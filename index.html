@@ -362,8 +362,8 @@
         </div>
 
         <div class="grid grid-4" style="margin-bottom:14px;">
-          <div class="card kpi"><div class="label">Visitas hoy</div><div class="value">612</div><div class="delta up">↑ 8% vs. LY</div></div>
-          <div class="card kpi"><div class="label">Mismo día, año pasado</div><div class="value">568</div><div class="delta" style="color:var(--text-soft);">16 jul 2025 (inventado)</div></div>
+          <div class="card kpi"><div class="label">Visitas hoy</div><div class="value" id="dash-today-visits">–</div><div class="delta" id="dash-today-delta" style="color:var(--text-soft);">cargando…</div></div>
+          <div class="card kpi"><div class="label">Mismo día, año pasado</div><div class="value" id="dash-ly-visits">–</div><div class="delta" id="dash-ly-date" style="color:var(--text-soft);">–</div></div>
           <div class="card kpi"><div class="label">Rating Tripadvisor</div><div class="value">4.3<span style="font-size:15px;color:var(--text-soft);"> / 5</span></div><div class="delta up">71 opiniones</div></div>
           <div class="card kpi"><div class="label">Tus tareas PDA</div><div class="value" id="dash-my-tasks">–</div><div class="delta" style="color:var(--text-soft);" id="dash-my-tasks-sub">pendientes</div></div>
         </div>
@@ -768,7 +768,7 @@ function initApp(){
   if(appInitialised) return;
   appInitialised = true;
   initNav();
-  renderWeekCalendar();
+  refreshDashboard(); // carga visitas reales + calendario
   renderResenas('tripadvisor');
   fillGrupos();
   renderPDA();
@@ -778,30 +778,81 @@ function initApp(){
   renderClMant();
   renderEvTimeline();
 }
+/* helpers de fecha */
+function todayIso(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function lyIso(isoStr){ const d=new Date(isoStr+'T12:00:00'); d.setFullYear(d.getFullYear()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function isoToLabel(isoStr){ const [y,m,dd]=isoStr.split('-'); return `${parseInt(dd)} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][parseInt(m)-1]} ${y}`; }
+
 async function refreshDashboard(){
-  const tasks = await fetchPdaTasks();
+  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits()]);
   updateDashboardMyTasks(tasks);
 }
 
+async function fetchDashboardVisits(){
+  const today = todayIso();
+  const ly = lyIso(today);
+  const { data } = await sb.from('spv_days').select('fecha,visitantes').in('fecha',[today, ly]);
+  const map = {}; (data||[]).forEach(r=>map[r.fecha]=r.visitantes);
+  const todayV = map[today] ?? null;
+  const lyV = map[ly] ?? null;
+  const todayEl = document.getElementById('dash-today-visits');
+  const deltaEl = document.getElementById('dash-today-delta');
+  const lyEl = document.getElementById('dash-ly-visits');
+  const lyDateEl = document.getElementById('dash-ly-date');
+  if(todayEl) todayEl.textContent = todayV !== null ? todayV.toLocaleString('es-ES') : '–';
+  if(lyEl) lyEl.textContent = lyV !== null ? lyV.toLocaleString('es-ES') : '–';
+  if(lyDateEl) lyDateEl.textContent = isoToLabel(ly);
+  if(deltaEl && todayV !== null && lyV !== null && lyV > 0){
+    const pct = Math.round((todayV - lyV) / lyV * 100);
+    deltaEl.textContent = `${pct>=0?'↑':'↓'} ${Math.abs(pct)}% vs. año pasado`;
+    deltaEl.className = 'delta ' + (pct >= 0 ? 'up' : 'down');
+  } else if(deltaEl) {
+    deltaEl.textContent = todayV === null ? 'Todavía no registrado hoy' : 'Sin dato LY';
+    deltaEl.className = 'delta';
+    deltaEl.style.color = 'var(--text-soft)';
+  }
+  renderWeekCalendar();
+}
+
 /* ============================================================
-   DASHBOARD — calendario semanal (estático por ahora)
+   DASHBOARD — calendario semanal con datos LY reales
    ============================================================ */
-const weekCalendar = [
-  {dname:'Lunes', ddate:'13 jul', groups:[], ly:498, today:false},
-  {dname:'Martes', ddate:'14 jul', groups:['Escola Guixot · 10:00 · 28 pax'], ly:512, today:false},
-  {dname:'Miércoles', ddate:'15 jul', groups:[], ly:470, today:false},
-  {dname:'Jueves', ddate:'16 jul', groups:['Casal Sta. Maria de Gràcia · 11:30 · 22 pax'], ly:568, today:true},
-  {dname:'Viernes', ddate:'17 jul', groups:['Diver-esports · 10:30 · 30 pax'], ly:605, today:false},
-  {dname:'Sábado', ddate:'18 jul', groups:[], ly:720, today:false},
-  {dname:'Domingo', ddate:'19 jul', groups:[], ly:690, today:false},
-];
-function renderWeekCalendar(){
-  document.getElementById('week-calendar').innerHTML = weekCalendar.map(d=>`
-    <div class="day-col ${d.today?'today':''}">
+const DNAMES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MONTH_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+async function renderWeekCalendar(){
+  const today = new Date();
+  const todayIsoStr = todayIso();
+  // obtener lunes de esta semana
+  const dayOfWeek = today.getDay(); // 0=dom
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (dayOfWeek===0 ? 6 : dayOfWeek-1));
+
+  const weekDates = [];
+  for(let i=0;i<7;i++){
+    const d = new Date(monday);
+    d.setDate(monday.getDate()+i);
+    const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const lyIsoDate = lyIso(iso);
+    weekDates.push({iso, lyIsoDate, dname: DNAMES[d.getDay()], label:`${d.getDate()} ${MONTH_SHORT[d.getMonth()]}`, isToday: iso===todayIsoStr});
+  }
+
+  // pedir datos de visitas LY y actuales para toda la semana de una vez
+  const allDates = [...weekDates.map(d=>d.iso), ...weekDates.map(d=>d.lyIsoDate)];
+  const {data: visitsData} = await sb.from('spv_days').select('fecha,visitantes').in('fecha', allDates);
+  const vMap = {}; (visitsData||[]).forEach(r=>vMap[r.fecha]=r.visitantes);
+
+  document.getElementById('week-calendar').innerHTML = weekDates.map(d=>`
+    <div class="day-col ${d.isToday?'today':''}">
       <div class="dname">${d.dname}</div>
-      <div class="ddate">${d.ddate}</div>
-      <div class="ly-inline"><span class="lynum">${d.ly}</span> visitantes año pasado</div>
-      ${d.groups.length? d.groups.map(g=>`<div class="group-chip">${g}</div>`).join('') : '<div class="no-groups">Sin grupos</div>'}
+      <div class="ddate">${d.label}</div>
+      <div class="ly-inline">
+        <span class="lynum">${vMap[d.lyIsoDate] !== undefined ? vMap[d.lyIsoDate].toLocaleString('es-ES') : '–'}</span>
+        <span style="color:var(--text-soft);font-size:11px;"> visitantes año pasado</span>
+      </div>
+      ${vMap[d.iso] !== undefined
+        ? `<div style="margin-top:6px;font-size:12px;color:var(--text);">Este año: <b>${vMap[d.iso].toLocaleString('es-ES')}</b></div>`
+        : `<div class="no-groups" style="margin-top:6px;">Sin grupos · sin dato</div>`}
     </div>`).join('');
 }
 
