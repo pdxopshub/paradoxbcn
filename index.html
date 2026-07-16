@@ -404,7 +404,14 @@
         </div>
 
         <div class="card">
-          <div class="section-title">Calendario de la semana <span class="hint">Grupos programados y visitantes año pasado</span></div>
+          <div class="section-title" style="margin-bottom:14px;">
+            <span>Calendario de la semana <span class="hint">Visitantes vs año pasado (mismo día de la semana)</span></span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="btn btn-ghost btn-sm" onclick="weekNav(-1)">← Anterior</button>
+              <button class="btn btn-ghost btn-sm" onclick="weekNav(0)" id="week-today-btn" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);">Esta semana</button>
+              <button class="btn btn-ghost btn-sm" onclick="weekNav(+1)">Siguiente →</button>
+            </div>
+          </div>
           <div class="grid grid-7" id="week-calendar"></div>
         </div>
       </div>
@@ -589,6 +596,7 @@
 
       <!-- ============ RECAP ============ -->
       <div class="view" id="view-recap">
+        <div style="max-width:780px;">
         <div class="page-head">
           <div><h1>Recap del día</h1><p>Cierre diario: info general, rutinas y observaciones. Se guarda automáticamente.</p></div>
           <div>
@@ -711,6 +719,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
           Guardar Recap
         </button>
+        </div><!-- fin max-width recap -->
       </div>
 
       <!-- ============ GRUPOS (PDXspot) ============ -->
@@ -944,6 +953,8 @@ function initApp(){
 /* helpers de fecha */
 function todayIso(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function lyIso(isoStr){ const d=new Date(isoStr+'T12:00:00'); d.setFullYear(d.getFullYear()-1); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+/* LY por mismo día de la semana: resta 364 días (52 semanas exactas → mismo weekday) */
+function lyIsoDow(isoStr){ const d=new Date(isoStr+'T12:00:00'); d.setDate(d.getDate()-364); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function isoToLabel(isoStr){ const [y,m,dd]=isoStr.split('-'); return `${parseInt(dd)} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][parseInt(m)-1]} ${y}`; }
 
 async function refreshDashboard(){
@@ -953,7 +964,7 @@ async function refreshDashboard(){
 
 async function fetchDashboardVisits(){
   const today = todayIso();
-  const ly = lyIso(today);
+  const ly = lyIsoDow(today); // mismo día de la semana, año pasado
   const { data } = await sb.from('spv_days').select('fecha,visitantes').in('fecha',[today, ly]);
   const map = {}; (data||[]).forEach(r=>map[r.fecha]=r.visitantes);
   const todayV = map[today] ?? null;
@@ -978,45 +989,73 @@ async function fetchDashboardVisits(){
 }
 
 /* ============================================================
-   DASHBOARD — calendario semanal con datos LY reales
+   DASHBOARD — calendario semanal navegable con LY por mismo día de semana
    ============================================================ */
 const DNAMES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const MONTH_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+let weekOffset = 0; // 0 = semana actual, -1 = anterior, +1 = siguiente
+
+function weekNav(delta){
+  if(delta === 0) weekOffset = 0; else weekOffset += delta;
+  const btn = document.getElementById('week-today-btn');
+  if(btn) btn.style.opacity = weekOffset === 0 ? '1' : '.6';
+  renderWeekCalendar();
+}
 
 async function renderWeekCalendar(){
-  const today = new Date();
   const todayIsoStr = todayIso();
-  // obtener lunes de esta semana
-  const dayOfWeek = today.getDay(); // 0=dom
+  // lunes de la semana actual + offset
+  const today = new Date();
+  const dayOfWeek = today.getDay();
   const monday = new Date(today);
-  monday.setDate(today.getDate() - (dayOfWeek===0 ? 6 : dayOfWeek-1));
+  monday.setDate(today.getDate() - (dayOfWeek===0 ? 6 : dayOfWeek-1) + weekOffset*7);
 
   const weekDates = [];
   for(let i=0;i<7;i++){
     const d = new Date(monday);
     d.setDate(monday.getDate()+i);
     const iso = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const lyIsoDate = lyIso(iso);
+    const lyIsoDate = lyIsoDow(iso); // mismo día de la semana el año pasado
     weekDates.push({iso, lyIsoDate, dname: DNAMES[d.getDay()], label:`${d.getDate()} ${MONTH_SHORT[d.getMonth()]}`, isToday: iso===todayIsoStr});
   }
 
-  // pedir datos de visitas LY y actuales para toda la semana de una vez
+  // título de la semana en la cabecera
+  const wStart = weekDates[0]; const wEnd = weekDates[6];
+  const weekLabel = `${wStart.label} – ${wEnd.label}`;
+
+  // pedir datos de visitas (año actual + LY) para toda la semana de una vez
   const allDates = [...weekDates.map(d=>d.iso), ...weekDates.map(d=>d.lyIsoDate)];
   const {data: visitsData} = await sb.from('spv_days').select('fecha,visitantes').in('fecha', allDates);
   const vMap = {}; (visitsData||[]).forEach(r=>vMap[r.fecha]=r.visitantes);
 
-  document.getElementById('week-calendar').innerHTML = weekDates.map(d=>`
+  // Actualizar hint de rango de semana
+  const hint = document.querySelector('#week-range-label');
+  if(hint) hint.textContent = weekLabel;
+
+  document.getElementById('week-calendar').innerHTML = weekDates.map(d=>{
+    const thisV = vMap[d.iso] ?? null;
+    const lyV = vMap[d.lyIsoDate] ?? null;
+    let pctHtml = '';
+    if(thisV !== null && lyV !== null && lyV > 0){
+      const pct = Math.round((thisV - lyV) / lyV * 100);
+      const color = pct >= 0 ? 'var(--success)' : 'var(--danger)';
+      const arrow = pct >= 0 ? '↑' : '↓';
+      pctHtml = `<div style="font-size:12px;font-weight:800;color:${color};margin-top:4px;">${arrow} ${Math.abs(pct)}%</div>`;
+    }
+    return `
     <div class="day-col ${d.isToday?'today':''}">
       <div class="dname">${d.dname}</div>
       <div class="ddate">${d.label}</div>
-      <div class="ly-inline">
-        <span class="lynum">${vMap[d.lyIsoDate] !== undefined ? vMap[d.lyIsoDate].toLocaleString('es-ES') : '–'}</span>
-        <span style="color:var(--text-soft);font-size:11px;"> visitantes año pasado</span>
+      ${thisV !== null
+        ? `<div style="font-family:var(--font);font-size:20px;font-weight:800;margin:6px 0 2px;">${thisV.toLocaleString('es-ES')}</div>`
+        : `<div style="font-size:20px;font-weight:800;color:var(--text-soft);margin:6px 0 2px;">–</div>`}
+      ${pctHtml}
+      <div class="ly-inline" style="margin-top:6px;">
+        <span class="lynum">${lyV !== null ? lyV.toLocaleString('es-ES') : '–'}</span>
+        <span style="color:var(--text-soft);font-size:10.5px;"> LY (${isoToLabel(d.lyIsoDate).slice(0,6)})</span>
       </div>
-      ${vMap[d.iso] !== undefined
-        ? `<div style="margin-top:6px;font-size:12px;color:var(--text);">Este año: <b>${vMap[d.iso].toLocaleString('es-ES')}</b></div>`
-        : `<div class="no-groups" style="margin-top:6px;">Sin grupos · sin dato</div>`}
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 /* ============================================================
