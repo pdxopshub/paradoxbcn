@@ -125,6 +125,10 @@
   th.grp-superv{background:#2E313A;color:#D3D5DE;}
   td.col-superv{background:#22242B;}
   td.col-subtotal,th.grp-subtotal{background:var(--panel);font-weight:800;}
+  td.spv-neto-cell{font-weight:800;}
+  td.spv-neto-cell.qualify{background:var(--success-soft) !important;color:var(--success);}
+  td.spv-amount-qualify{background:var(--success-soft) !important;}
+  td.spv-amount-qualify input.cell-input{color:var(--success);font-weight:700;}
   /* separadores gruesos entre bloques de columnas SPV */
   .grp-start{border-left:3px solid var(--line-strong) !important;}
   .grp-end{border-right:3px solid var(--line-strong) !important;}
@@ -373,7 +377,7 @@
       <!-- ============ SPV ============ -->
       <div class="view" id="view-spv">
         <div class="page-head">
-          <div><h1 id="spv-month-title">SPV</h1><p>Rellena visitantes totales y lo generado por cada persona cada día. Haz clic en una celda vacía y escribe directamente.</p></div>
+          <div><h1 id="spv-month-title">SPV</h1><p>Rellena visitantes totales, grupos y lo generado por cada persona cada día. El resto se calcula solo.</p></div>
           <div><label class="field-label">Mes</label><select id="spv-month-select" style="min-width:180px;font-weight:700;"></select></div>
         </div>
 
@@ -387,15 +391,26 @@
           </div>
         </div>
 
+        <div class="note-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          <div>Un día da comisión cuando el <b>SPV Neto</b> llega a 1€ o más (SPV Bruto ≥ 1,21€). Esos días se ven en verde, igual que las celdas de quien haya vendido algo ese día.</div>
+        </div>
+
         <div class="card" style="margin-bottom:14px;">
           <div class="section-title">Detalle diario <span class="hint">Tienda · Supervisores · Resto del staff</span></div>
           <div class="table-wrap"><table id="spv-grid-table"></table></div>
         </div>
 
+        <div class="grid grid-3" style="margin-bottom:14px;">
+          <div class="card kpi"><div class="label">Días con comisión</div><div class="value" id="spv-commission-days">0</div></div>
+          <div class="card kpi"><div class="label">Rev. Bruto (días con comisión)</div><div class="value" id="spv-commission-revenue">0€</div></div>
+          <div class="card kpi"><div class="label">Comisión tienda · Paula</div><div class="value" id="spv-paula-commission" style="color:var(--success);">0€</div></div>
+        </div>
+
         <div class="card" style="margin-bottom:14px;">
-          <div class="section-title">Resumen mensual por persona <span class="hint">Comisión sugerida</span></div>
+          <div class="section-title">Resumen mensual por persona <span class="hint">Solo cuenta lo vendido en días con comisión</span></div>
           <div class="table-wrap"><table id="spv-summary-table"><thead>
-            <tr><th>Persona</th><th>Total generado</th><th>Comisión sugerida</th></tr>
+            <tr><th>Persona</th><th>Días vendidos</th><th>Total generado (días con comisión)</th><th>Comisión (2%)</th></tr>
           </thead><tbody></tbody></table></div>
         </div>
 
@@ -852,12 +867,16 @@ function colClass(s){
   return 'staff';
 }
 function rowRevBruto(row){ return SPV_STAFF.reduce((a,s)=>a+(row.amounts[s]||0),0); }
+function rowNetVisitors(row){ return Math.max(0, (row.visitors||0) - (row.groupVisitors||0)); }
+function rowSpvBruto(row){ const nv = rowNetVisitors(row); return nv>0 ? rowRevBruto(row)/nv : 0; }
+function rowSpvNeto(row){ return rowSpvBruto(row) / 1.21; }
+function rowQualifies(row){ return rowSpvNeto(row) >= 1; }
 
 function buildSpvTable(data){
   const head = `<thead>
     <tr>
       <th rowspan="2" style="position:sticky;left:0;background:var(--panel);z-index:2;">Día</th>
-      <th class="grp-visit grp-start" colspan="3">Visitantes</th>
+      <th class="grp-visit grp-start" colspan="4">Visitantes</th>
       <th class="grp-tienda" colspan="${SPV_GROUP_TIENDA.length}">Tienda</th>
       <th class="grp-superv" colspan="${SPV_GROUP_SUPERV.length}">Supervisores</th>
       <th colspan="${SPV_GROUP_STAFF.length}">Staff</th>
@@ -865,22 +884,27 @@ function buildSpvTable(data){
     <tr>
       <th class="grp-visit grp-start">Total</th>
       <th class="grp-visit">Grupos</th>
-      <th class="grp-visit grp-end">Rev. Bruto</th>
+      <th class="grp-visit">Rev. Bruto</th>
+      <th class="grp-visit grp-end">SPV Neto</th>
       ${SPV_GROUP_TIENDA.map((s,i)=>`<th class="grp-tienda${i===SPV_GROUP_TIENDA.length-1?' grp-end':''}">${s}</th>`).join('')}
       ${SPV_GROUP_SUPERV.map((s,i)=>`<th class="grp-superv${i===SPV_GROUP_SUPERV.length-1?' grp-end':''}">${s}</th>`).join('')}
       ${SPV_GROUP_STAFF.map(s=>`<th>${s}</th>`).join('')}
     </tr>
   </thead>`;
-  const body = '<tbody>' + data.days.map((row,idx)=>`
+  const body = '<tbody>' + data.days.map((row,idx)=>{
+    const qualifies = rowQualifies(row);
+    return `
     <tr>
       <td class="total-cell" style="position:sticky;left:0;">${row.day}</td>
       <td class="col-visit grp-start"><input class="cell-input" type="number" min="0" placeholder="0" value="${numOrEmpty(row.visitors)}" data-role="visitors" data-day="${idx}"></td>
       <td class="col-visit"><input class="cell-input" type="number" min="0" placeholder="0" value="${numOrEmpty(row.groupVisitors)}" data-role="groupVisitors" data-day="${idx}"></td>
-      <td class="col-visit grp-end total-cell" id="revbruto-${idx}">${rowRevBruto(row).toFixed(2)}€</td>
-      ${SPV_GROUP_TIENDA.map((s,i)=>`<td class="col-tienda${i===SPV_GROUP_TIENDA.length-1?' grp-end':''}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
-      ${SPV_GROUP_SUPERV.map((s,i)=>`<td class="col-superv${i===SPV_GROUP_SUPERV.length-1?' grp-end':''}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
-      ${SPV_GROUP_STAFF.map(s=>`<td><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
-    </tr>`).join('') + '</tbody>';
+      <td class="col-visit total-cell" id="revbruto-${idx}">${rowRevBruto(row).toFixed(2)}€</td>
+      <td class="col-visit grp-end spv-neto-cell ${qualifies?'qualify':''}" id="spvneto-${idx}">${rowSpvNeto(row).toFixed(2)}</td>
+      ${SPV_GROUP_TIENDA.map((s,i)=>`<td class="col-tienda${i===SPV_GROUP_TIENDA.length-1?' grp-end':''} ${qualifies && row.amounts[s]>0 ?'spv-amount-qualify':''}" id="cell-${idx}-${s}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
+      ${SPV_GROUP_SUPERV.map((s,i)=>`<td class="col-superv${i===SPV_GROUP_SUPERV.length-1?' grp-end':''} ${qualifies && row.amounts[s]>0 ?'spv-amount-qualify':''}" id="cell-${idx}-${s}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
+      ${SPV_GROUP_STAFF.map(s=>`<td class="${qualifies && row.amounts[s]>0 ?'spv-amount-qualify':''}" id="cell-${idx}-${s}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
+    </tr>`;
+  }).join('') + '</tbody>';
   document.getElementById('spv-grid-table').innerHTML = head + body;
   document.querySelectorAll('#spv-grid-table input').forEach(inp=>inp.addEventListener('change', onSpvCellChange));
 }
@@ -908,8 +932,16 @@ async function onSpvCellChange(e){
     }, 400);
   }
   const data = await fetchSpvGrid();
+  const row = data.days[dayIdx];
+  const qualifies = rowQualifies(row);
   const rb = document.getElementById('revbruto-'+dayIdx);
-  if(rb) rb.textContent = rowRevBruto(data.days[dayIdx]).toFixed(2)+'€';
+  if(rb) rb.textContent = rowRevBruto(row).toFixed(2)+'€';
+  const sn = document.getElementById('spvneto-'+dayIdx);
+  if(sn){ sn.textContent = rowSpvNeto(row).toFixed(2); sn.classList.toggle('qualify', qualifies); }
+  SPV_STAFF.forEach(s=>{
+    const cell = document.getElementById(`cell-${dayIdx}-${s}`);
+    if(cell) cell.classList.toggle('spv-amount-qualify', qualifies && row.amounts[s]>0);
+  });
   computeSpvSummary(data);
 }
 
@@ -918,6 +950,8 @@ function computeSpvSummary(data){
   const totVisit = data.days.reduce((a,r)=>a+(r.visitors||0),0);
   const totGroupVisit = data.days.reduce((a,r)=>a+(r.groupVisitors||0),0);
   const totVisitIndiv = Math.max(0, totVisit - totGroupVisit);
+  const qualifyingDays = data.days.filter(rowQualifies);
+
   const totals = {};
   SPV_STAFF.forEach(s=>totals[s]=0);
   data.days.forEach(r=>SPV_STAFF.forEach(s=>totals[s]+= (r.amounts[s]||0)));
@@ -926,11 +960,34 @@ function computeSpvSummary(data){
   document.getElementById('spv-tot-money').textContent = totMoney.toFixed(2)+'€';
   document.getElementById('spv-avg').textContent = (totVisitIndiv? (totMoney/totVisitIndiv).toFixed(2) : '0.00')+'€';
 
+  // totales por persona: solo lo vendido en días que llegaron a comisión
+  const qualTotals = {};
+  const qualDays = {}; // días en que cada persona vendió algo (y el día tuvo comisión)
+  SPV_STAFF.forEach(s=>{ qualTotals[s]=0; qualDays[s]=0; });
+  qualifyingDays.forEach(r=>SPV_STAFF.forEach(s=>{
+    const v = r.amounts[s]||0;
+    qualTotals[s] += v;
+    if(v>0) qualDays[s]++;
+  }));
+
   const tbody = document.querySelector('#spv-summary-table tbody');
-  tbody.innerHTML = SPV_STAFF.filter(s=>totals[s]>0).sort((a,b)=>totals[b]-totals[a]).map(s=>`
-    <tr><td><b>${s}</b> ${colClass(s)==='tienda'?'<span class="pill pink">tienda</span>':colClass(s)==='superv'?'<span class="pill violet">superv.</span>':''}</td><td class="mono">${totals[s].toFixed(2)}€</td><td class="mono">${(totals[s]*rate/100).toFixed(2)}€</td></tr>`).join('')
-    || '<tr><td colspan="3" style="text-align:center;color:var(--text-soft);">Todavía no hay datos este mes.</td></tr>';
-  return {totals, totVisit, totMoney, rate};
+  tbody.innerHTML = SPV_STAFF.filter(s=>qualTotals[s]>0).sort((a,b)=>qualTotals[b]-qualTotals[a]).map(s=>`
+    <tr>
+      <td><b>${s}</b> ${colClass(s)==='tienda'?'<span class="pill pink">tienda</span>':colClass(s)==='superv'?'<span class="pill violet">superv.</span>':''}</td>
+      <td class="mono">${qualDays[s]} día${qualDays[s]!==1?'s':''}</td>
+      <td class="mono">${qualTotals[s].toFixed(2)}€</td>
+      <td class="mono" style="color:var(--success);font-weight:700;">${(qualTotals[s]*rate/100).toFixed(2)}€</td>
+    </tr>`).join('')
+    || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado todavía al umbral de comisión (SPV Neto ≥ 1€).</td></tr>';
+
+  // comisión de tienda (Paula): 2% del rev. bruto total de los días con comisión
+  const qualRevBruto = qualifyingDays.reduce((a,r)=>a+rowRevBruto(r),0);
+  const paulaCommission = qualRevBruto * rate/100;
+  document.getElementById('spv-commission-days').textContent = qualifyingDays.length;
+  document.getElementById('spv-commission-revenue').textContent = qualRevBruto.toFixed(2)+'€';
+  document.getElementById('spv-paula-commission').textContent = paulaCommission.toFixed(2)+'€';
+
+  return {totals: qualTotals, totVisit, totMoney, rate, qualifyingDaysCount: qualifyingDays.length, qualRevBruto, paulaCommission};
 }
 async function renderSpvGrid(){
   initSpvMonthSelect();
@@ -949,23 +1006,39 @@ async function renderCommissionHistory(){
   const list = await fetchCommissionHistory();
   const el = document.getElementById('commission-history');
   if(!list.length){ el.innerHTML = '<div class="empty-state">Todavía no has guardado ningún mes en el histórico.</div>'; return; }
-  el.innerHTML = list.map(entry=>`
+  el.innerHTML = list.map(entry=>{
+    const t = entry.totales || {};
+    const paulaComm = t['_paula_tienda_commission'] || 0;
+    const commDays = t['_commission_days'] || 0;
+    const staffEntries = Object.entries(t).filter(([k,v])=>!k.startsWith('_') && v>0).sort((a,b)=>b[1]-a[1]);
+    return `
     <div class="card" style="margin-bottom:12px;background:var(--panel);">
       <div class="flex-between" style="margin-bottom:10px;">
         <b style="font-family:var(--font);">${entry.mes}</b>
         <div style="display:flex;gap:8px;align-items:center;">
-          <span class="pill grey">${entry.rate}% comisión</span>
+          <span class="pill grey">${commDays} días comisión · ${entry.rate}%</span>
           <button class="btn btn-ghost btn-sm" onclick="deleteCommissionSnapshot(${entry.id})">Eliminar</button>
         </div>
       </div>
+      ${paulaComm>0?`<div class="note-banner" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div><b>Comisión tienda Paula:</b> ${paulaComm.toFixed(2)}€ (2% del Rev. Bruto de días con comisión)</div></div>`:''}
       <div class="table-wrap"><table><thead><tr><th>Persona</th><th>Total generado</th><th>Comisión</th></tr></thead>
-      <tbody>${Object.entries(entry.totales).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([s,v])=>`<tr><td>${s}</td><td class="mono">${v.toFixed(2)}€</td><td class="mono">${(v*entry.rate/100).toFixed(2)}€</td></tr>`).join('')}</tbody></table></div>
-    </div>`).join('');
+      <tbody>${staffEntries.map(([s,v])=>`<tr><td>${s}</td><td class="mono">${v.toFixed(2)}€</td><td class="mono" style="color:var(--success);font-weight:700;">${(v*entry.rate/100).toFixed(2)}€</td></tr>`).join('')}</tbody></table></div>
+    </div>`;
+  }).join('');
 }
 async function saveCommissionSnapshot(){
   const data = await fetchSpvGrid();
   const summary = computeSpvSummary(data);
-  await sb.from('spv_commission_history').insert({mes: spvMonthLabel(spvSelectedMonth), rate:summary.rate, totales:summary.totals});
+  await sb.from('spv_commission_history').insert({
+    mes: spvMonthLabel(spvSelectedMonth),
+    rate: summary.rate,
+    totales: {
+      ...summary.totals,
+      '_paula_tienda_commission': summary.paulaCommission,
+      '_commission_days': summary.qualifyingDaysCount,
+      '_qual_rev_bruto': summary.qualRevBruto
+    }
+  });
   renderCommissionHistory();
 }
 async function deleteCommissionSnapshot(id){
