@@ -195,6 +195,37 @@
   .note-banner svg{width:15px;height:15px;flex-shrink:0;margin-top:1px;color:var(--accent);}
   ::-webkit-scrollbar{width:9px;height:9px;} ::-webkit-scrollbar-thumb{background:#3A4051;border-radius:20px;}
 
+  /* RECAP */
+  .recap-section{margin-bottom:16px;}
+  .recap-section-title{font-family:var(--font);font-weight:800;font-size:13.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--text-soft);padding:10px 0 8px;border-bottom:1px solid var(--line);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+  .recap-section-title svg{width:15px;height:15px;flex-shrink:0;}
+  .recap-field{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .recap-field:last-child{border-bottom:none;}
+  .recap-field label{font-size:13.5px;font-weight:600;flex:1;color:var(--text);}
+  .recap-field label.sub{color:var(--text-soft);font-size:12.5px;font-weight:500;}
+  .recap-field .val{min-width:90px;text-align:right;}
+  .toggle-btn{display:inline-flex;align-items:center;gap:5px;font-family:var(--font);font-size:12px;font-weight:800;padding:6px 14px;border-radius:20px;border:2px solid var(--line-strong);background:var(--panel);color:var(--text-soft);cursor:pointer;transition:all .12s;user-select:none;letter-spacing:.3px;}
+  .toggle-btn.si{background:var(--success-soft);border-color:var(--success);color:var(--success);}
+  .toggle-btn.si::before{content:'✓ ';}
+  .toggle-btn:not(.si)::before{content:'✗ ';}
+  .task-item{display:flex;align-items:flex-start;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer;}
+  .task-item:last-child{border-bottom:none;}
+  .task-item .task-txt{font-size:13.5px;font-weight:500;flex:1;transition:all .12s;}
+  .task-item.done .task-txt{text-decoration:line-through;color:var(--text-soft);}
+  .task-item .task-check{width:20px;height:20px;border-radius:4px;border:2px solid var(--line-strong);background:var(--panel);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .task-item.done .task-check{background:var(--success);border-color:var(--success);}
+  .task-item.done .task-check::after{content:'✓';font-size:12px;color:#fff;font-weight:800;}
+  .day-block{margin-bottom:10px;}
+  .day-block-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--accent);margin-bottom:5px;padding:4px 0;}
+  .day-block.today .day-block-label{color:var(--success);}
+  .day-block.other{opacity:.6;}
+  .recap-nav{display:flex;align-items:center;gap:8px;}
+  .recap-nav button{background:var(--panel);border:1px solid var(--line-strong);color:var(--text);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-weight:700;}
+  .recap-nav button:hover{background:#262A35;}
+  .recap-nav .today-btn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
+  .recap-saved-banner{display:none;background:var(--success-soft);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:700;margin-top:8px;}
+  .recap-saved-banner.show{display:block;}
+
   /* weekly calendar — más amplio */
   .day-col{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 16px;min-height:220px;}
   .day-col.today{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent);}
@@ -311,6 +342,10 @@
         <button class="navitem" data-view="vacaciones">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 10-9 0"/><path d="M13 13V5a2 2 0 10-4 0v2"/><path d="M9 7l6 2.5"/></svg>
           Vacaciones
+        </button>
+        <button class="navitem" data-view="recap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>
+          Recap
         </button>
       </div>
 
@@ -552,6 +587,132 @@
         <div id="pda-content" style="max-width:640px;"></div>
       </div>
 
+      <!-- ============ RECAP ============ -->
+      <div class="view" id="view-recap">
+        <div class="page-head">
+          <div><h1>Recap del día</h1><p>Cierre diario: info general, rutinas y observaciones. Se guarda automáticamente.</p></div>
+          <div>
+            <div class="recap-nav">
+              <button onclick="recapPrevDay()">← Anterior</button>
+              <button class="today-btn" onclick="recapGoToday()">Hoy</button>
+              <button onclick="recapNextDay()">Siguiente →</button>
+            </div>
+            <div class="recap-saved-banner" id="recap-saved-banner">✓ Guardado</div>
+          </div>
+        </div>
+
+        <!-- Fecha y quién cierra -->
+        <div class="card" style="margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:180px;">
+              <label class="field-label">Fecha</label>
+              <input type="date" id="recap-date" style="font-weight:800;font-size:15px;">
+            </div>
+            <div style="flex:1;min-width:180px;">
+              <label class="field-label">Cierre a cargo de</label>
+              <select id="recap-cerrado-por">
+                <option value="">— Selecciona —</option>
+                <option value="Ignacio">Ignacio</option>
+                <option value="Paula">Paula</option>
+                <option value="Ceci">Ceci</option>
+                <option value="DUTY - Laura">DUTY - Laura</option>
+                <option value="DUTY - Ana">DUTY - Ana</option>
+                <option value="DUTY - Carol">DUTY - Carol</option>
+                <option value="DUTY - Melisa">DUTY - Melisa</option>
+                <option value="DUTY - Alma">DUTY - Alma</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- INFO GENERAL -->
+        <div class="card" style="margin-bottom:14px;">
+          <div class="recap-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M16 12H8"/></svg>
+            Info General
+          </div>
+
+          <div class="grid grid-2" style="gap:14px;margin-bottom:14px;">
+            <div class="card" style="background:var(--panel);">
+              <div style="font-size:11px;font-weight:800;color:var(--text-soft);text-transform:uppercase;margin-bottom:10px;">Visitantes</div>
+              <div class="recap-field"><label>Hoy</label><input type="number" class="cell-input" id="rc-visitantes" placeholder="0" style="width:90px;text-align:right;"></div>
+              <div class="recap-field"><label style="color:var(--text-soft);">Año pasado</label><div class="val" id="rc-visitantes-ly" style="color:var(--accent);font-weight:800;">–</div></div>
+            </div>
+            <div class="card" style="background:var(--panel);">
+              <div style="font-size:11px;font-weight:800;color:var(--text-soft);text-transform:uppercase;margin-bottom:10px;">Tipo de entrada</div>
+              <div class="recap-field"><label>Box Office</label><input type="number" class="cell-input" id="rc-box-office" placeholder="0" style="width:80px;text-align:right;"></div>
+              <div class="recap-field"><label>Fever Marketplace</label><input type="number" class="cell-input" id="rc-fever" placeholder="0" style="width:80px;text-align:right;"></div>
+              <div class="recap-field"><label>API</label><input type="number" class="cell-input" id="rc-api" placeholder="0" style="width:80px;text-align:right;"></div>
+              <div class="recap-field"><label>Grupos</label><input type="number" class="cell-input" id="rc-grupos" placeholder="0" style="width:80px;text-align:right;"></div>
+            </div>
+          </div>
+
+          <div style="font-size:11px;font-weight:800;color:var(--text-soft);text-transform:uppercase;margin-bottom:10px;">Boutique total día</div>
+          <div id="rc-boutique-fields" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:14px;"></div>
+
+          <div class="grid grid-2" style="gap:14px;">
+            <div class="recap-field"><label>Horas Planday (total staff)</label><input type="number" class="cell-input" id="rc-horas-planday" placeholder="0.0" step="0.5" style="width:80px;text-align:right;"></div>
+            <div class="recap-field"><label>Tripadvisor Reviews hoy</label><input type="number" class="cell-input" id="rc-ta-reviews" placeholder="0" style="width:80px;text-align:right;"></div>
+          </div>
+        </div>
+
+        <!-- RUTINAS MAÑANA -->
+        <div class="card" style="margin-bottom:14px;">
+          <div class="recap-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+            Rutinas de la Mañana
+          </div>
+          <div id="rutinas-mañana"></div>
+        </div>
+
+        <!-- RUTINAS TARDE -->
+        <div class="card" style="margin-bottom:14px;">
+          <div class="recap-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l-3 3"/></svg>
+            Rutinas de la Tarde
+          </div>
+          <div id="rutinas-tarde"></div>
+        </div>
+
+        <!-- TASKS SEMANALES -->
+        <div class="card" style="margin-bottom:14px;">
+          <div class="recap-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            Tasks Weekly Calendar
+            <span style="font-size:11px;font-weight:600;color:var(--text-soft);margin-left:4px;">Haz clic para marcar como hecho</span>
+          </div>
+          <div id="recap-weekly-tasks"></div>
+
+          <!-- Lluvia -->
+          <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:12px;">
+            <div class="recap-field">
+              <label style="font-weight:800;">☂ ¿Lluvia hoy?</label>
+              <button class="toggle-btn" id="rc-lluvia-toggle" onclick="toggleLluvia()">No</button>
+            </div>
+            <div id="rc-lluvia-tasks" style="display:none;padding-left:30px;">
+              <div class="task-item" id="task-lluvia-0" onclick="toggleTask('lluvia-0')">
+                <div class="task-check"></div>
+                <div class="task-txt">Alfombra en entrada + Fundas para paraguas listas</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OBSERVACIONES -->
+        <div class="card" style="margin-bottom:14px;">
+          <div class="recap-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Observaciones del día
+          </div>
+          <textarea id="rc-observaciones" rows="5" placeholder="Cualquier incidencia, nota o aviso relevante del día…" style="width:100%;"></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveRecap()" style="min-width:160px;justify-content:center;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+          Guardar Recap
+        </button>
+      </div>
+
       <!-- ============ GRUPOS (PDXspot) ============ -->
       <div class="view" id="view-grupos">
         <div class="page-head"><div><h1>Grupos <span class="tag" style="vertical-align:middle;">PDXspot</span></h1><p>Reservas y seguimiento de grupos gestionados en PDXspot.</p></div></div>
@@ -711,7 +872,8 @@ const titles = {
   grupos:['Grupos (PDXspot)','Reservas de grupos'],
   vacaciones:['Vacaciones','Pendiente de definir'],
   diego:['Mantenimiento','Tareas semanales de Diego'],
-  clmant:['CL Mantenimiento','Lista de material a comprar']
+  clmant:['CL Mantenimiento','Lista de material a comprar'],
+  recap:['Recap del día','Cierre diario: info general, rutinas y observaciones']
 };
 function initNav(){
   document.querySelectorAll('.navitem[data-view]').forEach(btn=>{
@@ -732,6 +894,7 @@ function initNav(){
       if(v==='ev') renderEvTimeline();
       if(v==='diego') renderDiego();
       if(v==='dashboard') refreshDashboard();
+      if(v==='recap') renderRecap();
     });
   });
   document.getElementById('today-date').textContent = titles.dashboard[1];
@@ -1708,6 +1871,237 @@ function updateDashboardMyTasks(tasks){
 /* ============================================================
    GRUPOS (PDXspot) — pendiente de definir, ejemplo estático
    ============================================================ */
+/* ============================================================
+   RECAP — cierre diario
+   ============================================================ */
+const RECAP_TIENDA_STAFF = ['Laura','Mario','Melisa','Ana','Constanza','Neus','Emma','Marina','Ary','Otro'];
+
+const RUTINAS_MAÑANA = [
+  {id:'m_fondo',    label:'Contar Fondo Caja 390€'},
+  {id:'m_sobre',    label:'Contar Sobre Caja 200€'},
+  {id:'m_ventrata', label:'Contar Sobre Caja Ventrata 200€'},
+  {id:'m_email',    label:'Email del museo revisado'},
+  {id:'m_trapos',   label:'Trapos cambiados'},
+];
+const RUTINAS_TARDE = [
+  {id:'t_fondo',    label:'Contar Fondo Caja 390€'},
+  {id:'t_sobre',    label:'Contar Sobre Caja 200€'},
+  {id:'t_ventrata', label:'Contar Sobre Caja Ventrata 200€'},
+  {id:'t_roster',   label:'Revisar Roster vs Planday'},
+  {id:'t_devices',  label:'Devices cargando'},
+];
+const WEEKLY_TASKS = {
+  1:{ label:'Lunes', mañana:['Loomis | Cambio en cajas'], tarde:['CL de Mantenimiento (Enviar a Luka + Laia)'] },
+  2:{ label:'Martes', mañana:['Revisión de todos los Props de F2 y Patucos de 0G'], tarde:['Lavadora/Secadora con Cambiadores de bebé, patucos y trapos'] },
+  3:{ label:'Miércoles', mañana:['Colocar patucos, trapos y cambiadores de bebé + Dejar abierto baño verde con el cambiador haciendo de "cuña"'], tarde:['CL de Materiales'] },
+  4:{ label:'Jueves', mañana:['Banco'], tarde:['Lavadora/Secadora con Chaquetas de camuflaje, cojines y manta'] },
+  5:{ label:'Viernes', mañana:['Colocar chaquetas de camuflaje, cojines y manta'], tarde:['Cambio en cajas + Cerrar baño verde'] },
+  6:{ label:'Sábado / Domingo', mañana:['Cuñas de las puertas del Eixample escondidos','Botón 0G en Oficina de Ops','Catenarias de Welcome Room + Shadow Freeze + Filas de 0G','Cambio en caja fuerte de C1','Taquilla lista (sin objetos indebidos)'], tarde:[] },
+  0:{ label:'Sábado / Domingo', mañana:['Cuñas de las puertas del Eixample escondidos','Botón 0G en Oficina de Ops','Catenarias de Welcome Room + Shadow Freeze + Filas de 0G','Cambio en caja fuerte de C1','Taquilla lista (sin objetos indebidos)'], tarde:[] },
+};
+
+let recapDate = todayIso();
+let recapData = {};  // datos cargados para la fecha activa
+
+async function renderRecap(){
+  // Poner la fecha en el input
+  document.getElementById('recap-date').value = recapDate;
+
+  // Generar campos de boutique
+  const btq = document.getElementById('rc-boutique-fields');
+  btq.innerHTML = RECAP_TIENDA_STAFF.map(s=>`
+    <div style="background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 10px;">
+      <div style="font-size:10.5px;font-weight:800;color:var(--text-soft);margin-bottom:4px;">${s}</div>
+      <input type="number" class="cell-input" id="rc-btq-${s}" placeholder="0" step="0.01" style="text-align:right;width:100%;">
+    </div>`).join('');
+
+  // Generar rutinas mañana
+  document.getElementById('rutinas-mañana').innerHTML = RUTINAS_MAÑANA.map(r=>`
+    <div class="recap-field">
+      <label>${r.label}</label>
+      <button class="toggle-btn" id="toggle-${r.id}" onclick="toggleRutina('${r.id}')">No</button>
+    </div>`).join('');
+
+  // Generar rutinas tarde
+  document.getElementById('rutinas-tarde').innerHTML = RUTINAS_TARDE.map(r=>`
+    <div class="recap-field">
+      <label>${r.label}</label>
+      <button class="toggle-btn" id="toggle-${r.id}" onclick="toggleRutina('${r.id}')">No</button>
+    </div>`).join('');
+
+  // Generar tasks semanales
+  const todayDate = new Date(recapDate+'T12:00:00');
+  const todayDow = todayDate.getDay(); // 0=dom,1=lun...
+  const taskContainer = document.getElementById('recap-weekly-tasks');
+  taskContainer.innerHTML = [1,2,3,4,5,6].map(dow=>{
+    const wt = WEEKLY_TASKS[dow];
+    const isToday = dow === todayDow || (dow===6 && (todayDow===6||todayDow===0));
+    const allTasks = [
+      ...wt.mañana.map((t,i)=>({id:`task-${dow}-m-${i}`, txt:`☀ ${t}`})),
+      ...wt.tarde.map((t,i)=>({id:`task-${dow}-t-${i}`, txt:`🌙 ${t}`})),
+    ];
+    return `<div class="day-block ${isToday?'today':'other'}">
+      <div class="day-block-label">${wt.label}${isToday?' ← hoy':''}</div>
+      ${allTasks.map(tk=>`
+        <div class="task-item" id="${tk.id}" onclick="toggleTask('${tk.id}')">
+          <div class="task-check"></div>
+          <div class="task-txt">${tk.txt}</div>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+
+  // Cargar datos de Supabase para esta fecha
+  await loadRecapData();
+
+  // Configurar event listeners de auto-guardado
+  ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('change', () => saveRecap(true));
+  });
+  RECAP_TIENDA_STAFF.forEach(s=>{
+    const el = document.getElementById(`rc-btq-${s}`);
+    if(el) el.addEventListener('change', () => saveRecap(true));
+  });
+  document.getElementById('rc-cerrado-por')?.addEventListener('change', () => saveRecap(true));
+  document.getElementById('rc-observaciones')?.addEventListener('input', debounceRecapSave);
+}
+
+let recapDebounceTimer = null;
+function debounceRecapSave(){ clearTimeout(recapDebounceTimer); recapDebounceTimer = setTimeout(()=>saveRecap(true), 800); }
+
+async function loadRecapData(){
+  // Fetch del recap guardado
+  const { data: rec } = await sb.from('recap').select('*').eq('fecha', recapDate).single().catch(()=>({data:null}));
+  recapData = rec || {};
+
+  // LY desde spv_days
+  const ly = lyIso(recapDate);
+  const { data: lyRow } = await sb.from('spv_days').select('visitantes').eq('fecha', ly).single().catch(()=>({data:null}));
+  const { data: todayRow } = await sb.from('spv_days').select('visitantes').eq('fecha', recapDate).single().catch(()=>({data:null}));
+
+  // Info general
+  setValue('rc-visitantes', recapData.visitantes ?? todayRow?.visitantes ?? '');
+  document.getElementById('rc-visitantes-ly').textContent = lyRow?.visitantes?.toLocaleString('es-ES') ?? '–';
+  setValue('rc-box-office', recapData.e_box_office ?? '');
+  setValue('rc-fever', recapData.e_fever ?? '');
+  setValue('rc-api', recapData.e_api ?? '');
+  setValue('rc-grupos', recapData.e_grupos ?? '');
+  setValue('rc-horas-planday', recapData.horas_planday ?? '');
+  setValue('rc-ta-reviews', recapData.ta_reviews ?? '');
+
+  // Auto-fetch boutique de spv_entries si no hay dato guardado
+  const boutique = recapData.boutique || {};
+  let spvEntries = {};
+  if(Object.keys(boutique).length === 0){
+    const { data: entries } = await sb.from('spv_entries').select('staff_nombre,importe').eq('fecha', recapDate);
+    (entries||[]).forEach(e=>spvEntries[e.staff_nombre]=e.importe);
+  }
+  RECAP_TIENDA_STAFF.forEach(s=>setValue(`rc-btq-${s}`, boutique[s] ?? spvEntries[s] ?? ''));
+
+  // Cerrado por
+  const cpEl = document.getElementById('recap-cerrado-por');
+  if(cpEl) cpEl.value = recapData.cerrado_por || '';
+
+  // Rutinas
+  const rutinasSi = recapData.rutinas || [];
+  [...RUTINAS_MAÑANA,...RUTINAS_TARDE].forEach(r=>{
+    const btn = document.getElementById('toggle-'+r.id);
+    if(btn){ const on = rutinasSi.includes(r.id); btn.className = 'toggle-btn '+(on?'si':''); btn.textContent = on?'Sí':'No'; }
+  });
+
+  // Tasks
+  const tasksDone = recapData.tasks_done || [];
+  document.querySelectorAll('.task-item').forEach(el=>{
+    el.classList.toggle('done', tasksDone.includes(el.id));
+  });
+
+  // Lluvia
+  const lluvia = recapData.lluvia || false;
+  const llBtn = document.getElementById('rc-lluvia-toggle');
+  if(llBtn){ llBtn.className='toggle-btn '+(lluvia?'si':''); llBtn.textContent=lluvia?'Sí':'No'; }
+  const llTasks = document.getElementById('rc-lluvia-tasks');
+  if(llTasks) llTasks.style.display = lluvia?'block':'none';
+  const llTask = document.getElementById('task-lluvia-0');
+  if(llTask) llTask.classList.toggle('done', (recapData.tasks_done||[]).includes('lluvia-0'));
+
+  // Observaciones
+  const obs = document.getElementById('rc-observaciones');
+  if(obs) obs.value = recapData.observaciones || '';
+}
+
+function setValue(id, val){
+  const el = document.getElementById(id);
+  if(el) el.value = (val===null||val===undefined) ? '' : val;
+}
+
+function getRecapPayload(){
+  const boutique = {};
+  RECAP_TIENDA_STAFF.forEach(s=>{ const v=parseFloat(document.getElementById(`rc-btq-${s}`)?.value||0); if(v) boutique[s]=v; });
+  const rutinasSi = [...RUTINAS_MAÑANA,...RUTINAS_TARDE].filter(r=>document.getElementById('toggle-'+r.id)?.classList.contains('si')).map(r=>r.id);
+  const tasksDone = Array.from(document.querySelectorAll('.task-item.done')).map(el=>el.id);
+  return {
+    fecha: recapDate,
+    visitantes: parseFloat(document.getElementById('rc-visitantes')?.value)||null,
+    e_box_office: parseFloat(document.getElementById('rc-box-office')?.value)||null,
+    e_fever: parseFloat(document.getElementById('rc-fever')?.value)||null,
+    e_api: parseFloat(document.getElementById('rc-api')?.value)||null,
+    e_grupos: parseFloat(document.getElementById('rc-grupos')?.value)||null,
+    boutique,
+    horas_planday: parseFloat(document.getElementById('rc-horas-planday')?.value)||null,
+    ta_reviews: parseFloat(document.getElementById('rc-ta-reviews')?.value)||null,
+    rutinas: rutinasSi,
+    tasks_done: tasksDone,
+    lluvia: document.getElementById('rc-lluvia-toggle')?.classList.contains('si') || false,
+    observaciones: document.getElementById('rc-observaciones')?.value || '',
+    cerrado_por: document.getElementById('recap-cerrado-por')?.value || '',
+    updated_at: new Date().toISOString(),
+  };
+}
+
+async function saveRecap(silent=false){
+  const payload = getRecapPayload();
+  await sb.from('recap').upsert(payload, {onConflict:'fecha'});
+  if(!silent){
+    const banner = document.getElementById('recap-saved-banner');
+    if(banner){ banner.classList.add('show'); setTimeout(()=>banner.classList.remove('show'), 2000); }
+  }
+}
+
+function toggleRutina(id){
+  const btn = document.getElementById('toggle-'+id);
+  if(!btn) return;
+  const on = btn.classList.contains('si');
+  btn.className = 'toggle-btn '+(on?'':'si');
+  btn.textContent = on?'No':'Sí';
+  saveRecap(true);
+}
+function toggleTask(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('done');
+  saveRecap(true);
+}
+function toggleLluvia(){
+  const btn = document.getElementById('rc-lluvia-toggle');
+  const on = btn?.classList.contains('si');
+  if(btn){ btn.className='toggle-btn '+(on?'':'si'); btn.textContent=on?'No':'Sí'; }
+  const tasks = document.getElementById('rc-lluvia-tasks');
+  if(tasks) tasks.style.display = on?'none':'block';
+  saveRecap(true);
+}
+
+function recapPrevDay(){ recapGoDate(offsetDate(recapDate,-1)); }
+function recapNextDay(){ recapGoDate(offsetDate(recapDate,+1)); }
+function recapGoToday(){ recapGoDate(todayIso()); }
+function offsetDate(iso, days){ const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+function recapGoDate(iso){ recapDate=iso; renderRecap(); }
+
+// Cambio de fecha manual desde el input
+document.addEventListener('DOMContentLoaded', ()=>{
+  const datePicker = document.getElementById('recap-date');
+  if(datePicker) datePicker.addEventListener('change', e=>{ recapDate=e.target.value; loadRecapData(); });
+});
+
 const gruposData = [
   {n:'Thau Sant Cugat (Susanna Puyol)', f:'Septiembre 2026', pax:68, tipo:'Escola', estado:'Negociando'},
   {n:'Casal Gent Gran Quatre Cantons', f:'Septiembre 2026', pax:24, tipo:'Casal gent gran', estado:'Seguimiento'},
