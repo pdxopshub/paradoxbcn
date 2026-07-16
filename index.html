@@ -1363,11 +1363,10 @@ async function deleteCommissionSnapshot(id){
 }
 
 /* ============================================================
-   RESEÑAS — datos en tiempo real desde Supabase (actualizados por GitHub Actions)
+   RESEÑAS — actualización manual semanal (cada lunes)
    ============================================================ */
 const reviewColor = {tripadvisor:'linear-gradient(180deg,#33C98B,#0E8F5C)', google:'linear-gradient(180deg,#5B8CFF,#2E48E0)'};
 
-// Histórico manual: estos datos puedes ir añadiendo para ver la evolución en el gráfico
 const reviewHistory = {
   tripadvisor:[
     {d:'17 may', rating:4.1, count:48, rank:'168/1551'},
@@ -1386,31 +1385,67 @@ const reviewHistory = {
 
 async function renderResenas(tab){
   const el = document.getElementById('resenas-content');
-  el.innerHTML = '<div class="empty-state">Cargando datos…</div>';
+  el.innerHTML = '<div class="empty-state">Cargando…</div>';
 
-  // Leer dato en tiempo real desde reviews_cache (sincronizado por GitHub Actions)
   const { data: cache } = await sb.from('reviews_cache').select('*').eq('source', tab).single().catch(()=>({data:null}));
   const rows = reviewHistory[tab] || [];
   const max = Math.max(...rows.map(r=>r.count), 1);
-
-  const rtBadge = cache
-    ? `<div style="display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:16px;">
-        <div style="font-size:36px;font-weight:800;font-family:var(--font);">${cache.rating ?? '–'}</div>
-        <div>
-          <div style="font-size:12px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.4px;">${tab === 'tripadvisor' ? 'Tripadvisor' : 'Google'} · Ahora mismo</div>
-          <div style="font-size:22px;font-weight:800;">${cache.review_count?.toLocaleString('es-ES') ?? '–'} opiniones</div>
-          ${cache.ranking ? `<div style="font-size:12.5px;color:var(--success);font-weight:700;margin-top:2px;">${cache.ranking}</div>` : ''}
-          <div style="font-size:11px;color:var(--text-soft);margin-top:4px;">Actualizado: ${cache.fetched_at ? new Date(cache.fetched_at).toLocaleDateString('es-ES', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}</div>
-        </div>
-        <div style="margin-left:auto;"><a href="${tab==='tripadvisor'?'https://www.tripadvisor.com/Attraction_Review-g187497-d25410922-Reviews-Paradox_Museum_Barcelona-Barcelona_Catalonia.html':'https://share.google/K0i8JLtwgsoqSMSKe'}" target="_blank" class="btn btn-ghost btn-sm">Ver en ${tab==='tripadvisor'?'Tripadvisor':'Google'} →</a></div>
-      </div>`
-    : `<div class="note-banner" style="margin-bottom:16px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div>Dato en tiempo real pendiente. Ejecuta el workflow de GitHub Actions para sincronizar.</div></div>`;
+  const label = tab === 'tripadvisor' ? 'Tripadvisor' : 'Google';
+  const link  = tab === 'tripadvisor'
+    ? 'https://www.tripadvisor.com/Attraction_Review-g187497-d25410922-Reviews-Paradox_Museum_Barcelona-Barcelona_Catalonia.html'
+    : 'https://share.google/K0i8JLtwgsoqSMSKe';
+  const updatedLabel = cache?.fetched_at
+    ? new Date(cache.fetched_at).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})
+    : '—';
 
   el.innerHTML = `
+    <div class="card" style="margin-bottom:14px;">
+      <div class="flex-between" style="margin-bottom:16px;">
+        <div class="section-title" style="margin:0;">${label} · Datos actuales</div>
+        <a href="${link}" target="_blank" class="btn btn-ghost btn-sm">Ver en ${label} →</a>
+      </div>
+      <div class="grid grid-3" style="gap:12px;margin-bottom:10px;">
+        <div class="card kpi" style="background:var(--panel);">
+          <div class="label">Puntuación</div>
+          <div class="value">${cache?.rating ?? '–'}<span style="font-size:15px;color:var(--text-soft);"> / 5</span></div>
+        </div>
+        <div class="card kpi" style="background:var(--panel);">
+          <div class="label">Nº de reseñas</div>
+          <div class="value">${cache?.review_count?.toLocaleString('es-ES') ?? '–'}</div>
+        </div>
+        <div class="card kpi" style="background:var(--panel);">
+          <div class="label">Ranking BCN</div>
+          <div class="value" style="font-size:18px;">${cache?.ranking ?? '–'}</div>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:var(--text-soft);">Última actualización: ${updatedLabel}</div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;border:1px solid var(--accent);">
+      <div class="section-title" style="margin-bottom:14px;">
+        ✏️ Actualización semanal — ${label}
+      </div>
+      <div class="grid grid-3" style="gap:12px;margin-bottom:12px;">
+        <div>
+          <label class="field-label">Puntuación (ej: 4.5)</label>
+          <input type="number" id="rv-rating-${tab}" step="0.1" min="1" max="5" placeholder="${cache?.rating ?? '4.5'}" style="font-size:16px;font-weight:700;">
+        </div>
+        <div>
+          <label class="field-label">Nº de reseñas</label>
+          <input type="number" id="rv-count-${tab}" placeholder="${cache?.review_count ?? '96'}" style="font-size:16px;font-weight:700;">
+        </div>
+        <div>
+          <label class="field-label">Ranking (ej: #84 de 1.551)</label>
+          <input type="text" id="rv-rank-${tab}" placeholder="${cache?.ranking ?? '#84 de 1.551'}" style="font-size:15px;font-weight:700;">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="saveResenaUpdate('${tab}')">Guardar</button>
+      <span id="rv-saved-${tab}" style="display:none;margin-left:12px;font-size:13px;font-weight:700;color:var(--success);">✓ Guardado</span>
+    </div>
+
+    ${rows.length ? `
     <div class="card">
-      ${rtBadge}
-      <div class="section-title">Evolución histórica <span class="hint">${tab==='tripadvisor'?'Tripadvisor':'Google'}</span></div>
-      ${rows.length ? `
+      <div class="section-title">Evolución histórica <span class="hint">${label}</span></div>
       <div style="display:flex;align-items:flex-end;gap:14px;height:120px;margin-bottom:18px;padding:0 4px;border-bottom:1px solid var(--line);">
         ${rows.map(r=>`
           <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
@@ -1419,10 +1454,26 @@ async function renderResenas(tab){
             <div style="font-size:10.5px;color:var(--text-soft);">${r.d}</div>
           </div>`).join('')}
       </div>
-      <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Nota media</th><th>Nº opiniones</th><th>Ranking BCN</th></tr></thead>
+      <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Puntuación</th><th>Nº reseñas</th><th>Ranking BCN</th></tr></thead>
       <tbody>${rows.map(r=>`<tr><td>${r.d}</td><td>${r.rating} / 5</td><td class="mono">${r.count}</td><td class="mono">${r.rank}</td></tr>`).join('')}</tbody>
-      </table></div>` : '<div class="empty-state">No hay historial registrado todavía.</div>'}
-    </div>`;
+      </table></div>
+    </div>` : ''}
+  `;
+}
+
+async function saveResenaUpdate(tab){
+  const rating  = parseFloat(document.getElementById(`rv-rating-${tab}`)?.value);
+  const count   = parseInt(document.getElementById(`rv-count-${tab}`)?.value);
+  const ranking = document.getElementById(`rv-rank-${tab}`)?.value?.trim();
+  if(!rating && !count) return;
+  const payload = {source: tab, fetched_at: new Date().toISOString()};
+  if(rating)  payload.rating       = rating;
+  if(count)   payload.review_count = count;
+  if(ranking) payload.ranking      = ranking;
+  await sb.from('reviews_cache').upsert(payload, {onConflict:'source'});
+  const badge = document.getElementById(`rv-saved-${tab}`);
+  if(badge){ badge.style.display='inline'; setTimeout(()=>badge.style.display='none', 2500); }
+  renderResenas(tab);
 }
 
 /* ============================================================
