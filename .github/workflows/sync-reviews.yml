@@ -1,0 +1,81 @@
+name: Sync Reviews
+
+on:
+  schedule:
+    - cron: '0 7 * * *'   # Cada día a las 7:00 UTC (9:00 Madrid)
+  workflow_dispatch:        # También se puede lanzar a mano desde GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch and update reviews
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          python3 << 'PYEOF'
+          import re, json, urllib.request, os
+
+          SUPABASE_URL  = os.environ["SUPABASE_URL"]
+          SUPABASE_KEY  = os.environ["SUPABASE_ANON_KEY"]
+          TA_URL = "https://www.tripadvisor.com/Attraction_Review-g187497-d25410922-Reviews-Paradox_Museum_Barcelona-Barcelona_Catalonia.html"
+
+          headers = {
+              "User-Agent": "Mozilla/5.0 (compatible; OpsHubBot/1.0)",
+              "Accept-Language": "es-ES,es;q=0.9,en;q=0.8"
+          }
+
+          print("Fetching TripAdvisor...")
+          req = urllib.request.Request(TA_URL, headers=headers)
+          html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", errors="ignore")
+
+          # Rating: busca patrones como "4.5 of 5 bubbles"
+          rating = None
+          m = re.search(r'(\d\.\d)\s+of\s+5\s+bubbles', html)
+          if m:
+              rating = float(m.group(1))
+
+          # Reseñas totales: "All reviews (96)" o "(96 reviews)"
+          count = None
+          m = re.search(r'All reviews \((\d+)\)', html)
+          if m:
+              count = int(m.group(1))
+          if not count:
+              m = re.search(r'\((\d+)\s+reviews?\)', html)
+              if m:
+                  count = int(m.group(1))
+
+          # Ranking
+          ranking = None
+          m = re.search(r'#([\d,]+)\s+of\s+([\d,]+)\s+things to do', html)
+          if m:
+              ranking = f"#{m.group(1)} de {m.group(2)}"
+
+          print(f"TripAdvisor → rating={rating}, reviews={count}, ranking={ranking}")
+
+          if not rating or not count:
+              print("ERROR: No se pudo extraer los datos de TripAdvisor")
+              exit(1)
+
+          # Actualizar Supabase
+          payload = json.dumps({
+              "rating": rating,
+              "review_count": count,
+              "ranking": ranking,
+              "fetched_at": "now()"
+          }).encode()
+
+          url = f"{SUPABASE_URL}/rest/v1/reviews_cache?source=eq.tripadvisor"
+          req2 = urllib.request.Request(
+              url, data=payload, method="PATCH",
+              headers={
+                  "apikey": SUPABASE_KEY,
+                  "Authorization": f"Bearer {SUPABASE_KEY}",
+                  "Content-Type": "application/json",
+                  "Prefer": "return=minimal"
+              }
+          )
+          resp = urllib.request.urlopen(req2, timeout=15)
+          print(f"Supabase updated: {resp.status}")
+          PYEOF
