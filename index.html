@@ -958,9 +958,64 @@ function buildSpvTable(data){
   }).join('') + '</tbody>';
   document.getElementById('spv-grid-table').innerHTML = head + body;
   document.querySelectorAll('#spv-grid-table input').forEach(inp=>inp.addEventListener('change', onSpvCellChange));
+  initSpvNavigation();
 }
 
 let spvSaveTimeouts = {};
+
+/* Navegación tipo Excel en la tabla SPV
+   Enter / ↓ → celda de abajo en la misma columna
+   ↑       → celda de arriba
+   ← →     → izquierda / derecha
+   Las flechas NO modifican el número (se cancela el comportamiento por defecto)
+*/
+function initSpvNavigation(){
+  const tbody = document.querySelector('#spv-grid-table tbody');
+  if(!tbody) return;
+
+  // Construir una cuadrícula 2D: grid[fila][col] = input
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const grid = rows.map(row => Array.from(row.querySelectorAll('input')));
+  const totalRows = grid.length;
+
+  grid.forEach((rowInputs, ri) => {
+    rowInputs.forEach((inp, ci) => {
+      inp.addEventListener('keydown', e => {
+        let targetRi = ri, targetCi = ci;
+
+        switch(e.key){
+          case 'Enter':
+          case 'ArrowDown':
+            e.preventDefault();
+            targetRi = Math.min(ri + 1, totalRows - 1);
+            break;
+          case 'ArrowUp':
+            e.preventDefault();
+            targetRi = Math.max(ri - 1, 0);
+            break;
+          case 'ArrowRight':
+            e.preventDefault();
+            if(ci + 1 < rowInputs.length){ targetCi = ci + 1; }
+            else if(ri + 1 < totalRows){ targetRi = ri + 1; targetCi = 0; }
+            break;
+          case 'ArrowLeft':
+            e.preventDefault();
+            if(ci - 1 >= 0){ targetCi = ci - 1; }
+            else if(ri - 1 >= 0){ targetRi = ri - 1; targetCi = (grid[ri-1]?.length||1) - 1; }
+            break;
+          default:
+            return; // dejar pasar cualquier otra tecla normalmente
+        }
+
+        const targetRow = grid[targetRi];
+        if(targetRow && targetRow[targetCi]){
+          targetRow[targetCi].focus();
+          targetRow[targetCi].select();
+        }
+      });
+    });
+  });
+}
 async function onSpvCellChange(e){
   const el = e.target;
   const dayIdx = parseInt(el.dataset.day,10);
