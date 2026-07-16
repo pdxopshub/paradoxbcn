@@ -399,7 +399,7 @@
         <div class="grid grid-4" style="margin-bottom:14px;">
           <div class="card kpi"><div class="label">Visitas hoy</div><div class="value" id="dash-today-visits">–</div><div class="delta" id="dash-today-delta" style="color:var(--text-soft);">cargando…</div></div>
           <div class="card kpi"><div class="label">Mismo día, año pasado</div><div class="value" id="dash-ly-visits">–</div><div class="delta" id="dash-ly-date" style="color:var(--text-soft);">–</div></div>
-          <div class="card kpi"><div class="label">Rating Tripadvisor</div><div class="value">4.3<span style="font-size:15px;color:var(--text-soft);"> / 5</span></div><div class="delta up">71 opiniones</div></div>
+          <div class="card kpi"><div class="label">Rating Tripadvisor</div><div class="value" id="dash-ta-rating">–</div><div class="delta up" id="dash-ta-count">–</div></div>
           <div class="card kpi"><div class="label">Tus tareas PDA</div><div class="value" id="dash-my-tasks">–</div><div class="delta" style="color:var(--text-soft);" id="dash-my-tasks-sub">pendientes</div></div>
         </div>
 
@@ -958,8 +958,16 @@ function lyIsoDow(isoStr){ const d=new Date(isoStr+'T12:00:00'); d.setDate(d.get
 function isoToLabel(isoStr){ const [y,m,dd]=isoStr.split('-'); return `${parseInt(dd)} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][parseInt(m)-1]} ${y}`; }
 
 async function refreshDashboard(){
-  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits()]);
+  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA()]);
   updateDashboardMyTasks(tasks);
+}
+
+async function fetchDashboardTA(){
+  const { data } = await sb.from('reviews_cache').select('rating,review_count').eq('source','tripadvisor').single().catch(()=>({data:null}));
+  const rEl = document.getElementById('dash-ta-rating');
+  const cEl = document.getElementById('dash-ta-count');
+  if(rEl) rEl.innerHTML = data?.rating ? `${data.rating}<span style="font-size:15px;color:var(--text-soft);"> / 5</span>` : '–';
+  if(cEl) cEl.textContent = data?.review_count ? `${data.review_count.toLocaleString('es-ES')} opiniones` : '–';
 }
 
 async function fetchDashboardVisits(){
@@ -1355,9 +1363,12 @@ async function deleteCommissionSnapshot(id){
 }
 
 /* ============================================================
-   RESEÑAS — estático por ahora (Tripadvisor verde / Google azul)
+   RESEÑAS — datos en tiempo real desde Supabase (actualizados por GitHub Actions)
    ============================================================ */
-const reviewData = {
+const reviewColor = {tripadvisor:'linear-gradient(180deg,#33C98B,#0E8F5C)', google:'linear-gradient(180deg,#5B8CFF,#2E48E0)'};
+
+// Histórico manual: estos datos puedes ir añadiendo para ver la evolución en el gráfico
+const reviewHistory = {
   tripadvisor:[
     {d:'17 may', rating:4.1, count:48, rank:'168/1551'},
     {d:'19 may', rating:4.2, count:53, rank:'152/1551'},
@@ -1372,13 +1383,34 @@ const reviewData = {
     {d:'01 jul', rating:4.5, count:248, rank:'—'},
   ]
 };
-const reviewColor = {tripadvisor:'linear-gradient(180deg,#33C98B,#0E8F5C)', google:'linear-gradient(180deg,#5B8CFF,#2E48E0)'};
-function renderResenas(tab){
-  const rows = reviewData[tab];
-  const max = Math.max(...rows.map(r=>r.count));
-  const html = `
+
+async function renderResenas(tab){
+  const el = document.getElementById('resenas-content');
+  el.innerHTML = '<div class="empty-state">Cargando datos…</div>';
+
+  // Leer dato en tiempo real desde reviews_cache (sincronizado por GitHub Actions)
+  const { data: cache } = await sb.from('reviews_cache').select('*').eq('source', tab).single().catch(()=>({data:null}));
+  const rows = reviewHistory[tab] || [];
+  const max = Math.max(...rows.map(r=>r.count), 1);
+
+  const rtBadge = cache
+    ? `<div style="display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:16px;">
+        <div style="font-size:36px;font-weight:800;font-family:var(--font);">${cache.rating ?? '–'}</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.4px;">${tab === 'tripadvisor' ? 'Tripadvisor' : 'Google'} · Ahora mismo</div>
+          <div style="font-size:22px;font-weight:800;">${cache.review_count?.toLocaleString('es-ES') ?? '–'} opiniones</div>
+          ${cache.ranking ? `<div style="font-size:12.5px;color:var(--success);font-weight:700;margin-top:2px;">${cache.ranking}</div>` : ''}
+          <div style="font-size:11px;color:var(--text-soft);margin-top:4px;">Actualizado: ${cache.fetched_at ? new Date(cache.fetched_at).toLocaleDateString('es-ES', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '—'}</div>
+        </div>
+        <div style="margin-left:auto;"><a href="${tab==='tripadvisor'?'https://www.tripadvisor.com/Attraction_Review-g187497-d25410922-Reviews-Paradox_Museum_Barcelona-Barcelona_Catalonia.html':'https://share.google/K0i8JLtwgsoqSMSKe'}" target="_blank" class="btn btn-ghost btn-sm">Ver en ${tab==='tripadvisor'?'Tripadvisor':'Google'} →</a></div>
+      </div>`
+    : `<div class="note-banner" style="margin-bottom:16px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div>Dato en tiempo real pendiente. Ejecuta el workflow de GitHub Actions para sincronizar.</div></div>`;
+
+  el.innerHTML = `
     <div class="card">
-      <div class="section-title">Evolución de opiniones <span class="hint">${tab==='tripadvisor'?'Tripadvisor':'Google'}</span></div>
+      ${rtBadge}
+      <div class="section-title">Evolución histórica <span class="hint">${tab==='tripadvisor'?'Tripadvisor':'Google'}</span></div>
+      ${rows.length ? `
       <div style="display:flex;align-items:flex-end;gap:14px;height:120px;margin-bottom:18px;padding:0 4px;border-bottom:1px solid var(--line);">
         ${rows.map(r=>`
           <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
@@ -1389,9 +1421,8 @@ function renderResenas(tab){
       </div>
       <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Nota media</th><th>Nº opiniones</th><th>Ranking BCN</th></tr></thead>
       <tbody>${rows.map(r=>`<tr><td>${r.d}</td><td>${r.rating} / 5</td><td class="mono">${r.count}</td><td class="mono">${r.rank}</td></tr>`).join('')}</tbody>
-      </table></div>
+      </table></div>` : '<div class="empty-state">No hay historial registrado todavía.</div>'}
     </div>`;
-  document.getElementById('resenas-content').innerHTML = html;
 }
 
 /* ============================================================
