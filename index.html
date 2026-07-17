@@ -2649,6 +2649,36 @@ async function kvDelete(key){
 const STORAGE_KEY = 'grupos-data-v1';
 const USER_KEY = 'user-name-v1';
 
+/* ---------- Carga / guardado de datos de Grupos (Supabase, tabla pdxspot_kv) ---------- */
+async function loadData(){
+  try{
+    const r = await kvGet(STORAGE_KEY);
+    if(r && r.value){
+      let data = r.value;
+      if(typeof data === 'string'){
+        try{ data = JSON.parse(data); }catch(e){ data = null; }
+      }
+      if(data && typeof data === 'object'){
+        state.groups = Array.isArray(data.groups) ? data.groups : [];
+        state.categories = (Array.isArray(data.categories) && data.categories.length) ? data.categories : DEFAULT_CATEGORIES.slice();
+        state.importDone = !!data.importDone;
+        state.autoRules = Array.isArray(data.autoRules) ? data.autoRules : [];
+        state.campaigns = Array.isArray(data.campaigns) ? data.campaigns : [];
+      }
+    }
+  }catch(e){
+    console.error('No se pudieron cargar los datos de Grupos', e);
+  }
+  dataVersionLoaded = true;
+}
+async function saveData(){
+  try{
+    await kvSet(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){
+    console.error('No se pudieron guardar los datos de Grupos', e);
+  }
+}
+
 const DEFAULT_CATEGORIES = ['Escuela','Casal de verano','Asociación','Gente grande','Agencia de viajes','Hotel','Crucero','Empresa','Guía','Cumpleaños','Estudiantes','Free tour / Bike'];
 const PAGE_SIZE = 50;
 const ESTADOS = [
