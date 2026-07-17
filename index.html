@@ -401,16 +401,12 @@
       <div class="view active" id="view-dashboard">
         <div class="page-head"><div><h1>Buenos días 👋</h1><p>Esto es lo que está pasando hoy en el museo.</p></div></div>
 
-        <div class="note-banner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-          <div>Todos los módulos guardan ya en la base de datos real (Supabase): <b>PDA</b>, <b>SPV</b>, <b>Staff</b>, <b>Evaluaciones</b>, <b>Entrevistas</b>, <b>Cambios de turno</b>, <b>Tareas Diego</b>, <b>CL Mantenimiento</b> y <b>NFCards</b>. Grupos y Vacaciones siguen pendientes de definir.</div>
-        </div>
-
-        <div class="grid grid-4" style="margin-bottom:14px;">
+        <div class="grid grid-4" style="margin-bottom:14px;grid-template-columns:repeat(5,1fr);">
           <div class="card kpi"><div class="label">Visitas hoy</div><div class="value" id="dash-today-visits">–</div><div class="delta" id="dash-today-delta" style="color:var(--text-soft);">cargando…</div></div>
           <div class="card kpi"><div class="label">Mismo día, año pasado</div><div class="value" id="dash-ly-visits">–</div><div class="delta" id="dash-ly-date" style="color:var(--text-soft);">–</div></div>
           <div class="card kpi"><div class="label">Rating Tripadvisor</div><div class="value" id="dash-ta-rating">–</div><div class="delta up" id="dash-ta-count">–</div></div>
           <div class="card kpi"><div class="label">Tus tareas PDA</div><div class="value" id="dash-my-tasks">–</div><div class="delta" style="color:var(--text-soft);" id="dash-my-tasks-sub">pendientes</div></div>
+          <div class="card kpi" style="cursor:pointer;" onclick="goToRecapFromDashboard()"><div class="label">Recaps</div><div class="value" id="dash-recaps-unread">–</div><div class="delta" style="color:var(--text-soft);" id="dash-recaps-unread-sub">cargando…</div></div>
         </div>
 
         <div class="card">
@@ -441,11 +437,6 @@
             <div class="label">% comisión</div>
             <input id="spv-commission-rate" type="number" value="2" min="0" max="100" step="0.5" style="margin-top:6px;font-family:var(--font);font-weight:800;font-size:18px;text-align:left;">
           </div>
-        </div>
-
-        <div class="note-banner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-          <div>Un día da comisión cuando el <b>SPV Neto</b> llega a 1€ o más (SPV Bruto ≥ 1,21€). Esos días se ven en verde, igual que las celdas de quien haya vendido algo ese día.</div>
         </div>
 
         <div class="card" style="margin-bottom:14px;">
@@ -606,7 +597,8 @@
 
       <!-- ============ RECAP ============ -->
       <div class="view" id="view-recap">
-        <div style="max-width:780px;">
+        <div style="display:flex;gap:20px;align-items:flex-start;">
+        <div style="max-width:780px;flex:1;min-width:0;">
         <div class="page-head">
           <div><h1>Recap del día</h1><p>Cierre diario: info general, rutinas y observaciones. Se guarda automáticamente.</p></div>
           <div>
@@ -625,6 +617,7 @@
             <div style="flex:1;min-width:180px;">
               <label class="field-label">Fecha</label>
               <input type="date" id="recap-date" style="font-weight:800;font-size:15px;">
+              <div id="recap-date-label" style="margin-top:4px;font-size:12.5px;font-weight:700;color:var(--accent);text-transform:capitalize;"></div>
             </div>
             <div style="flex:1;min-width:180px;">
               <label class="field-label">Cierre a cargo de</label>
@@ -730,6 +723,15 @@
           Guardar Recap
         </button>
         </div><!-- fin max-width recap -->
+
+        <!-- PANEL LATERAL: RECAPS ANTERIORES -->
+        <div style="width:280px;flex-shrink:0;position:sticky;top:0;">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:10px;">Recaps anteriores</div>
+            <div id="recap-capsule-list" style="display:flex;flex-direction:column;gap:8px;max-height:640px;overflow-y:auto;"></div>
+          </div>
+        </div>
+        </div><!-- fin flex recap -->
       </div>
 
       <!-- ============ LOOMIS ============ -->
@@ -817,6 +819,18 @@
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeStaffModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveStaffModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECAP VIEW MODAL -->
+<div class="modal-overlay" id="recap-view-modal">
+  <div class="modal-box" style="max-width:520px;">
+    <h3 id="rvm-title">Recap</h3>
+    <div id="rvm-body" style="font-size:13.5px;line-height:1.7;"></div>
+    <div class="mfoot">
+      <button class="btn btn-ghost" onclick="closeRecapViewModal()">Cerrar</button>
+      <button class="btn btn-primary" onclick="openRecapForEdit()">Abrir para editar</button>
     </div>
   </div>
 </div>
@@ -981,6 +995,10 @@ function isoToLabel(isoStr){ const [y,m,dd]=isoStr.split('-'); return `${parseIn
 async function refreshDashboard(){
   const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA()]);
   updateDashboardMyTasks(tasks);
+  refreshDashboardRecapBadge();
+}
+function goToRecapFromDashboard(){
+  document.querySelector('.navitem[data-view="recap"]')?.click();
 }
 
 async function fetchDashboardTA(){
@@ -1396,21 +1414,14 @@ async function deleteCommissionSnapshot(id){
    ============================================================ */
 const reviewColor = {tripadvisor:'linear-gradient(180deg,#33C98B,#0E8F5C)', google:'linear-gradient(180deg,#5B8CFF,#2E48E0)'};
 
-const reviewHistory = {
-  tripadvisor:[
-    {d:'17 may', rating:4.1, count:48, rank:'168/1551'},
-    {d:'19 may', rating:4.2, count:53, rank:'152/1551'},
-    {d:'27 may', rating:4.2, count:58, rank:'142/1552'},
-    {d:'31 may', rating:4.3, count:62, rank:'137/1553'},
-    {d:'22 jun', rating:4.3, count:66, rank:'122/1552'},
-    {d:'1 jul',  rating:4.3, count:71, rank:'116/1552'},
-  ],
-  google:[
-    {d:'01 jun', rating:4.4, count:212, rank:'—'},
-    {d:'15 jun', rating:4.4, count:229, rank:'—'},
-    {d:'01 jul', rating:4.5, count:248, rank:'—'},
-  ]
-};
+async function fetchReviewHistory(tab){
+  const { data, error } = await sb.from('reviews_history').select('*').eq('source', tab).order('created_at', {ascending:true});
+  if(error){ console.error(error); return []; }
+  return data.map(r=>({
+    d: new Date(r.created_at).toLocaleDateString('es-ES',{day:'numeric',month:'short'}),
+    rating: r.rating, count: r.review_count, rank: r.ranking || '—'
+  }));
+}
 
 async function renderResenas(tab){
   const el = document.getElementById('resenas-content');
@@ -1425,7 +1436,7 @@ async function renderResenas(tab){
     cache = result?.data ?? null;
   } catch(e){ cache = null; }
 
-  const rows = reviewHistory[tab] || [];
+  const rows = await fetchReviewHistory(tab);
   const max = Math.max(...rows.map(r=>r.count), 1);
   const label = tab === 'tripadvisor' ? 'Tripadvisor' : 'Google';
   const link  = tab === 'tripadvisor'
@@ -1508,6 +1519,12 @@ async function saveResenaUpdate(tab){
   if(count)   payload.review_count = count;
   if(ranking) payload.ranking      = ranking;
   await sb.from('reviews_cache').upsert(payload, {onConflict:'source'});
+  await sb.from('reviews_history').insert({
+    source: tab,
+    rating: rating || null,
+    review_count: count || null,
+    ranking: ranking || null,
+  });
   const badge = document.getElementById(`rv-saved-${tab}`);
   if(badge){ badge.style.display='inline'; setTimeout(()=>badge.style.display='none', 2500); }
   renderResenas(tab);
@@ -2032,7 +2049,12 @@ function updateDashboardMyTasks(tasks){
 /* ============================================================
    RECAP — cierre diario
    ============================================================ */
-const RECAP_TIENDA_STAFF = ['Laura','Mario','Melisa','Ana','Constanza','Neus','Emma','Marina','Ary','Otro'];
+const RECAP_TIENDA_STAFF_FALLBACK = ['Laura','Mario','Melisa','Ana','Constanza','Neus','Emma','Marina','Ary','Otro'];
+let RECAP_TIENDA_STAFF = RECAP_TIENDA_STAFF_FALLBACK;
+async function loadRecapStaffNames(){
+  const list = await fetchStaff();
+  RECAP_TIENDA_STAFF = list.length ? [...list.map(s=>s.nombre), 'Otro'] : RECAP_TIENDA_STAFF_FALLBACK;
+}
 
 const RUTINAS_MAÑANA = [
   {id:'m_fondo',    label:'Contar Fondo Caja 390€'},
@@ -2064,6 +2086,10 @@ let recapData = {};  // datos cargados para la fecha activa
 async function renderRecap(){
   // Poner la fecha en el input
   document.getElementById('recap-date').value = recapDate;
+  updateRecapDateLabel();
+
+  // Staff real desde la tabla staff
+  await loadRecapStaffNames();
 
   // Generar campos de boutique
   const btq = document.getElementById('rc-boutique-fields');
@@ -2122,6 +2148,18 @@ async function renderRecap(){
   });
   document.getElementById('rc-cerrado-por')?.addEventListener('change', () => saveRecap(true));
   document.getElementById('rc-observaciones')?.addEventListener('input', debounceRecapSave);
+
+  renderRecapCapsules();
+}
+
+function updateRecapDateLabel(){
+  const el = document.getElementById('recap-date-label');
+  if(!el) return;
+  const d = new Date(recapDate+'T12:00:00');
+  const dow = d.toLocaleDateString('es-ES',{weekday:'long'});
+  const dowCap = dow.charAt(0).toUpperCase()+dow.slice(1);
+  const [y,m,day] = recapDate.split('-');
+  el.textContent = `${dowCap}, ${day}/${m}/${y}`;
 }
 
 let recapDebounceTimer = null;
@@ -2218,11 +2256,32 @@ function getRecapPayload(){
 
 async function saveRecap(silent=false){
   const payload = getRecapPayload();
+  const me = currentProfile?.nombre || '';
+  if(!silent){
+    // Guardado explícito: se considera "mensaje" nuevo, se notifica a los demás.
+    payload.autor = me;
+    payload.leido_por = [me];
+  } else {
+    // Autoguardado: no reinicia el estado de lectura de los demás.
+    payload.autor = recapData?.autor || me;
+    payload.leido_por = recapData?.leido_por || [me];
+  }
   await sb.from('recap').upsert(payload, {onConflict:'fecha'});
+  await syncRecapBoutiqueToSpv(payload.fecha, payload.boutique);
+  recapData = { ...recapData, ...payload };
   if(!silent){
     const banner = document.getElementById('recap-saved-banner');
     if(banner){ banner.classList.add('show'); setTimeout(()=>banner.classList.remove('show'), 2000); }
+    renderRecapCapsules();
   }
+}
+
+async function syncRecapBoutiqueToSpv(fecha, boutique){
+  const entries = Object.entries(boutique||{}).filter(([nombre,importe])=> nombre!=='Otro' && importe);
+  if(!entries.length) return;
+  await Promise.all(entries.map(([staff_nombre, importe]) =>
+    sb.from('spv_entries').upsert({fecha, staff_nombre, importe}, {onConflict:'fecha,staff_nombre'})
+  ));
 }
 
 function toggleRutina(id){
@@ -2257,8 +2316,77 @@ function recapGoDate(iso){ recapDate=iso; renderRecap(); }
 // Cambio de fecha manual desde el input
 document.addEventListener('DOMContentLoaded', ()=>{
   const datePicker = document.getElementById('recap-date');
-  if(datePicker) datePicker.addEventListener('change', e=>{ recapDate=e.target.value; loadRecapData(); });
+  if(datePicker) datePicker.addEventListener('change', e=>{ recapDate=e.target.value; updateRecapDateLabel(); loadRecapData(); });
 });
+
+/* --- Panel lateral: cápsulas de recaps anteriores + notificaciones --- */
+async function fetchRecentRecaps(limit=20){
+  const { data, error } = await sb.from('recap').select('*').order('fecha', {ascending:false}).limit(limit);
+  if(error){ console.error(error); return []; }
+  return data;
+}
+function recapUnread(r){
+  const me = currentProfile?.nombre || '';
+  if(!r.autor || r.autor === me) return false;
+  return !(r.leido_por||[]).includes(me);
+}
+async function renderRecapCapsules(){
+  const list = document.getElementById('recap-capsule-list');
+  if(!list) return;
+  const recaps = await fetchRecentRecaps();
+  list.innerHTML = recaps.length ? recaps.map(r=>{
+    const unread = recapUnread(r);
+    const d = new Date(r.fecha+'T12:00:00');
+    const dd = d.toLocaleDateString('es-ES',{day:'2-digit',month:'short'});
+    return `
+    <div onclick="openRecapCapsule('${r.fecha}')" style="cursor:pointer;background:var(--panel);border:1px solid ${unread?'var(--accent)':'var(--line)'};border-radius:8px;padding:8px 10px;position:relative;">
+      ${unread?'<span style="position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--accent);"></span>':''}
+      <div style="font-size:11px;font-weight:800;color:var(--text-soft);text-transform:capitalize;">${dd}${r.fecha===recapDate?' · hoy':''}</div>
+      <div style="font-size:12.5px;font-weight:700;margin-top:2px;">${r.autor || '—'}</div>
+      <div style="font-size:11px;color:var(--text-soft);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${(r.observaciones||'Sin observaciones').slice(0,40)}</div>
+    </div>`;
+  }).join('') : '<div class="empty-state" style="font-size:12px;">Todavía no hay recaps guardados.</div>';
+}
+let recapModalFecha = null;
+async function openRecapCapsule(fecha){
+  const { data: r } = await sb.from('recap').select('*').eq('fecha', fecha).single().catch(()=>({data:null}));
+  if(!r) return;
+  recapModalFecha = fecha;
+  const d = new Date(fecha+'T12:00:00');
+  document.getElementById('rvm-title').textContent = d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const boutiqueTotal = Object.values(r.boutique||{}).reduce((a,b)=>a+(parseFloat(b)||0),0);
+  document.getElementById('rvm-body').innerHTML = `
+    <div><b>Autor:</b> ${r.autor || '—'}</div>
+    <div><b>Cerrado por:</b> ${r.cerrado_por || '—'}</div>
+    <div><b>Visitantes:</b> ${r.visitantes ?? '—'}</div>
+    <div><b>Boutique total:</b> ${boutiqueTotal.toFixed(2)}€</div>
+    <div><b>Horas Planday:</b> ${r.horas_planday ?? '—'}</div>
+    <div style="margin-top:8px;"><b>Observaciones:</b><br>${r.observaciones ? r.observaciones.replace(/\n/g,'<br>') : 'Sin observaciones.'}</div>
+  `;
+  document.getElementById('recap-view-modal').classList.add('open');
+  // Marcar como leído por el usuario actual
+  const me = currentProfile?.nombre || '';
+  if(recapUnread(r)){
+    const leidoPor = [...(r.leido_por||[]), me];
+    await sb.from('recap').update({leido_por: leidoPor}).eq('fecha', fecha);
+    renderRecapCapsules();
+    refreshDashboardRecapBadge();
+  }
+}
+function closeRecapViewModal(){ document.getElementById('recap-view-modal').classList.remove('open'); }
+function openRecapForEdit(){
+  if(recapModalFecha) recapGoDate(recapModalFecha);
+  closeRecapViewModal();
+}
+async function refreshDashboardRecapBadge(){
+  const el = document.getElementById('dash-recaps-unread');
+  if(!el) return;
+  const recaps = await fetchRecentRecaps();
+  const unread = recaps.filter(recapUnread).length;
+  el.textContent = unread;
+  const sub = document.getElementById('dash-recaps-unread-sub');
+  if(sub) sub.textContent = unread ? 'sin leer' : 'al día';
+}
 
 const gruposData = [
   {n:'Thau Sant Cugat (Susanna Puyol)', f:'Septiembre 2026', pax:68, tipo:'Escola', estado:'Negociando'},
@@ -2289,13 +2417,18 @@ async function renderDiego(){
   const tasks = await fetchDiegoTasks();
   const list = document.getElementById('diego-list');
   list.innerHTML = tasks.length ? tasks.map(t=>`
-    <div class="checkbox-row ${t.done?'done':''}">
+    <div class="checkbox-row ${t.done?'done':''}" style="display:flex;align-items:center;gap:8px;">
       <input type="checkbox" ${t.done?'checked':''} onchange="toggleDiegoTask(${t.id}, this.checked)">
-      <div class="txt ${t.done?'done':''}">${t.title}</div>
+      <div class="txt ${t.done?'done':''}" style="flex:1;">${t.title}</div>
+      <button class="btn btn-ghost btn-sm" title="Eliminar tarea" onclick="deleteDiegoTask(${t.id})">✕</button>
     </div>`).join('') : '<div class="empty-state">Sin tareas de mantenimiento esta semana.</div>';
 }
 async function toggleDiegoTask(id, done){
   await sb.from('diego_tasks').update({done}).eq('id', id);
+  renderDiego();
+}
+async function deleteDiegoTask(id){
+  await sb.from('diego_tasks').delete().eq('id', id);
   renderDiego();
 }
 async function addDiegoTask(){
