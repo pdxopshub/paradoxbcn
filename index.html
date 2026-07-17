@@ -755,15 +755,7 @@
       <!-- ============ GRUPOS (PDXspot) ============ -->
       <div class="view" id="view-grupos">
         <div class="page-head"><div><h1>Grupos <span class="tag" style="vertical-align:middle;">PDXspot</span></h1><p>Reservas y seguimiento de grupos gestionados en PDXspot.</p></div></div>
-        <div class="note-banner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
-          <div>Pendiente de conectar con PDXspot real. Datos de ejemplo con el formato de la tabla — nos falta que me digas cómo lo quieres exactamente.</div>
-        </div>
-        <div class="card">
-          <div class="table-wrap"><table id="grupos-table"><thead>
-            <tr><th>Grupo / Contacto</th><th>Fecha visita</th><th>Nº personas</th><th>Tipo</th><th>Estado</th></tr>
-          </thead><tbody></tbody></table></div>
-        </div>
+        <iframe id="pdxspot-frame" title="PDXspot" style="width:100%;height:calc(100vh - 150px);min-height:560px;border:1px solid var(--line-strong);border-radius:12px;background:var(--surface);"></iframe>
       </div>
 
       <!-- ============ VACACIONES ============ -->
@@ -947,6 +939,7 @@ function initNav(){
       if(v==='diego') renderDiego();
       if(v==='dashboard') refreshDashboard();
       if(v==='recap') renderRecap();
+      if(v==='grupos') loadPdxspotIframe();
     });
   });
   document.getElementById('today-date').textContent = titles.dashboard[1];
@@ -985,7 +978,6 @@ function initApp(){
   initNav();
   refreshDashboard(); // carga visitas reales + calendario
   renderResenas('tripadvisor');
-  fillGrupos();
   renderPDA();
   renderStaffTable();
   renderDiego();
@@ -2443,21 +2435,14 @@ async function refreshDashboardRecapBadge(){
   if(sub) sub.textContent = unread ? 'sin leer' : 'al día';
 }
 
-const gruposData = [
-  {n:'Thau Sant Cugat (Susanna Puyol)', f:'Septiembre 2026', pax:68, tipo:'Escola', estado:'Negociando'},
-  {n:'Casal Gent Gran Quatre Cantons', f:'Septiembre 2026', pax:24, tipo:'Casal gent gran', estado:'Seguimiento'},
-  {n:'Casal Infantil Cotxeres Borrell', f:'Por confirmar', pax:35, tipo:'Casal', estado:'Lead caliente'},
-];
-function fillGrupos(){
-  const tbody = document.querySelector('#grupos-table tbody');
-  tbody.innerHTML = gruposData.map(g=>`
-    <tr>
-      <td><b>${g.n}</b></td>
-      <td>${g.f}</td>
-      <td class="mono">${g.pax}</td>
-      <td>${g.tipo}</td>
-      <td><span class="pill ${g.estado==='Lead caliente'?'amber':'violet'}">${g.estado}</span></td>
-    </tr>`).join('');
+/* PDXspot se carga solo la primera vez que se entra a la pestaña Grupos,
+   pasándole el usuario ya identificado en el HUB por la URL. */
+let pdxspotLoaded = false;
+function loadPdxspotIframe(){
+  if(pdxspotLoaded) return;
+  pdxspotLoaded = true;
+  const frame = document.getElementById('pdxspot-frame');
+  if(frame) frame.src = 'pdxspot.html?pdxUser=' + encodeURIComponent(currentProfile?.nombre || '');
 }
 
 /* ============================================================
