@@ -227,14 +227,20 @@
   .recap-saved-banner.show{display:block;}
 
   /* weekly calendar — más amplio */
-  .day-col{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 16px;min-height:220px;}
+  .day-col{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 12px;min-height:160px;display:flex;flex-direction:column;}
+  .day-col.weekend{background:#161A24;border-color:#252A38;}
   .day-col.today{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent);}
-  .day-col .dname{font-size:12px;font-weight:800;text-transform:uppercase;color:var(--text-soft);letter-spacing:.6px;}
-  .day-col .ddate{font-family:var(--font);font-weight:800;font-size:24px;margin:4px 0 2px;}
-  .day-col .ly-inline{font-size:13px;font-weight:700;color:var(--text-soft);margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--line-strong);}
-  .day-col .ly-inline .lynum{font-family:var(--font);font-weight:800;font-size:16px;color:var(--accent);}
-  .day-col .group-chip{background:var(--accent-soft);border:1px solid #2C3F66;border-radius:7px;padding:8px 9px;font-size:12px;font-weight:700;color:var(--accent-dark);margin-bottom:7px;line-height:1.4;}
-  .day-col .no-groups{font-size:12px;color:var(--text-soft);padding:6px 0;}
+  .day-col .dname{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--text-soft);letter-spacing:.7px;}
+  .day-col.weekend .dname{color:#6C7593;}
+  .day-col .ddate{font-family:var(--font);font-weight:800;font-size:17px;margin:3px 0 10px;color:var(--text);}
+  .day-col .visit-big{font-family:var(--font);font-size:30px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:4px;}
+  .day-col .visit-none{font-size:26px;font-weight:800;color:var(--line-strong);line-height:1;margin-bottom:4px;}
+  .day-col .ly-row{display:flex;align-items:center;gap:5px;margin-top:auto;padding-top:8px;border-top:1px dashed var(--line);font-size:11.5px;}
+  .day-col .ly-num{color:var(--text-soft);font-weight:600;}
+  .pct-up{font-size:11px;font-weight:800;color:var(--success);}
+  .pct-down{font-size:11px;font-weight:800;color:var(--danger);}
+  .day-col .group-chip{background:var(--accent-soft);border:1px solid #2C3F66;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent-dark);margin-bottom:5px;line-height:1.4;}
+  .day-col .no-groups{font-size:11px;color:var(--line-strong);padding:3px 0;}
 
   /* modal */
   .modal-overlay{position:fixed;inset:0;background:rgba(6,7,11,.65);display:none;align-items:center;justify-content:center;z-index:100;}
@@ -346,6 +352,10 @@
         <button class="navitem" data-view="recap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>
           Recap
+        </button>
+        <button class="navitem" data-view="loomis">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1.5"/><path d="M10 15h8"/></svg>
+          Loomis
         </button>
       </div>
 
@@ -722,6 +732,16 @@
         </div><!-- fin max-width recap -->
       </div>
 
+      <!-- ============ LOOMIS ============ -->
+      <div class="view" id="view-loomis">
+        <div class="page-head"><div><h1>Loomis</h1><p>Gestión semanal del servicio Loomis. Pendiente de definir el flujo con el archivo correspondiente.</p></div></div>
+        <div class="empty-state" style="margin-top:20px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="36" height="36"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1.5"/><path d="M10 15h8"/></svg>
+          <div style="margin-top:12px;font-size:15px;font-weight:700;">Sección pendiente</div>
+          <div style="margin-top:6px;font-size:13px;">Cuando tengas el archivo de Loomis pásaselo a Claude y montamos aquí la gestión semanal del lunes.</div>
+        </div>
+      </div>
+
       <!-- ============ GRUPOS (PDXspot) ============ -->
       <div class="view" id="view-grupos">
         <div class="page-head"><div><h1>Grupos <span class="tag" style="vertical-align:middle;">PDXspot</span></h1><p>Reservas y seguimiento de grupos gestionados en PDXspot.</p></div></div>
@@ -882,7 +902,8 @@ const titles = {
   vacaciones:['Vacaciones','Pendiente de definir'],
   diego:['Mantenimiento','Tareas semanales de Diego'],
   clmant:['CL Mantenimiento','Lista de material a comprar'],
-  recap:['Recap del día','Cierre diario: info general, rutinas y observaciones']
+  recap:['Recap del día','Cierre diario: info general, rutinas y observaciones'],
+  loomis:['Loomis','Gestión semanal del lunes']
 };
 function initNav(){
   document.querySelectorAll('.navitem[data-view]').forEach(btn=>{
@@ -963,7 +984,13 @@ async function refreshDashboard(){
 }
 
 async function fetchDashboardTA(){
-  const { data } = await sb.from('reviews_cache').select('rating,review_count').eq('source','tripadvisor').single().catch(()=>({data:null}));
+  let data = null;
+  try {
+    const timeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),5000));
+    const query = sb.from('reviews_cache').select('rating,review_count').eq('source','tripadvisor').single();
+    const result = await Promise.race([query, timeout]);
+    data = result?.data ?? null;
+  } catch(e){ data = null; }
   const rEl = document.getElementById('dash-ta-rating');
   const cEl = document.getElementById('dash-ta-count');
   if(rEl) rEl.innerHTML = data?.rating ? `${data.rating}<span style="font-size:15px;color:var(--text-soft);"> / 5</span>` : '–';
@@ -1036,31 +1063,33 @@ async function renderWeekCalendar(){
   const {data: visitsData} = await sb.from('spv_days').select('fecha,visitantes').in('fecha', allDates);
   const vMap = {}; (visitsData||[]).forEach(r=>vMap[r.fecha]=r.visitantes);
 
-  // Actualizar hint de rango de semana
   const hint = document.querySelector('#week-range-label');
   if(hint) hint.textContent = weekLabel;
 
   document.getElementById('week-calendar').innerHTML = weekDates.map(d=>{
+    const dow = new Date(d.iso+'T12:00:00').getDay(); // 0=dom, 6=sáb
+    const isWeekend = dow === 0 || dow === 6;
     const thisV = vMap[d.iso] ?? null;
-    const lyV = vMap[d.lyIsoDate] ?? null;
+    const lyV   = vMap[d.lyIsoDate] ?? null;
+
     let pctHtml = '';
     if(thisV !== null && lyV !== null && lyV > 0){
       const pct = Math.round((thisV - lyV) / lyV * 100);
-      const color = pct >= 0 ? 'var(--success)' : 'var(--danger)';
-      const arrow = pct >= 0 ? '↑' : '↓';
-      pctHtml = `<div style="font-size:12px;font-weight:800;color:${color};margin-top:4px;">${arrow} ${Math.abs(pct)}%</div>`;
+      pctHtml = `<span class="${pct>=0?'pct-up':'pct-down'}">${pct>=0?'↑':'↓'}${Math.abs(pct)}%</span>`;
     }
+
+    const lyDateShort = isoToLabel(d.lyIsoDate).slice(0,6);
+
     return `
-    <div class="day-col ${d.isToday?'today':''}">
+    <div class="day-col ${d.isToday?'today':''} ${isWeekend?'weekend':''}">
       <div class="dname">${d.dname}</div>
       <div class="ddate">${d.label}</div>
       ${thisV !== null
-        ? `<div style="font-family:var(--font);font-size:20px;font-weight:800;margin:6px 0 2px;">${thisV.toLocaleString('es-ES')}</div>`
-        : `<div style="font-size:20px;font-weight:800;color:var(--text-soft);margin:6px 0 2px;">–</div>`}
-      ${pctHtml}
-      <div class="ly-inline" style="margin-top:6px;">
-        <span class="lynum">${lyV !== null ? lyV.toLocaleString('es-ES') : '–'}</span>
-        <span style="color:var(--text-soft);font-size:10.5px;"> LY (${isoToLabel(d.lyIsoDate).slice(0,6)})</span>
+        ? `<div class="visit-big">${thisV.toLocaleString('es-ES')}</div>`
+        : `<div class="visit-none">–</div>`}
+      <div class="ly-row">
+        <span class="ly-num">LY ${lyV !== null ? lyV.toLocaleString('es-ES') : '–'}</span>
+        ${pctHtml}
       </div>
     </div>`;
   }).join('');
@@ -1387,7 +1416,15 @@ async function renderResenas(tab){
   const el = document.getElementById('resenas-content');
   el.innerHTML = '<div class="empty-state">Cargando…</div>';
 
-  const { data: cache } = await sb.from('reviews_cache').select('*').eq('source', tab).single().catch(()=>({data:null}));
+  // Timeout de seguridad: si en 5s no hay respuesta, muestra el formulario vacío
+  let cache = null;
+  try {
+    const timeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),5000));
+    const query = sb.from('reviews_cache').select('*').eq('source', tab).single();
+    const result = await Promise.race([query, timeout]);
+    cache = result?.data ?? null;
+  } catch(e){ cache = null; }
+
   const rows = reviewHistory[tab] || [];
   const max = Math.max(...rows.map(r=>r.count), 1);
   const label = tab === 'tripadvisor' ? 'Tripadvisor' : 'Google';
