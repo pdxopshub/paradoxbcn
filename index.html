@@ -113,16 +113,80 @@
   .section-title .hint{font-size:11.5px;color:var(--text-soft);font-weight:600;}
 
   .table-wrap{border:1px solid var(--line-strong);border-radius:8px;overflow:auto;}
-  /* ---- Zoom ajustable de la tabla de Equipo ---- */
-  .zoom-ctl{display:flex;align-items:center;gap:6px;}
-  .zoom-ctl .zbtn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line-strong);color:var(--text-soft);border-radius:6px;cursor:pointer;font-size:14px;font-weight:800;line-height:1;padding:0;}
-  .zoom-ctl .zbtn:hover{color:#fff;border-color:var(--accent);}
-  .zoom-ctl .zval{min-width:44px;text-align:center;font-size:11.5px;font-weight:700;color:var(--text-soft);cursor:pointer;user-select:none;}
-  #staff-table{font-size:calc(13px * var(--staffz,1));}
-  #staff-table th{font-size:calc(11px * var(--staffz,1));padding:calc(9px * var(--staffz,1)) calc(12px * var(--staffz,1));}
-  #staff-table td{padding:calc(7px * var(--staffz,1)) calc(8px * var(--staffz,1));}
-  #staff-table input,#staff-table select{font-size:calc(12.5px * var(--staffz,1));}
-  #staff-table .badge,#staff-table .pill{font-size:calc(10.5px * var(--staffz,1));}
+  /* ---- Columnas redimensionables (tabla de Equipo) ---- */
+  table.resizable{table-layout:fixed;width:auto;min-width:100%;}
+  table.resizable th{position:relative;overflow:hidden;text-overflow:ellipsis;}
+  table.resizable td{overflow:hidden;text-overflow:ellipsis;}
+  table.resizable td input,table.resizable td select{max-width:100%;box-sizing:border-box;}
+  .col-grip{position:absolute;top:0;right:-3px;width:7px;height:100%;cursor:col-resize;z-index:5;
+    display:flex;align-items:center;justify-content:center;}
+  .col-grip::after{content:'';width:2px;height:60%;background:var(--line-strong);border-radius:2px;transition:background .12s;}
+  .col-grip:hover::after,.col-grip.dragging::after{background:var(--accent);width:3px;height:100%;}
+  body.col-resizing{cursor:col-resize!important;user-select:none;}
+  /* ---- Aviso de guardado ---- */
+  .save-toast{position:fixed;right:20px;bottom:20px;z-index:9999;padding:11px 16px;border-radius:10px;
+    font-size:13px;font-weight:700;max-width:420px;opacity:0;transform:translateY(10px);
+    transition:opacity .18s,transform .18s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.45);}
+  .save-toast.show{opacity:1;transform:translateY(0);}
+  .save-toast.ok{background:#1E3A2B;border:1px solid #33C98B;color:#8FE7BE;}
+  .save-toast.err{background:#3A1E22;border:1px solid var(--danger);color:#FFB3BC;pointer-events:auto;}
+  /* ---- CHAT ---- */
+  .chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 190px);min-height:420px;
+    background:var(--surface);border:1px solid var(--line-strong);border-radius:12px;overflow:hidden;}
+  .chat-head{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;
+    justify-content:space-between;gap:12px;background:var(--panel);}
+  .chat-head .ch-title{font-weight:800;font-size:14px;}
+  .chat-head .ch-sub{font-size:11.5px;color:var(--text-dim);margin-top:2px;}
+  .chat-body{flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:3px;}
+  .chat-daysep{align-self:center;background:var(--panel);border:1px solid var(--line);color:var(--text-dim);
+    font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin:14px 0 8px;}
+  .msg{max-width:74%;padding:8px 12px;border-radius:12px;position:relative;word-wrap:break-word;
+    background:#20242F;border:1px solid var(--line);align-self:flex-start;margin-top:2px;}
+  .msg.mine{align-self:flex-end;background:#254032;border-color:#2F6B4B;}
+  .msg .m-who{font-size:11.5px;font-weight:800;margin-bottom:3px;}
+  .msg .m-txt{font-size:13.5px;line-height:1.45;white-space:pre-wrap;}
+  .msg .m-time{font-size:10px;color:var(--text-dim);text-align:right;margin-top:3px;}
+  .msg .m-del{position:absolute;top:4px;right:6px;background:none;border:none;color:var(--text-dim);
+    cursor:pointer;font-size:13px;line-height:1;opacity:0;transition:opacity .12s;padding:2px;}
+  .msg:hover .m-del{opacity:1;}
+  .msg .m-del:hover{color:var(--danger);}
+  .chat-foot{padding:12px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-end;background:var(--panel);}
+  .chat-foot textarea{flex:1;resize:none;min-height:42px;max-height:130px;padding:11px 13px;border-radius:10px;
+    background:var(--surface);border:1px solid var(--line-strong);color:var(--text);font-family:inherit;font-size:13.5px;}
+  .chat-foot textarea:focus{outline:none;border-color:var(--accent);}
+  .chat-send{width:42px;height:42px;flex-shrink:0;border-radius:50%;background:var(--accent);border:none;
+    color:#0B0E14;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .chat-send:hover{filter:brightness(1.1);}
+  .chat-send svg{width:19px;height:19px;}
+  /* ---- VACACIONES (estilo WhosOff) ---- */
+  .vac-legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:11.5px;color:var(--text-soft);}
+  .vac-legend span{display:flex;align-items:center;gap:6px;}
+  .vac-dot{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  .vac-year{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:12px;}
+  .vac-month{background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:11px;}
+  .vac-month h4{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--text-soft);margin:0 0 8px;text-align:center;}
+  .vac-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+  .vac-dow{font-size:9.5px;text-align:center;color:var(--text-dim);font-weight:700;padding-bottom:3px;}
+  .vac-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:10.5px;
+    border-radius:4px;cursor:pointer;color:var(--text-soft);position:relative;}
+  .vac-day.pad{visibility:hidden;cursor:default;}
+  .vac-day:hover{outline:1.5px solid var(--accent);}
+  .vac-day.wknd{color:#555A68;}
+  .vac-day.today{font-weight:900;color:#fff;box-shadow:inset 0 0 0 1.5px var(--accent);}
+  .vac-day.bloq{background:#4A2226;color:#FFB3BC;}
+  .vac-day.apro{background:#245C40;color:#B8F0D4;font-weight:700;}
+  .vac-day.pend{background:#5A4A18;color:#F4DFA0;font-weight:700;}
+  .vac-day.recu{background:#243F5C;color:#B4D5F5;font-weight:700;}
+  .vac-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
+  .vac-card{background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:14px;}
+  .vac-card .vc-n{font-size:26px;font-weight:800;line-height:1;}
+  .vac-card .vc-l{font-size:11px;color:var(--text-dim);margin-top:5px;text-transform:uppercase;letter-spacing:.4px;}
+  .vac-req{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);
+    border-radius:9px;margin-bottom:8px;background:var(--surface);flex-wrap:wrap;}
+  .vac-req .vr-main{flex:1;min-width:190px;}
+  .vac-req .vr-who{font-weight:700;font-size:13px;}
+  .vac-req .vr-meta{font-size:11.5px;color:var(--text-dim);margin-top:2px;}
   table{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);}
   th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-soft);padding:9px 12px;background:var(--panel);border:1px solid var(--line);font-weight:800;white-space:nowrap;}
   td{padding:7px 8px;border:1px solid var(--line);vertical-align:middle;color:var(--text);}
@@ -447,6 +511,10 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 20c.7-3.6 3-5.4 5.5-5.4s4.8 1.8 5.5 5.4"/><path d="M14 15c2.3.2 4 1.8 4.6 5"/></svg>
           Grupos
         </button>
+        <button class="navitem" data-view="chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-4-.9L3 21l1.9-4.9A8.4 8.4 0 0112 3a8.4 8.4 0 019 8.5z"/></svg>
+          Chat
+        </button>
         <button class="navitem" data-view="vacaciones">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 10-9 0"/><path d="M13 13V5a2 2 0 10-4 0v2"/><path d="M9 7l6 2.5"/></svg>
           Vacaciones
@@ -588,17 +656,13 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
         <div id="staff-sub-equipo" class="staff-sub">
           <div class="card">
             <div class="flex-between" style="margin-bottom:12px;">
-              <div class="section-title" style="margin:0;">Equipo</div>
-              <div style="display:flex;align-items:center;gap:12px;">
-                <div class="zoom-ctl" title="Tamaño de la tabla">
-                  <button class="zbtn" onclick="setStaffZoom(-0.1)">−</button>
-                  <span class="zval" id="staff-zoom-val" onclick="setStaffZoom(0,true)" title="Clic para restablecer">100%</span>
-                  <button class="zbtn" onclick="setStaffZoom(0.1)">+</button>
-                </div>
+              <div class="section-title" style="margin:0;">Equipo <span class="hint">Arrastra el borde entre columnas para ajustar el ancho</span></div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <button class="btn btn-ghost btn-sm" onclick="resetStaffCols()">Restablecer anchos</button>
                 <button class="btn btn-primary btn-sm" onclick="addNewStaff()">+ Añadir staff</button>
               </div>
             </div>
-            <div class="table-wrap"><table id="staff-table"><thead>
+            <div class="table-wrap"><table id="staff-table" class="resizable"><thead>
               <tr><th>Nombre</th><th>Horas</th><th>Disp. (L–D)</th><th>Formación</th><th>Usuario FEVER</th><th>Contraseña FEVER</th><th>Usuario SumUp</th><th>Contraseña SumUp</th><th></th></tr>
             </thead><tbody></tbody></table></div>
           </div>
@@ -876,8 +940,108 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
         </div>
       </div>
 
+
+      <!-- ============ CHAT ============ -->
+      <div class="view" id="view-chat">
+        <div class="page-head"><div><h1>Chat</h1><p>Conversación del equipo: Laia, Ignacio, Paula, Ceci y Mireia.</p></div></div>
+        <div class="chat-wrap">
+          <div class="chat-head">
+            <div>
+              <div class="ch-title"># Equipo PARADOX BCN</div>
+              <div class="ch-sub" id="chat-members">Laia · Ignacio · Paula · Ceci · Mireia</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="loadChat(true)">Actualizar</button>
+          </div>
+          <div class="chat-body" id="chat-body">
+            <div class="empty-state" style="margin:auto;"><div>Cargando mensajes…</div></div>
+          </div>
+          <div class="chat-foot">
+            <textarea id="chat-input" placeholder="Escribe un mensaje…  (Enter envía, Shift+Enter salto de línea)"></textarea>
+            <button class="chat-send" onclick="sendChat()" title="Enviar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- ============ VACACIONES ============ -->
       <div class="view" id="view-vacaciones">
+        <div class="page-head"><div><h1>Vacaciones</h1><p>Calendario anual del equipo, solicitudes y aprobaciones.</p></div></div>
+
+        <div class="tab-strip">
+          <button class="tab-btn active" data-vtab="calendario">Calendario</button>
+          <button class="tab-btn" data-vtab="solicitudes">Solicitudes</button>
+          <button class="tab-btn" data-vtab="saldos">Saldos</button>
+          <button class="tab-btn" data-vtab="bloqueos">Días bloqueados</button>
+        </div>
+
+        <!-- ---- Calendario ---- -->
+        <div class="vac-sub" id="vac-sub-calendario">
+          <div class="card" style="margin-bottom:14px;">
+            <div class="flex-between" style="margin-bottom:12px;flex-wrap:wrap;gap:12px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <button class="btn btn-ghost btn-sm" onclick="vacChangeYear(-1)">‹</button>
+                <div class="section-title" style="margin:0;min-width:60px;text-align:center;" id="vac-year-label">2026</div>
+                <button class="btn btn-ghost btn-sm" onclick="vacChangeYear(1)">›</button>
+                <select id="vac-filtro-persona" style="width:170px;margin-left:10px;" onchange="renderVacCalendar()"></select>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openVacRequest()">+ Solicitar días</button>
+            </div>
+            <div class="vac-legend" style="margin-bottom:14px;">
+              <span><i class="vac-dot" style="background:#245C40"></i> Aprobado</span>
+              <span><i class="vac-dot" style="background:#5A4A18"></i> Pendiente</span>
+              <span><i class="vac-dot" style="background:#243F5C"></i> Recuperación</span>
+              <span><i class="vac-dot" style="background:#4A2226"></i> Bloqueado</span>
+            </div>
+            <div class="vac-year" id="vac-year-grid"></div>
+          </div>
+          <div class="card">
+            <div class="section-title">Quién está fuera hoy</div>
+            <div id="vac-hoy"></div>
+          </div>
+        </div>
+
+        <!-- ---- Solicitudes ---- -->
+        <div class="vac-sub" id="vac-sub-solicitudes" style="display:none;">
+          <div class="card" style="margin-bottom:14px;">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Pendientes de aprobar</div>
+              <button class="btn btn-primary btn-sm" onclick="openVacRequest()">+ Solicitar días</button>
+            </div>
+            <div id="vac-pendientes"></div>
+          </div>
+          <div class="card">
+            <div class="section-title">Historial</div>
+            <div id="vac-historial"></div>
+          </div>
+        </div>
+
+        <!-- ---- Saldos ---- -->
+        <div class="vac-sub" id="vac-sub-saldos" style="display:none;">
+          <div class="card">
+            <div class="section-title">Saldo de días <span class="hint">Días totales por año y consumo</span></div>
+            <div class="table-wrap"><table id="vac-saldos-table"><thead>
+              <tr><th>Persona</th><th>Vacaciones año</th><th>Usados</th><th>Pendientes</th><th>Restantes</th><th>Recuperación</th></tr>
+            </thead><tbody></tbody></table></div>
+          </div>
+        </div>
+
+        <!-- ---- Bloqueos ---- -->
+        <div class="vac-sub" id="vac-sub-bloqueos" style="display:none;">
+          <div class="card">
+            <div class="section-title">Días bloqueados <span class="hint">Fechas en las que no se pueden pedir vacaciones</span></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;">
+              <div class="mfield" style="margin:0;"><label class="field-label">Desde</label><input type="date" id="vac-bloq-desde"></div>
+              <div class="mfield" style="margin:0;"><label class="field-label">Hasta</label><input type="date" id="vac-bloq-hasta"></div>
+              <div class="mfield" style="margin:0;flex:1;min-width:180px;"><label class="field-label">Motivo</label><input type="text" id="vac-bloq-motivo" placeholder="Ej: Semana Santa, alta ocupación"></div>
+              <button class="btn btn-primary btn-sm" onclick="addVacBloqueo()">Bloquear</button>
+            </div>
+            <div id="vac-bloqueos-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="view-vacaciones-old" style="display:none;">
         <div class="page-head"><div><h1>Vacaciones</h1><p>Sección pendiente de definir.</p></div></div>
         <div class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 10-9 0"/><path d="M13 13V5a2 2 0 10-4 0v2"/><path d="M9 7l6 2.5"/></svg>
@@ -970,6 +1134,59 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: false, autoRefreshToken: true }
 });
 
+/* ============================================================
+   GUARDADO SEGURO — intercepta TODAS las escrituras a Supabase.
+   Antes, si Supabase rechazaba un guardado (permisos, columna
+   inexistente, sin conexión...) el error se ignoraba en silencio
+   y parecía que se había guardado. Ahora siempre se avisa.
+   ============================================================ */
+function showSaveToast(msg, type){
+  let el = document.getElementById('save-toast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'save-toast';
+    document.body.appendChild(el);
+  }
+  el.className = 'save-toast show ' + (type||'ok');
+  el.textContent = msg;
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{ el.className = 'save-toast ' + (type||'ok'); }, type==='err' ? 8000 : 1800);
+}
+(function wrapSupabaseWrites(){
+  const origFrom = sb.from.bind(sb);
+  sb.from = function(table){
+    const q = origFrom(table);
+    ['insert','update','upsert','delete'].forEach(m=>{
+      const orig = q[m];
+      if(typeof orig !== 'function') return;
+      q[m] = function(...args){
+        const builder = orig.apply(this, args);
+        if(builder && typeof builder.then === 'function'){
+          const origThen = builder.then.bind(builder);
+          builder.then = function(onOk, onErr){
+            return origThen(res=>{
+              if(res && res.error){
+                console.error('[GUARDADO FALLIDO]', table, m, res.error);
+                showSaveToast('No se pudo guardar en "'+table+'": '+(res.error.message||'error desconocido'), 'err');
+              } else {
+                showSaveToast('Guardado', 'ok');
+              }
+              return onOk ? onOk(res) : res;
+            }, err=>{
+              console.error('[GUARDADO FALLIDO]', table, m, err);
+              showSaveToast('No se pudo guardar en "'+table+'" (sin conexión?)', 'err');
+              if(onErr) return onErr(err);
+              throw err;
+            });
+          };
+        }
+        return builder;
+      };
+    });
+    return q;
+  };
+})();
+
 let currentUser = null;     // { id, email }
 let currentProfile = null;  // { nombre, rol }
 
@@ -1014,7 +1231,8 @@ function updateUserChip(){
   document.getElementById('uc-name').textContent = currentProfile.nombre;
   document.getElementById('uc-rol').textContent = currentProfile.rol === 'director' ? 'Directora' : 'Manager';
 }
-const roleColors = {Laia:'#FF4FA0', Ignacio:'#5B8CFF', Paula:'#33C98B', Ceci:'#F0AC3F'};
+const roleColors = {Laia:'#FF4FA0', Ignacio:'#5B8CFF', Paula:'#33C98B', Ceci:'#F0AC3F', Mireia:'#B084F5'};
+const EQUIPO_HUB = ['Laia','Ignacio','Paula','Ceci','Mireia'];
 
 /* Try to resume an existing session on load (in case persistSession is later enabled) */
 (async ()=>{
@@ -1035,7 +1253,8 @@ const titles = {
   turnos:['Cambios de turno','Solicitudes e histórico'],
   pda:['PDA · Tareas semanales','Plan de acción por persona'],
   grupos:['Grupos','Reservas de grupos'],
-  vacaciones:['Vacaciones','Pendiente de definir'],
+  vacaciones:['Vacaciones','Calendario anual, solicitudes y aprobaciones'],
+  chat:['Chat','Conversación del equipo'],
   diego:['Mantenimiento','Tareas semanales de Diego'],
   clmant:['CL Mantenimiento','Lista de material a comprar'],
   recap:['Recap del día','Cierre diario: info general, rutinas y observaciones'],
@@ -1062,6 +1281,8 @@ function initNav(){
       if(v==='dashboard') refreshDashboard();
       if(v==='recap') renderRecap();
       if(v==='grupos') initPdxspotEmbed();
+      if(v==='chat') initChat();
+      if(v==='vacaciones') initVacaciones();
     });
   });
   document.getElementById('today-date').textContent = titles.dashboard[1];
@@ -1722,28 +1943,71 @@ async function fetchStaff(){
   setTimeout(wipe, 600);
 })();
 
-/* ---------- Tamaño ajustable de la tabla de Equipo ---------- */
-let staffZoom = 1;
-function applyStaffZoom(){
-  staffZoom = Math.min(1.8, Math.max(0.7, Math.round(staffZoom*100)/100));
-  document.documentElement.style.setProperty('--staffz', staffZoom);
-  const el = document.getElementById('staff-zoom-val');
-  if(el) el.textContent = Math.round(staffZoom*100) + '%';
-  try{ localStorage.setItem('pdx-staff-zoom', staffZoom); }catch(e){}
+/* ---------- Columnas redimensionables (tabla de Equipo) ---------- */
+const STAFF_COLS_KEY = 'pdx-staff-colw';
+function loadStaffCols(){
+  try{ return JSON.parse(localStorage.getItem(STAFF_COLS_KEY)) || {}; }catch(e){ return {}; }
 }
-function setStaffZoom(delta, reset){
-  if(reset) staffZoom = 1; else staffZoom += delta;
-  applyStaffZoom();
+function saveStaffCols(w){
+  try{ localStorage.setItem(STAFF_COLS_KEY, JSON.stringify(w)); }catch(e){}
 }
-(function initStaffZoom(){
-  try{
-    const v = parseFloat(localStorage.getItem('pdx-staff-zoom'));
-    if(!isNaN(v)) staffZoom = v;
-  }catch(e){}
-  applyStaffZoom();
-})();
+function applyStaffCols(){
+  const table = document.getElementById('staff-table');
+  if(!table) return;
+  const w = loadStaffCols();
+  table.querySelectorAll('thead th').forEach((th,i)=>{
+    if(w[i]) th.style.width = w[i]+'px';
+  });
+}
+function resetStaffCols(){
+  try{ localStorage.removeItem(STAFF_COLS_KEY); }catch(e){}
+  const table = document.getElementById('staff-table');
+  if(table) table.querySelectorAll('thead th').forEach(th=> th.style.width='');
+}
+function initStaffColResize(){
+  const table = document.getElementById('staff-table');
+  if(!table) return;
+  const ths = table.querySelectorAll('thead th');
+  ths.forEach((th,i)=>{
+    if(i === ths.length-1) return;              // la última columna (acciones) no se redimensiona
+    if(th.querySelector('.col-grip')) return;   // ya tiene tirador
+    const grip = document.createElement('div');
+    grip.className = 'col-grip';
+    grip.title = 'Arrastra para cambiar el ancho';
+    grip.addEventListener('mousedown', e=>{
+      e.preventDefault(); e.stopPropagation();
+      const startX = e.pageX;
+      const startW = th.offsetWidth;
+      grip.classList.add('dragging');
+      document.body.classList.add('col-resizing');
+      function onMove(ev){
+        const nw = Math.max(52, startW + (ev.pageX - startX));
+        th.style.width = nw + 'px';
+      }
+      function onUp(){
+        grip.classList.remove('dragging');
+        document.body.classList.remove('col-resizing');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        const w = loadStaffCols();
+        w[i] = th.offsetWidth;
+        saveStaffCols(w);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    grip.addEventListener('dblclick', e=>{        // doble clic = ancho automático
+      e.preventDefault(); e.stopPropagation();
+      th.style.width = '';
+      const w = loadStaffCols(); delete w[i]; saveStaffCols(w);
+    });
+    th.appendChild(grip);
+  });
+  applyStaffCols();
+}
 
 async function renderStaffTable(){
+  setTimeout(initStaffColResize, 0);
   const list = await fetchStaff();
   const tbody = document.querySelector('#staff-table tbody');
   const days=['L','M','X','J','V','S','D'];
@@ -2349,7 +2613,7 @@ async function renderRecap(){
     const el = document.getElementById(`rc-btq-${s}`);
     if(el) el.addEventListener('change', () => saveRecap(true));
   });
-  document.getElementById('rc-cerrado-por')?.addEventListener('change', () => saveRecap(true));
+  document.getElementById('recap-cerrado-por')?.addEventListener('change', () => saveRecap(true));
   document.getElementById('rc-observaciones')?.addEventListener('input', debounceRecapSave);
 
   renderRecapCapsules();
@@ -4014,6 +4278,398 @@ async function deleteGroup(id){
   await saveData();
   closeModal();
   if(currentView==='grupos') renderGrupos(); else renderDashboard();
+}
+
+/* ============================================================
+   CHAT DE EQUIPO  (tabla Supabase: chat_mensajes)
+   ============================================================ */
+let chatCache = [];
+let chatTimer = null;
+let chatInit = false;
+
+async function initChat(){
+  if(!chatInit){
+    chatInit = true;
+    const ta = document.getElementById('chat-input');
+    if(ta){
+      ta.addEventListener('keydown', e=>{
+        if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+      });
+      ta.addEventListener('input', ()=>{
+        ta.style.height = 'auto';
+        ta.style.height = Math.min(130, ta.scrollHeight) + 'px';
+      });
+    }
+  }
+  await loadChat(true);
+  clearInterval(chatTimer);
+  chatTimer = setInterval(()=>{
+    const v = document.getElementById('view-chat');
+    if(v && v.classList.contains('active')) loadChat(false);
+  }, 5000);
+}
+
+async function loadChat(scroll){
+  const { data, error } = await sb.from('chat_mensajes')
+    .select('*').order('created_at', {ascending:true}).limit(500);
+  const body = document.getElementById('chat-body');
+  if(!body) return;
+  if(error){
+    body.innerHTML = emptyState('No se pudo cargar el chat',
+      'Falta crear la tabla chat_mensajes en Supabase. Error: ' + error.message);
+    return;
+  }
+  const changed = JSON.stringify((data||[]).map(m=>m.id)) !== JSON.stringify(chatCache.map(m=>m.id));
+  chatCache = data || [];
+  if(!changed && !scroll) return;
+  renderChat();
+  if(scroll || changed) body.scrollTop = body.scrollHeight;
+}
+
+function renderChat(){
+  const body = document.getElementById('chat-body');
+  if(!body) return;
+  if(!chatCache.length){
+    body.innerHTML = emptyState('Todavía no hay mensajes', 'Escribe el primero abajo.');
+    return;
+  }
+  const me = currentProfile?.nombre || '';
+  let html = '', lastDay = '';
+  chatCache.forEach(m=>{
+    const d = new Date(m.created_at);
+    const day = d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+    if(day !== lastDay){ html += `<div class="chat-daysep">${esc(day)}</div>`; lastDay = day; }
+    const mine = m.autor === me;
+    const color = roleColors[m.autor] || 'var(--accent)';
+    const hora = d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    html += `<div class="msg ${mine?'mine':''}">
+      ${mine ? `<button class="m-del" title="Eliminar" onclick="deleteChat(${m.id})">×</button>` : ''}
+      <div class="m-who" style="color:${color}">${esc(m.autor||'?')}</div>
+      <div class="m-txt">${esc(m.texto||'')}</div>
+      <div class="m-time">${hora}</div>
+    </div>`;
+  });
+  body.innerHTML = html;
+}
+
+async function sendChat(){
+  const ta = document.getElementById('chat-input');
+  if(!ta) return;
+  const texto = ta.value.trim();
+  if(!texto) return;
+  ta.value = ''; ta.style.height = 'auto';
+  await sb.from('chat_mensajes').insert({ autor: currentProfile?.nombre || 'Equipo', texto });
+  await loadChat(true);
+}
+
+async function deleteChat(id){
+  if(!confirm('¿Eliminar este mensaje?')) return;
+  await sb.from('chat_mensajes').delete().eq('id', id);
+  await loadChat(false);
+}
+
+/* ============================================================
+   VACACIONES — estilo WhosOff
+   Tablas Supabase: vac_solicitudes, vac_bloqueos, vac_saldos
+   ============================================================ */
+let vacYear = new Date().getFullYear();
+let vacSolicitudes = [], vacBloqueos = [], vacSaldos = [];
+let vacTabInit = false;
+
+const VAC_TIPOS = {
+  vacaciones:   {label:'Vacaciones',   cls:'apro'},
+  recuperacion: {label:'Recuperación', cls:'recu'},
+  asuntos:      {label:'Asuntos propios', cls:'apro'},
+  baja:         {label:'Baja',         cls:'apro'},
+};
+
+async function initVacaciones(){
+  if(!vacTabInit){
+    vacTabInit = true;
+    document.querySelectorAll('[data-vtab]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-vtab]').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.vac-sub').forEach(el=>el.style.display='none');
+        const el = document.getElementById('vac-sub-'+btn.dataset.vtab);
+        if(el) el.style.display='block';
+      });
+    });
+  }
+  await loadVacData();
+  renderVacFiltro();
+  renderVacCalendar();
+  renderVacSolicitudes();
+  renderVacSaldos();
+  renderVacBloqueos();
+  renderVacHoy();
+}
+
+async function loadVacData(){
+  const [r1, r2, r3] = await Promise.all([
+    sb.from('vac_solicitudes').select('*').order('fecha_inicio'),
+    sb.from('vac_bloqueos').select('*').order('fecha'),
+    sb.from('vac_saldos').select('*'),
+  ]);
+  if(r1.error) console.error('vac_solicitudes', r1.error);
+  if(r2.error) console.error('vac_bloqueos', r2.error);
+  if(r3.error) console.error('vac_saldos', r3.error);
+  vacSolicitudes = r1.data || [];
+  vacBloqueos    = r2.data || [];
+  vacSaldos      = r3.data || [];
+}
+
+function vacDateStr(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function vacDaysBetween(a, b){
+  const out = [];
+  const d = new Date(a+'T12:00:00'), end = new Date(b+'T12:00:00');
+  while(d <= end){ out.push(vacDateStr(d)); d.setDate(d.getDate()+1); }
+  return out;
+}
+function vacChangeYear(delta){
+  vacYear += delta;
+  renderVacCalendar();
+  renderVacSaldos();
+}
+function renderVacFiltro(){
+  const sel = document.getElementById('vac-filtro-persona');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">Todo el equipo</option>' +
+    EQUIPO_HUB.map(n=>`<option value="${n}">${n}</option>`).join('');
+  sel.value = cur;
+}
+
+/* Mapa fecha -> info, para pintar el calendario */
+function vacDayMap(){
+  const persona = document.getElementById('vac-filtro-persona')?.value || '';
+  const map = {};
+  vacBloqueos.forEach(b=>{
+    map[b.fecha] = {cls:'bloq', txt:'Bloqueado: '+(b.motivo||'')};
+  });
+  vacSolicitudes.forEach(sol=>{
+    if(sol.estado === 'rechazado') return;
+    if(persona && sol.persona !== persona) return;
+    vacDaysBetween(sol.fecha_inicio, sol.fecha_fin).forEach(f=>{
+      const prev = map[f];
+      if(prev && prev.cls === 'bloq') return;
+      let cls = sol.estado === 'pendiente' ? 'pend'
+              : (sol.tipo === 'recuperacion' ? 'recu' : 'apro');
+      const linea = sol.persona + ' · ' + (VAC_TIPOS[sol.tipo]?.label || sol.tipo) + ' (' + sol.estado + ')';
+      map[f] = {cls, txt: prev && prev.txt ? prev.txt + '\n' + linea : linea};
+    });
+  });
+  return map;
+}
+
+function renderVacCalendar(){
+  const grid = document.getElementById('vac-year-grid');
+  const lbl = document.getElementById('vac-year-label');
+  if(!grid) return;
+  if(lbl) lbl.textContent = vacYear;
+  const map = vacDayMap();
+  const hoy = vacDateStr(new Date());
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const dows = ['L','M','X','J','V','S','D'];
+  let html = '';
+  for(let m=0; m<12; m++){
+    const first = new Date(vacYear, m, 1);
+    const offset = (first.getDay() + 6) % 7;           // lunes = 0
+    const ndays = new Date(vacYear, m+1, 0).getDate();
+    html += `<div class="vac-month"><h4>${meses[m]}</h4><div class="vac-grid">`;
+    html += dows.map(d=>`<div class="vac-dow">${d}</div>`).join('');
+    for(let i=0;i<offset;i++) html += '<div class="vac-day pad"></div>';
+    for(let d=1; d<=ndays; d++){
+      const f = vacYear+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const dow = new Date(vacYear, m, d).getDay();
+      const cls = [ 'vac-day' ];
+      if(dow===0 || dow===6) cls.push('wknd');
+      if(map[f]) cls.push(map[f].cls);
+      if(f===hoy) cls.push('today');
+      const tip = map[f] ? map[f].txt.replace(/"/g,'&quot;') : f;
+      html += `<div class="${cls.join(' ')}" title="${tip}" onclick="openVacRequest('${f}')">${d}</div>`;
+    }
+    html += '</div></div>';
+  }
+  grid.innerHTML = html;
+}
+
+function renderVacHoy(){
+  const el = document.getElementById('vac-hoy');
+  if(!el) return;
+  const hoy = vacDateStr(new Date());
+  const fuera = vacSolicitudes.filter(s=> s.estado==='aprobado' &&
+      s.fecha_inicio <= hoy && s.fecha_fin >= hoy);
+  if(!fuera.length){ el.innerHTML = emptyState('Nadie está fuera hoy','Todo el equipo disponible.'); return; }
+  el.innerHTML = fuera.map(s=>`<div class="vac-req">
+      <div class="avatar" style="width:32px;height:32px;font-size:13px;background:${roleColors[s.persona]||'var(--accent)'};display:flex;align-items:center;justify-content:center;border-radius:50%;color:#0B0E14;font-weight:800;">${esc(s.persona[0])}</div>
+      <div class="vr-main"><div class="vr-who">${esc(s.persona)}</div>
+      <div class="vr-meta">${VAC_TIPOS[s.tipo]?.label||s.tipo} · hasta ${esc(s.fecha_fin)}</div></div>
+    </div>`).join('');
+}
+
+function openVacRequest(fecha){
+  const hoy = fecha || vacDateStr(new Date());
+  const yo = currentProfile?.nombre || '';
+  const opts = EQUIPO_HUB.map(n=>`<option value="${n}" ${n===yo?'selected':''}>${n}</option>`).join('');
+  const tipos = Object.entries(VAC_TIPOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <div class="modal-head"><h2>Solicitar días</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Persona</label><select id="vq-persona">${opts}</select></div>
+          <div class="field-row">
+            <div class="field"><label>Desde</label><input type="date" id="vq-desde" value="${hoy}"></div>
+            <div class="field"><label>Hasta</label><input type="date" id="vq-hasta" value="${hoy}"></div>
+          </div>
+          <div class="field"><label>Tipo</label><select id="vq-tipo">${tipos}</select></div>
+          <div class="field"><label>Motivo / notas</label><input type="text" id="vq-motivo" placeholder="Opcional"></div>
+          <div id="vq-aviso" style="font-size:12.5px;color:var(--warn);min-height:18px;"></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="submitVacRequest()">Enviar solicitud</button>
+        </div>
+      </div>
+    </div>`;
+  ['vq-desde','vq-hasta'].forEach(id=>{
+    document.getElementById(id).addEventListener('change', checkVacAviso);
+  });
+  checkVacAviso();
+}
+
+function checkVacAviso(){
+  const a = document.getElementById('vq-desde')?.value;
+  const b = document.getElementById('vq-hasta')?.value;
+  const av = document.getElementById('vq-aviso');
+  if(!a || !b || !av) return;
+  if(b < a){ av.textContent = 'La fecha final es anterior a la inicial.'; return; }
+  const dias = vacDaysBetween(a,b);
+  const bloqueados = dias.filter(f=> vacBloqueos.some(x=>x.fecha===f));
+  const n = dias.length;
+  av.textContent = bloqueados.length
+    ? `${n} día(s). Atención: ${bloqueados.length} está(n) bloqueado(s) (${bloqueados.join(', ')}).`
+    : `${n} día(s) solicitados.`;
+}
+
+async function submitVacRequest(){
+  const persona = document.getElementById('vq-persona').value;
+  const fi = document.getElementById('vq-desde').value;
+  const ff = document.getElementById('vq-hasta').value;
+  const tipo = document.getElementById('vq-tipo').value;
+  const motivo = document.getElementById('vq-motivo').value;
+  if(!fi || !ff || ff < fi){ alert('Revisa las fechas.'); return; }
+  const dias = vacDaysBetween(fi, ff).length;
+  await sb.from('vac_solicitudes').insert({
+    persona, tipo, fecha_inicio: fi, fecha_fin: ff, dias,
+    estado: 'pendiente', motivo, solicitado_por: currentProfile?.nombre || ''
+  });
+  closeModal();
+  await initVacaciones();
+}
+
+function vacReqRow(s, acciones){
+  const color = roleColors[s.persona] || 'var(--accent)';
+  const badge = s.estado==='aprobado' ? 'w-hot' : (s.estado==='rechazado' ? 'w-cool' : 'w-warm');
+  return `<div class="vac-req">
+    <div class="avatar" style="width:32px;height:32px;font-size:13px;background:${color};display:flex;align-items:center;justify-content:center;border-radius:50%;color:#0B0E14;font-weight:800;">${esc(s.persona[0])}</div>
+    <div class="vr-main">
+      <div class="vr-who">${esc(s.persona)} <span class="wait-badge ${badge}" style="margin-left:6px;">${esc(s.estado)}</span></div>
+      <div class="vr-meta">${VAC_TIPOS[s.tipo]?.label||s.tipo} · ${esc(s.fecha_inicio)} → ${esc(s.fecha_fin)} · ${s.dias} día(s)${s.motivo?' · '+esc(s.motivo):''}</div>
+    </div>
+    ${acciones||''}
+  </div>`;
+}
+
+function renderVacSolicitudes(){
+  const pend = document.getElementById('vac-pendientes');
+  const hist = document.getElementById('vac-historial');
+  if(!pend || !hist) return;
+  const p = vacSolicitudes.filter(s=>s.estado==='pendiente');
+  pend.innerHTML = p.length ? p.map(s=> vacReqRow(s, `
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary btn-sm" onclick="setVacEstado(${s.id},'aprobado')">Aprobar</button>
+        <button class="btn btn-danger btn-ghost btn-sm" onclick="setVacEstado(${s.id},'rechazado')">Rechazar</button>
+      </div>`)).join('')
+    : emptyState('No hay solicitudes pendientes','Todo al día.');
+  const h = vacSolicitudes.filter(s=>s.estado!=='pendiente').slice().reverse();
+  hist.innerHTML = h.length ? h.map(s=> vacReqRow(s, `
+      <button class="btn btn-danger btn-ghost btn-sm" onclick="deleteVacSolicitud(${s.id})">Eliminar</button>`)).join('')
+    : emptyState('Sin historial','Aún no se ha aprobado ni rechazado nada.');
+}
+
+async function setVacEstado(id, estado){
+  await sb.from('vac_solicitudes').update({
+    estado, aprobado_por: currentProfile?.nombre || ''
+  }).eq('id', id);
+  await initVacaciones();
+}
+async function deleteVacSolicitud(id){
+  if(!confirm('¿Eliminar esta solicitud?')) return;
+  await sb.from('vac_solicitudes').delete().eq('id', id);
+  await initVacaciones();
+}
+
+function renderVacSaldos(){
+  const tbody = document.querySelector('#vac-saldos-table tbody');
+  if(!tbody) return;
+  tbody.innerHTML = EQUIPO_HUB.map(n=>{
+    const saldo = vacSaldos.find(x=>x.persona===n && x.anio===vacYear) || {};
+    const total = saldo.dias_totales ?? 23;
+    const recu  = saldo.dias_recuperacion ?? 0;
+    const mias = vacSolicitudes.filter(s=> s.persona===n && s.tipo!=='recuperacion'
+                  && (s.fecha_inicio||'').startsWith(String(vacYear)));
+    const usados = mias.filter(s=>s.estado==='aprobado').reduce((a,s)=>a+(s.dias||0),0);
+    const pend   = mias.filter(s=>s.estado==='pendiente').reduce((a,s)=>a+(s.dias||0),0);
+    return `<tr>
+      <td style="font-weight:700;color:${roleColors[n]||'var(--text)'}">${n}</td>
+      <td><input type="number" value="${total}" style="width:70px;" onchange="saveVacSaldo('${n}','dias_totales',this.value)"></td>
+      <td>${usados}</td><td>${pend}</td>
+      <td style="font-weight:800;">${total - usados - pend}</td>
+      <td><input type="number" value="${recu}" style="width:70px;" onchange="saveVacSaldo('${n}','dias_recuperacion',this.value)"></td>
+    </tr>`;
+  }).join('');
+}
+
+async function saveVacSaldo(persona, campo, valor){
+  const row = { persona, anio: vacYear };
+  row[campo] = parseFloat(valor) || 0;
+  const prev = vacSaldos.find(x=>x.persona===persona && x.anio===vacYear) || {};
+  row.dias_totales       = campo==='dias_totales'       ? row[campo] : (prev.dias_totales ?? 23);
+  row.dias_recuperacion  = campo==='dias_recuperacion'  ? row[campo] : (prev.dias_recuperacion ?? 0);
+  await sb.from('vac_saldos').upsert(row, {onConflict:'persona,anio'});
+  await loadVacData();
+  renderVacSaldos();
+}
+
+function renderVacBloqueos(){
+  const el = document.getElementById('vac-bloqueos-list');
+  if(!el) return;
+  if(!vacBloqueos.length){ el.innerHTML = emptyState('Sin días bloqueados','Añade fechas arriba para impedir vacaciones.'); return; }
+  el.innerHTML = vacBloqueos.map(b=>`<div class="vac-req">
+      <div class="vr-main"><div class="vr-who">${esc(b.fecha)}</div>
+      <div class="vr-meta">${esc(b.motivo||'Sin motivo')}</div></div>
+      <button class="btn btn-danger btn-ghost btn-sm" onclick="deleteVacBloqueo(${b.id})">Quitar</button>
+    </div>`).join('');
+}
+
+async function addVacBloqueo(){
+  const a = document.getElementById('vac-bloq-desde').value;
+  const b = document.getElementById('vac-bloq-hasta').value || a;
+  const motivo = document.getElementById('vac-bloq-motivo').value;
+  if(!a){ alert('Indica al menos la fecha de inicio.'); return; }
+  const filas = vacDaysBetween(a, b).map(f=>({ fecha:f, motivo, creado_por: currentProfile?.nombre || '' }));
+  await sb.from('vac_bloqueos').upsert(filas, {onConflict:'fecha'});
+  document.getElementById('vac-bloq-motivo').value = '';
+  await initVacaciones();
+}
+async function deleteVacBloqueo(id){
+  await sb.from('vac_bloqueos').delete().eq('id', id);
+  await initVacaciones();
 }
 
 init();
