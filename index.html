@@ -123,6 +123,67 @@
   .col-grip::after{content:'';width:2px;height:60%;background:var(--line-strong);border-radius:2px;transition:background .12s;}
   .col-grip:hover::after,.col-grip.dragging::after{background:var(--accent);width:3px;height:100%;}
   body.col-resizing{cursor:col-resize!important;user-select:none;}
+  /* ============================================================
+     REDISEÑO — jerarquía, contraste, densidad y color por estado
+     ============================================================ */
+
+  /* --- Contraste de textos secundarios (antes demasiado apagados) --- */
+  :root{
+    --text-soft:#B4BACA;
+    --text-dim:#8D94A8;
+    --ok:#3FBF7F;      --ok-bg:#17301F;   --ok-br:#2E6B48;
+    --wait:#E0A32E;    --wait-bg:#2E2614; --wait-br:#6B5520;
+    --bad:#E5484D;     --bad-bg:#301618;  --bad-br:#6B2A2E;
+    --off:#7A8093;     --off-bg:#22262F;  --off-br:#3A404E;
+  }
+
+  /* --- Grupos del menú con franja de color --- */
+  .navgroup{position:relative;padding-left:11px;margin-bottom:16px;}
+  .navgroup::before{content:'';position:absolute;left:0;top:24px;bottom:4px;width:3px;border-radius:3px;opacity:.85;}
+  .navgroup.ng-dia::before{background:#5B8CFF;}
+  .navgroup.ng-eq::before{background:#33C98B;}
+  .navgroup.ng-com::before{background:#B084F5;}
+  .navgroup.ng-dat::before{background:#6E7688;}
+  .navlabel{font-size:10px;font-weight:800;letter-spacing:1.3px;text-transform:uppercase;
+    color:var(--text-dim);padding:0 0 7px 4px;}
+  .navitem{padding:9px 11px;border-radius:8px;font-size:13.5px;}
+
+  /* --- Cabeceras de página: más aire y centradas --- */
+  .page-head{margin-bottom:26px;}
+  .page-head h1{font-size:25px;letter-spacing:-.3px;margin-bottom:5px;}
+  .page-head > div:first-child{text-align:center;flex:1;}
+  .page-head p{font-size:13px;color:var(--text-soft);}
+  .section-title{font-size:14px;letter-spacing:.2px;margin-bottom:14px;}
+  .card{padding:20px;margin-bottom:18px;}
+
+  /* --- Tablas: más aire y todo centrado --- */
+  table{font-size:13.5px;}
+  th{padding:12px 12px;font-size:10.5px;letter-spacing:.7px;text-align:center;vertical-align:middle;
+    color:var(--text-soft);}
+  td{padding:11px 10px;text-align:center;vertical-align:middle;}
+  td textarea,td .cell-input.txt{text-align:left;}
+  tbody tr{transition:background .1s;}
+
+  /* --- Color por ESTADO, igual en todo el HUB --- */
+  .st{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;
+    font-size:11px;font-weight:800;letter-spacing:.2px;white-space:nowrap;}
+  .st-ok  {background:var(--ok-bg);  color:var(--ok);  border:1px solid var(--ok-br);}
+  .st-wait{background:var(--wait-bg);color:var(--wait);border:1px solid var(--wait-br);}
+  .st-bad {background:var(--bad-bg); color:var(--bad); border:1px solid var(--bad-br);}
+  .st-off {background:var(--off-bg); color:var(--off); border:1px solid var(--off-br);}
+
+  /* --- Botón de acción: un solo azul por pantalla --- */
+  .btn-primary{font-weight:800;}
+  .btn-ghost{color:var(--text-soft);}
+  .btn-ghost:hover{color:#fff;}
+
+  /* --- Añadir / quitar filas --- */
+  .row-tools{display:flex;justify-content:center;gap:4px;}
+  .row-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:15px;
+    line-height:1;padding:3px 6px;border-radius:6px;}
+  .row-del:hover{color:var(--bad);background:var(--bad-bg);}
+  .add-row-bar{display:flex;justify-content:center;margin-top:12px;}
+
   /* ---- Tabla de Equipo: cabeceras y anchos ---- */
   #staff-table th{text-align:center;vertical-align:middle;}
   #staff-table td{text-align:center;}
@@ -274,12 +335,17 @@
 
 
   .pill{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid transparent;}
-  .pill.violet{background:var(--accent-soft);color:var(--accent-dark);border-color:#2C3F66;}
-  .pill.green{background:var(--success-soft);color:var(--success);border-color:#1E5039;}
-  .pill.amber{background:var(--warning-soft);color:var(--warning);border-color:#5A4419;}
-  .pill.red{background:var(--danger-soft);color:var(--danger);border-color:#5A2530;}
-  .pill.grey{background:var(--panel);color:var(--text-soft);border-color:var(--line);}
-  .pill.pink{background:var(--panel);color:#C7CBD6;border-color:var(--line-strong);}
+  .pill.green{background:var(--ok-bg);  color:var(--ok);  border-color:var(--ok-br);}
+  .pill.amber{background:var(--wait-bg);color:var(--wait);border-color:var(--wait-br);}
+  .pill.red  {background:var(--bad-bg); color:var(--bad); border-color:var(--bad-br);}
+  .pill.grey {background:var(--off-bg); color:var(--off); border-color:var(--off-br);}
+  /* violeta y rosa = categorías, NO estados: tono neutro para no competir con el azul de acción */
+  .pill.violet{background:#242A36;color:#C3CAD9;border-color:#39414F;}
+  .pill.pink  {background:#242A36;color:#C3CAD9;border-color:#39414F;}
+  /* wait-badge alineado con la misma escala */
+  .wait-badge.w-hot {background:var(--bad-bg); color:var(--bad);}
+  .wait-badge.w-warm{background:var(--wait-bg);color:var(--wait);}
+  .wait-badge.w-cool{background:var(--off-bg); color:var(--off);}
 
   .badge-training{display:inline-block;font-size:10.5px;font-weight:700;background:var(--panel);color:var(--text-soft);padding:3px 8px;border-radius:6px;margin:1px 2px 1px 0;border:1px solid var(--line-strong);cursor:pointer;user-select:none;}
   .badge-training:hover{border-color:var(--accent);}
@@ -521,86 +587,80 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
     </div>
 
     <nav id="nav">
-      <div class="navgroup">
-        <button class="navitem active" data-view="dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-          Resumen
+        <div class="navgroup ng-dia">
+          <div class="navlabel">Día a día</div>
+          <button class="navitem active" data-view="recap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>
+          Recap
         </button>
-      </div>
-
-      <div class="navgroup">
-        <div class="navlabel">Datos</div>
-        <button class="navitem" data-view="spv">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
-          SPV
-        </button>
-        <button class="navitem" data-view="resenas">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 1-5.2 5 1.3 7L12 18l-6.1 3.5 1.3-7L2 9.5l7-1z"/></svg>
-          Reseñas
-        </button>
-      </div>
-
-      <div class="navgroup">
-        <div class="navlabel">Equipo</div>
-        <button class="navitem" data-view="staff">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c1-4 3.5-5.6 6.5-5.6s5.5 1.6 6.5 5.6"/><circle cx="18" cy="8.5" r="2.4"/><path d="M17 14.6c2.4.4 3.9 2 4.6 5.4"/></svg>
-          Staff
-        </button>
-        <button class="navitem" data-view="ev">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 6.6L21 9l-5 4.4L17.4 21 12 17.3 6.6 21 8 13.4 3 9l6.6-.4z"/></svg>
-          Evaluaciones
-        </button>
-        <button class="navitem" data-view="entrevistas">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-          Entrevistas
-        </button>
-        <button class="navitem" data-view="turnos">
+          <button class="navitem" data-view="turnos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
           Cambios de turno
         </button>
-      </div>
-
-      <div class="navgroup">
-        <div class="navlabel">Managers</div>
-        <button class="navitem" data-view="pda">
+          <button class="navitem" data-view="chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-4-.9L3 21l1.9-4.9A8.4 8.4 0 0112 3a8.4 8.4 0 019 8.5z"/></svg>
+          Chat
+        </button>
+          <button class="navitem" data-view="pda">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
           PDA
           <span class="dot" id="pda-dot"></span>
         </button>
-        <button class="navitem" data-view="grupos">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 20c.7-3.6 3-5.4 5.5-5.4s4.8 1.8 5.5 5.4"/><path d="M14 15c2.3.2 4 1.8 4.6 5"/></svg>
-          Grupos
+        </div>
+        <div class="navgroup ng-eq">
+          <div class="navlabel">Equipo</div>
+          <button class="navitem" data-view="staff">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c1-4 3.5-5.6 6.5-5.6s5.5 1.6 6.5 5.6"/><circle cx="18" cy="8.5" r="2.4"/><path d="M17 14.6c2.4.4 3.9 2 4.6 5.4"/></svg>
+          Staff
         </button>
-        <button class="navitem" data-view="chat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-4-.9L3 21l1.9-4.9A8.4 8.4 0 0112 3a8.4 8.4 0 019 8.5z"/></svg>
-          Chat
-        </button>
-        <button class="navitem" data-view="vacaciones">
+          <button class="navitem" data-view="vacaciones">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19a4.5 4.5 0 10-9 0"/><path d="M13 13V5a2 2 0 10-4 0v2"/><path d="M9 7l6 2.5"/></svg>
           Vacaciones
         </button>
-        <button class="navitem" data-view="recap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>
-          Recap
+          <button class="navitem" data-view="ev">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 6.6L21 9l-5 4.4L17.4 21 12 17.3 6.6 21 8 13.4 3 9l6.6-.4z"/></svg>
+          Evaluaciones
         </button>
-        <button class="navitem" data-view="loomis">
+          <button class="navitem" data-view="entrevistas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Entrevistas
+        </button>
+        </div>
+        <div class="navgroup ng-com">
+          <div class="navlabel">Comercial</div>
+          <button class="navitem" data-view="grupos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 20c.7-3.6 3-5.4 5.5-5.4s4.8 1.8 5.5 5.4"/><path d="M14 15c2.3.2 4 1.8 4.6 5"/></svg>
+          Grupos
+        </button>
+          <button class="navitem" data-view="resenas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 1-5.2 5 1.3 7L12 18l-6.1 3.5 1.3-7L2 9.5l7-1z"/></svg>
+          Reseñas
+        </button>
+        </div>
+        <div class="navgroup ng-dat">
+          <div class="navlabel">Datos y operativa</div>
+          <button class="navitem" data-view="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Resumen
+        </button>
+          <button class="navitem" data-view="spv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+          SPV
+        </button>
+          <button class="navitem" data-view="loomis">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1.5"/><path d="M10 15h8"/></svg>
           Loomis
         </button>
-      </div>
-
-      <div class="navgroup">
-        <div class="navlabel">Mantenimiento</div>
-        <button class="navitem" data-view="diego">
+          <button class="navitem" data-view="diego">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 015 5L11 20l-5.5 1.5L7 16 15.3 7.7"/><path d="M9 11l4 4"/></svg>
           Tareas Diego
         </button>
-        <button class="navitem" data-view="clmant">
+          <button class="navitem" data-view="clmant">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 18 2 18 6 6 6Z"/><path d="M6 6v14a2 2 0 002 2h8a2 2 0 002-2V6"/><path d="M10 11h4"/></svg>
           CL Mantenimiento
         </button>
-      </div>
-    </nav>
+        </div>
+      </nav>
 
     <div class="sidebar-foot">
       <div class="user-chip">
@@ -628,7 +688,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
     <div class="content">
 
       <!-- ============ DASHBOARD ============ -->
-      <div class="view active" id="view-dashboard">
+      <div class="view" id="view-dashboard">
         <div class="page-head"><div><h1>Buenos días 👋</h1><p>Esto es lo que está pasando hoy en el museo.</p></div></div>
 
         <div class="grid grid-4" style="margin-bottom:14px;grid-template-columns:repeat(5,1fr);">
@@ -831,7 +891,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
       </div>
 
       <!-- ============ RECAP ============ -->
-      <div class="view" id="view-recap">
+      <div class="view active" id="view-recap">
         <div style="display:flex;gap:20px;align-items:flex-start;">
         <div style="max-width:1500px;flex:1;min-width:0;">
         <div class="page-head">
@@ -1303,7 +1363,7 @@ function updateUserChip(){
   document.getElementById('uc-name').textContent = currentProfile.nombre;
   document.getElementById('uc-rol').textContent = currentProfile.rol === 'director' ? 'Directora' : 'Manager';
 }
-const roleColors = {Laia:'#FF4FA0', Ignacio:'#5B8CFF', Paula:'#33C98B', Ceci:'#F0AC3F', Mireia:'#B084F5'};
+const roleColors = {Laia:'#33C98B', Ignacio:'#F2913D', Paula:'#FF4FA0', Ceci:'#4D8DF6', Mireia:'#F2D64B'};
 const EQUIPO_HUB = ['Laia','Ignacio','Paula','Ceci','Mireia'];
 
 /* Try to resume an existing session on load (in case persistSession is later enabled) */
@@ -2413,6 +2473,11 @@ function toggleEvForm(){
     });
   }
 }
+async function deleteEvaluacion(id){
+  if(!confirm('¿Eliminar esta evaluación? No se puede deshacer.')) return;
+  await sb.from('evaluaciones').delete().eq('id', id);
+  renderEvTimelineBody();
+}
 async function saveNewEvaluation(){
   const staff = document.getElementById('ev-staff-select').value;
   if(!staff) return;
@@ -2441,16 +2506,19 @@ async function renderEvTimelineBody(){
     <div class="card" style="margin-bottom:12px;">
       <div class="flex-between" style="margin-bottom:10px;">
         <div style="font-weight:800;font-family:var(--font);font-size:15px;">${staff} ${i===0?'<span class="pill green">Más reciente</span>':''}</div>
-        <span class="pill grey">${e.fecha}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="pill grey">${e.fecha}</span>
+          <button class="row-del" title="Eliminar evaluación" onclick="deleteEvaluacion(${e.id})">✕</button>
+        </div>
       </div>
       ${e.seguimiento? `<div class="note-banner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><div><b>Seguimiento:</b> ${e.seguimiento}</div></div>` : ''}
       <div class="table-wrap">
         <table>
-          <tr><th style="width:16%;">Positivo</th><td>${e.positivo||'—'}</td></tr>
-          <tr><th>A mejorar</th><td>${e.a_mejorar||'—'}</td></tr>
-          <tr><th>Le gusta / se le da bien</th><td>${e.le_gusta||'—'}</td></tr>
-          <tr><th>No le gusta / no se le da bien</th><td>${e.no_le_gusta||'—'}</td></tr>
-          <tr><th>Sugerencias</th><td>${e.sugerencias||'—'}</td></tr>
+          <tr><th style="width:22%;text-align:left;">Positivo</th><td style="text-align:left;">${e.positivo||'—'}</td></tr>
+          <tr><th style="text-align:left;">A mejorar</th><td style="text-align:left;">${e.a_mejorar||'—'}</td></tr>
+          <tr><th style="text-align:left;">Le gusta / se le da bien</th><td style="text-align:left;">${e.le_gusta||'—'}</td></tr>
+          <tr><th style="text-align:left;">No le gusta / no se le da bien</th><td style="text-align:left;">${e.no_le_gusta||'—'}</td></tr>
+          <tr><th style="text-align:left;">Sugerencias</th><td style="text-align:left;">${e.sugerencias||'—'}</td></tr>
         </table>
       </div>
     </div>`).join('') : '<div class="empty-state">Todavía no hay evaluaciones para esta persona. Usa "+ Nueva evaluación" para añadir la primera.</div>';
@@ -2559,6 +2627,7 @@ async function renderTurnos(){
       <td style="display:flex;gap:6px;">
         <button class="btn btn-ghost btn-sm" onclick="resolveTurno(${t.id},'Aprobado')">Aprobar</button>
         <button class="btn btn-ghost btn-sm" onclick="resolveTurno(${t.id},'Rechazado')">Rechazar</button>
+        <button class="row-del" title="Eliminar" onclick="deleteTurno(${t.id})">✕</button>
       </td>
     </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-soft);">Sin solicitudes activas.</td></tr>';
 
@@ -2566,7 +2635,8 @@ async function renderTurnos(){
     <tr>
       <td>${personCell(t.p1_staff,t.p1_hora,t.p1_fecha)}</td><td>${personCell(t.p2_staff,t.p2_hora,t.p2_fecha)}</td><td style="color:var(--text-soft);">${t.motivo||'—'}</td>
       <td><span class="pill ${t.estado==='Aprobado'?'green':'red'}">${t.estado}</span></td>
-    </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Todavía no hay histórico.</td></tr>';
+      <td><button class="row-del" title="Eliminar" onclick="deleteTurno(${t.id})">✕</button></td>
+    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-soft);">Todavía no hay histórico.</td></tr>';
 
   renderTurnosPorMes(list, fmtDate);
 }
@@ -2601,6 +2671,11 @@ async function addTurnoRequest(){
     motivo, estado:'Pendiente'
   });
   document.getElementById('turno-motivo').value='';
+  renderTurnos();
+}
+async function deleteTurno(id){
+  if(!confirm('¿Eliminar esta solicitud de cambio de turno?')) return;
+  await sb.from('turnos').delete().eq('id', id);
   renderTurnos();
 }
 async function resolveTurno(id, estado){
@@ -3233,7 +3308,7 @@ const SPECIAL_TAG_CLASS = { 'No interesado':'tag-neg', 'Avisar el año que viene
 
 let state = { groups: [], categories: DEFAULT_CATEGORIES.slice(), importDone: false, autoRules: [], campaigns: [] };
 let userName = null;
-let currentView = 'dashboard';
+let currentView = 'recap';
 let filters = { tipo:'all', estado:'all', etiqueta:'all', q:'' };
 let calendarWeekOffset = 0;
 let calendarMonthOffset = 0;
@@ -4784,11 +4859,11 @@ async function submitVacRequest(){
 
 function vacReqRow(s, acciones){
   const color = roleColors[s.persona] || 'var(--accent)';
-  const badge = s.estado==='aprobado' ? 'w-hot' : (s.estado==='rechazado' ? 'w-cool' : 'w-warm');
+  const badge = s.estado==='aprobado' ? 'st-ok' : (s.estado==='rechazado' ? 'st-bad' : 'st-wait');
   return `<div class="vac-req">
     <div class="avatar" style="width:32px;height:32px;font-size:13px;background:${color};display:flex;align-items:center;justify-content:center;border-radius:50%;color:#0B0E14;font-weight:800;">${esc(s.persona[0])}</div>
     <div class="vr-main">
-      <div class="vr-who">${esc(s.persona)} <span class="wait-badge ${badge}" style="margin-left:6px;">${esc(s.estado)}</span></div>
+      <div class="vr-who">${esc(s.persona)} <span class="st ${badge}" style="margin-left:6px;">${esc(s.estado)}</span></div>
       <div class="vr-meta">${VAC_TIPOS[s.tipo]?.label||s.tipo} · ${esc(s.fecha_inicio)} → ${esc(s.fecha_fin)} · ${s.dias} día(s)${s.motivo?' · '+esc(s.motivo):''}</div>
     </div>
     ${acciones||''}
