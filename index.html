@@ -123,6 +123,23 @@
   .col-grip::after{content:'';width:2px;height:60%;background:var(--line-strong);border-radius:2px;transition:background .12s;}
   .col-grip:hover::after,.col-grip.dragging::after{background:var(--accent);width:3px;height:100%;}
   body.col-resizing{cursor:col-resize!important;user-select:none;}
+  /* ---- Buscador por nombre (todas las tablas) ---- */
+  .tbl-filter{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .tbl-filter input{flex:1;max-width:290px;padding:7px 11px 7px 32px;border-radius:8px;
+    background:var(--surface);border:1px solid var(--line-strong);color:var(--text);font-size:12.5px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A8093' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:9px center;background-size:14px;}
+  .tbl-filter input:focus{outline:none;border-color:var(--accent);}
+  .tbl-filter .tf-count{font-size:11.5px;color:var(--text-dim);white-space:nowrap;}
+  tr.tf-hidden{display:none;}
+  /* ---- Staff inactivo ---- */
+  tr.staff-off td{opacity:.5;}
+  tr.staff-off td:first-child{opacity:1;}
+  .staff-estado{display:flex;align-items:center;gap:6px;font-size:11.5px;cursor:pointer;user-select:none;}
+  .staff-estado .sw{width:30px;height:17px;border-radius:20px;background:#3A3F4C;position:relative;transition:background .15s;flex-shrink:0;}
+  .staff-estado .sw::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#8A90A0;transition:.15s;}
+  .staff-estado.on .sw{background:#245C40;}
+  .staff-estado.on .sw::after{left:15px;background:#4FE0A0;}
   /* ---- Aviso de guardado ---- */
   .save-toast{position:fixed;right:20px;bottom:20px;z-index:9999;padding:11px 16px;border-radius:10px;
     font-size:13px;font-weight:700;max-width:420px;opacity:0;transform:translateY(10px);
@@ -658,12 +675,17 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
             <div class="flex-between" style="margin-bottom:12px;">
               <div class="section-title" style="margin:0;">Equipo <span class="hint">Arrastra el borde entre columnas para ajustar el ancho</span></div>
               <div style="display:flex;align-items:center;gap:10px;">
+                <select id="staff-filtro-estado" style="width:150px;" onchange="renderStaffTable()">
+                  <option value="activos">Solo activos</option>
+                  <option value="inactivos">Solo no activos</option>
+                  <option value="todos">Todos</option>
+                </select>
                 <button class="btn btn-ghost btn-sm" onclick="resetStaffCols()">Restablecer anchos</button>
                 <button class="btn btn-primary btn-sm" onclick="addNewStaff()">+ Añadir staff</button>
               </div>
             </div>
             <div class="table-wrap"><table id="staff-table" class="resizable"><thead>
-              <tr><th>Nombre</th><th>Horas</th><th>Disp. (L–D)</th><th>Formación</th><th>Usuario FEVER</th><th>Contraseña FEVER</th><th>Usuario SumUp</th><th>Contraseña SumUp</th><th></th></tr>
+              <tr><th>Nombre</th><th>Estado</th><th>Horas</th><th>Disp. (L–D)</th><th>Formación</th><th>Usuario FEVER</th><th>Contraseña FEVER</th><th>Usuario SumUp</th><th>Contraseña SumUp</th><th></th></tr>
             </thead><tbody></tbody></table></div>
           </div>
 
@@ -1098,6 +1120,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
     <div class="mfield"><label class="field-label">Teléfono</label><input id="sm-telefono"></div>
     <div class="mfield"><label class="field-label">DNI</label><input id="sm-dni"></div>
     <div class="mfield"><label class="field-label">Email</label><input id="sm-email"></div>
+              <div class="mfield"><label class="field-label">Cumpleaños</label><input id="sm-cumple" placeholder="Ej: 18 enero"></div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeStaffModal()">Cancelar</button>
       <button class="btn btn-primary" onclick="saveStaffModal()">Guardar</button>
@@ -1280,6 +1303,7 @@ function initNav(){
       if(v==='diego') renderDiego();
       if(v==='dashboard') refreshDashboard();
       if(v==='recap') renderRecap();
+      setTimeout(installTableFilters, 60);
       if(v==='grupos') initPdxspotEmbed();
       if(v==='chat') initChat();
       if(v==='vacaciones') initVacaciones();
@@ -1943,6 +1967,70 @@ async function fetchStaff(){
   setTimeout(wipe, 600);
 })();
 
+/* ============================================================
+   BUSCADOR POR NOMBRE — se añade solo encima de CADA tabla
+   del HUB, en todas las pestañas. Filtra las filas por el texto
+   que escribas (nombre, email, teléfono... cualquier celda).
+   ============================================================ */
+function tfNorm(str){
+  return (str||'').toString().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+function tfRowText(tr){
+  let t = tr.textContent || '';
+  tr.querySelectorAll('input,select,textarea').forEach(el=>{
+    if(el.type === 'password') return;              // no buscar por contraseñas
+    if(el.tagName === 'SELECT'){
+      t += ' ' + (el.options[el.selectedIndex]?.text || '');
+    } else {
+      t += ' ' + (el.value || '');
+    }
+  });
+  return tfNorm(t);
+}
+function applyTableFilter(table, query){
+  const q = tfNorm(query).trim();
+  const rows = table.querySelectorAll('tbody tr');
+  let visibles = 0;
+  rows.forEach(tr=>{
+    const ok = !q || tfRowText(tr).includes(q);
+    tr.classList.toggle('tf-hidden', !ok);
+    if(ok) visibles++;
+  });
+  const box = table._tfBox;
+  if(box){
+    const c = box.querySelector('.tf-count');
+    if(c) c.textContent = q ? `${visibles} de ${rows.length}` : `${rows.length} filas`;
+  }
+}
+function installTableFilters(){
+  document.querySelectorAll('.view table').forEach(table=>{
+    if(table._tfDone) return;
+    if(!table.querySelector('tbody')) return;
+    const wrap = table.closest('.table-wrap');
+    if(!wrap || !wrap.parentNode) return;
+    table._tfDone = true;
+
+    const box = document.createElement('div');
+    box.className = 'tbl-filter';
+    box.innerHTML = `<input type="text" placeholder="Buscar por nombre…" autocomplete="off">
+                     <span class="tf-count"></span>`;
+    wrap.parentNode.insertBefore(box, wrap);
+    table._tfBox = box;
+
+    const input = box.querySelector('input');
+    input.addEventListener('input', ()=> applyTableFilter(table, input.value));
+
+    // Al repintarse la tabla, se vuelve a aplicar el filtro que hubiera escrito
+    const obs = new MutationObserver(()=>{
+      if(input.value) applyTableFilter(table, input.value);
+      else applyTableFilter(table, '');
+    });
+    obs.observe(table.querySelector('tbody'), {childList:true});
+    applyTableFilter(table, '');
+  });
+}
+
 /* ---------- Columnas redimensionables (tabla de Equipo) ---------- */
 const STAFF_COLS_KEY = 'pdx-staff-colw';
 function loadStaffCols(){
@@ -2008,15 +2096,24 @@ function initStaffColResize(){
 
 async function renderStaffTable(){
   setTimeout(initStaffColResize, 0);
-  const list = await fetchStaff();
+  setTimeout(installTableFilters, 60);
+  const all = await fetchStaff();
+  const modo = document.getElementById('staff-filtro-estado')?.value || 'activos';
+  const list = all.filter(s=>{
+    const act = s.activo !== false;
+    return modo==='todos' ? true : (modo==='activos' ? act : !act);
+  });
   const tbody = document.querySelector('#staff-table tbody');
   const days=['L','M','X','J','V','S','D'];
   tbody.innerHTML = list.length ? list.map(s=>{
     const avail = s.disponibilidad || {};
     const train = s.formacion || [];
+    const act = s.activo !== false;
     return `
-    <tr>
-      <td><button class="btn btn-ghost btn-sm" onclick="openStaffModal(${s.id})" style="font-weight:800;">${s.nombre}</button></td>
+    <tr class="${act?'':'staff-off'}">
+      <td><button class="btn btn-ghost btn-sm" onclick="openStaffModal(${s.id})" style="font-weight:800;">${s.nombre} ${s.apellido||''}</button></td>
+      <td><div class="staff-estado ${act?'on':''}" onclick="toggleStaffActivo(${s.id},${act})" title="Clic para cambiar">
+            <span class="sw"></span><span>${act?'Activo':'No activo'}</span></div></td>
       <td><input class="cell-input" type="number" min="0" style="width:50px;" value="${s.horas}" data-id="${s.id}" data-field="horas"> h</td>
       <td><div class="avail-grid">${days.map(d=>`<div class="avail-cell ${avail[d]?'':'off'}" style="${avail[d]?'background:var(--accent);color:#0B0E14;':''}">${d}</div>`).join('')}</div></td>
       <td>${TRAINING_BADGES.map(t=>`<span class="badge-training ${train.includes(t)?'done':''}" onclick="toggleTraining(${s.id},'${t}')">${t}</span>`).join('')}</td>
@@ -2026,7 +2123,7 @@ async function renderStaffTable(){
       <td>${pwField(s.id,'sumup_pass',s.sumup_pass)}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="deleteStaff(${s.id})">✕</button></td>
     </tr>`;
-  }).join('') : `<tr><td colspan="9" style="text-align:center;color:var(--text-soft);">Todavía no hay staff. Usa "+ Añadir staff" para crear el primero.</td></tr>`;
+  }).join('') : `<tr><td colspan="10" style="text-align:center;color:var(--text-soft);">No hay nadie con este filtro.</td></tr>`;
 
   tbody.querySelectorAll('input[data-field]').forEach(inp=>{
     inp.addEventListener('change', async (e)=>{
@@ -2053,6 +2150,10 @@ async function addNewStaff(){
   if(error){ console.error(error); return; }
   await renderStaffTable();
   openStaffModal(data.id);
+}
+async function toggleStaffActivo(id, actual){
+  await sb.from('staff').update({ activo: !actual }).eq('id', id);
+  renderStaffTable();
 }
 async function deleteStaff(id){
   await sb.from('staff').delete().eq('id', id);
@@ -2084,6 +2185,7 @@ async function openStaffModal(id){
   document.getElementById('sm-telefono').value = s.telefono||'';
   document.getElementById('sm-dni').value = s.dni||'';
   document.getElementById('sm-email').value = s.email||'';
+  document.getElementById('sm-cumple').value = s.cumpleanos||'';
   document.getElementById('staff-modal').dataset.editing = id;
   document.getElementById('staff-modal').classList.add('open');
 }
@@ -2096,6 +2198,7 @@ async function saveStaffModal(){
     telefono: document.getElementById('sm-telefono').value,
     dni: document.getElementById('sm-dni').value,
     email: document.getElementById('sm-email').value,
+    cumpleanos: document.getElementById('sm-cumple').value,
   }).eq('id', id);
   closeStaffModal();
   renderStaffTable();
