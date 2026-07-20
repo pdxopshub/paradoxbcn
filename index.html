@@ -123,6 +123,49 @@
   .col-grip::after{content:'';width:2px;height:60%;background:var(--line-strong);border-radius:2px;transition:background .12s;}
   .col-grip:hover::after,.col-grip.dragging::after{background:var(--accent);width:3px;height:100%;}
   body.col-resizing{cursor:col-resize!important;user-select:none;}
+  /* ---- Tabla de Equipo: cabeceras y anchos ---- */
+  #staff-table th{text-align:center;vertical-align:middle;}
+  #staff-table td{text-align:center;}
+  #staff-table td:first-child{text-align:left;}
+  #staff-table th:nth-child(1){width:180px;}
+  #staff-table th:nth-child(2){width:76px;}
+  #staff-table th:nth-child(3){width:152px;}
+  #staff-table th:nth-child(4){width:200px;}
+  #staff-table th:nth-child(5){width:165px;}
+  #staff-table th:nth-child(6){width:155px;}
+  #staff-table th:nth-child(7){width:165px;}
+  #staff-table th:nth-child(8){width:155px;}
+  #staff-table th:nth-child(9){width:125px;}
+  #staff-table th:nth-child(10){width:120px;}
+  #staff-table th:nth-child(11){width:105px;}
+  #staff-table th:nth-child(12){width:88px;}
+  #staff-table th:nth-child(13){width:118px;}
+  #staff-table th:nth-child(14){width:46px;}
+  #staff-table td .cell-input{width:100%;box-sizing:border-box;text-align:center;}
+  #staff-table td .cell-input.txt{text-align:left;}
+  .horas-cell{display:inline-flex;align-items:baseline;gap:1px;white-space:nowrap;}
+  .horas-cell input{width:42px!important;text-align:right!important;padding-right:2px;}
+  .horas-cell b{font-weight:700;font-size:12px;}
+  .visitas-calc{font-weight:800;font-size:14px;}
+  .visitas-calc.pos{color:#4FE0A0;}
+  /* columnas ocultables */
+  .colhide{display:none!important;}
+  .colmenu{position:relative;}
+  .colmenu-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:60;background:var(--surface);
+    border:1px solid var(--line-strong);border-radius:10px;padding:10px;min-width:225px;
+    box-shadow:0 14px 40px rgba(0,0,0,.5);display:none;}
+  .colmenu-panel.open{display:block;}
+  .colmenu-panel label{display:flex;align-items:center;gap:8px;padding:5px 4px;font-size:12.5px;
+    cursor:pointer;border-radius:6px;}
+  .colmenu-panel label:hover{background:var(--panel);}
+  .colmenu-panel input{accent-color:var(--accent);}
+  /* ---- Recap en 3 columnas ---- */
+  .recap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px;align-items:start;}
+  .recap-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
+  .recap-col > .card{margin-bottom:0!important;}
+  /* ---- Anchos más contenidos ---- */
+  #view-entrevistas .card,#view-turnos .card{max-width:820px;}
+  .chat-wrap{max-width:600px;margin:0 auto;}
   /* ---- Buscador por nombre (todas las tablas) ---- */
   .tbl-filter{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
   .tbl-filter input{flex:1;max-width:290px;padding:7px 11px 7px 32px;border-radius:8px;
@@ -668,24 +711,27 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
         <div class="page-head"><div><h1>Staff</h1><p>Ficha del equipo, accesos de FEVER / SumUp y entradas del mes. Haz clic en un nombre para ver su ficha completa.</p></div></div>
         <div class="tab-strip">
           <button class="tab-btn active" data-stab="equipo">Equipo</button>
-          <button class="tab-btn" data-stab="nfcards">NFCards</button>
         </div>
         <div id="staff-sub-equipo" class="staff-sub">
           <div class="card">
             <div class="flex-between" style="margin-bottom:12px;">
               <div class="section-title" style="margin:0;">Equipo <span class="hint">Arrastra el borde entre columnas para ajustar el ancho</span></div>
-              <div style="display:flex;align-items:center;gap:10px;">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <select id="staff-filtro-estado" style="width:150px;" onchange="renderStaffTable()">
                   <option value="activos">Solo activos</option>
                   <option value="inactivos">Solo no activos</option>
                   <option value="todos">Todos</option>
                 </select>
+                <div class="colmenu">
+                  <button class="btn btn-ghost btn-sm" onclick="toggleColMenu(event)">Columnas ▾</button>
+                  <div class="colmenu-panel" id="staff-colmenu"></div>
+                </div>
                 <button class="btn btn-ghost btn-sm" onclick="resetStaffCols()">Restablecer anchos</button>
                 <button class="btn btn-primary btn-sm" onclick="addNewStaff()">+ Añadir staff</button>
               </div>
             </div>
             <div class="table-wrap"><table id="staff-table" class="resizable"><thead>
-              <tr><th>Nombre</th><th>Estado</th><th>Horas</th><th>Disp. (L–D)</th><th>Formación</th><th>Usuario FEVER</th><th>Contraseña FEVER</th><th>Usuario SumUp</th><th>Contraseña SumUp</th><th></th></tr>
+              <tr><th>Nombre</th><th>Horas</th><th>Disp. (L–D)</th><th>Formación</th><th>Usuario FEVER</th><th>Contraseña FEVER</th><th>Usuario SumUp</th><th>Contraseña SumUp</th><th>Nº Tarjeta</th><th>Visitas iniciales<br><span style="font-weight:600;font-size:9.5px;">01/07/26</span></th><th>Stats Web</th><th>Visitas</th><th>Estado</th><th></th></tr>
             </thead><tbody></tbody></table></div>
           </div>
 
@@ -697,13 +743,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
             <div class="table-wrap"><table id="entradas-table"><thead><tr><th>Staff</th><th>Entradas usadas</th></tr></thead><tbody></tbody></table></div>
           </div>
         </div>
-        <div id="staff-sub-nfcards" class="staff-sub" style="display:none;">
-          <div class="card">
-            <div class="table-wrap"><table id="nfc-table"><thead>
-              <tr><th>Staff</th><th>Nº tarjeta</th><th>Visitas iniciales</th><th>Visitas actuales</th><th>Ganadas</th><th>Estado</th></tr>
-            </thead><tbody></tbody></table></div>
-          </div>
-        </div>
+
       </div>
 
       <!-- ============ EV ============ -->
@@ -793,7 +833,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
       <!-- ============ RECAP ============ -->
       <div class="view" id="view-recap">
         <div style="display:flex;gap:20px;align-items:flex-start;">
-        <div style="max-width:780px;flex:1;min-width:0;">
+        <div style="max-width:1500px;flex:1;min-width:0;">
         <div class="page-head">
           <div><h1>Recap del día</h1><p>Cierre diario: info general, rutinas y observaciones. Se guarda automáticamente.</p></div>
           <div>
@@ -831,6 +871,8 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
           </div>
         </div>
 
+        <div class="recap-grid">
+        <div class="recap-col">
         <!-- INFO GENERAL -->
         <div class="card" style="margin-bottom:14px;">
           <div class="recap-section-title">
@@ -862,6 +904,8 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
           </div>
         </div>
 
+        </div>
+        <div class="recap-col">
         <!-- RUTINAS MAÑANA -->
         <div class="card" style="margin-bottom:14px;">
           <div class="recap-section-title">
@@ -880,6 +924,8 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
           <div id="rutinas-tarde"></div>
         </div>
 
+        </div>
+        <div class="recap-col">
         <!-- TASKS SEMANALES -->
         <div class="card" style="margin-bottom:14px;">
           <div class="recap-section-title">
@@ -912,6 +958,9 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
           </div>
           <textarea id="rc-observaciones" rows="5" placeholder="Cualquier incidencia, nota o aviso relevante del día…" style="width:100%;"></textarea>
         </div>
+
+        </div>
+        </div><!-- fin recap-grid -->
 
         <button class="btn btn-primary" onclick="saveRecap()" style="min-width:160px;justify-content:center;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
@@ -2031,6 +2080,53 @@ function installTableFilters(){
   });
 }
 
+/* ---------- Mostrar / ocultar columnas de la tabla de Equipo ---------- */
+const STAFF_COL_LABELS = ['Nombre','Horas','Disponibilidad','Formación','Usuario FEVER',
+  'Contraseña FEVER','Usuario SumUp','Contraseña SumUp','Nº Tarjeta',
+  'Visitas iniciales (01/07/26)','Stats Web','Visitas','Estado'];
+const STAFF_COLVIS_KEY = 'pdx-staff-colvis';
+function loadColVis(){
+  try{ return JSON.parse(localStorage.getItem(STAFF_COLVIS_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveColVis(v){ try{ localStorage.setItem(STAFF_COLVIS_KEY, JSON.stringify(v)); }catch(e){} }
+function applyColVis(){
+  const table = document.getElementById('staff-table');
+  if(!table) return;
+  const vis = loadColVis();
+  STAFF_COL_LABELS.forEach((_,i)=>{
+    const oculta = vis[i] === false;
+    table.querySelectorAll(`tr > *:nth-child(${i+1})`).forEach(cel=>{
+      cel.classList.toggle('colhide', oculta);
+    });
+  });
+}
+function buildColMenu(){
+  const panel = document.getElementById('staff-colmenu');
+  if(!panel) return;
+  const vis = loadColVis();
+  panel.innerHTML = STAFF_COL_LABELS.map((lab,i)=>
+    `<label><input type="checkbox" data-col="${i}" ${vis[i]===false?'':'checked'}> ${lab}</label>`
+  ).join('');
+  panel.querySelectorAll('input[data-col]').forEach(chk=>{
+    chk.addEventListener('change', ()=>{
+      const v = loadColVis();
+      v[parseInt(chk.dataset.col,10)] = chk.checked;
+      saveColVis(v);
+      applyColVis();
+    });
+  });
+}
+function toggleColMenu(ev){
+  ev.stopPropagation();
+  const panel = document.getElementById('staff-colmenu');
+  if(!panel) return;
+  buildColMenu();
+  panel.classList.toggle('open');
+}
+document.addEventListener('click', ()=>{
+  document.getElementById('staff-colmenu')?.classList.remove('open');
+});
+
 /* ---------- Columnas redimensionables (tabla de Equipo) ---------- */
 const STAFF_COLS_KEY = 'pdx-staff-colw';
 function loadStaffCols(){
@@ -2097,6 +2193,7 @@ function initStaffColResize(){
 async function renderStaffTable(){
   setTimeout(initStaffColResize, 0);
   setTimeout(installTableFilters, 60);
+  setTimeout(applyColVis, 0);
   const all = await fetchStaff();
   const modo = document.getElementById('staff-filtro-estado')?.value || 'activos';
   const list = all.filter(s=>{
@@ -2109,27 +2206,35 @@ async function renderStaffTable(){
     const avail = s.disponibilidad || {};
     const train = s.formacion || [];
     const act = s.activo !== false;
+    const ini = s.nfc_visitas_iniciales, web = s.nfc_stats_web;
+    const gan = (ini===null||ini===undefined||web===null||web===undefined) ? null : Math.max(0, web - ini);
     return `
     <tr class="${act?'':'staff-off'}">
       <td><button class="btn btn-ghost btn-sm" onclick="openStaffModal(${s.id})" style="font-weight:800;">${s.nombre} ${s.apellido||''}</button></td>
-      <td><div class="staff-estado ${act?'on':''}" onclick="toggleStaffActivo(${s.id},${act})" title="Clic para cambiar">
-            <span class="sw"></span><span>${act?'Activo':'No activo'}</span></div></td>
-      <td><input class="cell-input" type="number" min="0" style="width:50px;" value="${s.horas}" data-id="${s.id}" data-field="horas"> h</td>
+      <td><span class="horas-cell"><input class="cell-input" type="number" min="0" value="${s.horas??8}" data-id="${s.id}" data-field="horas"><b>h</b></span></td>
       <td><div class="avail-grid">${days.map(d=>`<div class="avail-cell ${avail[d]?'':'off'}" style="${avail[d]?'background:var(--accent);color:#0B0E14;':''}">${d}</div>`).join('')}</div></td>
       <td>${TRAINING_BADGES.map(t=>`<span class="badge-training ${train.includes(t)?'done':''}" onclick="toggleTraining(${s.id},'${t}')">${t}</span>`).join('')}</td>
-      <td><input class="cell-input" style="text-align:left;width:120px;" placeholder="usuario" value="${s.fever_user||''}" data-id="${s.id}" data-field="fever_user"></td>
+      <td><input class="cell-input txt" placeholder="usuario" value="${s.fever_user||''}" data-id="${s.id}" data-field="fever_user"></td>
       <td>${pwField(s.id,'fever_pass',s.fever_pass)}</td>
-      <td><input class="cell-input" style="text-align:left;width:120px;" placeholder="usuario" value="${s.sumup_user||''}" data-id="${s.id}" data-field="sumup_user"></td>
+      <td><input class="cell-input txt" placeholder="usuario" value="${s.sumup_user||''}" data-id="${s.id}" data-field="sumup_user"></td>
       <td>${pwField(s.id,'sumup_pass',s.sumup_pass)}</td>
+      <td><input class="cell-input" placeholder="—" value="${s.nfc_numero||''}" data-id="${s.id}" data-field="nfc_numero"></td>
+      <td><input class="cell-input" type="number" min="0" placeholder="—" value="${numOrEmpty(ini)}" data-id="${s.id}" data-field="nfc_visitas_iniciales"></td>
+      <td><input class="cell-input" type="number" min="0" placeholder="—" value="${numOrEmpty(web)}" data-id="${s.id}" data-field="nfc_stats_web"></td>
+      <td><span class="visitas-calc ${gan?'pos':''}">${gan===null?'—':gan}</span></td>
+      <td><div class="staff-estado ${act?'on':''}" onclick="toggleStaffActivo(${s.id},${act})" title="Clic para cambiar">
+            <span class="sw"></span><span>${act?'Activo':'No activo'}</span></div></td>
       <td><button class="btn btn-ghost btn-sm" onclick="deleteStaff(${s.id})">✕</button></td>
     </tr>`;
-  }).join('') : `<tr><td colspan="10" style="text-align:center;color:var(--text-soft);">No hay nadie con este filtro.</td></tr>`;
+  }).join('') : `<tr><td colspan="14" style="text-align:center;color:var(--text-soft);">No hay nadie con este filtro.</td></tr>`;
 
   tbody.querySelectorAll('input[data-field]').forEach(inp=>{
     inp.addEventListener('change', async (e)=>{
       const id = parseInt(e.target.dataset.id,10);
       const field = e.target.dataset.field;
-      const val = field==='horas' ? (parseFloat(e.target.value)||0) : e.target.value;
+      const NUMS = ['horas','nfc_visitas_iniciales','nfc_stats_web'];
+      let val = e.target.value;
+      if(NUMS.includes(field)) val = (val==='' ? null : (parseFloat(val)||0));
       await sb.from('staff').update({[field]: val}).eq('id', id);
       renderStaffTable();
     });
@@ -2139,6 +2244,7 @@ async function renderStaffTable(){
     btn.addEventListener('click', ()=>{
       const inp = btn.previousElementSibling;
       inp.type = inp.type==='password' ? 'text' : 'password';
+      btn.textContent = inp.type==='password' ? '🙈' : '👁';
     });
   });
 }
@@ -2161,7 +2267,7 @@ async function deleteStaff(id){
 }
 function pwField(id, field, val){
   return `<div class="pw-wrap">
-    <input class="cell-input" type="password" style="text-align:left;width:110px;" placeholder="contraseña" value="${val||''}" data-id="${id}" data-field="${field}">
+    <input class="cell-input txt" type="text" placeholder="contraseña" value="${val||''}" data-id="${id}" data-field="${field}">
     <button type="button" class="pw-toggle" title="Mostrar/ocultar">👁</button>
   </div>`;
 }
@@ -2242,6 +2348,7 @@ async function fetchNfc(){
   return data;
 }
 async function renderNfcTable(){
+  if(!document.querySelector('#nfc-table tbody')) return;   // NFCards ahora vive dentro de Equipo
   const list = await fetchNfc();
   const tbody = document.querySelector('#nfc-table tbody');
   tbody.innerHTML = (list.length ? list.map(r=>`
