@@ -318,11 +318,35 @@
   #view-recap .grid-2{grid-template-columns:1fr 1fr;gap:10px;}
   #view-recap #rc-info-visitantes, #view-recap #rc-info-entrada{min-width:0;box-sizing:border-box;padding:11px 12px;}
   .rc-cap-title{font-size:10.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+  /* --- Info General del recap: cápsulas, filas y campos --- */
+  #view-recap .rc-block{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 13px;box-sizing:border-box;min-width:0;}
+  #view-recap .rc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);}
+  #view-recap .rc-row:last-child{border-bottom:none;}
+  #view-recap .rc-row > span:first-child{font-size:12.5px;color:var(--text);font-weight:600;flex:1;min-width:0;}
+  #view-recap .rc-num{width:76px;flex-shrink:0;text-align:right;padding:5px 8px;border-radius:6px;
+    background:#10233A;border:1.5px solid #2E4C6E;color:#EAF1FB;font-size:13px;font-weight:600;box-sizing:border-box;}
+  #view-recap .rc-num:focus{outline:none;border-color:var(--accent);background:#173A63;box-shadow:0 0 0 2px rgba(91,140,255,.18);}
+  #view-recap .rc-ly{font-size:14px;font-weight:800;color:#6B7180;flex-shrink:0;}
+  #view-recap .rc-reviews{display:flex;flex-direction:column;gap:0;}
+  #view-recap .rc-rev{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);}
+  #view-recap .rc-rev:last-child{border-bottom:none;}
+  #view-recap .rc-rev label{font-size:12.5px;color:var(--text);font-weight:600;flex:1;min-width:0;}
   #view-recap #rc-info-visitantes .recap-field, #view-recap #rc-info-entrada .recap-field{padding:4px 0;}
   #view-recap #rc-info-visitantes .recap-field label, #view-recap #rc-info-entrada .recap-field label{font-size:12px;}
   /* ---- Anchos más contenidos ---- */
   #view-entrevistas .card,#view-turnos .card{max-width:820px;}
-  .chat-wrap{max-width:600px;margin:0 auto;}
+  #view-diego .card{max-width:720px;}
+  .chat-wrap{max-width:400px;margin:0;width:100%;}
+  .chat-body .msg img{max-width:100%;border-radius:8px;margin-top:6px;cursor:pointer;display:block;}
+  .chat-preview{display:flex;align-items:center;gap:10px;padding:8px 12px;border-top:1px solid var(--line);background:var(--panel);}
+  .chat-preview img{height:46px;border-radius:6px;}
+  .chat-preview .cp-x{margin-left:auto;background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:16px;}
+  .chat-preview .cp-x:hover{color:var(--danger);}
+  .chat-attach{width:38px;height:38px;flex-shrink:0;border-radius:50%;background:var(--panel);border:1px solid var(--line-strong);
+    color:var(--text-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .chat-attach:hover{color:var(--accent);border-color:var(--accent);}
+  .img-lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:30px;cursor:zoom-out;}
+  .img-lightbox img{max-width:100%;max-height:100%;border-radius:8px;}
   /* ---- Buscador por nombre (todas las tablas) ---- */
   .tbl-filter{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
   .tbl-filter input{flex:1;max-width:290px;padding:7px 11px 7px 32px;border-radius:8px;
@@ -375,6 +399,68 @@
     color:#0B0E14;cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .chat-send:hover{filter:brightness(1.1);}
   .chat-send svg{width:19px;height:19px;}
+  /* ---- RESEÑAS: 3 columnas separadas por línea azul ---- */
+  .resenas-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;}
+  @media(max-width:900px){.resenas-3col{grid-template-columns:1fr;}}
+  .rv-col{padding:0 20px;border-right:2px solid var(--accent);}
+  .rv-col:last-child{border-right:none;}
+  @media(max-width:900px){.rv-col{border-right:none;border-bottom:2px solid var(--accent);padding:18px 4px;}}
+  .rv-col:first-child{padding-left:0;}
+  .rv-col:last-child{padding-right:0;}
+  .rv-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .rv-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+  .rv-title{font-family:var(--font);font-weight:800;font-size:16px;}
+  .rv-link{margin-left:auto;color:var(--text-soft);text-decoration:none;font-size:15px;}
+  .rv-link:hover{color:var(--accent);}
+  .rv-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
+  .rv-kpis > div{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 6px;text-align:center;}
+  .rv-k{font-family:var(--font);font-weight:800;font-size:19px;line-height:1;}
+  .rv-k small{font-size:11px;color:var(--text-soft);font-weight:600;}
+  .rv-l{font-size:9.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;margin-top:5px;}
+  .rv-form{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;}
+  .rv-form-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;}
+  .rv-form-row label{font-size:12px;color:var(--text-soft);font-weight:600;}
+  .rv-form-row input{width:70px;text-align:right;font-weight:700;}
+  .rv-hist table{font-size:12px;}
+  .rv-hist th{padding:6px 5px;}
+  .rv-hist td{padding:5px 5px;}
+  /* ---- LOOMIS: tabla de cuadre semanal ---- */
+  .loomis-table{table-layout:fixed;}
+  .loomis-table th{text-align:center;font-size:11px;}
+  .loomis-table td{text-align:center;padding:2px 4px;height:30px;border:1px solid var(--line);}
+  .loomis-table .lm-date{font-weight:800;font-size:11.5px;background:var(--panel);line-height:1.25;}
+  .loomis-table .lm-date small{font-weight:600;color:var(--text-dim);font-size:10px;}
+  .loomis-table .lm-total{font-weight:800;font-size:14px;background:var(--panel);}
+  .loomis-table .lm-in{width:100%;text-align:center;background:transparent;border:none;height:26px;
+    color:#EAF1FB;font-size:12.5px;font-style:italic;}
+  .loomis-table .lm-in:hover{background:#12253C;}
+  .loomis-table .lm-in:focus{background:#16304F;box-shadow:inset 0 0 0 1.5px var(--accent);outline:none;}
+  .loomis-table .lm-yellow td{background:#3A3413;}
+  .loomis-table .lm-yellow .lm-in{color:#F4DF7E;font-weight:800;font-style:normal;}
+  .loomis-table tr.lm-day-top td{border-top:2px solid var(--line-strong);}
+  .loomis-table .lm-week td{background:var(--panel);font-weight:800;font-size:13px;border-top:2px solid var(--accent);}
+  .loomis-table .lm-week td:first-child{color:var(--accent);}
+  /* ---- MARKETING: calendario semanal ---- */
+  .mk-week{display:flex;gap:14px;align-items:stretch;border-bottom:1px solid var(--line);padding:10px 0;}
+  .mk-week:last-child{border-bottom:none;}
+  .mk-week-label{width:130px;flex-shrink:0;font-size:12px;font-weight:800;color:var(--text-soft);}
+  .mk-week-label small{font-weight:600;color:var(--text-dim);font-size:10.5px;}
+  .mk-week-bars{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .mk-bar{background:var(--panel);border-radius:5px;padding:5px 10px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mk-empty{color:var(--text-dim);font-size:12px;padding:3px 0;}
+  .mk-sub{max-width:1000px;}
+  /* ---- SPV: columnas personalizadas + resumen estrecho ---- */
+  #spv-grid-table th.spv-custom-col{cursor:pointer;color:#C3CAD9;}
+  #spv-grid-table th.spv-custom-col:hover{color:var(--danger);}
+  #spv-grid-table th.spv-addcol{cursor:pointer;color:var(--accent);font-weight:900;font-size:16px;width:34px;}
+  #spv-grid-table th.spv-addcol:hover{background:var(--accent-soft);}
+  #spv-summary-table{max-width:560px;}
+  /* ---- ENTRADAS DEL MES: mini tablas estrechas ---- */
+  .entradas-mini{font-size:12.5px;}
+  .entradas-mini th{padding:7px 8px;font-size:10px;}
+  .entradas-mini td{padding:4px 8px;height:32px;}
+  .entradas-mini .em-name{text-align:left;font-weight:700;}
+  @media(max-width:640px){#entradas-split{grid-template-columns:1fr!important;}}
   /* ---- VACACIONES (estilo WhosOff) ---- */
   .vac-legend{display:flex;flex-wrap:wrap;gap:14px;align-items:center;font-size:11.5px;color:var(--text-soft);}
   .vac-legend span{display:flex;align-items:center;gap:6px;}
@@ -449,6 +535,8 @@
   .avail-grid{display:flex;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;width:fit-content;}
   .avail-cell{width:22px;height:22px;font-size:9.5px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;border-right:1px solid rgba(0,0,0,.3);}
   .avail-cell:last-child{border-right:none;}
+  .avail-cell{cursor:pointer;transition:background .1s;}
+  .avail-cell:hover{outline:1.5px solid var(--accent);outline-offset:-1.5px;}
   .avail-cell.off{background:var(--panel);color:#4E5266;border-right:1px solid var(--line);}
 
   .btn{font-family:var(--font);font-weight:700;font-size:12.5px;border:1px solid transparent;border-radius:8px;padding:9px 15px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
@@ -737,6 +825,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <button class="navitem" data-view="grupos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.6"/><path d="M2.5 20c.7-3.6 3-5.4 5.5-5.4s4.8 1.8 5.5 5.4"/><path d="M14 15c2.3.2 4 1.8 4.6 5"/></svg>
           Grupos
+        </button>
+          <button class="navitem" data-view="marketing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 01-5.8-1.6"/></svg>
+          Marketing
         </button>
           <button class="navitem" data-view="resenas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 1-5.2 5 1.3 7L12 18l-6.1 3.5 1.3-7L2 9.5l7-1z"/></svg>
@@ -1067,31 +1159,34 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             Info General
           </div>
 
-          <div class="grid grid-2" style="gap:10px;margin-bottom:12px;">
-            <div class="card" id="rc-info-visitantes" style="background:var(--panel);">
+          <div class="grid grid-2" style="gap:12px;margin-bottom:12px;">
+            <div class="rc-block" id="rc-info-visitantes">
               <div class="rc-cap-title">Visitantes</div>
-              <div class="recap-field"><label>Hoy</label><input type="number" class="cell-input" id="rc-visitantes" placeholder="0" style="width:80px;text-align:right;"></div>
-              <div class="recap-field"><label style="color:var(--text-soft);">Año pasado</label><div class="val" id="rc-visitantes-ly" style="color:var(--accent);font-weight:800;">–</div></div>
-
-              <div class="rc-cap-title" style="margin-top:12px;">Horas Planday</div>
-              <div class="recap-field"><label>Total staff</label><input type="number" class="cell-input" id="rc-horas-planday" placeholder="0.0" step="0.5" style="width:80px;text-align:right;"></div>
-
-              <div class="rc-cap-title" style="margin-top:12px;">Reseñas hoy</div>
-              <div class="recap-field"><label>Tripadvisor</label><input type="number" class="cell-input" id="rc-ta-reviews" placeholder="0" style="width:70px;text-align:right;"></div>
-              <div class="recap-field"><label>Google</label><input type="number" class="cell-input" id="rc-google-reviews" placeholder="0" style="width:70px;text-align:right;"></div>
-              <div class="recap-field"><label>GetYourGuide</label><input type="number" class="cell-input" id="rc-gyg-reviews" placeholder="0" style="width:70px;text-align:right;"></div>
+              <div class="rc-row"><span>Hoy</span><input type="number" class="rc-num" id="rc-visitantes" placeholder="0"></div>
+              <div class="rc-row"><span>Año pasado</span><span class="rc-ly" id="rc-visitantes-ly">–</span></div>
+              <div class="rc-cap-title" style="margin-top:14px;">Horas Planday</div>
+              <div class="rc-row"><span>Total staff</span><input type="number" class="rc-num" id="rc-horas-planday" placeholder="0.0" step="0.5"></div>
             </div>
-            <div class="card" id="rc-info-entrada" style="background:var(--panel);">
+            <div class="rc-block" id="rc-info-entrada">
               <div class="rc-cap-title">Tipo de entrada</div>
-              <div class="recap-field"><label>Box Office</label><input type="number" class="cell-input" id="rc-box-office" placeholder="0" style="width:70px;text-align:right;"></div>
-              <div class="recap-field"><label>Fever</label><input type="number" class="cell-input" id="rc-fever" placeholder="0" style="width:70px;text-align:right;"></div>
-              <div class="recap-field"><label>API</label><input type="number" class="cell-input" id="rc-api" placeholder="0" style="width:70px;text-align:right;"></div>
-              <div class="recap-field"><label>Grupos</label><input type="number" class="cell-input" id="rc-grupos" placeholder="0" style="width:70px;text-align:right;"></div>
+              <div class="rc-row"><span>Box Office</span><input type="number" class="rc-num" id="rc-box-office" placeholder="0"></div>
+              <div class="rc-row"><span>Fever</span><input type="number" class="rc-num" id="rc-fever" placeholder="0"></div>
+              <div class="rc-row"><span>API</span><input type="number" class="rc-num" id="rc-api" placeholder="0"></div>
+              <div class="rc-row"><span>Grupos</span><input type="number" class="rc-num" id="rc-grupos" placeholder="0"></div>
+            </div>
+          </div>
+
+          <div class="rc-block" style="margin-bottom:12px;">
+            <div class="rc-cap-title">Reseñas hoy</div>
+            <div class="rc-reviews">
+              <div class="rc-rev"><label>Tripadvisor</label><input type="number" class="rc-num" id="rc-ta-reviews" placeholder="0"></div>
+              <div class="rc-rev"><label>Google</label><input type="number" class="rc-num" id="rc-google-reviews" placeholder="0"></div>
+              <div class="rc-rev"><label>GetYourGuide</label><input type="number" class="rc-num" id="rc-gyg-reviews" placeholder="0"></div>
             </div>
           </div>
 
           <div class="rc-cap-title" style="margin-bottom:8px;">Boutique total día</div>
-          <div id="rc-boutique-fields" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin-bottom:4px;"></div>
+          <div id="rc-boutique-fields" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px;margin-bottom:4px;"></div>
         </div>
         </div>
 
@@ -1161,6 +1256,59 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
         </div>
         </div><!-- fin flex recap -->
+      </div>
+
+      <!-- ============ MARKETING ============ -->
+      <div class="view" id="view-marketing">
+        <div class="page-head"><div><h1>Marketing</h1><p>Campañas activas, influencers y calendario de campañas por semana.</p></div></div>
+
+        <div class="tab-strip">
+          <button class="tab-btn active" data-mktab="campanas">Campañas</button>
+          <button class="tab-btn" data-mktab="influencers">Influencers</button>
+          <button class="tab-btn" data-mktab="calendario">Calendario</button>
+        </div>
+
+        <!-- ---- Campañas ---- -->
+        <div class="mk-sub" id="mk-sub-campanas">
+          <div class="card">
+            <div class="flex-between" style="margin-bottom:14px;">
+              <div class="section-title" style="margin:0;">Campañas de marketing</div>
+              <button class="btn btn-primary btn-sm" onclick="openMktCampaign()">+ Nueva campaña</button>
+            </div>
+            <div id="mk-campanas-list"></div>
+          </div>
+        </div>
+
+        <!-- ---- Influencers ---- -->
+        <div class="mk-sub" id="mk-sub-influencers" style="display:none;">
+          <div class="card">
+            <div class="flex-between" style="margin-bottom:14px;">
+              <div class="section-title" style="margin:0;">Registro de influencers</div>
+              <button class="btn btn-primary btn-sm" onclick="openMktInfluencer()">+ Nuevo influencer</button>
+            </div>
+            <div class="table-wrap" style="max-width:920px;">
+              <table id="mk-influencers-table">
+                <thead><tr><th>Fecha</th><th>Influencer</th><th>Red</th><th>Seguidores</th><th>Acuerdo</th><th>Estado</th><th></th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ---- Calendario ---- -->
+        <div class="mk-sub" id="mk-sub-calendario" style="display:none;">
+          <div class="card">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Calendario de campañas por semana</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="btn btn-ghost btn-sm" onclick="mktCalMonth(-1)">‹</button>
+                <div class="section-title" style="margin:0;min-width:130px;text-align:center;" id="mk-cal-label"></div>
+                <button class="btn btn-ghost btn-sm" onclick="mktCalMonth(1)">›</button>
+              </div>
+            </div>
+            <div id="mk-calendar"></div>
+          </div>
+        </div>
       </div>
 
       <!-- ============ LOOMIS ============ -->
@@ -1238,8 +1386,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="chat-body" id="chat-body">
             <div class="empty-state" style="margin:auto;"><div>Cargando mensajes…</div></div>
           </div>
+          <div id="chat-img-preview"></div>
           <div class="chat-foot">
-            <textarea id="chat-input" placeholder="Escribe un mensaje…  (Enter envía, Shift+Enter salto de línea)"></textarea>
+            <button class="chat-attach" onclick="document.getElementById('chat-file').click()" title="Adjuntar imagen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+            </button>
+            <input type="file" id="chat-file" accept="image/*" style="display:none;">
+            <textarea id="chat-input" placeholder="Escribe un mensaje…  (pega un pantallazo con Ctrl+V)"></textarea>
             <button class="chat-send" onclick="sendChat()" title="Enviar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
             </button>
@@ -1333,7 +1486,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       </div>
 
       <!-- ============ DIEGO ============ -->
-      <div class="view" id="view-diego">
+      <div class="view" id="view-diego" style="--diego-w:720px;">
         <div class="page-head"><div><h1>Mantenimiento · Tareas de Diego</h1><p>Checklist semanal de mantenimiento. Se guarda en tiempo real.</p></div></div>
         <div class="card">
           <div class="flex-between" style="margin-bottom:14px;">
@@ -1538,6 +1691,7 @@ const titles = {
   pda:['PDA · Tareas semanales','Plan de acción por persona'],
   grupos:['Grupos','Reservas de grupos'],
   vacaciones:['Vacaciones','Calendario anual, solicitudes y aprobaciones'],
+  marketing:['Marketing','Campañas, influencers y calendario'],
   chat:['Chat','Conversación del equipo'],
   diego:['Mantenimiento','Tareas semanales de Diego'],
   clmant:['CL Mantenimiento','Lista de material a comprar'],
@@ -1566,6 +1720,7 @@ function goView(v){
   if(v==='dashboard') refreshDashboard();
   if(v==='recap') renderRecap();
   if(v==='resenas') renderResenas();
+  if(v==='marketing') renderMarketing();
   if(v==='loomis') renderLoomis();
   setTimeout(installTableFilters, 60);
   if(v==='grupos') initPdxspotEmbed();
@@ -1832,6 +1987,8 @@ function buildSpvTable(data){
       ${SPV_GROUP_TIENDA.map((s,i)=>`<th class="grp-tienda${i===SPV_GROUP_TIENDA.length-1?' grp-end':''}">${s}</th>`).join('')}
       ${SPV_GROUP_SUPERV.map((s,i)=>`<th class="grp-superv${i===SPV_GROUP_SUPERV.length-1?' grp-end':''}">${s}</th>`).join('')}
       ${SPV_GROUP_STAFF.map(s=>`<th>${s}</th>`).join('')}
+      ${SPV_CUSTOM_COLS.map(s=>`<th class="spv-custom-col" title="Clic para quitar columna" onclick="removeSpvColumn(\`${s}\`)">${s} <span style="opacity:.6;">✕</span></th>`).join('')}
+      <th class="spv-addcol" onclick="addSpvColumn()" title="Añadir columna">＋</th>
     </tr>
   </thead>`;
   const body = '<tbody>' + data.days.map((row,idx)=>{
@@ -1846,6 +2003,8 @@ function buildSpvTable(data){
       ${SPV_GROUP_TIENDA.map((s,i)=>`<td class="col-tienda${i===SPV_GROUP_TIENDA.length-1?' grp-end':''} ${qualifies && row.amounts[s]>0 ?'spv-amount-qualify':''}" id="cell-${idx}-${s}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
       ${SPV_GROUP_SUPERV.map((s,i)=>`<td class="col-superv${i===SPV_GROUP_SUPERV.length-1?' grp-end':''} ${qualifies && row.amounts[s]>0 ?'spv-amount-qualify':''}" id="cell-${idx}-${s}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
       ${SPV_GROUP_STAFF.map(s=>`<td class="${qualifies && row.amounts[s]>0 ?'spv-amount-qualify':''}" id="cell-${idx}-${s}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
+      ${SPV_CUSTOM_COLS.map(s=>`<td class="${qualifies && row.amounts[s]>0 ?'spv-amount-qualify':''}"><input class="cell-input" type="number" min="0" step="0.01" placeholder="0" value="${numOrEmpty(row.amounts[s])}" data-role="amount" data-day="${idx}" data-staff="${s}"></td>`).join('')}
+      <td></td>
     </tr>`;
   }).join('') + '</tbody>';
   document.getElementById('spv-grid-table').innerHTML = head + body;
@@ -1971,7 +2130,7 @@ function computeSpvSummary(data){
   const tbody = document.querySelector('#spv-summary-table tbody');
   tbody.innerHTML = SPV_STAFF.filter(s=>qualTotals[s]>0).sort((a,b)=>qualTotals[b]-qualTotals[a]).map(s=>`
     <tr>
-      <td><b>${s}</b> ${colClass(s)==='tienda'?'<span class="pill pink">tienda</span>':colClass(s)==='superv'?'<span class="pill violet">superv.</span>':''}</td>
+      <td style="text-align:left;"><b>${s}</b></td>
       <td class="mono">${qualDays[s]} día${qualDays[s]!==1?'s':''}</td>
       <td class="mono">${qualTotals[s].toFixed(2)}€</td>
       <td class="mono" style="color:var(--success);font-weight:700;">${(qualTotals[s]*rate/100).toFixed(2)}€</td>
@@ -2424,7 +2583,7 @@ async function renderStaffTable(){
             <span class="nm-txt">${s.nombre||''}<small>${s.apellido||''}</small></span>
           </div></td>
       <td><span class="horas-cell"><input class="cell-input" type="number" min="0" value="${s.horas??8}" data-id="${s.id}" data-field="horas"><b>h</b></span></td>
-      <td><div class="avail-grid">${days.map(d=>`<div class="avail-cell ${avail[d]?'':'off'}" style="${avail[d]?'background:var(--accent);color:#0B0E14;':''}">${d}</div>`).join('')}</div></td>
+      <td><div class="avail-grid">${days.map(d=>`<div class="avail-cell ${avail[d]?'':'off'}" style="${avail[d]?'background:var(--accent);color:#0B0E14;':''}" onclick="toggleAvail(${s.id},'${d}',this)" title="Clic para cambiar">${d}</div>`).join('')}</div></td>
       <td class="form-cell"><span class="form-badges">${TRAINING_BADGES.map(t=>`<span class="badge-training ${train.includes(t)?'done':''}" onclick="toggleTraining(${s.id},'${t}')">${t}</span>`).join('')}</span></td>
       <td class="user-cell"><input class="cell-input txt" placeholder="usuario" value="${s.fever_user||''}" data-id="${s.id}" data-field="fever_user"></td>
       <td>${pwField(s.id,'fever_pass',s.fever_pass)}</td>
@@ -2468,6 +2627,23 @@ async function addNewStaff(){
   if(error){ console.error(error); return; }
   await renderStaffTable();
   openStaffModal(data.id);
+}
+async function toggleAvail(id, dia, cellEl){
+  // cambia la celda al instante (optimista)
+  const list = await fetchStaff();
+  const s = list.find(x=>x.id===id);
+  if(!s) return;
+  const avail = Object.assign({L:0,M:0,X:0,J:0,V:0,S:0,D:0}, s.disponibilidad || {});
+  avail[dia] = avail[dia] ? 0 : 1;
+  // feedback visual inmediato
+  if(cellEl){
+    const on = !!avail[dia];
+    cellEl.classList.toggle('off', !on);
+    cellEl.style.background = on ? 'var(--accent)' : '';
+    cellEl.style.color = on ? '#0B0E14' : '';
+  }
+  const { error } = await sb.from('staff').update({ disponibilidad: avail }).eq('id', id);
+  if(error){ console.error('disponibilidad', error); renderStaffTable(); }
 }
 async function toggleStaffActivo(id, actual){
   await sb.from('staff').update({ activo: !actual }).eq('id', id);
@@ -3428,6 +3604,249 @@ async function fetchDiegoTasks(){
   if(error){ console.error(error); return []; }
   return data;
 }
+/* ============================================================
+   MARKETING — campañas, influencers y calendario
+   Tablas Supabase: mkt_campanas, mkt_influencers
+   ============================================================ */
+let mktCampanas = [], mktInfluencers = [];
+let mktCalDate = new Date();
+let mktTabInit = false;
+
+const MKT_ESTADOS = {
+  activa:     {label:'Activa',     cls:'st-ok'},
+  planificada:{label:'Planificada',cls:'st-wait'},
+  finalizada: {label:'Finalizada', cls:'st-off'},
+};
+const MKT_INF_ESTADOS = {
+  contactado:{label:'Contactado', cls:'st-wait'},
+  confirmado:{label:'Confirmado', cls:'st-ok'},
+  visito:    {label:'Visitó',     cls:'st-ok'},
+  descartado:{label:'Descartado', cls:'st-off'},
+};
+
+async function renderMarketing(){
+  if(!mktTabInit){
+    mktTabInit = true;
+    document.querySelectorAll('[data-mktab]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-mktab]').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.mk-sub').forEach(el=>el.style.display='none');
+        const el = document.getElementById('mk-sub-'+btn.dataset.mktab);
+        if(el) el.style.display='block';
+      });
+    });
+  }
+  await loadMktData();
+  renderMktCampanas();
+  renderMktInfluencers();
+  renderMktCalendar();
+}
+
+async function loadMktData(){
+  const [c, i] = await Promise.all([
+    sb.from('mkt_campanas').select('*').order('fecha_inicio'),
+    sb.from('mkt_influencers').select('*').order('fecha', {ascending:false}),
+  ]);
+  if(c.error) console.error('mkt_campanas', c.error);
+  if(i.error) console.error('mkt_influencers', i.error);
+  mktCampanas = c.data || [];
+  mktInfluencers = i.data || [];
+}
+
+/* ---------- Campañas ---------- */
+function renderMktCampanas(){
+  const el = document.getElementById('mk-campanas-list');
+  if(!el) return;
+  if(!mktCampanas.length){ el.innerHTML = emptyState('No hay campañas','Crea la primera con “+ Nueva campaña”.'); return; }
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">` +
+    mktCampanas.map(c=>{
+      const est = MKT_ESTADOS[c.estado] || MKT_ESTADOS.planificada;
+      return `<div class="card" style="background:var(--panel);margin:0;">
+        <div class="flex-between" style="margin-bottom:8px;">
+          <b style="font-family:var(--font);font-size:14px;">${esc(c.nombre)}</b>
+          <span class="st ${est.cls}">${est.label}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:6px;">${esc(c.canal||'—')}</div>
+        <div style="font-size:11.5px;color:var(--text-dim);">${c.fecha_inicio||'?'} → ${c.fecha_fin||'?'}</div>
+        ${c.notas?`<div style="font-size:12px;margin-top:8px;">${esc(c.notas)}</div>`:''}
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <button class="btn btn-ghost btn-sm" onclick="openMktCampaign(${c.id})">Editar</button>
+          <button class="btn btn-ghost btn-sm" onclick="deleteMktCampaign(${c.id})">Eliminar</button>
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+function openMktCampaign(id){
+  const c = id ? mktCampanas.find(x=>x.id===id) : {};
+  const estOpts = Object.entries(MKT_ESTADOS).map(([k,v])=>`<option value="${k}" ${c.estado===k?'selected':''}>${v.label}</option>`).join('');
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <div class="modal-head"><h2>${id?'Editar campaña':'Nueva campaña'}</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Nombre</label><input id="mkc-nombre" value="${esc(c.nombre||'')}"></div>
+          <div class="field"><label>Canal / plataforma</label><input id="mkc-canal" placeholder="Instagram, Fever, mailing…" value="${esc(c.canal||'')}"></div>
+          <div class="field-row">
+            <div class="field"><label>Inicio</label><input type="date" id="mkc-inicio" value="${c.fecha_inicio||''}"></div>
+            <div class="field"><label>Fin</label><input type="date" id="mkc-fin" value="${c.fecha_fin||''}"></div>
+          </div>
+          <div class="field"><label>Estado</label><select id="mkc-estado">${estOpts}</select></div>
+          <div class="field"><label>Notas</label><textarea id="mkc-notas" rows="3">${esc(c.notas||'')}</textarea></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveMktCampaign(${id||'null'})">Guardar</button>
+        </div>
+      </div>
+    </div>`;
+}
+async function saveMktCampaign(id){
+  const payload = {
+    nombre: document.getElementById('mkc-nombre').value.trim(),
+    canal: document.getElementById('mkc-canal').value.trim(),
+    fecha_inicio: document.getElementById('mkc-inicio').value || null,
+    fecha_fin: document.getElementById('mkc-fin').value || null,
+    estado: document.getElementById('mkc-estado').value,
+    notas: document.getElementById('mkc-notas').value.trim(),
+  };
+  if(!payload.nombre){ alert('Ponle un nombre a la campaña.'); return; }
+  if(id) await sb.from('mkt_campanas').update(payload).eq('id', id);
+  else await sb.from('mkt_campanas').insert(payload);
+  closeModal();
+  renderMarketing();
+}
+async function deleteMktCampaign(id){
+  if(!confirm('¿Eliminar esta campaña?')) return;
+  await sb.from('mkt_campanas').delete().eq('id', id);
+  renderMarketing();
+}
+
+/* ---------- Influencers ---------- */
+function renderMktInfluencers(){
+  const tbody = document.querySelector('#mk-influencers-table tbody');
+  if(!tbody) return;
+  if(!mktInfluencers.length){
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-soft);">Sin influencers registrados todavía.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = mktInfluencers.map(f=>{
+    const est = MKT_INF_ESTADOS[f.estado] || MKT_INF_ESTADOS.contactado;
+    return `<tr>
+      <td>${f.fecha||'—'}</td>
+      <td style="text-align:left;"><b>${esc(f.nombre||'')}</b>${f.handle?`<br><small style="color:var(--text-dim);">${esc(f.handle)}</small>`:''}</td>
+      <td>${esc(f.red||'—')}</td>
+      <td class="mono">${f.seguidores?Number(f.seguidores).toLocaleString('es-ES'):'—'}</td>
+      <td style="text-align:left;">${esc(f.acuerdo||'—')}</td>
+      <td><span class="st ${est.cls}">${est.label}</span></td>
+      <td class="row-tools">
+        <button class="btn btn-ghost btn-sm" onclick="openMktInfluencer(${f.id})">✎</button>
+        <button class="row-del" onclick="deleteMktInfluencer(${f.id})">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function openMktInfluencer(id){
+  const f = id ? mktInfluencers.find(x=>x.id===id) : {};
+  const estOpts = Object.entries(MKT_INF_ESTADOS).map(([k,v])=>`<option value="${k}" ${f.estado===k?'selected':''}>${v.label}</option>`).join('');
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <div class="modal-head"><h2>${id?'Editar influencer':'Nuevo influencer'}</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Nombre</label><input id="mki-nombre" value="${esc(f.nombre||'')}"></div>
+          <div class="field"><label>Usuario / handle</label><input id="mki-handle" placeholder="@usuario" value="${esc(f.handle||'')}"></div>
+          <div class="field-row">
+            <div class="field"><label>Red social</label><input id="mki-red" placeholder="Instagram, TikTok…" value="${esc(f.red||'')}"></div>
+            <div class="field"><label>Seguidores</label><input type="number" id="mki-seguidores" value="${f.seguidores||''}"></div>
+          </div>
+          <div class="field"><label>Fecha de visita</label><input type="date" id="mki-fecha" value="${f.fecha||''}"></div>
+          <div class="field"><label>Acuerdo</label><input id="mki-acuerdo" placeholder="2 entradas a cambio de reel…" value="${esc(f.acuerdo||'')}"></div>
+          <div class="field"><label>Estado</label><select id="mki-estado">${estOpts}</select></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveMktInfluencer(${id||'null'})">Guardar</button>
+        </div>
+      </div>
+    </div>`;
+}
+async function saveMktInfluencer(id){
+  const payload = {
+    nombre: document.getElementById('mki-nombre').value.trim(),
+    handle: document.getElementById('mki-handle').value.trim(),
+    red: document.getElementById('mki-red').value.trim(),
+    seguidores: parseInt(document.getElementById('mki-seguidores').value)||null,
+    fecha: document.getElementById('mki-fecha').value || null,
+    acuerdo: document.getElementById('mki-acuerdo').value.trim(),
+    estado: document.getElementById('mki-estado').value,
+  };
+  if(!payload.nombre){ alert('Ponle un nombre.'); return; }
+  if(id) await sb.from('mkt_influencers').update(payload).eq('id', id);
+  else await sb.from('mkt_influencers').insert(payload);
+  closeModal();
+  renderMarketing();
+}
+async function deleteMktInfluencer(id){
+  if(!confirm('¿Eliminar este influencer?')) return;
+  await sb.from('mkt_influencers').delete().eq('id', id);
+  renderMarketing();
+}
+
+/* ---------- Calendario de campañas por semana ---------- */
+function mktCalMonth(delta){
+  mktCalDate.setMonth(mktCalDate.getMonth()+delta);
+  renderMktCalendar();
+}
+function renderMktCalendar(){
+  const el = document.getElementById('mk-calendar');
+  const lbl = document.getElementById('mk-cal-label');
+  if(!el) return;
+  const year = mktCalDate.getFullYear(), month = mktCalDate.getMonth();
+  const MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  if(lbl) lbl.textContent = `${MES[month]} ${year}`;
+
+  // semanas del mes (lunes-domingo) que tocan este mes
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month+1, 0);
+  let cur = new Date(first);
+  cur.setDate(cur.getDate() - ((cur.getDay()+6)%7)); // retroceder al lunes
+  const semanas = [];
+  while(cur <= last){
+    const ini = new Date(cur);
+    const fin = new Date(cur); fin.setDate(fin.getDate()+6);
+    semanas.push({ini:new Date(ini), fin:new Date(fin)});
+    cur.setDate(cur.getDate()+7);
+  }
+  const iso = d=> d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const fmt = d=> d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+
+  el.innerHTML = semanas.map((w,idx)=>{
+    const wIni = iso(w.ini), wFin = iso(w.fin);
+    // campañas que se solapan con esta semana
+    const activas = mktCampanas.filter(c=>{
+      const ci = c.fecha_inicio || '0000', cf = c.fecha_fin || '9999';
+      return ci <= wFin && cf >= wIni;
+    });
+    const barras = activas.map(c=>{
+      const est = MKT_ESTADOS[c.estado] || MKT_ESTADOS.planificada;
+      const empieza = (c.fecha_inicio||'') >= wIni && (c.fecha_inicio||'') <= wFin;
+      const acaba = (c.fecha_fin||'') >= wIni && (c.fecha_fin||'') <= wFin;
+      const color = c.estado==='activa'?'#33C98B':c.estado==='finalizada'?'#6E7688':'#E0A32E';
+      return `<div class="mk-bar" style="border-left:3px solid ${color};" title="${esc(c.nombre)} (${c.fecha_inicio||'?'} → ${c.fecha_fin||'?'})">
+        ${empieza?'▶ ':''}${esc(c.nombre)}${acaba?' ⏹':''}
+      </div>`;
+    }).join('') || '<div class="mk-empty">—</div>';
+    return `<div class="mk-week">
+      <div class="mk-week-label">Semana ${idx+1}<br><small>${fmt(w.ini)} – ${fmt(w.fin)}</small></div>
+      <div class="mk-week-bars">${barras}</div>
+    </div>`;
+  }).join('');
+}
+
 /* ============================================================
    LOOMIS — cuadre semanal de efectivo (SumUp + Fever por día)
    Tabla Supabase: loomis_semanas (una fila por lunes de la semana)
@@ -4983,7 +5402,19 @@ async function initChat(){
         ta.style.height = 'auto';
         ta.style.height = Math.min(130, ta.scrollHeight) + 'px';
       });
+      // pegar pantallazo con Ctrl+V
+      ta.addEventListener('paste', e=>{
+        const items = e.clipboardData?.items || [];
+        for(const it of items){
+          if(it.type && it.type.startsWith('image/')){
+            const file = it.getAsFile();
+            if(file){ e.preventDefault(); handleChatImage(file); }
+          }
+        }
+      });
     }
+    const fi = document.getElementById('chat-file');
+    if(fi){ fi.addEventListener('change', e=>{ if(e.target.files[0]) handleChatImage(e.target.files[0]); }); }
   }
   await loadChat(true);
   clearInterval(chatTimer);
@@ -5029,21 +5460,67 @@ function renderChat(){
     html += `<div class="msg ${mine?'mine':''}">
       ${mine ? `<button class="m-del" title="Eliminar" onclick="deleteChat(${m.id})">×</button>` : ''}
       <div class="m-who" style="color:${color}">${esc(m.autor||'?')}</div>
-      <div class="m-txt">${esc(m.texto||'')}</div>
+      ${m.texto ? `<div class="m-txt">${esc(m.texto)}</div>` : ''}
+      ${m.imagen ? `<img src="${m.imagen}" onclick="openLightbox('${m.imagen.replace(/'/g,"\\'")}')" alt="imagen">` : ''}
       <div class="m-time">${hora}</div>
     </div>`;
   });
   body.innerHTML = html;
 }
 
+let chatPendingImg = null;   // dataURL de la imagen pegada/seleccionada
+
+function handleChatImage(file){
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      // redimensionar para no guardar imágenes enormes (máx 1400px de ancho)
+      const maxW = 1400;
+      let w = img.width, h = img.height;
+      if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+      const cv = document.createElement('canvas');
+      cv.width = w; cv.height = h;
+      cv.getContext('2d').drawImage(img, 0, 0, w, h);
+      chatPendingImg = cv.toDataURL('image/jpeg', 0.72);
+      showChatImgPreview();
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function showChatImgPreview(){
+  const el = document.getElementById('chat-img-preview');
+  if(!el) return;
+  if(!chatPendingImg){ el.innerHTML=''; return; }
+  el.innerHTML = `<div class="chat-preview">
+    <img src="${chatPendingImg}" alt="preview">
+    <span style="font-size:12px;color:var(--text-soft);">Imagen lista para enviar</span>
+    <button class="cp-x" onclick="clearChatImg()" title="Quitar">×</button>
+  </div>`;
+}
+function clearChatImg(){ chatPendingImg = null; showChatImgPreview(); }
+
 async function sendChat(){
   const ta = document.getElementById('chat-input');
   if(!ta) return;
   const texto = ta.value.trim();
-  if(!texto) return;
+  if(!texto && !chatPendingImg) return;
+  const payload = { autor: currentProfile?.nombre || 'Equipo', texto: texto || '' };
+  if(chatPendingImg) payload.imagen = chatPendingImg;
   ta.value = ''; ta.style.height = 'auto';
-  await sb.from('chat_mensajes').insert({ autor: currentProfile?.nombre || 'Equipo', texto });
+  clearChatImg();
+  await sb.from('chat_mensajes').insert(payload);
   await loadChat(true);
+}
+
+function openLightbox(src){
+  const lb = document.createElement('div');
+  lb.className = 'img-lightbox';
+  lb.onclick = ()=> lb.remove();
+  lb.innerHTML = `<img src="${src}">`;
+  document.body.appendChild(lb);
 }
 
 async function deleteChat(id){
