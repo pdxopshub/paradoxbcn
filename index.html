@@ -1165,11 +1165,38 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ LOOMIS ============ -->
       <div class="view" id="view-loomis">
-        <div class="page-head"><div><h1>Loomis</h1><p>Gestión semanal del servicio Loomis. Pendiente de definir el flujo con el archivo correspondiente.</p></div></div>
-        <div class="empty-state" style="margin-top:20px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="36" height="36"><rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/><circle cx="7" cy="15" r="1.5"/><path d="M10 15h8"/></svg>
-          <div style="margin-top:12px;font-size:15px;font-weight:700;">Sección pendiente</div>
-          <div style="margin-top:6px;font-size:13px;">Cuando tengas el archivo de Loomis pásaselo a Claude y montamos aquí la gestión semanal del lunes.</div>
+        <div class="page-head">
+          <div><h1>Loomis</h1><p>Cuadre semanal de efectivo: SumUp y Fever, por día. Cada lunes se cuadra la semana.</p></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button class="btn btn-ghost btn-sm" onclick="loomisWeek(-1)">← Semana anterior</button>
+            <button class="btn btn-ghost btn-sm today-btn" onclick="loomisWeek(0)">Esta semana</button>
+            <button class="btn btn-ghost btn-sm" onclick="loomisWeek(1)">Siguiente →</button>
+          </div>
+        </div>
+
+        <div class="card" style="max-width:560px;">
+          <div class="flex-between" style="margin-bottom:12px;">
+            <div class="section-title" style="margin:0;" id="loomis-week-label">Semana</div>
+            <div style="font-size:11.5px;color:var(--text-dim);">Fila amarilla = cuadre final</div>
+          </div>
+          <div class="table-wrap">
+            <table id="loomis-table" class="loomis-table">
+              <thead>
+                <tr>
+                  <th style="width:118px;">Turnos</th>
+                  <th style="width:110px;background:#1B1E27;">SumUp</th>
+                  <th style="width:110px;background:#12283F;color:#7FB2FF;">fever</th>
+                  <th style="width:96px;">TOTAL</th>
+                </tr>
+              </thead>
+              <tbody id="loomis-body"></tbody>
+              <tfoot id="loomis-foot"></tfoot>
+            </table>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:10px;">
+            <button class="btn btn-primary btn-sm" onclick="saveLoomis()">Guardar semana</button>
+            <span id="loomis-saved" style="display:none;font-size:12.5px;font-weight:700;color:var(--ok);align-self:center;">✓ Guardado</span>
+          </div>
         </div>
       </div>
 
@@ -1539,6 +1566,7 @@ function goView(v){
   if(v==='dashboard') refreshDashboard();
   if(v==='recap') renderRecap();
   if(v==='resenas') renderResenas();
+  if(v==='loomis') renderLoomis();
   setTimeout(installTableFilters, 60);
   if(v==='grupos') initPdxspotEmbed();
   if(v==='chat') initChat();
@@ -3400,6 +3428,128 @@ async function fetchDiegoTasks(){
   if(error){ console.error(error); return []; }
   return data;
 }
+/* ============================================================
+   LOOMIS — cuadre semanal de efectivo (SumUp + Fever por día)
+   Tabla Supabase: loomis_semanas (una fila por lunes de la semana)
+   Estructura por día: { sumup:[a,b], fever:[a,b,c] }
+     - SumUp: valor previsto + valor confirmado (fila amarilla)
+     - Fever: valor arriba + valor medio + valor confirmado (fila amarilla)
+   El TOTAL del día = sumup_confirmado + fever_confirmado.
+   ============================================================ */
+let loomisMonday = loomisMondayOf(new Date());
+
+function loomisMondayOf(d){
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dow = (x.getDay()+6)%7;        // lunes = 0
+  x.setDate(x.getDate()-dow);
+  return x;
+}
+function loomisIso(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function loomisWeek(delta){
+  if(delta===0) loomisMonday = loomisMondayOf(new Date());
+  else loomisMonday.setDate(loomisMonday.getDate()+delta*7);
+  renderLoomis();
+}
+
+let loomisData = {};   // { 'YYYY-MM-DD': {sumup:[..], fever:[..]} }
+
+async function renderLoomis(){
+  const monday = new Date(loomisMonday);
+  const mondayIso = loomisIso(monday);
+  const sunday = new Date(monday); sunday.setDate(sunday.getDate()+6);
+  const fmt = d=> d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  document.getElementById('loomis-week-label').textContent = `${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
+
+  // cargar de Supabase
+  loomisData = {};
+  try{
+    const { data } = await sb.from('loomis_semanas').select('*').eq('semana', mondayIso).single();
+    if(data && data.dias){
+      loomisData = (typeof data.dias==='string') ? JSON.parse(data.dias) : data.dias;
+    }
+  }catch(e){ loomisData = {}; }
+
+  const dias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const body = document.getElementById('loomis-body');
+  let html = '';
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(d.getDate()+i);
+    const iso = loomisIso(d);
+    const dd = loomisData[iso] || {sumup:['',''], fever:['','','']};
+    const su = dd.sumup || ['',''];
+    const fe = dd.fever || ['','',''];
+    const fecha = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+    // fila 1: fecha | (sumup vacío arriba) | fever[0] | TOTAL
+    // fila 2: sumup[0] | fever[1]
+    // fila 3 amarilla: sumup[1] | fever[2]
+    html += `
+    <tr class="lm-day-top">
+      <td rowspan="3" class="lm-date">${dias[i]}<br><small>${fecha}</small></td>
+      <td></td>
+      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="fever" data-r="0" value="${fe[0]??''}" placeholder="—"></td>
+      <td rowspan="3" class="lm-total" id="lm-total-${iso}">—</td>
+    </tr>
+    <tr>
+      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="sumup" data-r="0" value="${su[0]??''}" placeholder="—"></td>
+      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="fever" data-r="1" value="${fe[1]??''}" placeholder="—"></td>
+    </tr>
+    <tr class="lm-yellow">
+      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="sumup" data-r="1" value="${su[1]??''}" placeholder="0"></td>
+      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="fever" data-r="2" value="${fe[2]??''}" placeholder="0"></td>
+    </tr>`;
+  }
+  body.innerHTML = html;
+
+  // listeners
+  body.querySelectorAll('.lm-in').forEach(inp=>{
+    inp.addEventListener('input', onLoomisInput);
+  });
+  recalcLoomis();
+}
+
+function onLoomisInput(e){
+  const iso = e.target.dataset.iso, c = e.target.dataset.c, r = parseInt(e.target.dataset.r,10);
+  if(!loomisData[iso]) loomisData[iso] = {sumup:['',''], fever:['','','']};
+  loomisData[iso][c][r] = e.target.value;
+  recalcLoomis();
+}
+
+function recalcLoomis(){
+  const monday = new Date(loomisMonday);
+  let weekSumup=0, weekFever=0, weekTotal=0;
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(d.getDate()+i);
+    const iso = loomisIso(d);
+    const dd = loomisData[iso] || {sumup:['',''], fever:['','','']};
+    const suC = parseFloat(dd.sumup?.[1]) || 0;   // sumup confirmado (amarillo)
+    const feC = parseFloat(dd.fever?.[2]) || 0;   // fever confirmado (amarillo)
+    const total = suC + feC;
+    weekSumup += suC; weekFever += feC; weekTotal += total;
+    const cell = document.getElementById('lm-total-'+iso);
+    if(cell) cell.textContent = (suC||feC) ? total.toFixed(2) : '—';
+  }
+  const foot = document.getElementById('loomis-foot');
+  foot.innerHTML = `
+    <tr class="lm-week">
+      <td>TOTAL WEEK</td>
+      <td>${weekSumup.toFixed(2)}</td>
+      <td>${weekFever.toFixed(2)}</td>
+      <td>${weekTotal.toFixed(2)}</td>
+    </tr>`;
+}
+
+async function saveLoomis(){
+  const mondayIso = loomisIso(loomisMonday);
+  await sb.from('loomis_semanas').upsert(
+    { semana: mondayIso, dias: JSON.stringify(loomisData), updated_at: new Date().toISOString() },
+    { onConflict: 'semana' }
+  );
+  const b = document.getElementById('loomis-saved');
+  if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2500); }
+}
+
 async function renderDiego(){
   const tasks = await fetchDiegoTasks();
   const list = document.getElementById('diego-list');
