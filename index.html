@@ -51,18 +51,18 @@
   .app{display:flex;min-height:100vh;}
 
   /* ---------- SIDEBAR ---------- */
-  .sidebar{width:250px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
-  .brand{padding:30px 16px 22px;border-bottom:1px solid var(--line);text-align:center;}
-  .brand img.wordmark{height:76px;width:auto;display:block;margin:0 auto;filter:invert(1);}
-  .brand .hub-label{margin-top:14px;font-family:var(--font);font-weight:800;font-size:20px;letter-spacing:4px;color:var(--accent);line-height:1.1;}
-  .brand .hub-city{margin-top:6px;font-family:var(--font);font-weight:700;font-size:13px;letter-spacing:5px;color:#fff;line-height:1.1;}
-  .brand .hub-rule{width:40px;height:3px;background:var(--accent);border-radius:3px;margin:11px auto 0;}
+  .sidebar{width:238px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+  .brand{padding:16px 14px 13px;border-bottom:1px solid var(--line);text-align:center;}
+  .brand img.wordmark{height:48px;width:auto;display:block;margin:0 auto;filter:invert(1);}
+  .brand .hub-label{margin-top:8px;font-family:var(--font);font-weight:800;font-size:16px;letter-spacing:3px;color:var(--accent);line-height:1.1;}
+  .brand .hub-city{margin-top:3px;font-family:var(--font);font-weight:700;font-size:10.5px;letter-spacing:4px;color:#fff;line-height:1.1;}
+  .brand .hub-rule{width:32px;height:2px;background:var(--accent);border-radius:3px;margin:8px auto 0;}
 
   nav{flex:1;overflow-y:auto;padding:8px 12px 12px;}
-  .navgroup{border-bottom:1px solid var(--line);padding:10px 0 10px;}
+  .navgroup{border-bottom:1px solid var(--line);padding:5px 0 5px;}
   .navgroup:last-child{border-bottom:none;}
-  .navlabel{font-size:10.5px;color:#5C6072;text-transform:uppercase;letter-spacing:1.3px;padding:6px 10px 8px;font-weight:800;}
-  .navitem{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;color:#AEB2C4;font-size:13.5px;font-weight:600;cursor:pointer;border:none;background:none;text-align:left;width:100%;transition:background .12s ease,color .12s ease;}
+  .navlabel{font-size:9.5px;color:#5C6072;text-transform:uppercase;letter-spacing:1.2px;padding:3px 10px 4px;font-weight:800;}
+  .navitem{display:flex;align-items:center;gap:9px;padding:5.5px 10px;border-radius:7px;color:#AEB2C4;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;text-align:left;width:100%;transition:background .12s ease,color .12s ease;}
   .navitem svg{width:16px;height:16px;flex-shrink:0;color:#666B80;}
   .navitem:hover{background:var(--panel);color:#fff;}
   .navitem.active{background:var(--accent-soft);color:#fff;box-shadow:inset 3px 0 0 var(--accent);}
@@ -88,7 +88,8 @@
   .topbar-sub{font-size:12px;color:var(--text-soft);margin-top:1px;}
   .proto-badge{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:var(--warning-soft);color:var(--warning);padding:5px 10px;border-radius:20px;border:1px solid #4A3A16;}
 
-  .content{padding:26px 30px 60px;max-width:none;width:100%;}
+  .content{padding:22px 34px 60px;width:100%;}
+  .content > .view{max-width:1500px;margin:0 auto;}
   .view{display:none;}
   .view.active{display:block;}
 
@@ -137,10 +138,14 @@
   .cell-input, td input[type="text"], td input[type="number"], td input:not([type]),
   td textarea, td select{
     background:#10233A;
-    border:1px solid #24405F;
+    border:1.5px solid #2E4C6E;
     border-radius:6px;
     color:#EAF1FB;
     transition:border-color .12s, background .12s;
+  }
+  /* también los inputs del recap llevan contorno permanente visible */
+  #view-recap input, #view-recap textarea, #view-recap select{
+    border:1.5px solid #2E4C6E !important;
   }
   .cell-input:hover, td input:hover, td textarea:hover, td select:hover{ background:#143053; }
   .cell-input:focus, td input:focus, td textarea:focus, td select:focus{
@@ -218,8 +223,46 @@
   .row-del:hover{color:var(--bad);background:var(--bad-bg);}
   .add-row-bar{display:flex;justify-content:center;margin-top:12px;}
 
-  /* ---- Tabla de Equipo: cabeceras y anchos ---- */
-  #staff-table th{text-align:center;vertical-align:middle;}
+  /* ============ TABLA DE EQUIPO — estilo hoja de cálculo ============ */
+  /* filas finas */
+  #staff-table td{padding:3px 6px!important;height:34px;}
+  #staff-table th{padding:8px 6px!important;}
+  /* celdas planas: los inputs se ven como celda de Excel, sin cápsula azul */
+  #staff-table td .cell-input, #staff-table td input, #staff-table td select{
+    background:transparent!important;
+    border:none!important;
+    border-radius:0!important;
+    height:28px;
+    box-shadow:none!important;
+  }
+  #staff-table td .cell-input:hover, #staff-table td input:hover{ background:#12253C!important; }
+  #staff-table td .cell-input:focus, #staff-table td input:focus{
+    background:#16304F!important;
+    box-shadow:inset 0 0 0 1.5px var(--accent)!important;
+  }
+  /* nombre legible y con color por inicial */
+  #staff-table td.nm{text-align:left;}
+  .staff-name{display:flex;align-items:center;gap:8px;cursor:pointer;padding:2px 4px;border-radius:6px;}
+  .staff-name:hover{background:var(--panel);}
+  .staff-name .ini{width:24px;height:24px;border-radius:6px;flex-shrink:0;display:flex;align-items:center;
+    justify-content:center;font-size:11px;font-weight:800;color:#0B0E14;}
+  .staff-name .nm-txt{font-weight:700;font-size:13px;color:#EAF1FB;white-space:nowrap;}
+  .staff-name .nm-txt small{display:block;font-size:10.5px;font-weight:500;color:var(--text-dim);}
+  /* formación: fila fija que NO se parte nunca */
+  #staff-table td.form-cell{white-space:nowrap;}
+  .form-badges{display:inline-flex;flex-wrap:nowrap;gap:3px;}
+  .form-badges .badge-training{padding:2px 6px;font-size:9.5px;}
+  /* usuario fever/sumup completos */
+  #staff-table td.user-cell input{text-align:left;font-size:11.5px;}
+  /* cabeceras clicables para ordenar */
+  #staff-table th.sortable{cursor:pointer;user-select:none;white-space:nowrap;}
+  #staff-table th.sortable:hover{color:var(--accent);}
+  #staff-table th .sort-arrow{font-size:9px;opacity:.6;margin-left:2px;}
+  /* rótulo de grupo NFCards encima de la tabla */
+  .nfc-group-label{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;
+    color:#5FB0FF;background:#12283F;border:1px solid #24455F;border-radius:20px;padding:3px 12px;letter-spacing:.4px;}
+  /* ---- Tabla de Equipo: cabeceras y anchos (heredado) ---- */
+  #staff-table th.old-center{text-align:center;vertical-align:middle;}
   #staff-table td{text-align:center;}
   #staff-table td:first-child{text-align:left;}
   #staff-table th:nth-child(1){width:180px;}
@@ -255,9 +298,28 @@
   .colmenu-panel label:hover{background:var(--panel);}
   .colmenu-panel input{accent-color:var(--accent);}
   /* ---- Recap en 3 columnas ---- */
-  .recap-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px;align-items:start;}
-  .recap-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
-  .recap-col > .card{margin-bottom:0!important;}
+  .recap-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start;}
+  @media(max-width:1180px){.recap-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:820px){.recap-grid{grid-template-columns:1fr;}}
+  .recap-col{display:flex;flex-direction:column;gap:12px;min-width:0;}
+  .recap-col > .card{margin-bottom:0!important;padding:14px 15px;}
+  /* recap compacto: filas, toggles y tasks más pequeños para que quepa sin scroll */
+  #view-recap .recap-field{padding:5px 0;}
+  #view-recap .recap-field label{font-size:12.5px;}
+  #view-recap .toggle-btn{padding:4px 11px;font-size:11px;}
+  #view-recap .task-item{padding:4.5px 0;}
+  #view-recap .task-item .task-txt{font-size:12px;}
+  #view-recap .task-item .task-check{width:17px;height:17px;}
+  #view-recap .day-block{margin-bottom:7px;}
+  #view-recap .day-block-label{font-size:10px;margin-bottom:3px;padding:2px 0;}
+  #view-recap .recap-section-title{font-size:12px;margin-bottom:9px;padding-bottom:8px;}
+  #view-recap .card .card{padding:11px 12px;}
+  /* Info General: las dos cápsulas internas SIEMPRE dentro y simétricas */
+  #view-recap .grid-2{grid-template-columns:1fr 1fr;gap:10px;}
+  #view-recap #rc-info-visitantes, #view-recap #rc-info-entrada{min-width:0;box-sizing:border-box;padding:11px 12px;}
+  .rc-cap-title{font-size:10.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+  #view-recap #rc-info-visitantes .recap-field, #view-recap #rc-info-entrada .recap-field{padding:4px 0;}
+  #view-recap #rc-info-visitantes .recap-field label, #view-recap #rc-info-entrada .recap-field label{font-size:12px;}
   /* ---- Anchos más contenidos ---- */
   #view-entrevistas .card,#view-turnos .card{max-width:820px;}
   .chat-wrap{max-width:600px;margin:0 auto;}
@@ -479,7 +541,7 @@
   .day-col .visit-big{font-family:var(--font);font-size:30px;font-weight:800;color:var(--accent);line-height:1;margin-bottom:4px;}
   .day-col .visit-none{font-size:26px;font-weight:800;color:var(--line-strong);line-height:1;margin-bottom:4px;}
   .day-col .ly-row{display:flex;align-items:center;gap:5px;margin-top:auto;padding-top:8px;border-top:1px dashed var(--line);font-size:11.5px;}
-  .day-col .ly-num{color:var(--text-soft);font-weight:600;}
+  .day-col .ly-num{color:#6B7180;font-weight:800;}
   .pct-up{font-size:11px;font-weight:800;color:var(--success);}
   .pct-down{font-size:11px;font-weight:800;color:var(--danger);}
   .day-col .group-chip{background:var(--accent-soft);border:1px solid #2C3F66;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent-dark);margin-bottom:5px;line-height:1.4;}
@@ -577,10 +639,10 @@
   display:inline-flex;align-items:center;gap:7px;transition:transform .1s, border-color .15s;
 }#pdxspot-embed .btn:hover{border-color:var(--ink);}#pdxspot-embed .btn:active{transform:scale(0.97);}#pdxspot-embed .btn-primary{background:var(--violet);border-color:var(--violet);color:#fff;}#pdxspot-embed .btn-primary:hover{background:#8f86ff;border-color:#8f86ff;}#pdxspot-embed .btn-ghost{border-color:transparent;background:transparent;}#pdxspot-embed .btn-ghost:hover{background:var(--paper-dim);border-color:transparent;}#pdxspot-embed .btn-danger{color:var(--coral);}#pdxspot-embed .btn-sm{padding:6px 11px;font-size:12.5px;border-radius:8px;}#pdxspot-embed .icon-btn{width:32px;height:32px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line-strong);background:var(--card);color:var(--violet);}#pdxspot-embed .icon-btn:hover{background:var(--violet-dim);}#pdxspot-embed .icon-btn:hover{border-color:var(--ink);}#pdxspot-embed .icon-btn svg{width:15px;height:15px;}#pdxspot-embed /* Stat cards */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}#pdxspot-embed .stat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px;box-shadow:var(--shadow);}#pdxspot-embed .stat-card .num{font-family:'Sora',system-ui,sans-serif;font-variant-numeric:tabular-nums;font-size:30px;font-weight:800;line-height:1;}#pdxspot-embed .stat-card .lbl{font-size:12.5px;color:var(--text-dim);margin-top:8px;font-weight:500;}#pdxspot-embed .stat-card.alert .num{color:var(--coral);}#pdxspot-embed .section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px;}#pdxspot-embed .section-title h2{font-size:15.5px;font-weight:700;margin:0;}#pdxspot-embed .section-title .count-pill{font-size:11.5px;background:var(--paper-dim);color:var(--text-dim);padding:2px 8px;border-radius:99px;font-weight:600;}#pdxspot-embed .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin-bottom:26px;}#pdxspot-embed .followup-row{display:flex;align-items:center;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line);}#pdxspot-embed .followup-row:last-child{border-bottom:none;}#pdxspot-embed .followup-row:hover{background:var(--paper-dim);cursor:pointer;}#pdxspot-embed .followup-row .fname{font-weight:600;font-size:13.5px;flex:1;min-width:0;}#pdxspot-embed .followup-row .fname small{display:block;font-weight:400;color:var(--text-dim);font-size:12px;margin-top:1px;}#pdxspot-embed .wait-badge{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:99px;font-family:'Sora';font-variant-numeric:tabular-nums;flex-shrink:0;}#pdxspot-embed .wait-badge.w-hot{background:var(--coral-dim);color:var(--coral);}#pdxspot-embed .wait-badge.w-warm{background:var(--amber-dim);color:var(--amber);}#pdxspot-embed .wait-badge.w-cool{background:var(--paper-dim);color:var(--text-dim);}#pdxspot-embed .empty-state{padding:40px 20px;text-align:center;color:var(--text-dim);}#pdxspot-embed .empty-state svg{width:40px;height:40px;opacity:.35;margin-bottom:10px;}#pdxspot-embed .empty-state p{font-size:13.5px;margin:0;}#pdxspot-embed /* Filters bar */
-.filters-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}#pdxspot-embed .filters-bar select, #pdxspot-embed .filters-bar input[type=text]{
+.filters-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}#pdxspot-embed .filters-bar select, #pdxspot-embed .filters-bar input[type=text]{
   border:1px solid var(--line-strong);border-radius:9px;padding:8px 12px;background:var(--card);font-size:13px;color:var(--text);
 }#pdxspot-embed .filters-bar input[type=text]{min-width:220px;}#pdxspot-embed /* Table */
-table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);font-weight:700;padding:10px 12px;border-bottom:2px solid var(--line-strong);background:var(--paper-dim);}#pdxspot-embed tbody td{padding:10px 12px;border-bottom:1px solid var(--line-strong);font-size:13px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}#pdxspot-embed tbody tr:nth-child(even){background:var(--row-alt);}#pdxspot-embed tbody tr:nth-child(even) td{border-bottom-color:rgba(255,255,255,0.05);}#pdxspot-embed tbody tr:last-child td{border-bottom:none;}#pdxspot-embed tbody tr:hover{background:var(--paper-dim);cursor:pointer;}#pdxspot-embed .gname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}#pdxspot-embed .gname small{display:block;font-weight:500;color:var(--text-dim);font-size:11.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}#pdxspot-embed col.col-grupo{width:38%;}#pdxspot-embed col.col-tipo{width:20%;}#pdxspot-embed col.col-estado{width:19%;}#pdxspot-embed col.col-fecha{width:18%;}#pdxspot-embed col.col-pax{width:9%;}#pdxspot-embed col.col-arrow{width:28px;}#pdxspot-embed .pill{display:inline-flex;align-items:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;}#pdxspot-embed .pill-tipo{background:var(--violet-dim);color:var(--violet);}#pdxspot-embed .pill-nuevo{background:var(--paper-dim);color:var(--text-dim);}#pdxspot-embed .pill-contactado{background:var(--amber-dim);color:var(--amber);}#pdxspot-embed .pill-confirmado{background:var(--mint-dim);color:var(--mint);}#pdxspot-embed .pill-realizado{background:var(--violet-dim);color:var(--violet);}#pdxspot-embed .pill-cancelado{background:var(--coral-dim);color:var(--coral);}#pdxspot-embed /* Modal */
+table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed thead th{text-align:center;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-dim);font-weight:700;padding:10px 12px;border-bottom:2px solid var(--line-strong);background:var(--paper-dim);}#pdxspot-embed tbody td{padding:10px 12px;border-bottom:1px solid var(--line-strong);font-size:13px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}#pdxspot-embed tbody tr:nth-child(even){background:var(--row-alt);}#pdxspot-embed tbody tr:nth-child(even) td{border-bottom-color:rgba(255,255,255,0.05);}#pdxspot-embed tbody tr:last-child td{border-bottom:none;}#pdxspot-embed tbody tr:hover{background:var(--paper-dim);cursor:pointer;}#pdxspot-embed .gname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}#pdxspot-embed .gname small{display:block;font-weight:500;color:var(--text-dim);font-size:11.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}#pdxspot-embed col.col-grupo{width:280px;}#pdxspot-embed col.col-tipo{width:150px;}#pdxspot-embed col.col-estado{width:140px;}#pdxspot-embed col.col-fecha{width:120px;}#pdxspot-embed col.col-pax{width:9%;}#pdxspot-embed col.col-arrow{width:28px;}#pdxspot-embed .pill{display:inline-flex;align-items:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;white-space:nowrap;}#pdxspot-embed .pill-tipo{background:var(--violet-dim);color:var(--violet);}#pdxspot-embed .pill-nuevo{background:var(--paper-dim);color:var(--text-dim);}#pdxspot-embed .pill-contactado{background:var(--amber-dim);color:var(--amber);}#pdxspot-embed .pill-confirmado{background:var(--mint-dim);color:var(--mint);}#pdxspot-embed .pill-realizado{background:var(--violet-dim);color:var(--violet);}#pdxspot-embed .pill-cancelado{background:var(--coral-dim);color:var(--coral);}#pdxspot-embed /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(10,10,10,0.55);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:50;}#pdxspot-embed .modal{background:var(--card);border-radius:14px;width:100%;max-width:640px;box-shadow:0 20px 60px -20px rgba(0,0,0,0.45);animation:pop .15s ease-out;}
 @keyframes pop{from{opacity:0;transform:translateY(6px) scale(.98);}to{opacity:1;transform:none;}}#pdxspot-embed .modal-head{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--line);gap:12px;}#pdxspot-embed .modal-head h2{font-size:18px;margin:0;}#pdxspot-embed .modal-body{padding:22px 24px;max-height:70vh;overflow-y:auto;}#pdxspot-embed .modal-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;}#pdxspot-embed .field{margin-bottom:15px;}#pdxspot-embed .field label{display:block;font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:6px;}#pdxspot-embed .field input, #pdxspot-embed .field select, #pdxspot-embed .field textarea{
   width:100%;border:1px solid var(--line-strong);border-radius:9px;padding:9px 12px;background:var(--paper);color:var(--text);
@@ -593,6 +655,16 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
 @media (max-width:860px){#pdxspot-embed .sidebar{position:fixed;left:0;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;align-items:center;padding:10px 14px;z-index:20;justify-content:space-between;}#pdxspot-embed .sidebar .brand, #pdxspot-embed .sidebar-footer{display:none;}#pdxspot-embed nav{flex-direction:row;flex:1;justify-content:space-around;}#pdxspot-embed .nav-btn span{display:none;}#pdxspot-embed .main{padding-bottom:64px;}#pdxspot-embed .topbar, #pdxspot-embed .view-root{padding-left:18px;padding-right:18px;}#pdxspot-embed .stats-grid{grid-template-columns:1fr 1fr;}#pdxspot-embed .field-row, #pdxspot-embed .detail-grid{grid-template-columns:1fr;}#pdxspot-embed .about-hero{padding:36px 24px;}#pdxspot-embed .about-wordmark{font-size:40px;}#pdxspot-embed .about-tagline{font-size:18px;}#pdxspot-embed .about-features{grid-template-columns:1fr;}
 }
 
+
+/* --- Grupos: filtros compactos tipo cápsula, en una fila --- */
+#pdxspot-embed .filters-bar{gap:8px;}
+#pdxspot-embed .filters-bar select,
+#pdxspot-embed .filters-bar input[type=text]{
+  padding:6px 12px!important;border-radius:20px!important;font-size:12px!important;
+  height:32px;box-sizing:border-box;
+}
+#pdxspot-embed .filters-bar input[type=text]{min-width:180px!important;width:200px;}
+#pdxspot-embed .filters-bar select{width:auto;min-width:0;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -620,7 +692,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
       <div class="hub-rule"></div>
     </div>
 
-    <nav id="nav">
+    <nav id="nav" style="flex:1;overflow-y:auto;">
         <div class="navgroup ng-dia">
           <div class="navlabel">Día a día</div>
           <button class="navitem active" data-view="recap">
@@ -727,7 +799,7 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
 
         <div class="grid grid-4" style="margin-bottom:14px;grid-template-columns:repeat(5,1fr);">
           <div class="card kpi"><div class="label">Visitas hoy</div><div class="value" id="dash-today-visits">–</div><div class="delta" id="dash-today-delta" style="color:var(--text-soft);">cargando…</div></div>
-          <div class="card kpi"><div class="label">Mismo día, año pasado</div><div class="value" id="dash-ly-visits">–</div><div class="delta" id="dash-ly-date" style="color:var(--text-soft);">–</div></div>
+          <div class="card kpi"><div class="label">Mismo día, año pasado</div><div class="value" id="dash-ly-visits" style="color:#6B7180;font-weight:800;">–</div><div class="delta" id="dash-ly-date" style="color:var(--text-soft);">–</div></div>
           <div class="card kpi"><div class="label">Rating Tripadvisor</div><div class="value" id="dash-ta-rating">–</div><div class="delta up" id="dash-ta-count">–</div></div>
           <div class="card kpi"><div class="label">Tus tareas PDA</div><div class="value" id="dash-my-tasks">–</div><div class="delta" style="color:var(--text-soft);" id="dash-my-tasks-sub">pendientes</div></div>
           <div class="card kpi" style="cursor:pointer;" onclick="goToRecapFromDashboard()"><div class="label">Recaps</div><div class="value" id="dash-recaps-unread">–</div><div class="delta" style="color:var(--text-soft);" id="dash-recaps-unread-sub">cargando…</div></div>
@@ -792,12 +864,8 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
 
       <!-- ============ RESEÑAS ============ -->
       <div class="view" id="view-resenas">
-        <div class="page-head"><div><h1>Reseñas</h1><p>Evolución de valoraciones en Tripadvisor y Google.</p></div></div>
-        <div class="tab-strip">
-          <button class="tab-btn active" data-rtab="tripadvisor">Tripadvisor</button>
-          <button class="tab-btn" data-rtab="google">Google</button>
-        </div>
-        <div id="resenas-content"></div>
+        <div class="page-head"><div><h1>Reseñas</h1><p>Tripadvisor, Google y GetYourGuide en una sola pantalla.</p></div></div>
+        <div id="resenas-content" class="resenas-3col"></div>
       </div>
 
       <!-- ============ STAFF ============ -->
@@ -825,7 +893,27 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
               </div>
             </div>
             <div class="table-wrap"><table id="staff-table" class="resizable"><thead>
-              <tr><th>Nombre</th><th>Horas</th><th>Disp. (L–D)</th><th>Formación</th><th>Usuario FEVER</th><th>Contraseña FEVER</th><th>Usuario SumUp</th><th>Contraseña SumUp</th><th>Nº Tarjeta</th><th>Visitas iniciales<br><span style="font-weight:600;font-size:9.5px;">01/07/26</span></th><th>Stats Web</th><th>Visitas</th><th>Estado</th><th></th></tr>
+              <tr class="grp-row">
+                <th colspan="8" style="border-bottom:none;"></th>
+                <th colspan="4" style="text-align:center;color:#5FB0FF;background:#0F2032;border-bottom:none;font-size:10px;letter-spacing:1px;">◉ NFCARDS</th>
+                <th colspan="2" style="border-bottom:none;"></th>
+              </tr>
+              <tr>
+                <th class="sortable" onclick="sortStaff('nombre')">Nombre <span class="sort-arrow" data-k="nombre"></span></th>
+                <th class="sortable" onclick="sortStaff('horas')">Horas <span class="sort-arrow" data-k="horas"></span></th>
+                <th>Disp. (L–D)</th>
+                <th>Formación</th>
+                <th>Usuario FEVER</th>
+                <th>Contraseña FEVER</th>
+                <th>Usuario SumUp</th>
+                <th>Contraseña SumUp</th>
+                <th>Nº Tarjeta</th>
+                <th class="sortable" onclick="sortStaff('nfc_visitas_iniciales')">Visitas iniciales<br><span style="font-weight:600;font-size:9.5px;">01/07/26</span> <span class="sort-arrow" data-k="nfc_visitas_iniciales"></span></th>
+                <th class="sortable" onclick="sortStaff('nfc_stats_web')">Stats Web <span class="sort-arrow" data-k="nfc_stats_web"></span></th>
+                <th class="sortable" onclick="sortStaff('visitas')">Visitas <span class="sort-arrow" data-k="visitas"></span></th>
+                <th>Estado</th>
+                <th></th>
+              </tr>
             </thead><tbody></tbody></table></div>
           </div>
 
@@ -926,10 +1014,10 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
 
       <!-- ============ RECAP ============ -->
       <div class="view active" id="view-recap">
-        <div style="display:flex;gap:20px;align-items:flex-start;">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
         <div style="max-width:1500px;flex:1;min-width:0;">
-        <div class="page-head">
-          <div><h1>Recap del día</h1><p>Cierre diario: info general, rutinas y observaciones. Se guarda solo, pero puedes forzar el guardado.</p></div>
+        <div class="page-head" style="margin-bottom:12px;">
+          <div style="text-align:left;"><h1 style="font-size:17px;margin-bottom:2px;">Recap del día</h1><p style="font-size:11.5px;">Se guarda solo. Puedes forzar el guardado.</p></div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
             <button class="btn btn-primary" onclick="saveRecap()" style="min-width:150px;justify-content:center;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
@@ -979,28 +1067,30 @@ table{width:100%;border-collapse:collapse;table-layout:fixed;}#pdxspot-embed the
             Info General
           </div>
 
-          <div class="grid grid-2" style="gap:14px;margin-bottom:14px;">
-            <div class="card" style="background:var(--panel);">
-              <div style="font-size:11px;font-weight:800;color:var(--text-soft);text-transform:uppercase;margin-bottom:10px;">Visitantes</div>
-              <div class="recap-field"><label>Hoy</label><input type="number" class="cell-input" id="rc-visitantes" placeholder="0" style="width:90px;text-align:right;"></div>
+          <div class="grid grid-2" style="gap:10px;margin-bottom:12px;">
+            <div class="card" id="rc-info-visitantes" style="background:var(--panel);">
+              <div class="rc-cap-title">Visitantes</div>
+              <div class="recap-field"><label>Hoy</label><input type="number" class="cell-input" id="rc-visitantes" placeholder="0" style="width:80px;text-align:right;"></div>
               <div class="recap-field"><label style="color:var(--text-soft);">Año pasado</label><div class="val" id="rc-visitantes-ly" style="color:var(--accent);font-weight:800;">–</div></div>
+
+              <div class="rc-cap-title" style="margin-top:12px;">Horas Planday</div>
+              <div class="recap-field"><label>Total staff</label><input type="number" class="cell-input" id="rc-horas-planday" placeholder="0.0" step="0.5" style="width:80px;text-align:right;"></div>
+
+              <div class="rc-cap-title" style="margin-top:12px;">Reseñas hoy</div>
+              <div class="recap-field"><label>Tripadvisor</label><input type="number" class="cell-input" id="rc-ta-reviews" placeholder="0" style="width:70px;text-align:right;"></div>
+              <div class="recap-field"><label>Google</label><input type="number" class="cell-input" id="rc-google-reviews" placeholder="0" style="width:70px;text-align:right;"></div>
+              <div class="recap-field"><label>GetYourGuide</label><input type="number" class="cell-input" id="rc-gyg-reviews" placeholder="0" style="width:70px;text-align:right;"></div>
             </div>
-            <div class="card" style="background:var(--panel);">
-              <div style="font-size:11px;font-weight:800;color:var(--text-soft);text-transform:uppercase;margin-bottom:10px;">Tipo de entrada</div>
-              <div class="recap-field"><label>Box Office</label><input type="number" class="cell-input" id="rc-box-office" placeholder="0" style="width:80px;text-align:right;"></div>
-              <div class="recap-field"><label>Fever Marketplace</label><input type="number" class="cell-input" id="rc-fever" placeholder="0" style="width:80px;text-align:right;"></div>
-              <div class="recap-field"><label>API</label><input type="number" class="cell-input" id="rc-api" placeholder="0" style="width:80px;text-align:right;"></div>
-              <div class="recap-field"><label>Grupos</label><input type="number" class="cell-input" id="rc-grupos" placeholder="0" style="width:80px;text-align:right;"></div>
+            <div class="card" id="rc-info-entrada" style="background:var(--panel);">
+              <div class="rc-cap-title">Tipo de entrada</div>
+              <div class="recap-field"><label>Box Office</label><input type="number" class="cell-input" id="rc-box-office" placeholder="0" style="width:70px;text-align:right;"></div>
+              <div class="recap-field"><label>Fever</label><input type="number" class="cell-input" id="rc-fever" placeholder="0" style="width:70px;text-align:right;"></div>
+              <div class="recap-field"><label>API</label><input type="number" class="cell-input" id="rc-api" placeholder="0" style="width:70px;text-align:right;"></div>
+              <div class="recap-field"><label>Grupos</label><input type="number" class="cell-input" id="rc-grupos" placeholder="0" style="width:70px;text-align:right;"></div>
             </div>
           </div>
 
-          <!-- Planday + Reseñas AHORA encima de la boutique -->
-          <div class="grid grid-2" style="gap:14px;margin-bottom:14px;">
-            <div class="recap-field"><label>Horas Planday (total staff)</label><input type="number" class="cell-input" id="rc-horas-planday" placeholder="0.0" step="0.5" style="width:80px;text-align:right;"></div>
-            <div class="recap-field"><label>Tripadvisor Reviews hoy</label><input type="number" class="cell-input" id="rc-ta-reviews" placeholder="0" style="width:80px;text-align:right;"></div>
-          </div>
-
-          <div style="font-size:11px;font-weight:800;color:var(--text-soft);text-transform:uppercase;margin-bottom:10px;">Boutique total día</div>
+          <div class="rc-cap-title" style="margin-bottom:8px;">Boutique total día</div>
           <div id="rc-boutique-fields" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px;margin-bottom:4px;"></div>
         </div>
         </div>
@@ -1448,6 +1538,7 @@ function goView(v){
   if(v==='diego') renderDiego();
   if(v==='dashboard') refreshDashboard();
   if(v==='recap') renderRecap();
+  if(v==='resenas') renderResenas();
   setTimeout(installTableFilters, 60);
   if(v==='grupos') initPdxspotEmbed();
   if(v==='chat') initChat();
@@ -1928,7 +2019,7 @@ async function deleteCommissionSnapshot(id){
 /* ============================================================
    RESEÑAS — actualización manual semanal (cada lunes)
    ============================================================ */
-const reviewColor = {tripadvisor:'linear-gradient(180deg,#33C98B,#0E8F5C)', google:'linear-gradient(180deg,#5B8CFF,#2E48E0)'};
+const reviewColor = {tripadvisor:'linear-gradient(180deg,#33C98B,#0E8F5C)', google:'linear-gradient(180deg,#5B8CFF,#2E48E0)', getyourguide:'linear-gradient(180deg,#F2913D,#C56410)'};
 
 function parseRanking(str){
   if(!str) return {pos:'', total:''};
@@ -1955,119 +2046,81 @@ async function fetchReviewHistory(tab){
   }));
 }
 
-async function renderResenas(tab){
+async function renderResenas(){
   const el = document.getElementById('resenas-content');
-  el.innerHTML = '<div class="empty-state">Cargando…</div>';
+  el.innerHTML = '<div class="empty-state">Cargando reseñas…</div>';
+  const fuentes = [
+    {id:'tripadvisor', label:'Tripadvisor', color:'#33C98B',
+     link:'https://www.tripadvisor.com/Attraction_Review-g187497-d25410922-Reviews-Paradox_Museum_Barcelona-Barcelona_Catalonia.html'},
+    {id:'google', label:'Google', color:'#5B8CFF',
+     link:'https://share.google/K0i8JLtwgsoqSMSKe'},
+    {id:'getyourguide', label:'GetYourGuide', color:'#F2913D', link:'#'},
+  ];
 
-  // Timeout de seguridad: si en 5s no hay respuesta, muestra el formulario vacío
-  let cache = null;
-  try {
-    const timeout = new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),5000));
-    const query = sb.from('reviews_cache').select('*').eq('source', tab).single();
-    const result = await Promise.race([query, timeout]);
-    cache = result?.data ?? null;
-  } catch(e){ cache = null; }
+  const cols = await Promise.all(fuentes.map(async f=>{
+    let cache=null;
+    try{
+      const r = await sb.from('reviews_cache').select('*').eq('source', f.id).single();
+      cache = r?.data ?? null;
+    }catch(e){ cache=null; }
+    let rows = await fetchReviewHistory(f.id);
+    // orden por fecha descendente (más reciente arriba)
+    rows = (rows||[]).slice().sort((a,b)=> (b.iso||'').localeCompare(a.iso||''));
+    return {f, cache, rows};
+  }));
 
-  const rows = await fetchReviewHistory(tab);
-  const max = Math.max(...rows.map(r=>r.count), 1);
-  const label = tab === 'tripadvisor' ? 'Tripadvisor' : 'Google';
-  const link  = tab === 'tripadvisor'
-    ? 'https://www.tripadvisor.com/Attraction_Review-g187497-d25410922-Reviews-Paradox_Museum_Barcelona-Barcelona_Catalonia.html'
-    : 'https://share.google/K0i8JLtwgsoqSMSKe';
-  const updatedLabel = cache?.fetched_at
-    ? new Date(cache.fetched_at).toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})
-    : '—';
-  const rankParsed = parseRanking(cache?.ranking);
+  el.innerHTML = cols.map(({f,cache,rows})=>{
+    const rk = parseRanking(cache?.ranking);
+    const updated = cache?.fetched_at
+      ? new Date(cache.fetched_at).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})
+      : '—';
+    const hist = rows.length ? `
+      <div class="rv-hist">
+        <div class="section-title" style="font-size:12px;margin:14px 0 8px;">Histórico <span class="hint">por fecha</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Punt.</th><th>Nº</th><th>Ranking</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td>${r.d}</td><td>${r.rating??'–'}</td><td class="mono">${r.count??'–'}</td><td class="mono" style="font-size:11px;">${r.rank??'–'}</td></tr>`).join('')}</tbody>
+        </table></div>
+      </div>` : '<div style="font-size:12px;color:var(--text-dim);margin-top:14px;">Sin histórico todavía.</div>';
 
-  el.innerHTML = `
-    <div class="card" style="margin-bottom:14px;">
-      <div class="flex-between" style="margin-bottom:16px;">
-        <div class="section-title" style="margin:0;">${label} · Datos actuales</div>
-        <a href="${link}" target="_blank" class="btn btn-ghost btn-sm">Ver en ${label} →</a>
+    return `
+    <div class="rv-col" style="--rv:${f.color};">
+      <div class="rv-head">
+        <span class="rv-dot" style="background:${f.color};"></span>
+        <span class="rv-title">${f.label}</span>
+        ${f.link!=='#' ? `<a href="${f.link}" target="_blank" class="rv-link">↗</a>` : ''}
       </div>
-      <div class="grid grid-3" style="gap:12px;margin-bottom:10px;">
-        <div class="card kpi" style="background:var(--panel);">
-          <div class="label">Puntuación</div>
-          <div class="value">${cache?.rating ?? '–'}<span style="font-size:15px;color:var(--text-soft);"> / 5</span></div>
-        </div>
-        <div class="card kpi" style="background:var(--panel);">
-          <div class="label">Nº de reseñas</div>
-          <div class="value">${cache?.review_count?.toLocaleString('es-ES') ?? '–'}</div>
-        </div>
-        <div class="card kpi" style="background:var(--panel);">
-          <div class="label">Ranking BCN</div>
-          <div class="value" style="font-size:18px;">${cache?.ranking ?? '–'}</div>
-        </div>
-      </div>
-      <div style="font-size:11.5px;color:var(--text-soft);">Última actualización: ${updatedLabel}</div>
-    </div>
 
-    <div class="card" style="margin-bottom:14px;border:1px solid var(--accent);">
-      <div class="section-title" style="margin-bottom:14px;">
-        ✏️ Actualización semanal — ${label}
+      <div class="rv-kpis">
+        <div><div class="rv-k">${cache?.rating ?? '–'}<small>/5</small></div><div class="rv-l">Puntuación</div></div>
+        <div><div class="rv-k">${cache?.review_count?.toLocaleString('es-ES') ?? '–'}</div><div class="rv-l">Reseñas</div></div>
+        <div><div class="rv-k" style="font-size:14px;">${cache?.ranking ?? '–'}</div><div class="rv-l">Ranking</div></div>
       </div>
-      <div class="grid grid-3" style="gap:12px;margin-bottom:12px;">
-        <div>
-          <label class="field-label">Puntuación</label>
-          <div class="stepper-wrap">
-            <input type="number" id="rv-rating-${tab}" step="0.1" min="1" max="5" value="${cache?.rating ?? 4.5}" style="font-size:16px;font-weight:700;">
-            <div class="stepper-arrows">
-              <button type="button" onclick="stepperNudge('rv-rating-${tab}',0.1,1,5,1)">▲</button>
-              <button type="button" onclick="stepperNudge('rv-rating-${tab}',-0.1,1,5,1)">▼</button>
-            </div>
+      <div style="font-size:10.5px;color:var(--text-dim);margin-bottom:12px;">Actualizado: ${updated}</div>
+
+      <div class="rv-form">
+        <div class="rv-form-row">
+          <label>Puntuación</label>
+          <input type="number" id="rv-rating-${f.id}" step="0.1" min="1" max="5" value="${cache?.rating ?? 4.5}">
+        </div>
+        <div class="rv-form-row">
+          <label>Nº reseñas</label>
+          <input type="number" id="rv-count-${f.id}" value="${cache?.review_count ?? 0}">
+        </div>
+        <div class="rv-form-row">
+          <label>Ranking</label>
+          <div style="display:flex;gap:5px;align-items:center;">
+            <input type="number" id="rv-rank-pos-${f.id}" value="${rk.pos}" style="width:52px;" title="Posición">
+            <span style="color:var(--text-dim);font-size:11px;">de</span>
+            <input type="number" id="rv-rank-total-${f.id}" value="${rk.total}" style="width:64px;" title="Total">
           </div>
         </div>
-        <div>
-          <label class="field-label">Nº de reseñas</label>
-          <div class="stepper-wrap">
-            <input type="number" id="rv-count-${tab}" value="${cache?.review_count ?? 0}" style="font-size:16px;font-weight:700;">
-            <div class="stepper-arrows">
-              <button type="button" onclick="stepperNudge('rv-count-${tab}',1,0)">▲</button>
-              <button type="button" onclick="stepperNudge('rv-count-${tab}',-1,0)">▼</button>
-            </div>
-          </div>
-        </div>
-        <div>
-          <label class="field-label">Ranking (posición · de)</label>
-          <div style="display:flex;align-items:center;gap:6px;">
-            <div class="stepper-wrap" style="flex:1;">
-              <input type="number" id="rv-rank-pos-${tab}" value="${rankParsed.pos}" style="font-size:15px;font-weight:700;">
-              <div class="stepper-arrows">
-                <button type="button" onclick="stepperNudge('rv-rank-pos-${tab}',1,1)">▲</button>
-                <button type="button" onclick="stepperNudge('rv-rank-pos-${tab}',-1,1)">▼</button>
-              </div>
-            </div>
-            <span style="color:var(--text-soft);font-size:11.5px;flex-shrink:0;">de</span>
-            <div class="stepper-wrap" style="flex:1;">
-              <input type="number" id="rv-rank-total-${tab}" value="${rankParsed.total}" style="font-size:15px;font-weight:700;">
-              <div class="stepper-arrows">
-                <button type="button" onclick="stepperNudge('rv-rank-total-${tab}',1,1)">▲</button>
-                <button type="button" onclick="stepperNudge('rv-rank-total-${tab}',-1,1)">▼</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveResenaUpdate('${f.id}')">Guardar ${f.label}</button>
+        <span id="rv-saved-${f.id}" style="display:none;font-size:12px;font-weight:700;color:var(--ok);text-align:center;margin-top:6px;">✓ Guardado</span>
       </div>
-      <button class="btn btn-primary" onclick="saveResenaUpdate('${tab}')">Guardar</button>
-      <span id="rv-saved-${tab}" style="display:none;margin-left:12px;font-size:13px;font-weight:700;color:var(--success);">✓ Guardado</span>
-    </div>
 
-    ${rows.length ? `
-    <div class="card">
-      <div class="section-title">Evolución histórica <span class="hint">${label}</span></div>
-      <div style="display:flex;align-items:flex-end;gap:14px;height:120px;margin-bottom:18px;padding:0 4px;border-bottom:1px solid var(--line);">
-        ${rows.map(r=>`
-          <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;">
-            <div style="font-size:11px;color:var(--text-soft);font-weight:700;">${r.count}</div>
-            <div style="width:100%;background:${reviewColor[tab]};border-radius:4px 4px 0 0;height:${(r.count/max*80)+10}px;"></div>
-            <div style="font-size:10.5px;color:var(--text-soft);">${r.d}</div>
-          </div>`).join('')}
-      </div>
-      <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Puntuación</th><th>Nº reseñas</th><th>Ranking BCN</th></tr></thead>
-      <tbody>${rows.map(r=>`<tr><td>${r.d}</td><td>${r.rating} / 5</td><td class="mono">${r.count}</td><td class="mono">${r.rank}</td></tr>`).join('')}</tbody>
-      </table></div>
-    </div>` : ''}
-  `;
+      ${hist}
+    </div>`;
+  }).join('');
 }
 
 async function saveResenaUpdate(tab){
@@ -2290,6 +2343,33 @@ function initStaffColResize(){
   applyStaffCols();
 }
 
+let staffSort = { key:null, dir:1 };
+function staffVisitas(s){
+  const i=s.nfc_visitas_iniciales, w=s.nfc_stats_web;
+  if(i===null||i===undefined||w===null||w===undefined) return -1;
+  return Math.max(0, w - i);
+}
+function applyStaffSort(list){
+  if(!staffSort.key) return;
+  const k = staffSort.key, d = staffSort.dir;
+  list.sort((a,b)=>{
+    let va, vb;
+    if(k==='visitas'){ va=staffVisitas(a); vb=staffVisitas(b); }
+    else if(k==='nombre'){ va=(a.nombre||'').toLowerCase(); vb=(b.nombre||'').toLowerCase(); return va<vb?-1*d:va>vb?1*d:0; }
+    else { va=a[k]??-1; vb=b[k]??-1; }
+    return (va-vb)*d;
+  });
+}
+function sortStaff(key){
+  if(staffSort.key===key) staffSort.dir *= -1;
+  else { staffSort.key = key; staffSort.dir = (key==='nombre') ? 1 : -1; } // números: primero mayor
+  renderStaffTable();
+  setTimeout(()=>{
+    document.querySelectorAll('#staff-table .sort-arrow').forEach(el=>el.textContent='');
+    const a=document.querySelector(`#staff-table .sort-arrow[data-k="${key}"]`);
+    if(a) a.textContent = staffSort.dir>0 ? '▲' : '▼';
+  },0);
+}
 async function renderStaffTable(){
   setTimeout(initStaffColResize, 0);
   setTimeout(installTableFilters, 60);
@@ -2300,6 +2380,7 @@ async function renderStaffTable(){
     const act = s.activo !== false;
     return modo==='todos' ? true : (modo==='activos' ? act : !act);
   });
+  applyStaffSort(list);
   const tbody = document.querySelector('#staff-table tbody');
   const days=['L','M','X','J','V','S','D'];
   tbody.innerHTML = list.length ? list.map(s=>{
@@ -2310,13 +2391,16 @@ async function renderStaffTable(){
     const gan = (ini===null||ini===undefined||web===null||web===undefined) ? null : Math.max(0, web - ini);
     return `
     <tr class="${act?'':'staff-off'}">
-      <td><button class="btn btn-ghost btn-sm" onclick="openStaffModal(${s.id})" style="font-weight:800;">${s.nombre} ${s.apellido||''}</button></td>
+      <td class="nm"><div class="staff-name" onclick="openStaffModal(${s.id})">
+            <span class="ini" style="background:${roleColors[s.nombre]||'#5B8CFF'}">${(s.nombre||'?')[0]}</span>
+            <span class="nm-txt">${s.nombre||''}<small>${s.apellido||''}</small></span>
+          </div></td>
       <td><span class="horas-cell"><input class="cell-input" type="number" min="0" value="${s.horas??8}" data-id="${s.id}" data-field="horas"><b>h</b></span></td>
       <td><div class="avail-grid">${days.map(d=>`<div class="avail-cell ${avail[d]?'':'off'}" style="${avail[d]?'background:var(--accent);color:#0B0E14;':''}">${d}</div>`).join('')}</div></td>
-      <td>${TRAINING_BADGES.map(t=>`<span class="badge-training ${train.includes(t)?'done':''}" onclick="toggleTraining(${s.id},'${t}')">${t}</span>`).join('')}</td>
-      <td><input class="cell-input txt" placeholder="usuario" value="${s.fever_user||''}" data-id="${s.id}" data-field="fever_user"></td>
+      <td class="form-cell"><span class="form-badges">${TRAINING_BADGES.map(t=>`<span class="badge-training ${train.includes(t)?'done':''}" onclick="toggleTraining(${s.id},'${t}')">${t}</span>`).join('')}</span></td>
+      <td class="user-cell"><input class="cell-input txt" placeholder="usuario" value="${s.fever_user||''}" data-id="${s.id}" data-field="fever_user"></td>
       <td>${pwField(s.id,'fever_pass',s.fever_pass)}</td>
-      <td><input class="cell-input txt" placeholder="usuario" value="${s.sumup_user||''}" data-id="${s.id}" data-field="sumup_user"></td>
+      <td class="user-cell"><input class="cell-input txt" placeholder="usuario" value="${s.sumup_user||''}" data-id="${s.id}" data-field="sumup_user"></td>
       <td>${pwField(s.id,'sumup_pass',s.sumup_pass)}</td>
       <td><input class="cell-input" placeholder="—" value="${s.nfc_numero||''}" data-id="${s.id}" data-field="nfc_numero"></td>
       <td><input class="cell-input" type="number" min="0" placeholder="—" value="${numOrEmpty(ini)}" data-id="${s.id}" data-field="nfc_visitas_iniciales"></td>
@@ -3051,7 +3135,7 @@ async function renderRecap(){
   await loadRecapData();
 
   // Configurar event listeners de auto-guardado
-  ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews'].forEach(id=>{
+  ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews'].forEach(id=>{
     const el = document.getElementById(id);
     if(el) el.addEventListener('change', () => saveRecap(true));
   });
@@ -3097,6 +3181,8 @@ async function loadRecapData(){
   setValue('rc-grupos', recapData.e_grupos ?? '');
   setValue('rc-horas-planday', recapData.horas_planday ?? '');
   setValue('rc-ta-reviews', recapData.ta_reviews ?? '');
+  setValue('rc-google-reviews', recapData.google_reviews ?? '');
+  setValue('rc-gyg-reviews', recapData.gyg_reviews ?? '');
 
   // Auto-fetch boutique de spv_entries si no hay dato guardado
   const boutique = recapData.boutique || {};
@@ -3158,6 +3244,8 @@ function getRecapPayload(){
     boutique,
     horas_planday: parseFloat(document.getElementById('rc-horas-planday')?.value)||null,
     ta_reviews: parseFloat(document.getElementById('rc-ta-reviews')?.value)||null,
+    google_reviews: parseFloat(document.getElementById('rc-google-reviews')?.value)||null,
+    gyg_reviews: parseFloat(document.getElementById('rc-gyg-reviews')?.value)||null,
     rutinas: rutinasSi,
     tasks_done: tasksDone,
     lluvia: document.getElementById('rc-lluvia-toggle')?.classList.contains('si') || false,
