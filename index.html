@@ -370,6 +370,30 @@
   #view-recap #rc-info-visitantes .recap-field label, #view-recap #rc-info-entrada .recap-field label{font-size:12px;}
   /* ---- Anchos más contenidos ---- */
   #view-entrevistas .card{max-width:820px;}
+  /* ---- PDA: semana + columnas por persona ---- */
+  .pda-topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;
+    flex-wrap:wrap;margin-bottom:14px;}
+  .pda-week{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .pda-week-label{font-family:var(--font);font-weight:800;font-size:15px;color:var(--accent);
+    min-width:190px;text-align:center;display:flex;align-items:center;justify-content:center;}
+  .pda-readonly{font-size:11.5px;font-weight:700;color:var(--wait);
+    background:var(--wait-bg);border:1px solid var(--wait-br);border-radius:20px;padding:4px 12px;}
+  .pda-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start;}
+  .pda-cols.one{grid-template-columns:minmax(0,620px);}
+  @media(max-width:1050px){.pda-cols{grid-template-columns:1fr;}}
+  .pda-col{margin-bottom:0!important;}
+  .pda-col.mine{border-color:var(--accent);}
+  .pda-list{display:flex;flex-direction:column;}
+  .pda-task{display:flex;align-items:flex-start;gap:9px;padding:8px 0;
+    border-bottom:1px solid var(--line);cursor:pointer;text-align:left;}
+  .pda-task:last-child{border-bottom:none;}
+  .pda-task input{margin-top:2px;flex-shrink:0;accent-color:var(--accent);width:15px;height:15px;cursor:pointer;}
+  .pda-task-txt{flex:1;min-width:0;font-size:12.5px;line-height:1.4;overflow-wrap:anywhere;}
+  .pda-task.done .pda-task-txt{text-decoration:line-through;color:var(--text-dim);}
+  .pda-task.locked{cursor:default;}
+  .pda-task.locked input{cursor:not-allowed;opacity:.5;}
+  .pda-task .row-del{opacity:0;transition:opacity .12s;}
+  .pda-task:hover .row-del{opacity:1;}
   /* ---- TURNOS: gestión a la izquierda, calendario a la derecha ---- */
   .turnos-layout{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:14px;align-items:start;}
   @media(max-width:1150px){.turnos-layout{grid-template-columns:1fr;}}
@@ -1253,8 +1277,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ PDA ============ -->
       <div class="view" id="view-pda">
-        <div class="page-head"><div><h1>PDA · Plan de acción semanal</h1><p id="pda-sub">Laia asigna tareas cada semana a Ignacio, Paula y Ceci. Cada uno ve y marca solo las suyas.</p></div></div>
-        <div id="pda-content" style="max-width:640px;"></div>
+        <div id="pda-content"></div>
       </div>
 
       <!-- ============ RECAP ============ -->
@@ -3345,80 +3368,138 @@ async function fetchPdaTasks(){
   if(error){ console.error(error); return []; }
   return data;
 }
+/* ============================================================
+   PDA — Plan de acción semanal
+   Permisos:
+     · Laia (director): ve y edita las 3 columnas
+     · Ignacio: ve las 3 columnas, solo marca las suyas
+     · Paula / Ceci: solo su columna, solo marcan las suyas
+   ============================================================ */
+let pdaWeekOffset = 0;
+
+function pdaMondayOf(offset){
+  const d = new Date();
+  d.setDate(d.getDate() - ((d.getDay()+6)%7) + offset*7);
+  d.setHours(12,0,0,0);
+  return d;
+}
+function pdaIsoWeek(d){
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = (t.getUTCDay()+6)%7;
+  t.setUTCDate(t.getUTCDate() - dayNum + 3);
+  const ft = new Date(Date.UTC(t.getUTCFullYear(),0,4));
+  const fdNum = (ft.getUTCDay()+6)%7;
+  ft.setUTCDate(ft.getUTCDate() - fdNum + 3);
+  return { year:t.getUTCFullYear(), week: 1 + Math.round((t-ft)/604800000) };
+}
+function pdaWeekKey(offset){
+  const m = pdaMondayOf(offset);
+  const {year,week} = pdaIsoWeek(m);
+  return `${year}-W${String(week).padStart(2,'0')}`;
+}
+function pdaWeekLabel(offset){
+  const m = pdaMondayOf(offset);
+  const d = new Date(m); d.setDate(d.getDate()+6);
+  const {week} = pdaIsoWeek(m);
+  const MES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const rango = (m.getMonth()===d.getMonth())
+    ? `${m.getDate()}-${d.getDate()} de ${MES[m.getMonth()]}`
+    : `${m.getDate()} ${MES[m.getMonth()].slice(0,3)} - ${d.getDate()} ${MES[d.getMonth()].slice(0,3)}`;
+  return `W${week} · ${rango}`;
+}
+function pdaChangeWeek(delta){
+  if(delta===0) pdaWeekOffset = 0; else pdaWeekOffset += delta;
+  renderPDA();
+}
+function pdaCanSeeAll(){ return isDirector() || (currentProfile?.nombre === 'Ignacio'); }
+function pdaCanAssign(){ return isDirector(); }
+
 async function renderPDA(){
   const container = document.getElementById('pda-content');
+  if(!container) return;
   container.innerHTML = '<div class="empty-state">Cargando tareas…</div>';
-  const tasks = await fetchPdaTasks();
-  const director = isDirector();
+  const all = await fetchPdaTasks();
+  const wKey = pdaWeekKey(pdaWeekOffset);
+  const tasks = all.filter(t => (t.week||'') === wKey);
 
-  if(director){
-    document.getElementById('pda-sub').textContent = 'Estás asignando y viendo el seguimiento de todo el equipo.';
-    let html = `<div class="card" style="margin-bottom:16px;">
-      <div class="section-title">Asignar nueva tarea</div>
-      <div class="grid grid-3" style="align-items:end;">
+  const yo = currentProfile?.nombre || currentRole();
+  const verTodos = pdaCanSeeAll();
+  const puedeAsignar = pdaCanAssign();
+  const personas = verTodos ? ASSIGNABLE : [yo];
+
+  let html = `<div class="pda-topbar">
+      <div class="pda-week">
+        <button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(-1)">‹ Anterior</button>
+        <div class="pda-week-label">${pdaWeekLabel(pdaWeekOffset)}${pdaWeekOffset===0?' <span class="pill green" style="margin-left:6px;">actual</span>':''}</div>
+        <button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(1)">Siguiente ›</button>
+        ${pdaWeekOffset!==0?'<button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(0)">Ir a la actual</button>':''}
+      </div>
+      ${!puedeAsignar ? '<span class="pda-readonly">Solo lectura · marcas únicamente tus tareas</span>' : ''}
+    </div>`;
+
+  if(puedeAsignar){
+    html += `<div class="card" style="margin-bottom:14px;">
+      <div class="section-title">Asignar tarea · ${pdaWeekLabel(pdaWeekOffset)}</div>
+      <div style="display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:end;">
         <div><label class="field-label">Para</label>
           <select id="new-assignee">${ASSIGNABLE.map(a=>`<option value="${a}">${a}</option>`).join('')}</select>
         </div>
-        <div style="grid-column:span 2;"><label class="field-label">Tarea</label>
-          <input id="new-task-title" placeholder="Ej: Revisar propuesta grupos septiembre">
+        <div><label class="field-label">Tarea</label>
+          <input id="new-task-title" placeholder="Ej: Revisar propuesta grupos septiembre"
+                 onkeydown="if(event.key==='Enter') addPdaTask()">
         </div>
+        <button class="btn btn-primary" onclick="addPdaTask()">Asignar</button>
       </div>
-      <div style="margin-top:12px;"><button class="btn btn-primary" onclick="addPdaTask()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        Asignar tarea
-      </button></div>
     </div>`;
-
-    ASSIGNABLE.forEach(person=>{
-      const mine = tasks.filter(t=>t.assignee===person);
-      const doneCt = mine.filter(t=>t.done).length;
-      const pct = mine.length? Math.round(doneCt/mine.length*100) : 0;
-      html += `<div class="card" style="margin-bottom:14px;">
-        <div class="flex-between" style="margin-bottom:12px;">
-          <div style="display:flex;align-items:center;gap:11px;">
-            <div class="avatar" style="width:30px;height:30px;font-size:13px;background:${roleColors[person]};display:flex;align-items:center;justify-content:center;border-radius:50%;color:#0B0E14;font-weight:800;">${person[0]}</div>
-            <b style="font-family:var(--font);font-size:16px;">${person}</b>
-          </div>
-          <span class="pill ${pct===100?'green':'violet'}">${doneCt}/${mine.length} completadas</span>
-        </div>
-        <div class="progress-bar" style="margin-bottom:14px;"><div class="fill" style="width:${pct}%;"></div></div>
-        ${mine.length? mine.map(t=>`
-          <div class="checkbox-row ${t.done?'done':''}">
-            <input type="checkbox" disabled ${t.done?'checked':''}>
-            <div class="txt ${t.done?'done':''}">${t.title}<div class="meta">${t.week}</div></div>
-            <button class="btn btn-ghost btn-sm" onclick="deletePdaTask(${t.id})">Eliminar</button>
-          </div>`).join('') : '<div class="empty-state" style="padding:16px;">Sin tareas asignadas todavía.</div>'}
-      </div>`;
-    });
-    container.innerHTML = html;
-
-  } else {
-    const role = currentRole();
-    document.getElementById('pda-sub').textContent = `Estas son tus tareas asignadas por Laia. Marca las que vayas completando — se guarda automáticamente.`;
-    const mine = tasks.filter(t=>t.assignee===role);
-    const doneCt = mine.filter(t=>t.done).length;
-    const pct = mine.length? Math.round(doneCt/mine.length*100) : 0;
-    let html = `<div class="card">
-      <div class="flex-between" style="margin-bottom:14px;">
-        <div class="section-title" style="margin:0;font-size:17px;">Semana actual</div>
-        <span class="pill ${pct===100?'green':'violet'}" style="font-size:13px;padding:5px 12px;">${doneCt}/${mine.length} completadas</span>
-      </div>
-      <div class="progress-bar" style="margin-bottom:18px;height:10px;"><div class="fill" style="width:${pct}%;"></div></div>`;
-    html += mine.length ? mine.map(t=>`
-      <div class="checkbox-row ${t.done?'done':''}">
-        <input type="checkbox" ${t.done?'checked':''} onchange="togglePdaTask(${t.id}, this.checked)">
-        <div class="txt ${t.done?'done':''}">${t.title}<div class="meta">${t.week} · asignada por ${t.created_by}</div></div>
-      </div>`).join('') : '<div class="empty-state">No tienes tareas asignadas esta semana.</div>';
-    html += `</div>`;
-    container.innerHTML = html;
   }
-  updateDashboardMyTasks(tasks);
+
+  html += `<div class="pda-cols${personas.length===1?' one':''}">`;
+  personas.forEach(person=>{
+    const mine = tasks.filter(t=>t.assignee===person);
+    const doneCt = mine.filter(t=>t.done).length;
+    const pct = mine.length ? Math.round(doneCt/mine.length*100) : 0;
+    const esMia = person === yo;
+    const color = roleColors[person] || 'var(--accent)';
+
+    html += `<div class="card pda-col${esMia?' mine':''}">
+      <div class="flex-between" style="margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+          <div class="avatar" style="width:26px;height:26px;font-size:12px;background:${color};display:flex;align-items:center;justify-content:center;border-radius:50%;color:#0B0E14;font-weight:800;flex-shrink:0;">${person[0]}</div>
+          <b style="font-family:var(--font);font-size:14px;">${person}</b>
+          ${esMia?'<span class="pill green" style="font-size:9.5px;">tú</span>':''}
+        </div>
+        <span class="pill ${pct===100&&mine.length?'green':'grey'}" style="flex-shrink:0;">${doneCt}/${mine.length}</span>
+      </div>
+      <div class="progress-bar" style="margin-bottom:12px;"><div class="fill" style="width:${pct}%;background:${color};"></div></div>
+      <div class="pda-list">`;
+
+    if(mine.length){
+      mine.forEach(t=>{
+        const puedeMarcar = puedeAsignar || esMia;
+        html += `<label class="pda-task ${t.done?'done':''} ${puedeMarcar?'':'locked'}">
+          <input type="checkbox" ${t.done?'checked':''} ${puedeMarcar?'':'disabled'}
+                 onchange="togglePdaTask(${t.id}, this.checked)">
+          <span class="pda-task-txt">${esc(t.title)}</span>
+          ${puedeAsignar?`<button class="row-del" title="Eliminar" onclick="event.preventDefault();deletePdaTask(${t.id})">✕</button>`:''}
+        </label>`;
+      });
+    } else {
+      html += `<div style="font-size:12.5px;color:var(--text-dim);padding:8px 0;">Sin tareas esta semana.</div>`;
+    }
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+
+  container.innerHTML = html;
+  updateDashboardMyTasks(all.filter(t=>(t.week||'')===pdaWeekKey(0)));
 }
+
 async function addPdaTask(){
   const assignee = document.getElementById('new-assignee').value;
   const title = document.getElementById('new-task-title').value.trim();
   if(!title) return;
-  await sb.from('pda_tasks').insert({assignee, title, week:'Semana 29', done:false, created_by: currentRole()});
+  await sb.from('pda_tasks').insert({assignee, title, week: pdaWeekKey(pdaWeekOffset), done:false, created_by: currentProfile?.nombre || currentRole()});
+  document.getElementById('new-task-title').value='';
   renderPDA();
 }
 async function togglePdaTask(id, done){
