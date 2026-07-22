@@ -299,7 +299,7 @@
   .colmenu-panel input{accent-color:var(--accent);}
   /* ---- Recap en 3 columnas ---- */
   /* Recap: 4 columnas — Info | Boutique | Weekly+Observaciones | Rutinas */
-  .recap-grid{display:grid;grid-template-columns:1.05fr 0.85fr 1.75fr 1.05fr;gap:12px;align-items:start;}
+  .recap-grid{display:grid;grid-template-columns:1fr 0.8fr 1.6fr 1fr 1fr;gap:12px;align-items:start;}
   @media(max-width:1450px){.recap-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:860px){.recap-grid{grid-template-columns:1fr;}}
   .recap-obs{grid-column:1 / -1;min-width:0;}
@@ -1132,10 +1132,16 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ RECAP ============ -->
       <div class="view active" id="view-recap">
-        <div style="display:flex;gap:16px;align-items:flex-start;">
-        <div style="max-width:1500px;flex:1;min-width:0;">
+        <div style="width:100%;">
+        <div style="width:100%;min-width:0;">
         <div class="page-head" style="margin-bottom:12px;">
-          <div style="text-align:left;"><h1 style="font-size:17px;margin-bottom:2px;">Recap del día</h1><p style="font-size:11.5px;">Se guarda solo. Puedes forzar el guardado.</p></div>
+          <div style="text-align:left;">
+            <h1 style="font-size:17px;margin-bottom:4px;">Recap del día</h1>
+            <button class="btn btn-ghost btn-sm" onclick="openRecapHistory()" style="font-weight:700;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              Historial de Recaps
+            </button>
+          </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
             <div class="recap-nav">
               <button onclick="recapPrevDay()">← Anterior</button>
@@ -1251,13 +1257,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
         </div>
 
-        <div class="card">
-          <div class="recap-section-title">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-            Observaciones del día
-          </div>
-          <textarea id="rc-observaciones" rows="5" placeholder="Cualquier incidencia, nota o aviso relevante del día…" style="width:100%;"></textarea>
-        </div>
         </div>
 
         <!-- ============ 4. RUTINAS MAÑANA + TARDE ============ -->
@@ -1281,17 +1280,21 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
         </div>
 
-        </div><!-- fin recap-grid -->
-        </div><!-- fin max-width recap -->
-
-        <!-- PANEL LATERAL: RECAPS ANTERIORES -->
-        <div style="width:280px;flex-shrink:0;position:sticky;top:0;">
-          <div class="card">
-            <div class="section-title" style="margin-bottom:10px;">Recaps anteriores</div>
-            <div id="recap-capsule-list" style="display:flex;flex-direction:column;gap:8px;max-height:640px;overflow-y:auto;"></div>
+        <!-- ============ 5. OBSERVACIONES (derecha del todo) ============ -->
+        <div class="recap-col rc-c5">
+        <div class="card">
+          <div class="recap-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+            Observaciones del día
           </div>
+          <textarea id="rc-observaciones" rows="14" placeholder="Cualquier incidencia, nota o aviso relevante del día…" style="width:100%;"></textarea>
         </div>
-        </div><!-- fin flex recap -->
+        </div>
+
+        </div><!-- fin recap-grid -->
+        </div><!-- fin ancho recap -->
+        <div id="recap-capsule-list" style="display:none;"></div>
+        </div>
       </div>
 
       <!-- ============ MARKETING ============ -->
@@ -3215,7 +3218,14 @@ const RECAP_TIENDA_STAFF_FALLBACK = ['Laura','Mario','Melisa','Ana','Constanza',
 let RECAP_TIENDA_STAFF = RECAP_TIENDA_STAFF_FALLBACK;
 async function loadRecapStaffNames(){
   const list = await fetchStaff();
-  RECAP_TIENDA_STAFF = list.length ? [...list.map(s=>s.nombre), 'Otro'] : RECAP_TIENDA_STAFF_FALLBACK;
+  const activos = list.filter(s=>s.activo !== false).map(s=>s.nombre).filter(Boolean);
+  if(!activos.length){ RECAP_TIENDA_STAFF = RECAP_TIENDA_STAFF_FALLBACK; return; }
+  // mismo orden que SPV: Tienda -> Supervisores -> resto (alfabético)
+  const tienda  = SPV_GROUP_TIENDA.filter(n=>activos.includes(n));
+  const superv  = SPV_GROUP_SUPERV.filter(n=>activos.includes(n));
+  const usados  = [...tienda, ...superv];
+  const resto   = activos.filter(n=>!usados.includes(n)).sort((a,b)=>a.localeCompare(b,'es'));
+  RECAP_TIENDA_STAFF = [...tienda, ...superv, ...resto];
 }
 
 let RUTINAS_MAÑANA = [
@@ -3617,6 +3627,43 @@ function recapUnread(r){
   if(!r.autor || r.autor === me) return false;
   return !(r.leido_por||[]).includes(me);
 }
+/* ---------- Historial completo de recaps (ventana) ---------- */
+async function openRecapHistory(){
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+      <div class="modal" style="max-width:760px;">
+        <div class="modal-head"><h2>Historial de Recaps</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body" style="max-height:68vh;overflow-y:auto;">
+          <div id="recap-history-body"><div class="empty-state">Cargando…</div></div>
+        </div>
+      </div>
+    </div>`;
+  const { data, error } = await sb.from('recap').select('*').order('fecha', {ascending:false});
+  const cont = document.getElementById('recap-history-body');
+  if(!cont) return;
+  if(error){ cont.innerHTML = emptyState('No se pudo cargar','Revisa la conexión.'); return; }
+  const recaps = data || [];
+  if(!recaps.length){ cont.innerHTML = emptyState('Sin recaps','Todavía no hay recaps guardados.'); return; }
+  cont.innerHTML = `<div class="table-wrap"><table><thead>
+      <tr><th>Fecha</th><th>Cerrado por</th><th>Visitantes</th><th>Boutique</th><th>Observaciones</th><th></th></tr>
+    </thead><tbody>` +
+    recaps.map(r=>{
+      const d = new Date(r.fecha+'T12:00:00');
+      const fecha = d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short',year:'2-digit'});
+      const btq = Object.values(r.boutique||{}).reduce((a,b)=>a+(parseFloat(b)||0),0);
+      const obs = (r.observaciones||'').trim();
+      return `<tr>
+        <td style="text-align:left;font-weight:700;text-transform:capitalize;">${fecha}</td>
+        <td>${esc(r.cerrado_por||'—')}</td>
+        <td class="mono">${r.visitantes ?? '—'}</td>
+        <td class="mono">${btq ? btq.toFixed(2)+'€' : '—'}</td>
+        <td style="text-align:left;font-size:12px;">${obs ? esc(obs.slice(0,60))+(obs.length>60?'…':'') : '<span style="color:var(--text-dim);">—</span>'}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="closeModal(); recapGoDate('${r.fecha}')">Abrir</button></td>
+      </tr>`;
+    }).join('') + '</tbody></table></div>';
+}
+
 async function renderRecapCapsules(){
   const list = document.getElementById('recap-capsule-list');
   if(!list) return;
