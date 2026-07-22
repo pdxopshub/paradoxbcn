@@ -418,6 +418,39 @@
   .colmenu-panel label{display:flex;align-items:center;gap:9px;padding:6px 8px;font-size:12.5px;
     text-align:left;justify-content:flex-start;line-height:1.25;}
   .colmenu-panel input{flex-shrink:0;margin:0;}
+  /* ============ EVALUACIONES ============ */
+  .ev-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start;}
+  @media(max-width:1100px){.ev-layout{grid-template-columns:1fr;}}
+  .ev-right{position:sticky;top:8px;}
+  .ev-card{border-left:3px solid var(--line-strong);}
+  .ev-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .ev-head-l{display:flex;align-items:center;gap:10px;min-width:0;}
+  .ev-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .ev-fecha{font-family:var(--font);font-weight:800;font-size:14px;text-transform:capitalize;}
+  .ev-prox{font-size:10.5px;color:var(--text-dim);margin-top:1px;}
+  .ev-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:760px){.ev-grid{grid-template-columns:1fr;}}
+  .ev-box{border:1px solid var(--line);border-radius:9px;padding:11px 12px;background:var(--panel);}
+  .ev-box.ev-nuestra{border-left:3px solid #5B8CFF;}
+  .ev-box.ev-suya{border-left:3px solid #B084F5;}
+  .ev-box.ev-sug{border-left:3px solid #F2913D;}
+  .ev-block-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;
+    color:var(--text-soft);margin-bottom:9px;}
+  .ev-item{margin-bottom:9px;}
+  .ev-item:last-child{margin-bottom:0;}
+  .ev-lbl{display:inline-block;font-size:9.5px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.4px;padding:2px 7px;border-radius:4px;margin-bottom:4px;}
+  .ev-item.ok .ev-lbl{background:var(--ok-bg);color:var(--ok);}
+  .ev-item.warn .ev-lbl{background:var(--wait-bg);color:var(--wait);}
+  .ev-item p{margin:0;font-size:12.5px;line-height:1.45;text-align:left;}
+  .ev-form-block{border:1px solid var(--line);border-radius:9px;padding:12px;margin-bottom:10px;background:var(--panel);}
+  .ev-form-block.ev-nuestra{border-left:3px solid #5B8CFF;}
+  .ev-form-block.ev-suya{border-left:3px solid #B084F5;}
+  .ev-form-block.ev-sug{border-left:3px solid #F2913D;}
+  .ev-prox-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);}
+  .ev-prox-row:last-child{border-bottom:none;}
+  .ev-prox-name{font-weight:700;font-size:13px;}
+  .ev-prox-date{font-size:10.5px;color:var(--text-dim);margin-top:1px;}
   /* ---- PDA: semana + columnas por persona ---- */
   .pda-topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;
     flex-wrap:wrap;margin-bottom:14px;}
@@ -1236,34 +1269,57 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ EV ============ -->
       <div class="view" id="view-ev">
-        <div class="page-head"><div><h1>Evaluaciones de staff</h1><p>Histórico por persona. Cada nueva evaluación puede comentar si se ha mejorado desde la anterior.</p></div></div>
+        <div class="ev-layout">
 
-        <div class="card" style="margin-bottom:14px;">
-          <div class="grid grid-2" style="align-items:end;">
-            <div><label class="field-label">Staff</label><select id="ev-staff-select"></select></div>
-            <div style="text-align:right;"><button class="btn btn-primary" onclick="toggleEvForm()" id="ev-toggle-btn">+ Nueva evaluación</button></div>
+          <!-- ---------- IZQUIERDA: evaluaciones ---------- -->
+          <div class="ev-left">
+            <div class="card" style="margin-bottom:14px;">
+              <div style="display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;">
+                <div><label class="field-label">Staff</label><select id="ev-staff-select"></select></div>
+                <button class="btn btn-primary" onclick="toggleEvForm()" id="ev-toggle-btn">+ Nueva evaluación</button>
+              </div>
+            </div>
+
+            <div class="card" id="ev-form-card" style="display:none;margin-bottom:14px;">
+              <div id="ev-prev-ref"></div>
+              <div class="ev-form-block ev-nuestra">
+                <div class="ev-block-title">Nuestra valoración</div>
+                <div class="grid grid-2">
+                  <div><label class="field-label">Positivo</label><textarea id="ev-f-pos" rows="2"></textarea></div>
+                  <div><label class="field-label">A mejorar</label><textarea id="ev-f-mej" rows="2"></textarea></div>
+                </div>
+              </div>
+              <div class="ev-form-block ev-suya">
+                <div class="ev-block-title">Lo que nos dice</div>
+                <div class="grid grid-2">
+                  <div><label class="field-label">Le gusta / se le da bien</label><textarea id="ev-f-like" rows="2"></textarea></div>
+                  <div><label class="field-label">No le gusta / no se le da bien</label><textarea id="ev-f-dislike" rows="2"></textarea></div>
+                </div>
+              </div>
+              <div class="ev-form-block ev-sug">
+                <div class="ev-block-title">Sugerencias para el museo</div>
+                <textarea id="ev-f-sug" rows="2"></textarea>
+              </div>
+              <div style="margin:12px 0;"><label class="field-label">Seguimiento respecto a la anterior — ¿ha mejorado?</label><textarea id="ev-f-seg" rows="2"></textarea></div>
+              <div style="display:flex;gap:8px;justify-content:flex-end;">
+                <button class="btn btn-ghost" onclick="toggleEvForm()">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveNewEvaluation()">Guardar evaluación</button>
+              </div>
+            </div>
+
+            <div id="ev-timeline"></div>
           </div>
+
+          <!-- ---------- DERECHA: calendario de próximas ---------- -->
+          <div class="ev-right">
+            <div class="card">
+              <div class="section-title" style="margin-bottom:4px;">Próximas evaluaciones</div>
+              <div class="hint" style="display:block;margin-bottom:12px;">Se hacen cada 6 meses. Aquí ves a quién le toca.</div>
+              <div id="ev-proximas"></div>
+            </div>
+          </div>
+
         </div>
-
-        <div class="card" id="ev-form-card" style="display:none;margin-bottom:14px;">
-          <div id="ev-prev-ref"></div>
-          <div class="grid grid-2" style="margin-bottom:10px;">
-            <div><label class="field-label">Positivo</label><textarea id="ev-f-pos" rows="2"></textarea></div>
-            <div><label class="field-label">A mejorar</label><textarea id="ev-f-mej" rows="2"></textarea></div>
-          </div>
-          <div class="grid grid-2" style="margin-bottom:10px;">
-            <div><label class="field-label">Le gusta / se le da bien</label><textarea id="ev-f-like" rows="2"></textarea></div>
-            <div><label class="field-label">No le gusta / no se le da bien</label><textarea id="ev-f-dislike" rows="2"></textarea></div>
-          </div>
-          <div style="margin-bottom:10px;"><label class="field-label">Sugerencias</label><textarea id="ev-f-sug" rows="2"></textarea></div>
-          <div style="margin-bottom:12px;"><label class="field-label">Seguimiento respecto a la evaluación anterior — ¿se ha mejorado?</label><textarea id="ev-f-seg" rows="2" placeholder="Comenta aquí si se ha notado mejora en lo hablado la última vez…"></textarea></div>
-          <div style="display:flex;gap:8px;justify-content:flex-end;">
-            <button class="btn btn-ghost" onclick="toggleEvForm()">Cancelar</button>
-            <button class="btn btn-primary" onclick="saveNewEvaluation()">Guardar evaluación</button>
-          </div>
-        </div>
-
-        <div id="ev-timeline"></div>
       </div>
 
       <!-- ============ ENTREVISTAS ============ -->
@@ -3309,37 +3365,117 @@ async function saveNewEvaluation(){
     seguimiento: document.getElementById('ev-f-seg').value,
   });
   document.getElementById('ev-form-card').style.display='none';
+  ['ev-f-pos','ev-f-mej','ev-f-like','ev-f-dislike','ev-f-sug','ev-f-seg']
+    .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   renderEvTimelineBody();
+  renderEvProximas();
 }
-function renderEvTimeline(){ populateEvStaffSelect(); renderEvTimelineBody(); }
+function renderEvTimeline(){ populateEvStaffSelect(); renderEvTimelineBody(); renderEvProximas(); }
+function evFechaLarga(f){
+  if(!f) return '—';
+  const d = new Date(f+'T12:00:00');
+  if(isNaN(d)) return f;
+  return d.toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'});
+}
+function evAddMonths(f, n){
+  const d = new Date(f+'T12:00:00');
+  d.setMonth(d.getMonth()+n);
+  return d;
+}
+
 async function renderEvTimelineBody(){
   const staff = document.getElementById('ev-staff-select').value;
   const el = document.getElementById('ev-timeline');
   if(!staff){ el.innerHTML = '<div class="empty-state">Añade staff primero en la pestaña Staff.</div>'; return; }
-  const { data, error } = await sb.from('evaluaciones').select('*').eq('staff_nombre', staff).order('created_at', {ascending:false});
+  const { data, error } = await sb.from('evaluaciones').select('*').eq('staff_nombre', staff).order('fecha', {ascending:false});
   if(error) console.error(error);
   const arr = data || [];
-  el.innerHTML = arr.length ? arr.map((e,i)=>`
-    <div class="card" style="margin-bottom:12px;">
-      <div class="flex-between" style="margin-bottom:10px;">
-        <div style="font-weight:800;font-family:var(--font);font-size:15px;">${staff} ${i===0?'<span class="pill green">Más reciente</span>':''}</div>
+
+  el.innerHTML = arr.length ? arr.map((e,i)=>{
+    const prox = e.fecha ? evAddMonths(e.fecha, 6) : null;
+    return `
+    <div class="card ev-card" style="margin-bottom:12px;">
+      <div class="ev-head">
+        <div class="ev-head-l">
+          <span class="ev-dot" style="background:${staffColor(staff)}"></span>
+          <div>
+            <div class="ev-fecha">${evFechaLarga(e.fecha)}</div>
+            ${prox?`<div class="ev-prox">Siguiente hacia el ${prox.toLocaleDateString('es-ES',{month:'long',year:'numeric'})}</div>`:''}
+          </div>
+        </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span class="pill grey">${e.fecha}</span>
+          ${i===0?'<span class="pill green">Más reciente</span>':''}
           <button class="row-del" title="Eliminar evaluación" onclick="deleteEvaluacion(${e.id})">✕</button>
         </div>
       </div>
-      ${e.seguimiento? `<div class="note-banner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><div><b>Seguimiento:</b> ${e.seguimiento}</div></div>` : ''}
-      <div class="table-wrap">
-        <table>
-          <tr><th style="width:22%;text-align:left;">Positivo</th><td style="text-align:left;">${e.positivo||'—'}</td></tr>
-          <tr><th style="text-align:left;">A mejorar</th><td style="text-align:left;">${e.a_mejorar||'—'}</td></tr>
-          <tr><th style="text-align:left;">Le gusta / se le da bien</th><td style="text-align:left;">${e.le_gusta||'—'}</td></tr>
-          <tr><th style="text-align:left;">No le gusta / no se le da bien</th><td style="text-align:left;">${e.no_le_gusta||'—'}</td></tr>
-          <tr><th style="text-align:left;">Sugerencias</th><td style="text-align:left;">${e.sugerencias||'—'}</td></tr>
-        </table>
+
+      ${e.seguimiento? `<div class="note-banner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><div><b>Seguimiento:</b> ${esc(e.seguimiento)}</div></div>` : ''}
+
+      <div class="ev-grid">
+        <div class="ev-box ev-nuestra">
+          <div class="ev-block-title">Nuestra valoración</div>
+          <div class="ev-item ok"><span class="ev-lbl">Positivo</span><p>${esc(e.positivo)||'—'}</p></div>
+          <div class="ev-item warn"><span class="ev-lbl">A mejorar</span><p>${esc(e.a_mejorar)||'—'}</p></div>
+        </div>
+        <div class="ev-box ev-suya">
+          <div class="ev-block-title">Lo que nos dice</div>
+          <div class="ev-item ok"><span class="ev-lbl">Le gusta / se le da bien</span><p>${esc(e.le_gusta)||'—'}</p></div>
+          <div class="ev-item warn"><span class="ev-lbl">No le gusta / no se le da bien</span><p>${esc(e.no_le_gusta)||'—'}</p></div>
+        </div>
       </div>
-    </div>`).join('') : '<div class="empty-state">Todavía no hay evaluaciones para esta persona. Usa "+ Nueva evaluación" para añadir la primera.</div>';
+      ${e.sugerencias ? `<div class="ev-box ev-sug" style="margin-top:10px;">
+        <div class="ev-block-title">Sugerencias para el museo</div>
+        <p style="font-size:12.5px;margin:0;">${esc(e.sugerencias)}</p>
+      </div>` : ''}
+    </div>`;
+  }).join('') : '<div class="empty-state">Todavía no hay evaluaciones para esta persona. Usa "+ Nueva evaluación" para añadir la primera.</div>';
 }
+
+/* ---------- Panel de próximas evaluaciones (cada 6 meses) ---------- */
+async function renderEvProximas(){
+  const el = document.getElementById('ev-proximas');
+  if(!el) return;
+  const [staffRes, evRes] = await Promise.all([ fetchStaff(), sb.from('evaluaciones').select('staff_nombre,fecha') ]);
+  const activos = (staffRes||[]).filter(x=>x.activo!==false);
+  const evs = evRes.data || [];
+
+  // última evaluación por persona
+  const ultima = {};
+  evs.forEach(e=>{
+    if(!e.fecha) return;
+    if(!ultima[e.staff_nombre] || e.fecha > ultima[e.staff_nombre]) ultima[e.staff_nombre] = e.fecha;
+  });
+
+  const hoy = new Date(); hoy.setHours(12,0,0,0);
+  const filas = activos.map(x=>{
+    const ult = ultima[x.nombre] || null;
+    const prox = ult ? evAddMonths(ult, 6) : null;
+    const dias = prox ? Math.round((prox - hoy)/86400000) : null;
+    return {nombre:x.nombre, ult, prox, dias};
+  }).sort((a,b)=>{
+    if(a.prox===null) return -1;      // sin evaluación, primero
+    if(b.prox===null) return 1;
+    return a.prox - b.prox;
+  });
+
+  el.innerHTML = filas.map(f=>{
+    let estado, cls;
+    if(f.prox === null){ estado = 'Sin evaluar'; cls = 'st-bad'; }
+    else if(f.dias < 0){ estado = `Vencida (${Math.abs(f.dias)} d)`; cls = 'st-bad'; }
+    else if(f.dias <= 30){ estado = `En ${f.dias} d`; cls = 'st-wait'; }
+    else { estado = `En ${Math.round(f.dias/30)} meses`; cls = 'st-ok'; }
+    const semana = f.prox ? `Semana del ${f.prox.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'2-digit'})}` : 'Pendiente de la primera';
+    return `<div class="ev-prox-row">
+      <span class="ev-dot" style="background:${staffColor(f.nombre)}"></span>
+      <div style="flex:1;min-width:0;">
+        <div class="ev-prox-name">${esc(f.nombre)}</div>
+        <div class="ev-prox-date">${semana}</div>
+      </div>
+      <span class="st ${cls}">${estado}</span>
+    </div>`;
+  }).join('') || emptyState('Sin staff activo','Añade personas en la pestaña Staff.');
+}
+
 
 /* ============================================================
    ENTREVISTAS — tabla entrevistas
