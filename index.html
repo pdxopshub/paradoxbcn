@@ -2460,10 +2460,11 @@ function spvPuedeVerComision(){
   return isDirector() || currentProfile?.nombre === 'Ignacio';
 }
 function aplicarPermisosSpv(){
-  const ver = spvPuedeVerComision();
+  // Estos bloques ya no se muestran nunca: sus datos se ven en la ventana
+  // de Comisiones. Se mantienen en el DOM solo para que los cálculos sigan.
   ['spv-comision-kpis','spv-resumen-card','spv-historico-card'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.style.display = ver ? '' : 'none';
+    if(el) el.style.display = 'none';
   });
 }
 
