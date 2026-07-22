@@ -599,7 +599,16 @@
   .rv-form{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;}
   .rv-form-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;}
   .rv-form-row label{font-size:12px;color:var(--text-soft);font-weight:600;}
-  .rv-form-row input{width:70px;text-align:right;font-weight:700;}
+  .rv-form-row input{text-align:center;font-weight:700;}
+  .numstep{display:inline-flex;align-items:center;gap:0;border:1.5px solid #2E4C6E;
+    border-radius:8px;overflow:hidden;background:#10233A;}
+  .numstep input{border:none!important;background:transparent!important;border-radius:0!important;
+    padding:6px 2px!important;box-shadow:none!important;}
+  .numstep input:focus{outline:none;background:#173A63!important;}
+  .ns-btn{width:26px;height:32px;border:none;background:var(--panel);color:var(--text-soft);
+    cursor:pointer;font-size:15px;font-weight:800;line-height:1;padding:0;flex-shrink:0;}
+  .ns-btn:hover{background:var(--accent);color:#0B0E14;}
+  .ns-btn:active{filter:brightness(.85);}
   .rv-hist table{font-size:12px;}
   .rv-hist th{padding:6px 5px;}
   .rv-hist td{padding:5px 5px;}
@@ -2669,6 +2678,28 @@ async function fetchReviewHistory(tab){
   }));
 }
 
+/* Campo numérico con botones − / + */
+function numStepper(id, val, step, min, max, w){
+  const dataMin = (min===null||min===undefined) ? '' : ` data-min="${min}"`;
+  const dataMax = (max===null||max===undefined) ? '' : ` data-max="${max}"`;
+  return `<div class="numstep">
+    <button type="button" class="ns-btn" onclick="stepNum('${id}',-1)" title="Bajar">−</button>
+    <input type="number" id="${id}" value="${val}" step="${step}" data-step="${step}"${dataMin}${dataMax} style="width:${w}px;">
+    <button type="button" class="ns-btn" onclick="stepNum('${id}',1)" title="Subir">+</button>
+  </div>`;
+}
+function stepNum(id, dir){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const step = parseFloat(el.dataset.step) || 1;
+  const dec = (String(step).split('.')[1]||'').length;
+  let v = (parseFloat(el.value) || 0) + dir*step;
+  if(el.dataset.min !== undefined && el.dataset.min !== '') v = Math.max(parseFloat(el.dataset.min), v);
+  if(el.dataset.max !== undefined && el.dataset.max !== '') v = Math.min(parseFloat(el.dataset.max), v);
+  el.value = dec ? v.toFixed(dec) : Math.round(v);
+  el.dispatchEvent(new Event('change', {bubbles:true}));
+}
+
 async function renderResenas(){
   const el = document.getElementById('resenas-content');
   el.innerHTML = '<div class="empty-state">Cargando reseñas…</div>';
@@ -2723,18 +2754,18 @@ async function renderResenas(){
       <div class="rv-form">
         <div class="rv-form-row">
           <label>Puntuación</label>
-          <input type="number" id="rv-rating-${f.id}" step="0.1" min="1" max="5" value="${cache?.rating ?? 4.5}">
+          ${numStepper('rv-rating-'+f.id, cache?.rating ?? 4.5, 0.1, 1, 5, 62)}
         </div>
         <div class="rv-form-row">
           <label>Nº reseñas</label>
-          <input type="number" id="rv-count-${f.id}" value="${cache?.review_count ?? 0}">
+          ${numStepper('rv-count-'+f.id, cache?.review_count ?? 0, 1, 0, null, 72)}
         </div>
         ${f.id==='tripadvisor' ? `<div class="rv-form-row">
           <label>Ranking</label>
-          <div style="display:flex;gap:5px;align-items:center;">
-            <input type="number" id="rv-rank-pos-${f.id}" value="${rk.pos}" style="width:52px;" title="Posición">
+          <div style="display:flex;gap:6px;align-items:center;">
+            ${numStepper('rv-rank-pos-'+f.id, rk.pos, 1, 1, null, 48)}
             <span style="color:var(--text-dim);font-size:11px;">de</span>
-            <input type="number" id="rv-rank-total-${f.id}" value="${rk.total}" style="width:64px;" title="Total">
+            ${numStepper('rv-rank-total-'+f.id, rk.total, 1, 1, null, 58)}
           </div>
         </div>` : ''}
         <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveResenaUpdate('${f.id}')">Guardar ${f.label}</button>
