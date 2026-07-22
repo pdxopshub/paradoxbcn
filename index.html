@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDX Ops Hub</title>
-<meta name="theme-color" content="#0B0E14">
+<meta name="theme-color" content="#252932">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -19,7 +19,7 @@
 <style>
   :root{
     --font:'Plus Jakarta Sans',sans-serif;
-    --bg:#111319;
+    --bg:#252932;
     --surface:#181B22;
     --panel:#1E222B;
     --line:#2B303C;
@@ -1093,7 +1093,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
 
         <div class="card" style="margin-top:14px;">
-          <div class="section-title">Cambios por persona y mes</div>
+          <div class="section-title">Cambios por persona y mes <span class="hint">Cuenta solo a quien cede el turno, en el mes en que lo pide</span></div>
           <div class="table-wrap"><table id="turnos-por-mes-table"><thead></thead><tbody></tbody></table></div>
         </div>
       </div>
@@ -1910,8 +1910,46 @@ const SPV_MONTH_NAMES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio
 let spvSelectedMonth = '2026-07'; // se ajusta a mes actual en initSpvMonthSelect()
 const SPV_GROUP_TIENDA = ['Laura','Mario'];
 const SPV_GROUP_SUPERV = ['Ceci','Paula','Ignacio'];
-const SPV_GROUP_STAFF = ['Ana','Aitana','Alma','Brenda','Carol','Emma','Grace','Marina','Melisa','Neus','Laia','Constanza','Otro'];
-const SPV_STAFF = [...SPV_GROUP_TIENDA, ...SPV_GROUP_SUPERV, ...SPV_GROUP_STAFF];
+let SPV_GROUP_STAFF = ['Ana','Aitana','Alma','Brenda','Carol','Emma','Grace','Marina','Melisa','Neus','Laia','Constanza'];
+let SPV_CUSTOM_COLS = [];
+let SPV_STAFF = [...SPV_GROUP_TIENDA, ...SPV_GROUP_SUPERV, ...SPV_GROUP_STAFF];
+
+function rebuildSpvStaff(){
+  SPV_STAFF = [...SPV_GROUP_TIENDA, ...SPV_GROUP_SUPERV, ...SPV_GROUP_STAFF, ...SPV_CUSTOM_COLS];
+}
+/* Las columnas de Staff salen del equipo real (solo nombre, sin apellido) */
+async function loadSpvStaffCols(){
+  try{
+    const list = await fetchStaff();
+    const activos = list.filter(x=>x.activo !== false).map(x=>x.nombre).filter(Boolean);
+    const fijos = [...SPV_GROUP_TIENDA, ...SPV_GROUP_SUPERV];
+    const nuevos = [...new Set(activos.filter(n=>!fijos.includes(n)))];
+    if(nuevos.length) SPV_GROUP_STAFF = nuevos;
+  }catch(e){ console.error('spv staff cols', e); }
+  try{
+    const r = await kvGet('spv-custom-cols');
+    let v = r?.value;
+    if(typeof v === 'string'){ try{ v = JSON.parse(v); }catch(e){ v = null; } }
+    SPV_CUSTOM_COLS = Array.isArray(v) ? v : [];
+  }catch(e){ SPV_CUSTOM_COLS = []; }
+  rebuildSpvStaff();
+}
+async function addSpvColumn(){
+  const nombre = (prompt('Nombre de la nueva columna:')||'').trim();
+  if(!nombre) return;
+  if(SPV_STAFF.includes(nombre)){ alert('Ya existe una columna con ese nombre.'); return; }
+  SPV_CUSTOM_COLS.push(nombre);
+  rebuildSpvStaff();
+  await kvSet('spv-custom-cols', JSON.stringify(SPV_CUSTOM_COLS));
+  renderSpvGrid();
+}
+async function removeSpvColumn(nombre){
+  if(!confirm('¿Quitar la columna "'+nombre+'"? Los datos se conservan pero deja de mostrarse.')) return;
+  SPV_CUSTOM_COLS = SPV_CUSTOM_COLS.filter(c=>c!==nombre);
+  rebuildSpvStaff();
+  await kvSet('spv-custom-cols', JSON.stringify(SPV_CUSTOM_COLS));
+  renderSpvGrid();
+}
 
 function spvMonthLabel(key){ const [y,m] = key.split('-'); return `${SPV_MONTH_NAMES[parseInt(m,10)-1]} ${y}`; }
 function spvDaysInMonth(key){ const [y,m] = key.split('-').map(Number); return new Date(y, m, 0).getDate(); }
@@ -2148,6 +2186,7 @@ function computeSpvSummary(data){
 }
 async function renderSpvGrid(){
   initSpvMonthSelect();
+  await loadSpvStaffCols();
   const data = await fetchSpvGrid();
   buildSpvTable(data);
   computeSpvSummary(data);
@@ -2972,15 +3011,22 @@ async function renderTurnosPorMes(list){
   const staffList = await fetchStaff();
   const names = staffList.map(s=>s.nombre);
   function monthLabel(d){ const dt = new Date(d+'T00:00:00'); return `${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`; }
-  const months = [...new Set(list.flatMap(t=>[monthLabel(t.p1_fecha),monthLabel(t.p2_fecha)]))];
+  // Se cuenta SOLO a quien CEDE el turno (p1), y en el mes en que lo PIDE
+  // (fecha de la solicitud), no en el mes del turno.
+  function monthOfRequest(t){
+    const base = t.created_at ? new Date(t.created_at) : new Date((t.p1_fecha||'')+'T00:00:00');
+    if(isNaN(base)) return null;
+    return `${TURNO_MONTHS[base.getMonth()]} ${base.getFullYear()}`;
+  }
+  const months = [...new Set(list.map(monthOfRequest).filter(Boolean))];
   const counts = {};
   names.forEach(n=>{ counts[n] = {}; months.forEach(m=>counts[n][m]=0); });
   list.forEach(t=>{
-    [[t.p1_staff,t.p1_fecha],[t.p2_staff,t.p2_fecha]].forEach(([staff,fecha])=>{
-      if(!counts[staff]) counts[staff] = {};
-      const m = monthLabel(fecha);
-      counts[staff][m] = (counts[staff][m]||0)+1;
-    });
+    const staff = t.p1_staff;
+    const m = monthOfRequest(t);
+    if(!staff || !m) return;
+    if(!counts[staff]) counts[staff] = {};
+    counts[staff][m] = (counts[staff][m]||0)+1;
   });
   const tbody = document.querySelector('#turnos-por-mes-table tbody');
   const thead = document.querySelector('#turnos-por-mes-table thead');
