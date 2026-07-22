@@ -396,9 +396,11 @@
   .tcal-day.has{background:#245C40;color:#C6F3DC;font-weight:800;cursor:help;}
   .tcal-day.has:hover{filter:brightness(1.25);}
   .tcal-list{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;}
-  .tcal-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .tcal-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
   .tcal-item:last-child{border-bottom:none;}
-  .tcal-date{font-weight:800;color:var(--accent);min-width:74px;flex-shrink:0;font-size:11.5px;}
+  .tcal-date{font-weight:800;color:var(--text-soft);min-width:70px;flex-shrink:0;font-size:11px;}
+  .tcal-pair{display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;min-width:0;}
+  .tcal-swap{font-weight:900;font-size:15px;flex-shrink:0;}
   #view-diego .card{max-width:720px;}
   .chat-wrap{max-width:400px;margin:0;width:100%;}
   .chat-body .msg img{max-width:100%;border-radius:8px;margin-top:6px;cursor:pointer;display:block;}
@@ -1235,7 +1237,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               </div>
               <div id="turnos-cal"></div>
               <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--text-soft);">
-                <span style="display:flex;align-items:center;gap:6px;"><i style="width:11px;height:11px;border-radius:3px;background:#245C40;display:inline-block;"></i> Día con cambio aprobado</span>
+                <span style="display:flex;align-items:center;gap:6px;"><i style="width:11px;height:11px;border-radius:3px;background:linear-gradient(135deg,#33C98B,#5B8CFF,#F2913D);display:inline-block;"></i> Cada cambio tiene su color</span>
                 <span style="display:flex;align-items:center;gap:6px;"><i style="width:11px;height:11px;border-radius:3px;box-shadow:inset 0 0 0 1.5px var(--accent);display:inline-block;"></i> Hoy</span>
               </div>
             </div>
@@ -3103,8 +3105,8 @@ function buildTurnoBlock(prefix, label, staffNames){
       <div class="grid grid-4" style="align-items:end;">
         <div><label class="field-label">Staff</label><select id="${prefix}-staff">${staffNames.map(n=>`<option value="${n}">${n}</option>`).join('') || '<option value="">Añade staff primero</option>'}</select></div>
         <div style="display:flex;gap:6px;">
-          <div style="flex:1;"><label class="field-label">Hora</label><select id="${prefix}-hour">${TURNO_HOURS.map(h=>`<option value="${h}">${h}h</option>`).join('')}</select></div>
-          <div style="flex:1;"><label class="field-label">Min.</label><select id="${prefix}-min">${TURNO_MINUTES.map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div>
+          <div style="flex:1;min-width:72px;"><label class="field-label">Hora</label><select id="${prefix}-hour">${TURNO_HOURS.map(h=>`<option value="${h}">${h}h</option>`).join('')}</select></div>
+          <div style="flex:1;min-width:72px;"><label class="field-label">Min.</label><select id="${prefix}-min">${TURNO_MINUTES.map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div>
         </div>
         <div style="display:flex;gap:6px;">
           <div style="flex:0 0 52px;"><label class="field-label">Día</label><select id="${prefix}-day">${Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}">${d}</option>`).join('')}</select></div>
@@ -3180,13 +3182,19 @@ function renderTurnosCalendar(list){
   if(!cont) return;
   const aprobados = (list||[]).filter(t=>t.estado==='Aprobado');
 
-  // mapa fecha -> movimientos de ese día
+  // Un color por cambio (el mismo para las dos partes del intercambio)
+  const PALETA = ['#33C98B','#5B8CFF','#F2913D','#B084F5','#F2D64B','#FF4FA0',
+                  '#4FD8E0','#E5484D','#8FD14F','#C77DFF','#FFA45B','#5FB0FF'];
+  const colorDe = {};
+  aprobados.forEach((t,i)=>{ colorDe[t.id] = PALETA[i % PALETA.length]; });
+
+  // mapa fecha -> movimientos
   const map = {};
   aprobados.forEach(t=>{
     [[t.p1_fecha, t.p1_staff, t.p2_staff, t.p1_hora],
      [t.p2_fecha, t.p2_staff, t.p1_staff, t.p2_hora]].forEach(([f, cede, coge, hora])=>{
       if(!f) return;
-      (map[f] = map[f] || []).push({cede, coge, hora});
+      (map[f] = map[f] || []).push({cede, coge, hora, id:t.id, color:colorDe[t.id]});
     });
   });
 
@@ -3207,10 +3215,22 @@ function renderTurnosCalendar(list){
       const dow = new Date(y,m,d).getDay();
       const cls = ['tcal-day'];
       if(dow===0||dow===6) cls.push('wknd');
-      if(movs) cls.push('has');
       if(iso===hoyIso) cls.push('today');
+      let style = '';
+      if(movs){
+        cls.push('has');
+        const c = movs[0].color;
+        style = `background:${c}22;border-color:${c};color:${c};`;
+        if(movs.length>1){
+          // varios cambios el mismo día: franjas con los colores
+          const cols = movs.map(x=>x.color);
+          const step = 100/cols.length;
+          const stops = cols.map((c,i)=>`${c}22 ${i*step}%, ${c}22 ${(i+1)*step}%`).join(',');
+          style = `background:linear-gradient(135deg, ${stops});border-color:${cols[0]};color:#EDEEF3;`;
+        }
+      }
       const tip = movs ? movs.map(x=>`${x.cede} → ${x.coge}${x.hora?' ('+x.hora+')':''}`).join(' | ').replace(/"/g,'&quot;') : iso;
-      h += `<div class="${cls.join(' ')}" title="${tip}">${d}</div>`;
+      h += `<div class="${cls.join(' ')}" style="${style}" title="${tip}">${d}</div>`;
     }
     return h + '</div></div>';
   }
@@ -3219,25 +3239,43 @@ function renderTurnosCalendar(list){
   const mes2 = new Date(turnosCalDate.getFullYear(), turnosCalDate.getMonth()+1, 1);
   cont.innerHTML = `<div class="tcal-wrap">${mesHtml(mes1)}${mesHtml(mes2)}</div>`;
 
-  // lista de los cambios de esos dos meses
-  const desde = mes1, hasta = new Date(turnosCalDate.getFullYear(), turnosCalDate.getMonth()+2, 0);
-  const isoDesde = desde.getFullYear()+'-'+String(desde.getMonth()+1).padStart(2,'0')+'-01';
-  const isoHasta = hasta.getFullYear()+'-'+String(hasta.getMonth()+1).padStart(2,'0')+'-'+String(hasta.getDate()).padStart(2,'0');
-  const fechas = Object.keys(map).filter(f=> f>=isoDesde && f<=isoHasta).sort();
-  if(fechas.length){
-    cont.innerHTML += `<div class="tcal-list">` + fechas.map(f=>{
-      const d = new Date(f+'T12:00:00');
-      const lbl = d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'});
-      return map[f].map(x=>`<div class="tcal-item">
-        <span class="tcal-date" style="text-transform:capitalize;">${lbl}</span>
-        <span><b style="color:${roleColors[x.cede]||'var(--text)'}">${esc(x.cede||'?')}</b>
-        <span style="color:var(--text-dim);"> cede a </span>
-        <b style="color:${roleColors[x.coge]||'var(--text)'}">${esc(x.coge||'?')}</b>
-        ${x.hora?`<span style="color:var(--text-dim);"> · ${esc(x.hora)}</span>`:''}</span>
-      </div>`).join('');
+  // ---- Listado: UNA fila por cambio, con las dos partes ----
+  const isoDesde = mes1.getFullYear()+'-'+String(mes1.getMonth()+1).padStart(2,'0')+'-01';
+  const finMes2 = new Date(turnosCalDate.getFullYear(), turnosCalDate.getMonth()+2, 0);
+  const isoHasta = finMes2.getFullYear()+'-'+String(finMes2.getMonth()+1).padStart(2,'0')+'-'+String(finMes2.getDate()).padStart(2,'0');
+
+  const enRango = aprobados.filter(t=>
+    (t.p1_fecha && t.p1_fecha>=isoDesde && t.p1_fecha<=isoHasta) ||
+    (t.p2_fecha && t.p2_fecha>=isoDesde && t.p2_fecha<=isoHasta)
+  ).sort((a,b)=> (a.p1_fecha||'').localeCompare(b.p1_fecha||''));
+
+  const fmt = f=>{
+    if(!f) return '—';
+    const d = new Date(f+'T12:00:00');
+    return d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'});
+  };
+  const lado = (fecha, cede, coge, hora)=>`
+    <span style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span class="tcal-date" style="text-transform:capitalize;">${fmt(fecha)}</span>
+      <span><b style="color:${roleColors[cede]||'var(--text)'}">${esc(cede||'?')}</b>
+      <span style="color:var(--text-dim);"> cede a </span>
+      <b style="color:${roleColors[coge]||'var(--text)'}">${esc(coge||'?')}</b>
+      ${hora?`<span style="color:var(--text-dim);"> · ${esc(hora)}</span>`:''}</span>
+    </span>`;
+
+  if(enRango.length){
+    cont.innerHTML += '<div class="tcal-list">' + enRango.map(t=>{
+      const c = colorDe[t.id];
+      return `<div class="tcal-item" style="border-left:3px solid ${c};padding-left:9px;">
+        <div class="tcal-pair">
+          ${lado(t.p1_fecha, t.p1_staff, t.p2_staff, t.p1_hora)}
+          <span class="tcal-swap" style="color:${c};">⇄</span>
+          ${lado(t.p2_fecha, t.p2_staff, t.p1_staff, t.p2_hora)}
+        </div>
+      </div>`;
     }).join('') + '</div>';
   } else {
-    cont.innerHTML += `<div class="tcal-list"><div style="font-size:12.5px;color:var(--text-dim);">Sin cambios aprobados en estos dos meses.</div></div>`;
+    cont.innerHTML += '<div class="tcal-list"><div style="font-size:12.5px;color:var(--text-dim);">Sin cambios aprobados en estos dos meses.</div></div>';
   }
 }
 
