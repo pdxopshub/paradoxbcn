@@ -52,11 +52,11 @@
 
   /* ---------- SIDEBAR ---------- */
   .sidebar{width:238px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
-  .brand{padding:16px 14px 13px;border-bottom:1px solid var(--line);text-align:center;}
-  .brand img.wordmark{height:48px;width:auto;display:block;margin:0 auto;filter:invert(1);}
-  .brand .hub-label{margin-top:8px;font-family:var(--font);font-weight:800;font-size:16px;letter-spacing:3px;color:var(--accent);line-height:1.1;}
-  .brand .hub-city{margin-top:3px;font-family:var(--font);font-weight:700;font-size:10.5px;letter-spacing:4px;color:#fff;line-height:1.1;}
-  .brand .hub-rule{width:32px;height:2px;background:var(--accent);border-radius:3px;margin:8px auto 0;}
+  .brand{padding:11px 12px 9px;border-bottom:1px solid var(--line);text-align:center;}
+  .brand img.wordmark{height:34px;width:auto;display:block;margin:0 auto;filter:invert(1);}
+  .brand .hub-label{margin-top:5px;font-family:var(--font);font-weight:800;font-size:12.5px;letter-spacing:2.5px;color:var(--accent);line-height:1.1;}
+  .brand .hub-city{margin-top:2px;font-family:var(--font);font-weight:700;font-size:9px;letter-spacing:3px;color:#fff;line-height:1.1;}
+  .brand .hub-rule{width:24px;height:2px;background:var(--accent);border-radius:3px;margin:6px auto 0;}
 
   nav{flex:1;overflow-y:auto;padding:8px 12px 12px;}
   .navgroup{border-bottom:1px solid var(--line);padding:5px 0 5px;}
@@ -800,24 +800,23 @@
   .login-box .hub-city{font-weight:700;letter-spacing:5px;font-size:12px;color:#fff;margin-top:5px;margin-bottom:24px;line-height:1.1;}
   .login-box .mfield{margin-bottom:12px;text-align:left;}
   .login-box .login-err{color:var(--danger);font-size:12.5px;margin-top:10px;min-height:16px;line-height:1.4;}
-  .login-users{display:flex;flex-direction:column;gap:8px;}
-  .login-user{display:flex;align-items:center;gap:11px;width:100%;padding:9px 12px;
-    background:var(--panel);border:1px solid var(--line-strong);border-radius:10px;
-    color:var(--text);cursor:pointer;transition:.12s;text-align:left;}
-  .login-user:hover{border-color:var(--accent);background:var(--accent-soft);transform:translateX(2px);}
-  .lu-ini{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
-    justify-content:center;font-weight:800;font-size:14px;color:#0B0E14;}
-  .lu-txt{display:flex;flex-direction:column;gap:1px;min-width:0;}
-  .lu-name{font-weight:700;font-size:14px;line-height:1.15;}
-  .lu-cargo{font-size:10.5px;color:var(--text-dim);font-weight:600;}
-  .login-who{display:flex;align-items:center;gap:11px;justify-content:center;padding:10px;
-    background:var(--panel);border:1px solid var(--line-strong);border-radius:10px;}
+  .login-users{display:flex;flex-direction:column;gap:6px;align-items:center;}
+  .login-user{display:flex;align-items:center;gap:9px;width:190px;padding:6px 12px;
+    background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;
+    color:var(--text);cursor:pointer;transition:.12s;}
+  .login-user:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .lu-ini{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
+    justify-content:center;font-weight:800;font-size:12px;color:#0B0E14;}
+  .lu-name{font-weight:700;font-size:13.5px;line-height:1.15;}
+  .login-who{display:flex;align-items:center;gap:9px;justify-content:center;padding:7px 14px;
+    background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;
+    width:190px;margin:0 auto;}
   .lu-email-input{width:100%;margin-bottom:10px;}
   .login-box button{width:100%;justify-content:center;margin-top:6px;}
   .user-chip{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;}
   .user-chip .avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#0B0E14;flex-shrink:0;}
   .user-chip .uc-col{flex:1;min-width:0;}
-  .user-chip .uc-name{font-size:13px;font-weight:700;}
+  .user-chip .uc-name{font-size:13px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .user-chip .uc-rol{font-size:10.5px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;}
   .user-chip .uc-logout{background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:11px;font-weight:700;}
   .user-chip .uc-logout:hover{color:var(--danger);}
@@ -1093,13 +1092,9 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
     <div class="sidebar-foot">
       <div class="user-chip">
         <div class="avatar" id="avatar">?</div>
-        <div class="uc-col">
-          <div class="uc-name" id="uc-name">—</div>
-          <div class="uc-rol" id="uc-rol">—</div>
-        </div>
+        <div class="uc-name" id="uc-name">—</div>
         <button class="uc-logout" onclick="doLogout()">Salir</button>
       </div>
-      <div class="small">PARADOX Museum Barcelona · Plaza Urquinaona<br>Conectado a Supabase</div>
     </div>
   </aside>
 
@@ -1903,7 +1898,7 @@ function renderLoginUsers(){
   cont.innerHTML = USUARIOS_HUB.map(u=>`
     <button type="button" class="login-user" onclick="pickLoginUser('${u.nombre}')">
       <span class="lu-ini" style="background:${roleColors[u.nombre]||'#5B8CFF'}">${u.nombre[0]}</span>
-      <span class="lu-txt"><span class="lu-name">${u.nombre}</span><span class="lu-cargo">${u.cargo}</span></span>
+      <span class="lu-name">${u.nombre}</span>
     </button>`).join('');
 }
 
@@ -1917,7 +1912,7 @@ function pickLoginUser(nombre){
   document.getElementById('login-step-pass').style.display = 'block';
   document.getElementById('login-who').innerHTML = `
     <span class="lu-ini" style="background:${roleColors[nombre]||'#5B8CFF'}">${nombre[0]}</span>
-    <span class="lu-txt"><span class="lu-name">${nombre}</span><span class="lu-cargo">${u.cargo||''}</span></span>`;
+    <span class="lu-name">${nombre}</span>`;
   const emailEl = document.getElementById('login-email');
   if(u.email){
     emailEl.type = 'hidden';
@@ -1988,9 +1983,8 @@ function updateUserChip(){
   av.textContent = currentProfile.nombre[0];
   av.style.background = roleColors[currentProfile.nombre] || 'var(--accent)';
   document.getElementById('uc-name').textContent = currentProfile.nombre;
-  document.getElementById('uc-rol').textContent =
-    CARGOS[currentProfile.rol] ||
-    (USUARIOS_HUB.find(u=>u.nombre===currentProfile.nombre)?.cargo) || 'Equipo';
+  const rolEl = document.getElementById('uc-rol');
+  if(rolEl) rolEl.textContent = '';
 }
 const roleColors = {Laia:'#33C98B', Ignacio:'#F2913D', Paula:'#FF4FA0', Ceci:'#4D8DF6', Mireia:'#F2D64B'};
 const EQUIPO_HUB = ['Laia','Ignacio','Paula','Ceci','Mireia'];
