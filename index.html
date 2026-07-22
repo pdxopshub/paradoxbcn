@@ -321,8 +321,11 @@
   #view-recap .task-item{padding:4.5px 0;}
   #view-recap .task-item .task-txt{font-size:12px;}
   #view-recap .task-item .task-check{width:17px;height:17px;}
-  #view-recap .day-block{margin-bottom:7px;}
-  #view-recap .day-block-label{font-size:10px;margin-bottom:3px;padding:2px 0;}
+  #view-recap .day-block{margin-bottom:10px;padding:8px 10px;background:var(--panel);
+    border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;}
+  #view-recap .day-block.today{border-left-color:var(--success);background:#16241D;}
+  #view-recap .day-block-label{font-size:10.5px;margin-bottom:5px;padding:0 0 5px;
+    border-bottom:1px solid var(--line);}
   #view-recap .recap-section-title{font-size:12px;margin-bottom:9px;padding-bottom:8px;}
   #view-recap .card .card{padding:11px 12px;}
   /* Info General: las dos cápsulas internas SIEMPRE dentro y simétricas */
@@ -1136,7 +1139,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div style="width:100%;min-width:0;">
         <div class="page-head" style="margin-bottom:12px;">
           <div style="text-align:left;">
-            <h1 style="font-size:17px;margin-bottom:4px;">Recap del día</h1>
             <button class="btn btn-ghost btn-sm" onclick="openRecapHistory()" style="font-weight:700;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
               Historial de Recaps
@@ -1147,6 +1149,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <button onclick="recapPrevDay()">← Anterior</button>
               <button class="today-btn" onclick="recapGoToday()">Hoy</button>
               <button onclick="recapNextDay()">Siguiente →</button>
+              <button onclick="renderRecap()" title="Actualizar datos">⟳</button>
             </div>
             <button class="btn btn-primary" onclick="saveRecap()" style="min-width:150px;justify-content:center;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
@@ -1239,7 +1242,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
             Tasks Weekly Calendar
             <button class="edit-pencil" onclick="openEditWeekly()" title="Editar tareas semanales">✎</button>
-            <span style="font-size:11px;font-weight:600;color:var(--text-soft);margin-left:4px;">Clic para marcar</span>
           </div>
           <div id="recap-weekly-tasks" class="wk-2col"></div>
 
@@ -1406,7 +1408,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <div id="pdx-topbar-actions"></div>
           </div>
           <div id="view-root"></div>
-          <div id="modal-root"></div>
         </div>
       </div>
 
@@ -1805,6 +1806,7 @@ function initApp(){
   if(appInitialised) return;
   appInitialised = true;
   initNav();
+  renderRecap();      // el Recap es la vista inicial: dibujarlo ya
   refreshDashboard(); // carga visitas reales + calendario
   renderResenas('tripadvisor');
   renderPDA();
@@ -3220,9 +3222,10 @@ async function loadRecapStaffNames(){
   const list = await fetchStaff();
   const activos = list.filter(s=>s.activo !== false).map(s=>s.nombre).filter(Boolean);
   if(!activos.length){ RECAP_TIENDA_STAFF = RECAP_TIENDA_STAFF_FALLBACK; return; }
-  // mismo orden que SPV: Tienda -> Supervisores -> resto (alfabético)
-  const tienda  = SPV_GROUP_TIENDA.filter(n=>activos.includes(n));
-  const superv  = SPV_GROUP_SUPERV.filter(n=>activos.includes(n));
+  // mismo orden que SPV: Tienda -> Supervisores -> resto (alfabético).
+  // Tienda y supervisores salen SIEMPRE, aunque no estén en la tabla de staff.
+  const tienda  = [...SPV_GROUP_TIENDA];
+  const superv  = [...SPV_GROUP_SUPERV];
   const usados  = [...tienda, ...superv];
   const resto   = activos.filter(n=>!usados.includes(n)).sort((a,b)=>a.localeCompare(b,'es'));
   RECAP_TIENDA_STAFF = [...tienda, ...superv, ...resto];
@@ -3414,8 +3417,8 @@ async function renderRecap(){
     const wt = WEEKLY_TASKS[dow];
     const isToday = dow === todayDow || (dow===6 && (todayDow===6||todayDow===0));
     const allTasks = [
-      ...wt.mañana.map((t,i)=>({id:`task-${dow}-m-${i}`, txt:`☀ ${t}`})),
-      ...wt.tarde.map((t,i)=>({id:`task-${dow}-t-${i}`, txt:`🌙 ${t}`})),
+      ...wt.mañana.map((t,i)=>({id:`task-${dow}-m-${i}`, txt:t})),
+      ...wt.tarde.map((t,i)=>({id:`task-${dow}-t-${i}`, txt:t})),
     ];
     return `<div class="day-block ${isToday?'today':'other'}">
       <div class="day-block-label">${wt.label}${isToday?' ← hoy':''}</div>
@@ -5965,5 +5968,6 @@ async function deleteVacBloqueo(id){
 init();
 
 </script>
+<div id="modal-root"></div>
 </body>
 </html>
