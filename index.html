@@ -494,8 +494,10 @@
   .tbl-filter .tf-count{font-size:11.5px;color:var(--text-dim);white-space:nowrap;}
   tr.tf-hidden{display:none;}
   /* ---- Staff inactivo ---- */
-  tr.staff-off td{opacity:.5;}
-  tr.staff-off td:first-child{opacity:1;}
+  tr.staff-off td{background:#15171C!important;opacity:.62;filter:grayscale(.5);}
+  tr.staff-off td:first-child{opacity:.75;}
+  tr.staff-off .staff-name .ini{filter:grayscale(1);}
+  tr.staff-off .nm-txt{color:#8A90A0;}
   .staff-estado{display:flex;align-items:center;gap:6px;font-size:11.5px;cursor:pointer;user-select:none;}
   .staff-estado .sw{width:30px;height:17px;border-radius:20px;background:#3A3F4C;position:relative;transition:background .15s;flex-shrink:0;}
   .staff-estado .sw::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#8A90A0;transition:.15s;}
@@ -2837,9 +2839,15 @@ function staffRank(s){
   return i === -1 ? 99 : i;
 }
 function applyStaffSort(list){
+  const inactivoUltimo = (a,b)=>{
+    const ia = a.activo===false ? 1 : 0, ib = b.activo===false ? 1 : 0;
+    return ia - ib;   // los no activos siempre al final
+  };
   if(!staffSort.key){
-    // por defecto: Paula y Ceci primero, después alfabético
+    // por defecto: activos primero, luego Paula y Ceci, después alfabético
     list.sort((a,b)=>{
+      const inact = inactivoUltimo(a,b);
+      if(inact !== 0) return inact;
       const ra = staffRank(a), rb = staffRank(b);
       if(ra !== rb) return ra - rb;
       return (a.nombre||'').localeCompare(b.nombre||'','es');
@@ -2848,6 +2856,8 @@ function applyStaffSort(list){
   }
   const k = staffSort.key, d = staffSort.dir;
   list.sort((a,b)=>{
+    const inact = inactivoUltimo(a,b);
+    if(inact !== 0) return inact;
     let va, vb;
     if(k==='visitas'){ va=staffVisitas(a); vb=staffVisitas(b); }
     else if(k==='nombre'){ va=(a.nombre||'').toLowerCase(); vb=(b.nombre||'').toLowerCase(); return va<vb?-1*d:va>vb?1*d:0; }
@@ -2895,7 +2905,7 @@ function staffColumns(){
         <span class="sw"></span><span>${act?'Activo':'No activo'}</span></div></td>`;}};
   const borrar = {key:'del', th:'', w:44, cell:s=>`<td><button class="btn btn-ghost btn-sm" onclick="deleteStaff(${s.id})">✕</button></td>`};
   const txt = (field, ph, w)=>({key:field, th:ph, w, cell:s=>
-      `<td><input class="cell-input txt" placeholder="${ph}" value="${(s[field]||'').toString().replace(/"/g,'&quot;')}" data-id="${s.id}" data-field="${field}"></td>`});
+      `<td><input class="cell-input" placeholder="${ph}" value="${(s[field]||'').toString().replace(/"/g,'&quot;')}" data-id="${s.id}" data-field="${field}"></td>`});
 
   if(staffView==='datos'){
     return {
