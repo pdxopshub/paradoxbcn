@@ -319,7 +319,9 @@
   #view-recap .recap-field label{font-size:12.5px;}
   #view-recap .toggle-btn{padding:4px 11px;font-size:11px;}
   #view-recap .task-item{padding:4.5px 0;}
-  #view-recap .task-item .task-txt{font-size:12px;}
+  #view-recap .task-item .task-txt{font-size:11px;line-height:1.35;overflow-wrap:anywhere;word-break:break-word;min-width:0;}
+  #view-recap .task-item{align-items:flex-start;gap:7px;}
+  #view-recap .task-item .task-check{flex-shrink:0;margin-top:1px;}
   #view-recap .task-item .task-check{width:17px;height:17px;}
   #view-recap .day-block{margin-bottom:10px;padding:8px 10px;background:var(--panel);
     border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;}
@@ -1138,24 +1140,24 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div style="width:100%;">
         <div style="width:100%;min-width:0;">
         <div class="page-head" style="margin-bottom:12px;">
-          <div style="text-align:left;">
-            <button class="btn btn-ghost btn-sm" onclick="openRecapHistory()" style="font-weight:700;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;">
+            <button class="btn btn-ghost btn-sm" onclick="openRecapHistory()" style="font-weight:700;flex-shrink:0;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
               Historial de Recaps
             </button>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
-            <div class="recap-nav">
+            <div class="recap-nav" style="flex-shrink:0;">
               <button onclick="recapPrevDay()">← Anterior</button>
               <button class="today-btn" onclick="recapGoToday()">Hoy</button>
               <button onclick="recapNextDay()">Siguiente →</button>
               <button onclick="renderRecap()" title="Actualizar datos">⟳</button>
             </div>
-            <button class="btn btn-primary" onclick="saveRecap()" style="min-width:150px;justify-content:center;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-              Guardar Recap
-            </button>
-            <div class="recap-saved-banner" id="recap-saved-banner">✓ Guardado</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+              <div class="recap-saved-banner" id="recap-saved-banner">✓ Guardado</div>
+              <button class="btn btn-primary" onclick="saveRecap()" style="min-width:150px;justify-content:center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+                Guardar Recap
+              </button>
+            </div>
           </div>
         </div>
 
@@ -3251,8 +3253,8 @@ let WEEKLY_TASKS = {
   3:{ label:'Miércoles', mañana:['Colocar patucos, trapos y cambiadores de bebé + Dejar abierto baño verde con el cambiador haciendo de "cuña"'], tarde:['CL de Materiales'] },
   4:{ label:'Jueves', mañana:['Banco'], tarde:['Lavadora/Secadora con Chaquetas de camuflaje, cojines y manta'] },
   5:{ label:'Viernes', mañana:['Colocar chaquetas de camuflaje, cojines y manta'], tarde:['Cambio en cajas + Cerrar baño verde'] },
-  6:{ label:'Sábado / Domingo', mañana:['Cuñas de las puertas del Eixample escondidos','Botón 0G en Oficina de Ops','Catenarias de Welcome Room + Shadow Freeze + Filas de 0G','Cambio en caja fuerte de C1','Taquilla lista (sin objetos indebidos)'], tarde:[] },
-  0:{ label:'Sábado / Domingo', mañana:['Cuñas de las puertas del Eixample escondidos','Botón 0G en Oficina de Ops','Catenarias de Welcome Room + Shadow Freeze + Filas de 0G','Cambio en caja fuerte de C1','Taquilla lista (sin objetos indebidos)'], tarde:[] },
+  6:{ label:'Sábado / Domingo', mañana:['Cuñas de las puertas del Eixample escondidos','Botón 0G en Oficina de Ops','Catenarias de WR + SF + Filas de 0G','Cambio en caja fuerte de C1','Taquilla lista (sin objetos indebidos)'], tarde:[] },
+  0:{ label:'Sábado / Domingo', mañana:['Cuñas de las puertas del Eixample escondidos','Botón 0G en Oficina de Ops','Catenarias de WR + SF + Filas de 0G','Cambio en caja fuerte de C1','Taquilla lista (sin objetos indebidos)'], tarde:[] },
 };
 
 let recapDate = todayIso();
@@ -3266,7 +3268,7 @@ function openEditRutinas(turno){
       <button class="row-del" onclick="this.parentElement.remove()" title="Quitar">✕</button>
     </div>`).join('');
   document.getElementById('modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal" style="max-width:560px;">
         <div class="modal-head"><h2>Editar rutinas de la ${turno}</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
@@ -3321,7 +3323,7 @@ function openEditWeekly(){
     </div>`;
   }).join('');
   document.getElementById('modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal" style="max-width:640px;">
         <div class="modal-head"><h2>Editar Tasks Weekly</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
@@ -3633,7 +3635,7 @@ function recapUnread(r){
 /* ---------- Historial completo de recaps (ventana) ---------- */
 async function openRecapHistory(){
   document.getElementById('modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal" style="max-width:760px;">
         <div class="modal-head"><h2>Historial de Recaps</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
@@ -3814,7 +3816,7 @@ function openMktCampaign(id){
   const c = id ? mktCampanas.find(x=>x.id===id) : {};
   const estOpts = Object.entries(MKT_ESTADOS).map(([k,v])=>`<option value="${k}" ${c.estado===k?'selected':''}>${v.label}</option>`).join('');
   document.getElementById('modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal">
         <div class="modal-head"><h2>${id?'Editar campaña':'Nueva campaña'}</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
@@ -3884,7 +3886,7 @@ function openMktInfluencer(id){
   const f = id ? mktInfluencers.find(x=>x.id===id) : {};
   const estOpts = Object.entries(MKT_INF_ESTADOS).map(([k,v])=>`<option value="${k}" ${f.estado===k?'selected':''}>${v.label}</option>`).join('');
   document.getElementById('modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal">
         <div class="modal-head"><h2>${id?'Editar influencer':'Nuevo influencer'}</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
@@ -4587,7 +4589,7 @@ function openRulesModal(){
       <button class="icon-btn" title="Eliminar regla" onclick="removeRule('${r.id}')">${closeIcon()}</button>
     </div>`).join('');
   $('#modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal" style="max-width:520px;">
         <div class="modal-head">
           <h2>Avisos automáticos</h2>
@@ -4855,7 +4857,7 @@ function renderCumpleanos(){
 function openBirthdayModal(existing){
   const g = existing || null;
   $('#modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal">
         <div class="modal-head">
           <h2>${g?'Editar cumpleaños':'Nuevo cumpleaños'}</h2>
@@ -4974,7 +4976,7 @@ function openCampaignModal(existing){
   const c = existing || null;
   const currentYear = new Date().getFullYear();
   $('#modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal">
         <div class="modal-head">
           <h2>${c?'Editar campaña':'Nueva campaña'}</h2>
@@ -5037,7 +5039,7 @@ function openCampaignDetail(id){
   const rec = campaignRecipients(c).slice().sort((a,b)=> a.nombre.localeCompare(b.nombre));
   const pendientes = rec.filter(g=>campaignStatusFor(g,c)==='pendiente').length;
   $('#modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal" style="max-width:700px;">
         <div class="modal-head">
           <div>
@@ -5152,7 +5154,7 @@ function openGroupModal(existing){
   const g = existing || null;
   const catOptions = state.categories.map(c => `<option value="${esc(c)}" ${g&&g.tipo===c?'selected':''}>${esc(c)}</option>`).join('');
   $('#modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal">
         <div class="modal-head">
           <h2>${g?'Editar grupo':'Nuevo grupo'}</h2>
@@ -5285,7 +5287,7 @@ function openGroupDetail(id){
   if(!g) return;
   const interacciones = (g.interacciones||[]).slice().reverse();
   $('#modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal" style="max-width:680px;">
         <div class="modal-head">
           <div class="detail-header" style="width:100%;">
@@ -5809,7 +5811,7 @@ function openVacRequest(fecha){
   const opts = EQUIPO_HUB.map(n=>`<option value="${n}" ${n===yo?'selected':''}>${n}</option>`).join('');
   const tipos = Object.entries(VAC_TIPOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   document.getElementById('modal-root').innerHTML = `
-    <div class="modal-overlay" onclick="if(event.target===this) closeModal()">
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal">
         <div class="modal-head"><h2>Solicitar días</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
