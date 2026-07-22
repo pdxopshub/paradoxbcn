@@ -369,7 +369,29 @@
   #view-recap #rc-info-visitantes .recap-field, #view-recap #rc-info-entrada .recap-field{padding:4px 0;}
   #view-recap #rc-info-visitantes .recap-field label, #view-recap #rc-info-entrada .recap-field label{font-size:12px;}
   /* ---- Anchos más contenidos ---- */
-  #view-entrevistas .card,#view-turnos .card{max-width:820px;}
+  #view-entrevistas .card{max-width:820px;}
+  /* ---- TURNOS: gestión a la izquierda, calendario a la derecha ---- */
+  .turnos-layout{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:14px;align-items:start;}
+  @media(max-width:1150px){.turnos-layout{grid-template-columns:1fr;}}
+  .turnos-left{min-width:0;}
+  .turnos-right{min-width:0;position:sticky;top:8px;}
+  .tcal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:760px){.tcal-wrap{grid-template-columns:1fr;}}
+  .tcal-month h4{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
+    color:var(--accent);margin:0 0 8px;text-align:center;}
+  .tcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+  .tcal-dow{font-size:9.5px;text-align:center;color:var(--text-dim);font-weight:700;padding-bottom:3px;}
+  .tcal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;
+    border-radius:5px;color:var(--text-soft);position:relative;}
+  .tcal-day.pad{visibility:hidden;}
+  .tcal-day.wknd{color:#5A6070;}
+  .tcal-day.today{box-shadow:inset 0 0 0 1.5px var(--accent);color:#fff;font-weight:900;}
+  .tcal-day.has{background:#245C40;color:#C6F3DC;font-weight:800;cursor:help;}
+  .tcal-day.has:hover{filter:brightness(1.25);}
+  .tcal-list{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;}
+  .tcal-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .tcal-item:last-child{border-bottom:none;}
+  .tcal-date{font-weight:800;color:var(--accent);min-width:74px;flex-shrink:0;font-size:11.5px;}
   #view-diego .card{max-width:720px;}
   .chat-wrap{max-width:400px;margin:0;width:100%;}
   .chat-body .msg img{max-width:100%;border-radius:8px;margin-top:6px;cursor:pointer;display:block;}
@@ -1162,33 +1184,57 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ CAMBIOS DE TURNO ============ -->
       <div class="view" id="view-turnos">
-        <div class="page-head"><div><h1>Cambios de turno</h1><p>Un cambio implica a dos personas: quien cede el día y quien lo coge.</p></div></div>
+        <div class="turnos-layout">
 
-        <div class="card" style="margin-bottom:14px;">
-          <div class="section-title">Añadir cambio de turno</div>
-          <div id="turno-block-1" class="turno-block" style="margin-bottom:12px;"></div>
-          <div id="turno-block-2" class="turno-block" style="margin-bottom:12px;"></div>
-          <div><label class="field-label">Motivo</label><input id="turno-motivo" placeholder="Motivo (opcional)"></div>
-          <div style="margin-top:12px;"><button class="btn btn-primary" onclick="addTurnoRequest()">Guardar cambio de turno</button></div>
-        </div>
+          <!-- ---------- IZQUIERDA: gestión ---------- -->
+          <div class="turnos-left">
+            <div class="card" style="margin-bottom:14px;">
+              <div class="section-title">Añadir cambio de turno</div>
+              <div id="turno-block-1" class="turno-block" style="margin-bottom:12px;"></div>
+              <div id="turno-block-2" class="turno-block" style="margin-bottom:12px;"></div>
+              <div><label class="field-label">Motivo</label><input id="turno-motivo" placeholder="Motivo (opcional)"></div>
+              <div style="margin-top:12px;"><button class="btn btn-primary" onclick="addTurnoRequest()">Guardar cambio de turno</button></div>
+            </div>
 
-        <div class="card" style="margin-bottom:14px;">
-          <div class="section-title">Solicitudes activas</div>
-          <div class="table-wrap"><table id="turnos-active-table"><thead>
-            <tr><th>Staff 1</th><th>Staff 2</th><th>Motivo</th><th>Estado</th><th></th></tr>
-          </thead><tbody></tbody></table></div>
-        </div>
+            <div class="card" style="margin-bottom:14px;">
+              <div class="section-title">Solicitudes activas</div>
+              <div class="table-wrap"><table id="turnos-active-table"><thead>
+                <tr><th>Staff 1</th><th>Staff 2</th><th>Motivo</th><th>Estado</th><th></th></tr>
+              </thead><tbody></tbody></table></div>
+            </div>
 
-        <div class="card">
-          <div class="section-title">Histórico</div>
-          <div class="table-wrap"><table id="turnos-history-table"><thead>
-            <tr><th>Staff 1</th><th>Staff 2</th><th>Motivo</th><th>Estado</th></tr>
-          </thead><tbody></tbody></table></div>
-        </div>
+            <div class="card" style="margin-bottom:14px;">
+              <div class="section-title">Histórico</div>
+              <div class="table-wrap"><table id="turnos-history-table"><thead>
+                <tr><th>Staff 1</th><th>Staff 2</th><th>Motivo</th><th>Estado</th><th></th></tr>
+              </thead><tbody></tbody></table></div>
+            </div>
 
-        <div class="card" style="margin-top:14px;">
-          <div class="section-title">Cambios por persona y mes <span class="hint">Cuenta solo a quien cede el turno, en el mes en que lo pide</span></div>
-          <div class="table-wrap"><table id="turnos-por-mes-table"><thead></thead><tbody></tbody></table></div>
+            <div class="card">
+              <div class="section-title">Cambios por persona y mes <span class="hint">Cuenta solo a quien cede el turno, en el mes en que lo pide</span></div>
+              <div class="table-wrap"><table id="turnos-por-mes-table"><thead></thead><tbody></tbody></table></div>
+            </div>
+          </div>
+
+          <!-- ---------- DERECHA: calendario de aprobados ---------- -->
+          <div class="turnos-right">
+            <div class="card">
+              <div class="flex-between" style="margin-bottom:10px;">
+                <div class="section-title" style="margin:0;">Calendario de cambios <span class="hint">Solo aprobados</span></div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <button class="btn btn-ghost btn-sm" onclick="turnosCalMonth(-1)">‹</button>
+                  <button class="btn btn-ghost btn-sm" onclick="turnosCalMonth(0)">Hoy</button>
+                  <button class="btn btn-ghost btn-sm" onclick="turnosCalMonth(1)">›</button>
+                </div>
+              </div>
+              <div id="turnos-cal"></div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:12px;font-size:11px;color:var(--text-soft);">
+                <span style="display:flex;align-items:center;gap:6px;"><i style="width:11px;height:11px;border-radius:3px;background:#245C40;display:inline-block;"></i> Día con cambio aprobado</span>
+                <span style="display:flex;align-items:center;gap:6px;"><i style="width:11px;height:11px;border-radius:3px;box-shadow:inset 0 0 0 1.5px var(--accent);display:inline-block;"></i> Hoy</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -3116,7 +3162,81 @@ async function renderTurnos(){
 
   renderTurnosPorMes(list, fmtDate);
 }
+/* ---------- Calendario de cambios aprobados (2 meses) ---------- */
+let turnosCalDate = new Date();
+function turnosCalMonth(delta){
+  if(delta===0) turnosCalDate = new Date();
+  else turnosCalDate.setMonth(turnosCalDate.getMonth()+delta);
+  renderTurnos();
+}
+function renderTurnosCalendar(list){
+  const cont = document.getElementById('turnos-cal');
+  if(!cont) return;
+  const aprobados = (list||[]).filter(t=>t.estado==='Aprobado');
+
+  // mapa fecha -> movimientos de ese día
+  const map = {};
+  aprobados.forEach(t=>{
+    [[t.p1_fecha, t.p1_staff, t.p2_staff, t.p1_hora],
+     [t.p2_fecha, t.p2_staff, t.p1_staff, t.p2_hora]].forEach(([f, cede, coge, hora])=>{
+      if(!f) return;
+      (map[f] = map[f] || []).push({cede, coge, hora});
+    });
+  });
+
+  const MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const dows = ['L','M','X','J','V','S','D'];
+  const hoyIso = (()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); })();
+
+  function mesHtml(base){
+    const y = base.getFullYear(), m = base.getMonth();
+    const offset = (new Date(y,m,1).getDay()+6)%7;
+    const ndays = new Date(y,m+1,0).getDate();
+    let h = `<div class="tcal-month"><h4>${MES[m]} ${y}</h4><div class="tcal-grid">`;
+    h += dows.map(d=>`<div class="tcal-dow">${d}</div>`).join('');
+    for(let i=0;i<offset;i++) h += '<div class="tcal-day pad"></div>';
+    for(let d=1; d<=ndays; d++){
+      const iso = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const movs = map[iso];
+      const dow = new Date(y,m,d).getDay();
+      const cls = ['tcal-day'];
+      if(dow===0||dow===6) cls.push('wknd');
+      if(movs) cls.push('has');
+      if(iso===hoyIso) cls.push('today');
+      const tip = movs ? movs.map(x=>`${x.cede} → ${x.coge}${x.hora?' ('+x.hora+')':''}`).join(' | ').replace(/"/g,'&quot;') : iso;
+      h += `<div class="${cls.join(' ')}" title="${tip}">${d}</div>`;
+    }
+    return h + '</div></div>';
+  }
+
+  const mes1 = new Date(turnosCalDate.getFullYear(), turnosCalDate.getMonth(), 1);
+  const mes2 = new Date(turnosCalDate.getFullYear(), turnosCalDate.getMonth()+1, 1);
+  cont.innerHTML = `<div class="tcal-wrap">${mesHtml(mes1)}${mesHtml(mes2)}</div>`;
+
+  // lista de los cambios de esos dos meses
+  const desde = mes1, hasta = new Date(turnosCalDate.getFullYear(), turnosCalDate.getMonth()+2, 0);
+  const isoDesde = desde.getFullYear()+'-'+String(desde.getMonth()+1).padStart(2,'0')+'-01';
+  const isoHasta = hasta.getFullYear()+'-'+String(hasta.getMonth()+1).padStart(2,'0')+'-'+String(hasta.getDate()).padStart(2,'0');
+  const fechas = Object.keys(map).filter(f=> f>=isoDesde && f<=isoHasta).sort();
+  if(fechas.length){
+    cont.innerHTML += `<div class="tcal-list">` + fechas.map(f=>{
+      const d = new Date(f+'T12:00:00');
+      const lbl = d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'});
+      return map[f].map(x=>`<div class="tcal-item">
+        <span class="tcal-date" style="text-transform:capitalize;">${lbl}</span>
+        <span><b style="color:${roleColors[x.cede]||'var(--text)'}">${esc(x.cede||'?')}</b>
+        <span style="color:var(--text-dim);"> cede a </span>
+        <b style="color:${roleColors[x.coge]||'var(--text)'}">${esc(x.coge||'?')}</b>
+        ${x.hora?`<span style="color:var(--text-dim);"> · ${esc(x.hora)}</span>`:''}</span>
+      </div>`).join('');
+    }).join('') + '</div>';
+  } else {
+    cont.innerHTML += `<div class="tcal-list"><div style="font-size:12.5px;color:var(--text-dim);">Sin cambios aprobados en estos dos meses.</div></div>`;
+  }
+}
+
 async function renderTurnosPorMes(list){
+  renderTurnosCalendar(list);
   const staffList = await fetchStaff();
   const names = staffList.map(s=>s.nombre);
   function monthLabel(d){ const dt = new Date(d+'T00:00:00'); return `${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`; }
