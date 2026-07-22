@@ -434,13 +434,19 @@
     max-height:calc(100vh - 190px);background:var(--surface);margin-bottom:14px;}
   #spv-grid-table{font-size:11px;border-collapse:separate;border-spacing:0;}
   #spv-grid-table th{padding:5px 4px!important;font-size:9px;letter-spacing:.3px;
-    position:sticky;z-index:3;background:var(--panel);}
+    position:sticky;z-index:3;background:#111C33!important;color:#AFC4E8!important;}
+  /* columnas de visitantes también en azul oscuro */
+  #spv-grid-table .grp-visit{background:#111C33!important;color:#AFC4E8!important;}
+  #spv-grid-table td.col-visit{background:#0E1728!important;}
+  #spv-grid-table td.col-visit.total-cell{background:#132038!important;font-weight:800;}
   #spv-grid-table thead tr:first-child th{top:0;z-index:5;}
   #spv-grid-table thead tr:nth-child(2) th{top:23px;z-index:5;}
   #spv-grid-table td{padding:2px 3px!important;height:26px;}
   /* primera columna (día) fija */
-  #spv-grid-table th:first-child,#spv-grid-table td:first-child{
-    position:sticky;left:0;z-index:4;background:var(--panel)!important;}
+  #spv-grid-table th:first-child{position:sticky;left:0;z-index:6;background:#111C33!important;}
+  #spv-grid-table td:first-child{position:sticky;left:0;z-index:4;
+    background:#132038!important;color:#CBD8EF;font-weight:700;
+    border-right:3px solid var(--line-strong)!important;}
   #spv-grid-table thead th:first-child{z-index:6;}
   /* celdas sin azul */
   #spv-grid-table .cell-input{background:transparent!important;border:none!important;
@@ -450,14 +456,15 @@
   #spv-grid-table .cell-input:focus{background:#2C3444!important;
     box-shadow:inset 0 0 0 1.5px var(--accent)!important;}
   /* Tienda gris más claro que Supervisores */
-  #spv-grid-table .grp-tienda{background:#3A3F4C!important;color:#E4E7EE!important;
-    border:1px solid #545A6B!important;}
-  #spv-grid-table .col-tienda{background:#2B303B!important;border:1px solid #474D5C!important;}
-  #spv-grid-table .grp-superv{background:#23262F!important;color:#B9BECB!important;
-    border:1px solid #343845!important;}
-  #spv-grid-table .col-superv{background:#1C1F27!important;border:1px solid #2F333E!important;}
+  /* Tienda y Supervisores con el mismo fondo que el staff */
+  #spv-grid-table .grp-tienda,#spv-grid-table .grp-superv{background:var(--panel)!important;color:var(--text-soft)!important;}
+  #spv-grid-table .col-tienda,#spv-grid-table .col-superv{background:transparent!important;}
   /* separación general entre celdas */
   #spv-grid-table td,#spv-grid-table th{border:1px solid var(--line);}
+  /* líneas gruesas: Tienda | Supervisores | Staff */
+  #spv-grid-table .grp-tienda.grp-end,#spv-grid-table .col-tienda.grp-end,
+  #spv-grid-table .grp-superv.grp-end,#spv-grid-table .col-superv.grp-end{
+    border-right:3px solid var(--line-strong)!important;}
   /* ============ EVALUACIONES ============ */
   .ev-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start;}
   @media(max-width:1100px){.ev-layout{grid-template-columns:1fr;}}
@@ -1248,18 +1255,11 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <span id="spv-commission-days"></span><span id="spv-commission-revenue"></span><span id="spv-paula-commission"></span>
         </div>
 
-        <div class="card" id="spv-resumen-card" style="margin-bottom:14px;">
-          <div class="section-title">Resumen mensual por persona <span class="hint">Solo cuenta lo vendido en días con comisión</span></div>
-          <div class="table-wrap"><table id="spv-summary-table"><thead>
-            <tr><th>Persona</th><th>Días vendidos</th><th>Total generado (días con comisión)</th><th>Comisión (2%)</th></tr>
-          </thead><tbody></tbody></table></div>
+        <!-- Ocultos: sus datos se consultan desde la ventana de Comisiones -->
+        <div id="spv-resumen-card" style="display:none;">
+          <table id="spv-summary-table"><tbody></tbody></table>
         </div>
-
-        <div class="card" id="spv-historico-card">
-          <div class="flex-between" style="margin-bottom:12px;">
-            <div class="section-title" style="margin:0;">Histórico de comisiones</div>
-            <button class="btn btn-primary btn-sm" onclick="saveCommissionSnapshot()">Guardar este mes en el histórico</button>
-          </div>
+        <div id="spv-historico-card" style="display:none;">
           <div id="commission-history"></div>
         </div>
       </div>
