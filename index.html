@@ -298,7 +298,9 @@
   .colmenu-panel label:hover{background:var(--panel);}
   .colmenu-panel input{accent-color:var(--accent);}
   /* ---- Recap en 3 columnas ---- */
-  .recap-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start;}
+  .recap-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-items:start;}
+  .recap-obs{grid-column:1 / -1;min-width:0;}
+  @media(max-width:1500px){.recap-grid{grid-template-columns:repeat(2,1fr);}}
   @media(max-width:1180px){.recap-grid{grid-template-columns:1fr 1fr;}}
   @media(max-width:820px){.recap-grid{grid-template-columns:1fr;}}
   .recap-col{display:flex;flex-direction:column;gap:12px;min-width:0;}
@@ -317,7 +319,22 @@
   /* Info General: las dos cápsulas internas SIEMPRE dentro y simétricas */
   #view-recap .grid-2{grid-template-columns:1fr;gap:10px;}
   #view-recap #rc-info-visitantes, #view-recap #rc-info-entrada{min-width:0;box-sizing:border-box;padding:11px 12px;}
-  .rc-cap-title{font-size:10.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+  .rc-cap-title{font-size:10.5px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+  /* campos compactos: etiqueta arriba, hueco debajo */
+  #view-recap .rc-fields{display:grid;gap:8px;}
+  #view-recap .rc-fields.c2{grid-template-columns:1fr 1fr;}
+  #view-recap .rc-fields.c3{grid-template-columns:1fr 1fr 1fr;}
+  #view-recap .rc-f{display:flex;flex-direction:column;gap:4px;min-width:0;}
+  #view-recap .rc-f label{font-size:10.5px;font-weight:700;color:var(--text-soft);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  #view-recap .rc-f input{width:100%;box-sizing:border-box;text-align:right;padding:6px 9px;
+    border-radius:6px;background:#10233A;border:1.5px solid #2E4C6E;color:#EAF1FB;
+    font-size:13px;font-weight:600;}
+  #view-recap .rc-f input:focus{outline:none;border-color:var(--accent);background:#173A63;
+    box-shadow:0 0 0 2px rgba(91,140,255,.18);}
+  #view-recap .rc-ly-box{width:100%;box-sizing:border-box;text-align:right;padding:6px 9px;
+    border-radius:6px;background:transparent;border:1.5px dashed #3A4051;color:#8D91A3;
+    font-size:13px;font-weight:800;}
   /* --- Info General del recap: cápsulas, filas y campos --- */
   #view-recap .rc-block{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 13px;box-sizing:border-box;min-width:0;}
   #view-recap .rc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);}
@@ -1126,7 +1143,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
         <!-- Fecha y quién cierra -->
         <div class="card" style="margin-bottom:14px;">
-          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;">
             <div style="flex:1;min-width:180px;">
               <label class="field-label">Fecha</label>
               <input type="date" id="recap-date" style="font-weight:800;font-size:15px;">
@@ -1159,29 +1176,34 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             Info General
           </div>
 
-          <div class="grid grid-2" style="gap:12px;margin-bottom:12px;">
-            <div class="rc-block" id="rc-info-visitantes">
-              <div class="rc-cap-title">Visitantes</div>
-              <div class="rc-row"><span>Hoy</span><input type="number" class="rc-num" id="rc-visitantes" placeholder="0"></div>
-              <div class="rc-row"><span>Año pasado</span><span class="rc-ly" id="rc-visitantes-ly">–</span></div>
-              <div class="rc-cap-title" style="margin-top:14px;">Horas Planday</div>
-              <div class="rc-row"><span>Total staff</span><input type="number" class="rc-num" id="rc-horas-planday" placeholder="0.0" step="0.5"></div>
+          <div class="rc-block" style="margin-bottom:10px;">
+            <div class="rc-cap-title">Visitantes</div>
+            <div class="rc-fields c2">
+              <div class="rc-f"><label>Hoy</label><input type="number" id="rc-visitantes" placeholder="0"></div>
+              <div class="rc-f"><label>Año pasado</label><div class="rc-ly-box" id="rc-visitantes-ly">–</div></div>
             </div>
-            <div class="rc-block" id="rc-info-entrada">
-              <div class="rc-cap-title">Tipo de entrada</div>
-              <div class="rc-row"><span>Box Office</span><input type="number" class="rc-num" id="rc-box-office" placeholder="0"></div>
-              <div class="rc-row"><span>Fever</span><input type="number" class="rc-num" id="rc-fever" placeholder="0"></div>
-              <div class="rc-row"><span>API</span><input type="number" class="rc-num" id="rc-api" placeholder="0"></div>
-              <div class="rc-row"><span>Grupos</span><input type="number" class="rc-num" id="rc-grupos" placeholder="0"></div>
+            <div class="rc-cap-title" style="margin-top:12px;">Horas Planday</div>
+            <div class="rc-fields c2">
+              <div class="rc-f"><label>Total staff</label><input type="number" id="rc-horas-planday" placeholder="0.0" step="0.5"></div>
             </div>
           </div>
 
-          <div class="rc-block" style="margin-bottom:12px;">
+          <div class="rc-block" style="margin-bottom:10px;">
+            <div class="rc-cap-title">Tipo de entrada</div>
+            <div class="rc-fields c2">
+              <div class="rc-f"><label>Box Office</label><input type="number" id="rc-box-office" placeholder="0"></div>
+              <div class="rc-f"><label>Fever</label><input type="number" id="rc-fever" placeholder="0"></div>
+              <div class="rc-f"><label>API</label><input type="number" id="rc-api" placeholder="0"></div>
+              <div class="rc-f"><label>Grupos</label><input type="number" id="rc-grupos" placeholder="0"></div>
+            </div>
+          </div>
+
+          <div class="rc-block" style="margin-bottom:10px;">
             <div class="rc-cap-title">Reseñas hoy</div>
-            <div class="rc-reviews">
-              <div class="rc-rev"><label>Tripadvisor</label><input type="number" class="rc-num" id="rc-ta-reviews" placeholder="0"></div>
-              <div class="rc-rev"><label>Google</label><input type="number" class="rc-num" id="rc-google-reviews" placeholder="0"></div>
-              <div class="rc-rev"><label>GetYourGuide</label><input type="number" class="rc-num" id="rc-gyg-reviews" placeholder="0"></div>
+            <div class="rc-fields c3">
+              <div class="rc-f"><label>Tripadvisor</label><input type="number" id="rc-ta-reviews" placeholder="0"></div>
+              <div class="rc-f"><label>Google</label><input type="number" id="rc-google-reviews" placeholder="0"></div>
+              <div class="rc-f"><label>GetYourGuide</label><input type="number" id="rc-gyg-reviews" placeholder="0"></div>
             </div>
           </div>
 
@@ -1216,7 +1238,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
         </div>
 
-        <!-- ===================== COLUMNA 3: RUTINAS + OBSERVACIONES ===================== -->
+        <!-- ===================== COLUMNA 3: RUTINAS MAÑANA ===================== -->
         <div class="recap-col">
         <div class="card" style="margin-bottom:14px;">
           <div class="recap-section-title">
@@ -1226,7 +1248,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
           <div id="rutinas-mañana"></div>
         </div>
+        </div>
 
+        <!-- ===================== COLUMNA 4: RUTINAS TARDE ===================== -->
+        <div class="recap-col">
         <div class="card" style="margin-bottom:14px;">
           <div class="recap-section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l-3 3"/></svg>
@@ -1235,13 +1260,16 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
           <div id="rutinas-tarde"></div>
         </div>
+        </div>
 
+        <!-- ===================== OBSERVACIONES (ancho completo) ===================== -->
+        <div class="recap-obs">
         <div class="card" style="margin-bottom:14px;">
           <div class="recap-section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             Observaciones del día
           </div>
-          <textarea id="rc-observaciones" rows="5" placeholder="Cualquier incidencia, nota o aviso relevante del día…" style="width:100%;"></textarea>
+          <textarea id="rc-observaciones" rows="4" placeholder="Cualquier incidencia, nota o aviso relevante del día…" style="width:100%;"></textarea>
         </div>
         </div>
 
