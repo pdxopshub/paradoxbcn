@@ -659,22 +659,6 @@
   .rv-hist table{font-size:12px;}
   .rv-hist th{padding:6px 5px;}
   .rv-hist td{padding:5px 5px;}
-  /* ---- LOOMIS: tabla de cuadre semanal ---- */
-  .loomis-table{table-layout:fixed;}
-  .loomis-table th{text-align:center;font-size:11px;}
-  .loomis-table td{text-align:center;padding:2px 4px;height:30px;border:1px solid var(--line);}
-  .loomis-table .lm-date{font-weight:800;font-size:11.5px;background:var(--panel);line-height:1.25;}
-  .loomis-table .lm-date small{font-weight:600;color:var(--text-dim);font-size:10px;}
-  .loomis-table .lm-total{font-weight:800;font-size:14px;background:var(--panel);}
-  .loomis-table .lm-in{width:100%;text-align:center;background:transparent;border:none;height:26px;
-    color:#EAF1FB;font-size:12.5px;font-style:italic;}
-  .loomis-table .lm-in:hover{background:#12253C;}
-  .loomis-table .lm-in:focus{background:#16304F;box-shadow:inset 0 0 0 1.5px var(--accent);outline:none;}
-  .loomis-table .lm-yellow td{background:#3A3413;}
-  .loomis-table .lm-yellow .lm-in{color:#F4DF7E;font-weight:800;font-style:normal;}
-  .loomis-table tr.lm-day-top td{border-top:2px solid var(--line-strong);}
-  .loomis-table .lm-week td{background:var(--panel);font-weight:800;font-size:13px;border-top:2px solid var(--accent);}
-  .loomis-table .lm-week td:first-child{color:var(--accent);}
   /* ---- MARKETING: calendario semanal ---- */
   .mk-week{display:flex;gap:14px;align-items:stretch;border-bottom:1px solid var(--line);padding:10px 0;}
   .mk-week:last-child{border-bottom:none;}
@@ -690,6 +674,51 @@
   #spv-grid-table th.spv-addcol{cursor:pointer;color:var(--accent);font-weight:900;font-size:16px;width:34px;}
   #spv-grid-table th.spv-addcol:hover{background:var(--accent-soft);}
   #spv-summary-table{max-width:560px;}
+  /* ---- LOOMIS ---- */
+  .lm-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start;}
+  @media(max-width:1000px){.lm-layout{grid-template-columns:1fr;}}
+  .lm-left{min-width:0;background:var(--surface);border:1px solid var(--line-strong);
+    border-radius:11px;padding:12px 14px 14px;}
+  .lm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+    flex-wrap:wrap;margin-bottom:10px;}
+  .loomis-table{table-layout:fixed;width:100%;border-collapse:separate;border-spacing:0;}
+  .loomis-table th{padding:6px 4px!important;font-size:9.5px;letter-spacing:.5px;text-align:center;
+    border:1px solid var(--line);}
+  .loomis-table th.sub{font-size:8.5px;font-weight:700;opacity:.85;}
+  .loomis-table td{padding:0!important;height:30px;border:1px solid var(--line);text-align:center;}
+  /* colores de cabecera */
+  .lm-h-turnos{background:#111C33!important;color:#AFC4E8!important;}
+  .lm-h-fever {background:#12294D!important;color:#fff!important;}
+  .lm-h-sumup {background:#0A0A0A!important;color:#fff!important;}
+  .lm-h-total {background:#111C33!important;color:#AFC4E8!important;}
+  /* columna de días */
+  .loomis-table .lm-date{background:#132038;color:#CBD8EF;font-weight:800;font-size:11px;
+    line-height:1.15;padding:3px 5px!important;}
+  .loomis-table .lm-date span{display:block;}
+  .loomis-table .lm-date small{font-weight:600;color:#7E90AE;font-size:9px;}
+  /* celdas por grupo */
+  .lm-c-fever{background:rgba(18,41,77,.32);}
+  .lm-c-sumup{background:rgba(10,10,10,.4);}
+  .loomis-table .lm-in{width:100%;height:28px;text-align:center;background:transparent;
+    border:none;color:#EAF1FB;font-size:12px;padding:0 2px;}
+  .loomis-table .lm-in:hover{background:rgba(255,255,255,.05);}
+  .loomis-table .lm-in:focus{outline:none;background:#173A63;
+    box-shadow:inset 0 0 0 1.5px var(--accent);}
+  /* total del día */
+  .loomis-table .lm-total{background:#132038;font-weight:800;font-size:12.5px;color:#8A93A6;}
+  .loomis-table .lm-total.has{color:#4FE0A0;}
+  /* total semana */
+  .loomis-table .lm-week td{background:#0F2A24;font-weight:800;font-size:12.5px;
+    color:#5FE0B0;border-top:2px solid #2E7A55;padding:7px 4px!important;height:auto;}
+  .loomis-table .lm-week td:first-child{color:#8FE7BE;font-size:10.5px;letter-spacing:.6px;}
+  /* panel derecho */
+  .lm-link{display:flex;align-items:center;gap:8px;color:var(--accent);text-decoration:none;
+    font-weight:700;font-size:13px;}
+  .lm-link:hover{text-decoration:underline;}
+  .lm-info{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px;}
+  .lm-info li{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;line-height:1.4;
+    color:var(--text-soft);}
+  .lm-arrow,.lm-eur,.lm-cal{flex-shrink:0;font-weight:800;color:var(--accent);width:16px;text-align:center;}
   /* ---- ENTRADAS DEL MES: mini tablas estrechas ---- */
   .entradas-mini{font-size:12.5px;}
   .entradas-mini th{padding:7px 8px;font-size:10px;}
@@ -1669,35 +1698,64 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ LOOMIS ============ -->
       <div class="view" id="view-loomis">
-        <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-bottom:12px;">
-          <button class="btn btn-ghost btn-sm" onclick="loomisWeek(-1)">← Semana anterior</button>
-          <button class="btn btn-ghost btn-sm today-btn" onclick="loomisWeek(0)">Esta semana</button>
-          <button class="btn btn-ghost btn-sm" onclick="loomisWeek(1)">Siguiente →</button>
-        </div>
+        <div class="lm-layout">
 
-        <div class="card" style="max-width:560px;">
-          <div class="flex-between" style="margin-bottom:12px;">
-            <div class="section-title" style="margin:0;" id="loomis-week-label">Semana</div>
-            <div style="font-size:11.5px;color:var(--text-dim);">Fila amarilla = cuadre final</div>
-          </div>
-          <div class="table-wrap">
-            <table id="loomis-table" class="loomis-table">
+          <!-- IZQUIERDA: tabla -->
+          <div class="lm-left">
+            <div class="lm-head">
+              <div class="section-title" style="margin:0;" id="loomis-week-label">Semana</div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="btn btn-ghost btn-sm" onclick="loomisWeek(-1)">‹ Anterior</button>
+                <button class="btn btn-ghost btn-sm today-btn" onclick="loomisWeek(0)">Esta semana</button>
+                <button class="btn btn-ghost btn-sm" onclick="loomisWeek(1)">Siguiente ›</button>
+              </div>
+            </div>
+
+            <table id="loomis-table" class="loomis-table no-filter">
               <thead>
                 <tr>
-                  <th style="width:118px;">Turnos</th>
-                  <th style="width:110px;background:#1B1E27;">SumUp</th>
-                  <th style="width:110px;background:#12283F;color:#7FB2FF;">fever</th>
-                  <th style="width:96px;">TOTAL</th>
+                  <th rowspan="2" class="lm-h-turnos">Turnos</th>
+                  <th colspan="2" class="lm-h-fever">FEVER</th>
+                  <th colspan="2" class="lm-h-sumup">SUMUP</th>
+                  <th rowspan="2" class="lm-h-total">TOTAL</th>
+                </tr>
+                <tr>
+                  <th class="lm-h-fever sub">Turno 1</th>
+                  <th class="lm-h-fever sub">Turno 2</th>
+                  <th class="lm-h-sumup sub">Turno 1</th>
+                  <th class="lm-h-sumup sub">Turno 2</th>
                 </tr>
               </thead>
               <tbody id="loomis-body"></tbody>
               <tfoot id="loomis-foot"></tfoot>
             </table>
+
+            <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+              <button class="btn btn-primary btn-sm" onclick="saveLoomis()">Guardar semana</button>
+              <span id="loomis-saved" style="display:none;font-size:12.5px;font-weight:700;color:var(--ok);">✓ Guardado</span>
+            </div>
           </div>
-          <div style="margin-top:12px;display:flex;gap:10px;">
-            <button class="btn btn-primary btn-sm" onclick="saveLoomis()">Guardar semana</button>
-            <span id="loomis-saved" style="display:none;font-size:12.5px;font-weight:700;color:var(--ok);align-self:center;">✓ Guardado</span>
+
+          <!-- DERECHA: enlaces e info -->
+          <div class="lm-right">
+            <div class="card" style="margin-bottom:12px;">
+              <a class="lm-link" href="https://docs.google.com/spreadsheets/d/13qDZD_KF8Qkp6U0_1IaJKSy86yUVZv7c/edit?gid=1418629642#gid=1418629642" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v7H3V3h7"/></svg>
+                Depósito Cajas
+              </a>
+            </div>
+
+            <div class="card">
+              <div class="section-title" style="margin-bottom:10px;">Sobre Loomis</div>
+              <ul class="lm-info">
+                <li><span class="lm-arrow">←</span> Black and White Museum S.L</li>
+                <li><span class="lm-arrow">→</span> Paradox Museum Barcelona</li>
+                <li><span class="lm-eur">€</span> Poner cantidad de cash de la semana</li>
+                <li><span class="lm-cal">📅</span> Poner fecha de recogida</li>
+              </ul>
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -2973,6 +3031,7 @@ function applyTableFilter(table, query){
 function installTableFilters(){
   document.querySelectorAll('.view table').forEach(table=>{
     if(table._tfDone) return;
+    if(table.classList.contains('no-filter')) return;   // tablas sin buscador
     if(!table.querySelector('tbody')) return;
     const wrap = table.closest('.table-wrap') || table.closest('.staff-tablebox');
     if(!wrap || !wrap.parentNode) return;
@@ -4877,9 +4936,9 @@ async function renderLoomis(){
   const mondayIso = loomisIso(monday);
   const sunday = new Date(monday); sunday.setDate(sunday.getDate()+6);
   const fmt = d=> d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
-  document.getElementById('loomis-week-label').textContent = `${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
+  const lbl = document.getElementById('loomis-week-label');
+  if(lbl) lbl.textContent = `${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
 
-  // cargar de Supabase
   loomisData = {};
   try{
     const { data } = await sb.from('loomis_semanas').select('*').eq('semana', mondayIso).single();
@@ -4894,68 +4953,62 @@ async function renderLoomis(){
   for(let i=0;i<7;i++){
     const d = new Date(monday); d.setDate(d.getDate()+i);
     const iso = loomisIso(d);
-    const dd = loomisData[iso] || {sumup:['',''], fever:['','','']};
+    const dd = loomisData[iso] || {};
+    const fe = dd.fever || ['',''];
     const su = dd.sumup || ['',''];
-    const fe = dd.fever || ['','',''];
-    const fecha = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
-    // fila 1: fecha | (sumup vacío arriba) | fever[0] | TOTAL
-    // fila 2: sumup[0] | fever[1]
-    // fila 3 amarilla: sumup[1] | fever[2]
-    html += `
-    <tr class="lm-day-top">
-      <td rowspan="3" class="lm-date">${dias[i]}<br><small>${fecha}</small></td>
-      <td></td>
-      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="fever" data-r="0" value="${fe[0]??''}" placeholder="—"></td>
-      <td rowspan="3" class="lm-total" id="lm-total-${iso}">—</td>
-    </tr>
-    <tr>
-      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="sumup" data-r="0" value="${su[0]??''}" placeholder="—"></td>
-      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="fever" data-r="1" value="${fe[1]??''}" placeholder="—"></td>
-    </tr>
-    <tr class="lm-yellow">
-      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="sumup" data-r="1" value="${su[1]??''}" placeholder="0"></td>
-      <td><input class="lm-in" type="number" step="0.01" data-iso="${iso}" data-c="fever" data-r="2" value="${fe[2]??''}" placeholder="0"></td>
+    const fecha = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});
+    const inp = (c,r,v)=>`<input class="lm-in" type="number" step="0.01" placeholder="—"
+        data-iso="${iso}" data-c="${c}" data-r="${r}" value="${v ?? ''}">`;
+    html += `<tr>
+      <td class="lm-date"><span>${dias[i]}</span><small>${fecha}</small></td>
+      <td class="lm-c-fever">${inp('fever',0,fe[0])}</td>
+      <td class="lm-c-fever">${inp('fever',1,fe[1])}</td>
+      <td class="lm-c-sumup">${inp('sumup',0,su[0])}</td>
+      <td class="lm-c-sumup">${inp('sumup',1,su[1])}</td>
+      <td class="lm-total" id="lm-total-${iso}">—</td>
     </tr>`;
   }
   body.innerHTML = html;
-
-  // listeners
-  body.querySelectorAll('.lm-in').forEach(inp=>{
-    inp.addEventListener('input', onLoomisInput);
-  });
+  body.querySelectorAll('.lm-in').forEach(inp=> inp.addEventListener('input', onLoomisInput));
   recalcLoomis();
 }
 
 function onLoomisInput(e){
   const iso = e.target.dataset.iso, c = e.target.dataset.c, r = parseInt(e.target.dataset.r,10);
-  if(!loomisData[iso]) loomisData[iso] = {sumup:['',''], fever:['','','']};
+  if(!loomisData[iso]) loomisData[iso] = {fever:['',''], sumup:['','']};
+  if(!loomisData[iso][c]) loomisData[iso][c] = ['',''];
   loomisData[iso][c][r] = e.target.value;
   recalcLoomis();
 }
 
 function recalcLoomis(){
   const monday = new Date(loomisMonday);
-  let weekSumup=0, weekFever=0, weekTotal=0;
+  let wFever=0, wSumup=0, wTotal=0;
   for(let i=0;i<7;i++){
     const d = new Date(monday); d.setDate(d.getDate()+i);
     const iso = loomisIso(d);
-    const dd = loomisData[iso] || {sumup:['',''], fever:['','','']};
-    const suC = parseFloat(dd.sumup?.[1]) || 0;   // sumup confirmado (amarillo)
-    const feC = parseFloat(dd.fever?.[2]) || 0;   // fever confirmado (amarillo)
-    const total = suC + feC;
-    weekSumup += suC; weekFever += feC; weekTotal += total;
+    const dd = loomisData[iso] || {};
+    const fe = (dd.fever||['','']).reduce((a,v)=>a+(parseFloat(v)||0),0);
+    const su = (dd.sumup||['','']).reduce((a,v)=>a+(parseFloat(v)||0),0);
+    const total = fe + su;
+    wFever += fe; wSumup += su; wTotal += total;
     const cell = document.getElementById('lm-total-'+iso);
-    if(cell) cell.textContent = (suC||feC) ? total.toFixed(2) : '—';
+    if(cell){
+      cell.textContent = total ? total.toFixed(2) : '—';
+      cell.classList.toggle('has', total>0);
+    }
   }
   const foot = document.getElementById('loomis-foot');
-  foot.innerHTML = `
-    <tr class="lm-week">
-      <td>TOTAL WEEK</td>
-      <td>${weekSumup.toFixed(2)}</td>
-      <td>${weekFever.toFixed(2)}</td>
-      <td>${weekTotal.toFixed(2)}</td>
+  if(foot){
+    foot.innerHTML = `<tr class="lm-week">
+      <td>TOTAL SEMANA</td>
+      <td colspan="2">${wFever.toFixed(2)}</td>
+      <td colspan="2">${wSumup.toFixed(2)}</td>
+      <td>${wTotal.toFixed(2)}</td>
     </tr>`;
+  }
 }
+
 
 async function saveLoomis(){
   const mondayIso = loomisIso(loomisMonday);
