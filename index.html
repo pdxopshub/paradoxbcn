@@ -418,6 +418,39 @@
   .colmenu-panel label{display:flex;align-items:center;gap:9px;padding:6px 8px;font-size:12.5px;
     text-align:left;justify-content:flex-start;line-height:1.25;}
   .colmenu-panel input{flex-shrink:0;margin:0;}
+  /* ============ SPV ============ */
+  body.spv-open{overflow:hidden;}
+  .spv-topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .spv-kpi{display:flex;flex-direction:column;gap:1px;background:var(--surface);
+    border:1px solid var(--line-strong);border-radius:8px;padding:5px 12px;}
+  .spv-kpi .k-l{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);}
+  .spv-kpi .k-v{font-family:var(--font);font-weight:800;font-size:15px;line-height:1.1;}
+  .spv-month{margin-left:auto;width:auto;min-width:150px;font-weight:700;padding:6px 10px;font-size:12.5px;}
+  /* Solo la tabla hace scroll */
+  .spv-tablebox{border:1px solid var(--line-strong);border-radius:9px;overflow:auto;
+    max-height:calc(100vh - 190px);background:var(--surface);margin-bottom:14px;}
+  #spv-grid-table{font-size:11px;border-collapse:separate;border-spacing:0;}
+  #spv-grid-table th{padding:5px 4px!important;font-size:9px;letter-spacing:.3px;
+    position:sticky;z-index:3;background:var(--panel);}
+  #spv-grid-table thead tr:first-child th{top:0;z-index:5;}
+  #spv-grid-table thead tr:nth-child(2) th{top:23px;z-index:5;}
+  #spv-grid-table td{padding:2px 3px!important;height:26px;}
+  /* primera columna (día) fija */
+  #spv-grid-table th:first-child,#spv-grid-table td:first-child{
+    position:sticky;left:0;z-index:4;background:var(--panel)!important;}
+  #spv-grid-table thead th:first-child{z-index:6;}
+  /* celdas sin azul */
+  #spv-grid-table .cell-input{background:transparent!important;border:none!important;
+    border-radius:0!important;box-shadow:none!important;height:22px;font-size:11px;
+    text-align:center;width:100%;padding:0 2px!important;}
+  #spv-grid-table .cell-input:hover{background:#242A36!important;}
+  #spv-grid-table .cell-input:focus{background:#2C3444!important;
+    box-shadow:inset 0 0 0 1.5px var(--accent)!important;}
+  /* Tienda gris más claro que Supervisores */
+  #spv-grid-table .grp-tienda{background:#3A3F4C!important;color:#E4E7EE!important;}
+  #spv-grid-table .col-tienda{background:#2B303B!important;}
+  #spv-grid-table .grp-superv{background:#23262F!important;color:#B9BECB!important;}
+  #spv-grid-table .col-superv{background:#1C1F27!important;}
   /* ============ EVALUACIONES ============ */
   .ev-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start;}
   @media(max-width:1100px){.ev-layout{grid-template-columns:1fr;}}
@@ -1185,40 +1218,31 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ SPV ============ -->
       <div class="view" id="view-spv">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-          <div><label class="field-label">Mes</label><select id="spv-month-select" style="min-width:180px;font-weight:700;"></select></div>
+        <div class="spv-topbar">
+          <div class="spv-kpi"><span class="k-l">Visitantes mes</span><span class="k-v" id="spv-tot-visit">0</span></div>
+          <div class="spv-kpi"><span class="k-l">Total boutique</span><span class="k-v" id="spv-tot-money">0€</span></div>
+          <div class="spv-kpi"><span class="k-l">SPV medio</span><span class="k-v" id="spv-avg">0.00€</span></div>
+          <select id="spv-month-select" class="spv-month"></select>
+          <input id="spv-commission-rate" type="number" value="2" min="0" max="100" step="0.5" style="display:none;">
         </div>
         <h1 id="spv-month-title" style="display:none;"></h1>
 
-        <div class="grid grid-4" style="margin-bottom:14px;">
-          <div class="card kpi"><div class="label">Visitantes mes</div><div class="value" id="spv-tot-visit">0</div></div>
-          <div class="card kpi"><div class="label">Total boutique</div><div class="value" id="spv-tot-money">0€</div></div>
-          <div class="card kpi"><div class="label">SPV medio <span style="font-weight:500;text-transform:none;">(sin grupos)</span></div><div class="value" id="spv-avg">0.00€</div></div>
-          <div class="card kpi">
-            <div class="label">% comisión</div>
-            <input id="spv-commission-rate" type="number" value="2" min="0" max="100" step="0.5" style="margin-top:6px;font-family:var(--font);font-weight:800;font-size:18px;text-align:left;">
-          </div>
-        </div>
+        <div class="spv-tablebox"><table id="spv-grid-table"></table></div>
 
-        <div class="card" style="margin-bottom:14px;">
-          <div class="section-title">Detalle diario <span class="hint">Tienda · Supervisores · Resto del staff</span></div>
-          <div class="table-wrap"><table id="spv-grid-table"></table></div>
-        </div>
-
-        <div class="grid grid-3" style="margin-bottom:14px;">
+        <div class="grid grid-3" id="spv-comision-kpis" style="margin-bottom:14px;">
           <div class="card kpi"><div class="label">Días con comisión</div><div class="value" id="spv-commission-days">0</div></div>
           <div class="card kpi"><div class="label">Rev. Bruto (días con comisión)</div><div class="value" id="spv-commission-revenue">0€</div></div>
           <div class="card kpi"><div class="label">Comisión tienda · Paula</div><div class="value" id="spv-paula-commission" style="color:var(--success);">0€</div></div>
         </div>
 
-        <div class="card" style="margin-bottom:14px;">
+        <div class="card" id="spv-resumen-card" style="margin-bottom:14px;">
           <div class="section-title">Resumen mensual por persona <span class="hint">Solo cuenta lo vendido en días con comisión</span></div>
           <div class="table-wrap"><table id="spv-summary-table"><thead>
             <tr><th>Persona</th><th>Días vendidos</th><th>Total generado (días con comisión)</th><th>Comisión (2%)</th></tr>
           </thead><tbody></tbody></table></div>
         </div>
 
-        <div class="card">
+        <div class="card" id="spv-historico-card">
           <div class="flex-between" style="margin-bottom:12px;">
             <div class="section-title" style="margin:0;">Histórico de comisiones</div>
             <button class="btn btn-primary btn-sm" onclick="saveCommissionSnapshot()">Guardar este mes en el histórico</button>
@@ -2105,6 +2129,7 @@ function goView(v){
   if(v==='grupos') initPdxspotEmbed();
   document.body.classList.toggle('chat-open', v==='chat');
   document.body.classList.toggle('staff-open', v==='staff');
+  document.body.classList.toggle('spv-open', v==='spv');
   if(v==='chat') initChat();
   if(v==='vacaciones') initVacaciones();
   window.scrollTo(0,0);
@@ -2414,6 +2439,21 @@ function rowSpvBruto(row){ const nv = rowNetVisitors(row); return nv>0 ? rowRevB
 function rowSpvNeto(row){ return rowSpvBruto(row) / 1.21; }
 function rowQualifies(row){ return rowSpvNeto(row) >= 1; }
 
+const SPV_NOMBRE_CORTO = { Carolina:'Carol', Constanza:'Const.', Cecilia:'Ceci' };
+function spvNombreCorto(n){ return SPV_NOMBRE_CORTO[n] || n; }
+
+/* La comisión de tienda solo la ven Laia e Ignacio */
+function spvPuedeVerComision(){
+  return isDirector() || currentProfile?.nombre === 'Ignacio';
+}
+function aplicarPermisosSpv(){
+  const ver = spvPuedeVerComision();
+  ['spv-comision-kpis','spv-resumen-card','spv-historico-card'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display = ver ? '' : 'none';
+  });
+}
+
 function buildSpvTable(data){
   const head = `<thead>
     <tr>
@@ -2428,9 +2468,9 @@ function buildSpvTable(data){
       <th class="grp-visit">Grupos</th>
       <th class="grp-visit">Rev. Bruto</th>
       <th class="grp-visit grp-end">SPV Neto</th>
-      ${SPV_GROUP_TIENDA.map((s,i)=>`<th class="grp-tienda${i===SPV_GROUP_TIENDA.length-1?' grp-end':''}">${s}</th>`).join('')}
-      ${SPV_GROUP_SUPERV.map((s,i)=>`<th class="grp-superv${i===SPV_GROUP_SUPERV.length-1?' grp-end':''}">${s}</th>`).join('')}
-      ${SPV_GROUP_STAFF.map(s=>`<th>${s}</th>`).join('')}
+      ${SPV_GROUP_TIENDA.map((s,i)=>`<th class="grp-tienda${i===SPV_GROUP_TIENDA.length-1?' grp-end':''}">${spvNombreCorto(s)}</th>`).join('')}
+      ${SPV_GROUP_SUPERV.map((s,i)=>`<th class="grp-superv${i===SPV_GROUP_SUPERV.length-1?' grp-end':''}">${spvNombreCorto(s)}</th>`).join('')}
+      ${SPV_GROUP_STAFF.map(s=>`<th>${spvNombreCorto(s)}</th>`).join('')}
       ${SPV_CUSTOM_COLS.map(s=>`<th class="spv-custom-col" title="Clic para quitar columna" onclick="removeSpvColumn(\`${s}\`)">${s} <span style="opacity:.6;">✕</span></th>`).join('')}
       <th class="spv-addcol" onclick="addSpvColumn()" title="Añadir columna">＋</th>
     </tr>
@@ -2592,6 +2632,7 @@ function computeSpvSummary(data){
 }
 async function renderSpvGrid(){
   initSpvMonthSelect();
+  aplicarPermisosSpv();
   await loadSpvStaffCols();
   const data = await fetchSpvGrid();
   buildSpvTable(data);
