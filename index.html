@@ -71,7 +71,7 @@
   .navitem .dot.show{display:block;}
   .navitem .tag{margin-left:auto;font-size:9.5px;font-weight:800;color:#666B80;background:var(--panel);border:1px solid var(--line);padding:1px 6px;border-radius:5px;}
 
-  .sidebar-foot{padding:14px;border-top:1px solid var(--line);}
+  .sidebar-foot{padding:7px 10px;border-top:1px solid var(--line);}
   .sidebar-foot .opshub-icon{display:block;height:56px;width:auto;margin:0 auto 12px;border-radius:12px;}
   .role-picker{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;}
   .role-picker .avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#0B0E14;flex-shrink:0;}
@@ -734,7 +734,11 @@
   td.col-subtotal,th.grp-subtotal{background:var(--panel);font-weight:800;}
   td.spv-neto-cell{font-weight:800;}
   td.spv-neto-cell.qualify{background:var(--success-soft) !important;color:var(--success);}
-  td.spv-amount-qualify{background:var(--success-soft) !important;}
+  td.spv-amount-qualify{background:#1B4633 !important;}
+  #spv-grid-table td.spv-amount-qualify{border-color:#2E7A55 !important;}
+  #spv-grid-table td.spv-amount-qualify .cell-input{color:#7FE8B4;font-weight:800;}
+  #spv-grid-table td.col-tienda.spv-amount-qualify{background:#215B3E !important;}
+  #spv-grid-table td.col-superv.spv-amount-qualify{background:#1B4633 !important;}
   td.spv-amount-qualify input.cell-input{color:var(--success);font-weight:700;}
   /* separadores gruesos entre bloques de columnas SPV */
   .grp-start{border-left:3px solid var(--line-strong) !important;}
@@ -901,12 +905,12 @@
     border:1.5px solid var(--uc);border-radius:24px;width:215px;box-sizing:border-box;}
   .lu-email-input{width:100%;margin-bottom:10px;}
   .login-box button{width:100%;justify-content:center;margin-top:6px;}
-  .user-chip{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;}
-  .user-chip .avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#0B0E14;flex-shrink:0;}
+  .user-chip{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:3px 7px;}
+  .user-chip .avatar{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px;color:#0B0E14;flex-shrink:0;}
   .user-chip .uc-col{flex:1;min-width:0;}
-  .user-chip .uc-name{font-size:13px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .user-chip .uc-name{font-size:11.5px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .user-chip .uc-rol{font-size:10.5px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;}
-  .user-chip .uc-logout{background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:11px;font-weight:700;}
+  .user-chip .uc-logout{background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:10px;font-weight:700;padding:0;flex-shrink:0;}
   .user-chip .uc-logout:hover{color:var(--danger);}
 
 
@@ -1240,10 +1244,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
         <div class="spv-tablebox"><table id="spv-grid-table"></table></div>
 
-        <div class="grid grid-3" id="spv-comision-kpis" style="margin-bottom:14px;">
-          <div class="card kpi"><div class="label">Días con comisión</div><div class="value" id="spv-commission-days">0</div></div>
-          <div class="card kpi"><div class="label">Rev. Bruto (días con comisión)</div><div class="value" id="spv-commission-revenue">0€</div></div>
-          <div class="card kpi"><div class="label">Comisión tienda · Paula</div><div class="value" id="spv-paula-commission" style="color:var(--success);">0€</div></div>
+        <div id="spv-comision-kpis" style="display:none;">
+          <span id="spv-commission-days"></span><span id="spv-commission-revenue"></span><span id="spv-paula-commission"></span>
         </div>
 
         <div class="card" id="spv-resumen-card" style="margin-bottom:14px;">
@@ -2096,7 +2098,7 @@ const EQUIPO_HUB = ['Laia','Ignacio','Paula','Ceci','Mireia'];
    ============================================================ */
 const titles = {
   dashboard:['Resumen','Vista general del día'],
-  spv:['SPV','Tabla diaria editable'],
+  spv:['SPV','Spend Per Visitor'],
   resenas:['Reseñas','Tripadvisor, Google y GetYourGuide'],
   staff:['Staff','Equipo, accesos y NFCards'],
   ev:['Evaluaciones','Histórico por persona'],
