@@ -59,11 +59,11 @@
   .brand .hub-rule{width:24px;height:2px;background:var(--accent);border-radius:3px;margin:6px auto 0;}
 
   nav{flex:1;overflow-y:auto;padding:8px 12px 12px;}
-  .navgroup{border-bottom:1px solid var(--line);padding:5px 0 5px;}
+  .navgroup{border-bottom:1px solid var(--line);padding:3px 0 3px;}
   .navgroup:last-child{border-bottom:none;}
-  .navlabel{font-size:9.5px;color:#5C6072;text-transform:uppercase;letter-spacing:1.2px;padding:3px 10px 4px;font-weight:800;}
-  .navitem{display:flex;align-items:center;gap:9px;padding:5.5px 10px;border-radius:7px;color:#AEB2C4;font-size:13px;font-weight:600;cursor:pointer;border:none;background:none;text-align:left;width:100%;transition:background .12s ease,color .12s ease;}
-  .navitem svg{width:16px;height:16px;flex-shrink:0;color:#666B80;}
+  .navlabel{font-size:8.5px;color:#5C6072;text-transform:uppercase;letter-spacing:1px;padding:2px 10px 2px;font-weight:800;}
+  .navitem{display:flex;align-items:center;gap:8px;padding:4px 9px;border-radius:6px;color:#AEB2C4;font-size:12px;font-weight:600;cursor:pointer;border:none;background:none;text-align:left;width:100%;transition:background .12s ease,color .12s ease;}
+  .navitem svg{width:14px;height:14px;flex-shrink:0;color:#666B80;}
   .navitem:hover{background:var(--panel);color:#fff;}
   .navitem.active{background:var(--accent-soft);color:#fff;box-shadow:inset 3px 0 0 var(--accent);}
   .navitem.active svg{color:var(--accent);}
@@ -177,7 +177,7 @@
   }
 
   /* --- Grupos del menú con franja de color --- */
-  .navgroup{position:relative;padding-left:11px;margin-bottom:16px;}
+  .navgroup{position:relative;padding-left:11px;margin-bottom:8px;}
   .navgroup::before{content:'';position:absolute;left:0;top:24px;bottom:4px;width:3px;border-radius:3px;opacity:.85;}
   .navgroup.ng-dia::before{background:#5B8CFF;}
   .navgroup.ng-eq::before{background:#33C98B;}
@@ -800,17 +800,16 @@
   .login-box .hub-city{font-weight:700;letter-spacing:5px;font-size:12px;color:#fff;margin-top:5px;margin-bottom:24px;line-height:1.1;}
   .login-box .mfield{margin-bottom:12px;text-align:left;}
   .login-box .login-err{color:var(--danger);font-size:12.5px;margin-top:10px;min-height:16px;line-height:1.4;}
-  .login-users{display:flex;flex-direction:column;gap:6px;align-items:center;}
-  .login-user{display:flex;align-items:center;gap:9px;width:190px;padding:6px 12px;
-    background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;
-    color:var(--text);cursor:pointer;transition:.12s;}
-  .login-user:hover{border-color:var(--accent);background:var(--accent-soft);}
-  .lu-ini{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;
-    justify-content:center;font-weight:800;font-size:12px;color:#0B0E14;}
-  .lu-name{font-weight:700;font-size:13.5px;line-height:1.15;}
-  .login-who{display:flex;align-items:center;gap:9px;justify-content:center;padding:7px 14px;
-    background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;
-    width:190px;margin:0 auto;}
+  .login-users{display:flex;flex-direction:column;gap:7px;align-items:center;}
+  .login-user{display:flex;align-items:center;gap:10px;width:215px;padding:8px 16px;
+    background:transparent;border:1.5px solid var(--uc);border-radius:24px;
+    color:var(--text);cursor:pointer;transition:.14s;}
+  .login-user:hover{background:color-mix(in srgb, var(--uc) 12%, transparent);}
+  .lu-dot{width:7px;height:7px;border-radius:50%;background:var(--uc);flex-shrink:0;}
+  .lu-name{font-weight:600;font-size:13.5px;line-height:1.15;letter-spacing:.2px;}
+  .login-who{display:flex;justify-content:center;}
+  .login-who-in{display:inline-flex;align-items:center;gap:10px;padding:8px 16px;
+    border:1.5px solid var(--uc);border-radius:24px;width:215px;box-sizing:border-box;}
   .lu-email-input{width:100%;margin-bottom:10px;}
   .login-box button{width:100%;justify-content:center;margin-top:6px;}
   .user-chip{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;}
@@ -1883,11 +1882,11 @@ let currentProfile = null;  // { nombre, rol }
    persona podrá escribir su email a mano al pulsar su nombre.
    ============================================================ */
 const USUARIOS_HUB = [
-  { nombre:'Laia',    cargo:'General Manager',    email:'barcelonagm@paradoxmuseum.com' },
-  { nombre:'Ignacio', cargo:'Operations Manager', email:'barcelonaom@paradoxmuseum.com' },
-  { nombre:'Paula',   cargo:'Supervisor',         email:'barcelonaadmin@paradoxmuseum.com' },
-  { nombre:'Ceci',    cargo:'Supervisor',         email:'barcelonasup3@paradoxmuseum.com' },
-  { nombre:'Mireia',  cargo:'Marketing',          email:'barcelonasmm@paradoxmuseum.com' },
+  { nombre:'Laia',    completo:'Laia Cortinas',      cargo:'General Manager',    email:'barcelonagm@paradoxmuseum.com' },
+  { nombre:'Ignacio', completo:'Ignacio de Benito',  cargo:'Operations Manager', email:'barcelonaom@paradoxmuseum.com' },
+  { nombre:'Paula',   completo:'Paula Fernández',    cargo:'Supervisor',         email:'barcelonaadmin@paradoxmuseum.com' },
+  { nombre:'Ceci',    completo:'Ceci De Medeiros',   cargo:'Supervisor',         email:'barcelonasup3@paradoxmuseum.com' },
+  { nombre:'Mireia',  completo:'Mireia Marques',     cargo:'Marketing',          email:'barcelonasmm@paradoxmuseum.com' },
 ];
 const CARGOS = { director:'General Manager', manager:'Operations Manager',
                  supervisor:'Supervisor', marketing:'Marketing' };
@@ -1896,9 +1895,10 @@ function renderLoginUsers(){
   const cont = document.getElementById('login-users');
   if(!cont) return;
   cont.innerHTML = USUARIOS_HUB.map(u=>`
-    <button type="button" class="login-user" onclick="pickLoginUser('${u.nombre}')">
-      <span class="lu-ini" style="background:${roleColors[u.nombre]||'#5B8CFF'}">${u.nombre[0]}</span>
-      <span class="lu-name">${u.nombre}</span>
+    <button type="button" class="login-user" onclick="pickLoginUser('${u.nombre}')"
+            style="--uc:${roleColors[u.nombre]||'#5B8CFF'}">
+      <span class="lu-dot"></span>
+      <span class="lu-name">${u.completo||u.nombre}</span>
     </button>`).join('');
 }
 
@@ -1911,8 +1911,8 @@ function pickLoginUser(nombre){
   document.getElementById('login-step-user').style.display = 'none';
   document.getElementById('login-step-pass').style.display = 'block';
   document.getElementById('login-who').innerHTML = `
-    <span class="lu-ini" style="background:${roleColors[nombre]||'#5B8CFF'}">${nombre[0]}</span>
-    <span class="lu-name">${nombre}</span>`;
+    <span class="login-who-in" style="--uc:${roleColors[nombre]||'#5B8CFF'}">
+      <span class="lu-dot"></span><span class="lu-name">${u.completo||nombre}</span></span>`;
   const emailEl = document.getElementById('login-email');
   if(u.email){
     emailEl.type = 'hidden';
