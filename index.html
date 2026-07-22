@@ -375,14 +375,21 @@
   @media(max-width:1150px){.turnos-layout{grid-template-columns:1fr;}}
   .turnos-left{min-width:0;}
   .turnos-right{min-width:0;position:sticky;top:8px;}
-  .tcal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-  @media(max-width:760px){.tcal-wrap{grid-template-columns:1fr;}}
+  .tcal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .tcal-wrap .tcal-month:first-child{padding-right:18px;border-right:2px solid var(--line-strong);}
+  .tcal-wrap .tcal-month:last-child{padding-left:18px;}
+  @media(max-width:760px){
+    .tcal-wrap{grid-template-columns:1fr;}
+    .tcal-wrap .tcal-month:first-child{padding-right:0;border-right:none;border-bottom:2px solid var(--line-strong);padding-bottom:14px;margin-bottom:14px;}
+    .tcal-wrap .tcal-month:last-child{padding-left:0;}
+  }
   .tcal-month h4{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;
     color:var(--accent);margin:0 0 8px;text-align:center;}
   .tcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
   .tcal-dow{font-size:9.5px;text-align:center;color:var(--text-dim);font-weight:700;padding-bottom:3px;}
   .tcal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;
-    border-radius:5px;color:var(--text-soft);position:relative;}
+    border-radius:5px;color:var(--text-soft);position:relative;
+    background:var(--panel);border:1px solid var(--line);}
   .tcal-day.pad{visibility:hidden;}
   .tcal-day.wknd{color:#5A6070;}
   .tcal-day.today{box-shadow:inset 0 0 0 1.5px var(--accent);color:#fff;font-weight:900;}
@@ -1220,11 +1227,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="turnos-right">
             <div class="card">
               <div class="flex-between" style="margin-bottom:10px;">
-                <div class="section-title" style="margin:0;">Calendario de cambios <span class="hint">Solo aprobados</span></div>
+                <div class="section-title" style="margin:0;">Calendario de cambios</div>
                 <div style="display:flex;align-items:center;gap:6px;">
-                  <button class="btn btn-ghost btn-sm" onclick="turnosCalMonth(-1)">‹</button>
-                  <button class="btn btn-ghost btn-sm" onclick="turnosCalMonth(0)">Hoy</button>
-                  <button class="btn btn-ghost btn-sm" onclick="turnosCalMonth(1)">›</button>
+                  <button class="btn btn-ghost btn-sm" onclick="turnosCalMonth(-1)">‹ Anterior</button>
+                  <button class="btn btn-ghost btn-sm" onclick="turnosCalMonth(1)">Siguiente ›</button>
                 </div>
               </div>
               <div id="turnos-cal"></div>
@@ -3101,18 +3107,18 @@ function buildTurnoBlock(prefix, label, staffNames){
           <div style="flex:1;"><label class="field-label">Min.</label><select id="${prefix}-min">${TURNO_MINUTES.map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div>
         </div>
         <div style="display:flex;gap:6px;">
-          <div style="flex:1;"><label class="field-label">Día</label><select id="${prefix}-day">${Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}">${d}</option>`).join('')}</select></div>
-          <div style="flex:1.4;"><label class="field-label">Mes</label><select id="${prefix}-month">${TURNO_MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}</select></div>
+          <div style="flex:0 0 52px;"><label class="field-label">Día</label><select id="${prefix}-day">${Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}">${d}</option>`).join('')}</select></div>
+          <div style="flex:1;min-width:104px;"><label class="field-label">Mes</label><select id="${prefix}-month">${TURNO_MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}</select></div>
         </div>
-        <div><label class="field-label">Año</label><input id="${prefix}-year" type="number" value="2026" style="width:90px;"></div>
+        <div><label class="field-label">Año</label><input id="${prefix}-year" type="number" value="2026" style="width:64px;"></div>
       </div>
     </div>`;
 }
 async function renderTurnoBlocks(){
   const list = await fetchStaff();
   const names = list.map(s=>s.nombre);
-  document.getElementById('turno-block-1').innerHTML = buildTurnoBlock('tb1','Staff que cede su día', names);
-  document.getElementById('turno-block-2').innerHTML = buildTurnoBlock('tb2','Staff que coge el día', names);
+  document.getElementById('turno-block-1').innerHTML = buildTurnoBlock('tb1','Staff que pide cambiar su turno', names);
+  document.getElementById('turno-block-2').innerHTML = buildTurnoBlock('tb2','Staff que le cambia el turno', names);
 }
 function readTurnoBlock(prefix){
   const staff = document.getElementById(prefix+'-staff').value;
