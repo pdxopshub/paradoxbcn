@@ -265,20 +265,6 @@
   #staff-table th.old-center{text-align:center;vertical-align:middle;}
   #staff-table td{text-align:center;}
   #staff-table td:first-child{text-align:left;}
-  #staff-table th:nth-child(1){width:180px;}
-  #staff-table th:nth-child(2){width:76px;}
-  #staff-table th:nth-child(3){width:152px;}
-  #staff-table th:nth-child(4){width:200px;}
-  #staff-table th:nth-child(5){width:165px;}
-  #staff-table th:nth-child(6){width:155px;}
-  #staff-table th:nth-child(7){width:165px;}
-  #staff-table th:nth-child(8){width:155px;}
-  #staff-table th:nth-child(9){width:125px;}
-  #staff-table th:nth-child(10){width:120px;}
-  #staff-table th:nth-child(11){width:105px;}
-  #staff-table th:nth-child(12){width:88px;}
-  #staff-table th:nth-child(13){width:118px;}
-  #staff-table th:nth-child(14){width:46px;}
   #staff-table td .cell-input{width:100%;box-sizing:border-box;text-align:center;}
   #staff-table td .cell-input.txt{text-align:left;}
   .horas-cell{display:inline-flex;align-items:baseline;gap:1px;white-space:nowrap;}
@@ -395,33 +381,23 @@
     max-height:calc(100vh - 260px);background:var(--surface);}
   .staff-tablebox thead th{position:sticky;top:0;z-index:3;background:var(--panel);}
   .staff-tablebox thead tr.grp-row th{top:0;z-index:4;}
-  .staff-tablebox thead tr:nth-child(2) th{top:26px;}
+  #staff-table.has-groups thead tr:nth-child(2) th{top:26px;}
+  #staff-table:not(.has-groups) thead tr th{top:0;}
   /* cabeceras de grupo */
   #staff-table .grp-row th{height:26px;padding:2px 6px!important;font-size:10px;letter-spacing:1.2px;
     text-align:center;border-bottom:none;}
   #staff-table .grp-row .grp-none{background:var(--surface);}
-  #staff-table .grp-row .grp-fever{background:#12283F;color:#7FB2FF;}
-  #staff-table .grp-row .grp-sumup{background:#2A1F3A;color:#C9A6F5;}
+  #staff-table .grp-row .grp-fever{background:#12294D;color:#fff;}
+  #staff-table .grp-row .grp-sumup{background:#0A0A0A;color:#fff;}
   #staff-table .grp-row .grp-nfc{background:#0F2A24;color:#5FE0B0;}
-  #staff-table th.c-fever{background:#101E2E;}
-  #staff-table th.c-sumup{background:#211A2C;}
+  #staff-table th.c-fever{background:#122341;color:#DCE7FF;}
+  #staff-table th.c-sumup{background:#121212;color:#EDEDED;}
   #staff-table th.c-nfc{background:#0E211D;}
+  #staff-table td.cf{background:rgba(18,41,77,.35);}
+  #staff-table td.cs{background:rgba(10,10,10,.45);}
+  #staff-table td.cn{background:rgba(15,42,36,.3);}
   #staff-table td.cf,#staff-table td.cs,#staff-table td.cn{background:rgba(255,255,255,.012);}
   /* anchos: usuarios y contraseñas completos */
-  #staff-table th:nth-child(1){width:190px;}
-  #staff-table th:nth-child(2){width:78px;}
-  #staff-table th:nth-child(3){width:172px;}
-  #staff-table th:nth-child(4){width:205px;}
-  #staff-table th:nth-child(5){width:225px;}
-  #staff-table th:nth-child(6){width:170px;}
-  #staff-table th:nth-child(7){width:190px;}
-  #staff-table th:nth-child(8){width:170px;}
-  #staff-table th:nth-child(9){width:120px;}
-  #staff-table th:nth-child(10){width:112px;}
-  #staff-table th:nth-child(11){width:104px;}
-  #staff-table th:nth-child(12){width:86px;}
-  #staff-table th:nth-child(13){width:116px;}
-  #staff-table th:nth-child(14){width:44px;}
   /* horas pegadas: 20h */
   #staff-table td.horas-td{text-align:center;}
   .horas-cell{display:inline-flex;align-items:baseline;gap:0;white-space:nowrap;}
@@ -1187,6 +1163,12 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <div class="view" id="view-staff">
         <div class="staff-shell">
 
+          <div class="tab-strip" style="margin-bottom:12px;">
+            <button class="tab-btn active" data-sview="datos">Datos</button>
+            <button class="tab-btn" data-sview="operativa">Operativa</button>
+            <button class="tab-btn" data-sview="accesos">Usuarios y contraseñas</button>
+          </div>
+
           <div class="staff-toolbar">
             <div class="stb-left" id="staff-search-slot"></div>
             <div class="stb-mid">
@@ -1205,7 +1187,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             </div>
           </div>
 
-          <div class="staff-legend">
+          <div class="staff-legend" id="staff-legend" style="display:none;">
             <span><i class="dsp-key dsp-m"></i> Mañana</span>
             <span><i class="dsp-key dsp-t"></i> Tarde</span>
             <span><i class="dsp-key dsp-c"></i> Completa</span>
@@ -1213,34 +1195,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
 
           <div class="staff-tablebox">
-            <table id="staff-table" class="resizable"><thead>
-              <tr class="grp-row">
-                <th colspan="4" class="grp-none"></th>
-                <th colspan="2" class="grp-fever">FEVER</th>
-                <th colspan="2" class="grp-sumup">SUMUP</th>
-                <th colspan="4" class="grp-nfc">NFCARDS</th>
-                <th colspan="2" class="grp-none"></th>
-              </tr>
-              <tr>
-                <th class="sortable" onclick="sortStaff('nombre')">Nombre <span class="sort-arrow" data-k="nombre"></span></th>
-                <th class="sortable" onclick="sortStaff('horas')">Horas <span class="sort-arrow" data-k="horas"></span></th>
-                <th>Disp. (L–D)</th>
-                <th>Formación</th>
-                <th class="c-fever">Usuario</th>
-                <th class="c-fever">Contraseña</th>
-                <th class="c-sumup">Usuario</th>
-                <th class="c-sumup">Contraseña</th>
-                <th class="c-nfc">Nº Tarjeta</th>
-                <th class="c-nfc sortable" onclick="sortStaff('nfc_visitas_iniciales')">Visitas iniciales<br><span style="font-weight:600;font-size:9.5px;">01/07/26</span> <span class="sort-arrow" data-k="nfc_visitas_iniciales"></span></th>
-                <th class="c-nfc sortable" onclick="sortStaff('nfc_stats_web')">Stats Web <span class="sort-arrow" data-k="nfc_stats_web"></span></th>
-                <th class="c-nfc sortable" onclick="sortStaff('visitas')">Visitas <span class="sort-arrow" data-k="visitas"></span></th>
-                <th>Estado</th>
-                <th></th>
-              </tr>
-            </thead><tbody></tbody></table>
+            <table id="staff-table" class="resizable">
+              <thead id="staff-thead"></thead>
+              <tbody></tbody>
+            </table>
           </div>
 
-          <div class="card" style="margin-top:14px;">
+          <div class="card" style="margin-top:14px;" id="staff-entradas-card">
             <div class="flex-between" style="margin-bottom:12px;">
               <div class="section-title" style="margin:0;">Entradas del mes <span class="hint">Máximo 4 por persona</span></div>
               <select id="entradas-month" style="width:170px;"></select>
@@ -2002,6 +1963,9 @@ function initNav(){
   });
   document.getElementById('today-date').textContent = titles.dashboard[1];
 
+  document.querySelectorAll('[data-sview]').forEach(btn=>{
+    btn.addEventListener('click',()=> setStaffView(btn.dataset.sview));
+  });
   document.querySelectorAll('[data-stab]').forEach(btn=>{
     btn.addEventListener('click',()=>{
       document.querySelectorAll('[data-stab]').forEach(b=>b.classList.remove('active'));
@@ -2868,6 +2832,90 @@ function sortStaff(key){
     if(a) a.textContent = staffSort.dir>0 ? '▲' : '▼';
   },0);
 }
+let staffView = 'datos';   // datos | operativa | accesos
+
+function setStaffView(v){
+  staffView = v;
+  document.querySelectorAll('[data-sview]').forEach(b=>b.classList.toggle('active', b.dataset.sview===v));
+  const lg = document.getElementById('staff-legend');
+  if(lg) lg.style.display = (v==='operativa') ? 'flex' : 'none';
+  const ent = document.getElementById('staff-entradas-card');
+  if(ent) ent.style.display = (v==='datos') ? 'block' : 'none';
+  renderStaffTable();
+}
+
+/* Definición de columnas por pestaña */
+function staffColumns(){
+  const nombre = {key:'nombre', th:'Nombre', sort:'nombre', w:190, cell:s=>`
+      <td class="nm"><div class="staff-name" onclick="openStaffModal(${s.id})">
+        <span class="ini" style="background:${roleColors[s.nombre]||'#5B8CFF'}">${(s.nombre||'?')[0]}</span>
+        <span class="nm-txt">${s.nombre||''}<small>${s.apellido||''}</small></span>
+      </div></td>`};
+  const estado = {key:'estado', th:'Estado', w:118, cell:s=>{
+      const act = s.activo !== false;
+      return `<td><div class="staff-estado ${act?'on':''}" onclick="toggleStaffActivo(${s.id},${act})" title="Clic para cambiar">
+        <span class="sw"></span><span>${act?'Activo':'No activo'}</span></div></td>`;}};
+  const borrar = {key:'del', th:'', w:44, cell:s=>`<td><button class="btn btn-ghost btn-sm" onclick="deleteStaff(${s.id})">✕</button></td>`};
+  const txt = (field, ph, w)=>({key:field, th:ph, w, cell:s=>
+      `<td><input class="cell-input txt" placeholder="${ph}" value="${(s[field]||'').toString().replace(/"/g,'&quot;')}" data-id="${s.id}" data-field="${field}"></td>`});
+
+  if(staffView==='datos'){
+    return {
+      grupos: null,
+      cols: [ nombre,
+        txt('apellido','Apellido',170),
+        txt('telefono','Teléfono',140),
+        txt('email','Email',260),
+        txt('dni','DNI',120),
+        txt('cumpleanos','Cumpleaños',140),
+        estado, borrar ]
+    };
+  }
+  if(staffView==='operativa'){
+    return {
+      grupos: [ {span:4, cls:'grp-none', label:''}, {span:4, cls:'grp-nfc', label:'NFCARDS'}, {span:2, cls:'grp-none', label:''} ],
+      cols: [ nombre,
+        {key:'horas', th:'Horas', sort:'horas', w:78, cell:s=>
+          `<td class="horas-td"><span class="horas-cell"><input class="cell-input" type="number" min="0" value="${s.horas??8}" data-id="${s.id}" data-field="horas"><b>h</b></span></td>`},
+        {key:'disp', th:'Disp. (L–D)', w:172, cell:s=>{
+          const avail = s.disponibilidad || {};
+          return `<td><div class="avail-grid">${['L','M','X','J','V','S','D'].map(d=>{
+            const v = availState(avail[d]);
+            return `<div class="avail-cell st${v}" onclick="toggleAvail(${s.id},'${d}',this)" title="${AVAIL_LABEL[v]}">${d}</div>`;
+          }).join('')}</div></td>`;}},
+        {key:'form', th:'Formación', w:205, cell:s=>{
+          const train = s.formacion || [];
+          return `<td class="form-cell"><span class="form-badges">${TRAINING_BADGES.map(t=>
+            `<span class="badge-training ${train.includes(t)?'done':''}" onclick="toggleTraining(${s.id},'${t}')">${t}</span>`).join('')}</span></td>`;}},
+        {key:'nfc_numero', th:'Nº Tarjeta', w:120, cls:'c-nfc', tdcls:'cn', cell:s=>
+          `<td class="cn"><input class="cell-input" placeholder="—" value="${s.nfc_numero||''}" data-id="${s.id}" data-field="nfc_numero"></td>`},
+        {key:'nfc_visitas_iniciales', th:'Visitas iniciales<br><span style="font-weight:600;font-size:9.5px;">01/07/26</span>', sort:'nfc_visitas_iniciales', w:112, cls:'c-nfc', cell:s=>
+          `<td class="cn"><input class="cell-input" type="number" min="0" placeholder="—" value="${numOrEmpty(s.nfc_visitas_iniciales)}" data-id="${s.id}" data-field="nfc_visitas_iniciales"></td>`},
+        {key:'nfc_stats_web', th:'Stats Web', sort:'nfc_stats_web', w:104, cls:'c-nfc', cell:s=>
+          `<td class="cn"><input class="cell-input" type="number" min="0" placeholder="—" value="${numOrEmpty(s.nfc_stats_web)}" data-id="${s.id}" data-field="nfc_stats_web"></td>`},
+        {key:'visitas', th:'Visitas', sort:'visitas', w:86, cls:'c-nfc', cell:s=>{
+          const ini=s.nfc_visitas_iniciales, web=s.nfc_stats_web;
+          const gan=(ini==null||web==null)?null:Math.max(0,web-ini);
+          return `<td class="cn"><span class="visitas-calc ${gan?'pos':''}">${gan===null?'—':gan}</span></td>`;}},
+        estado, borrar ]
+    };
+  }
+  // accesos
+  return {
+    grupos: [ {span:1, cls:'grp-none', label:''}, {span:2, cls:'grp-fever', label:'FEVER'}, {span:2, cls:'grp-sumup', label:'SUMUP'}, {span:2, cls:'grp-none', label:''} ],
+    cols: [ nombre,
+      {key:'fever_user', th:'Usuario', w:250, cls:'c-fever', cell:s=>
+        `<td class="user-cell cf"><input class="cell-input txt" placeholder="usuario" value="${(s.fever_user||'').replace(/"/g,'&quot;')}" data-id="${s.id}" data-field="fever_user"></td>`},
+      {key:'fever_pass', th:'Contraseña', w:180, cls:'c-fever', cell:s=>
+        `<td class="cf">${pwField(s.id,'fever_pass',s.fever_pass)}</td>`},
+      {key:'sumup_user', th:'Usuario', w:210, cls:'c-sumup', cell:s=>
+        `<td class="user-cell cs"><input class="cell-input txt" placeholder="usuario" value="${(s.sumup_user||'').replace(/"/g,'&quot;')}" data-id="${s.id}" data-field="sumup_user"></td>`},
+      {key:'sumup_pass', th:'Contraseña', w:180, cls:'c-sumup', cell:s=>
+        `<td class="cs">${pwField(s.id,'sumup_pass',s.sumup_pass)}</td>`},
+      estado, borrar ]
+  };
+}
+
 async function renderStaffTable(){
   setTimeout(initStaffColResize, 0);
   setTimeout(installTableFilters, 60);
@@ -2879,39 +2927,31 @@ async function renderStaffTable(){
     return modo==='todos' ? true : (modo==='activos' ? act : !act);
   });
   applyStaffSort(list);
+
+  const {grupos, cols} = staffColumns();
+  const thead = document.getElementById('staff-thead');
   const tbody = document.querySelector('#staff-table tbody');
-  const days=['L','M','X','J','V','S','D'];
-  tbody.innerHTML = list.length ? list.map(s=>{
-    const avail = s.disponibilidad || {};
-    const train = s.formacion || [];
-    const act = s.activo !== false;
-    const ini = s.nfc_visitas_iniciales, web = s.nfc_stats_web;
-    const gan = (ini===null||ini===undefined||web===null||web===undefined) ? null : Math.max(0, web - ini);
-    return `
-    <tr class="${act?'':'staff-off'}">
-      <td class="nm"><div class="staff-name" onclick="openStaffModal(${s.id})">
-            <span class="ini" style="background:${roleColors[s.nombre]||'#5B8CFF'}">${(s.nombre||'?')[0]}</span>
-            <span class="nm-txt">${s.nombre||''}<small>${s.apellido||''}</small></span>
-          </div></td>
-      <td class="horas-td"><span class="horas-cell"><input class="cell-input" type="number" min="0" value="${s.horas??8}" data-id="${s.id}" data-field="horas"><b>h</b></span></td>
-      <td><div class="avail-grid">${days.map(d=>{
-        const v = availState(avail[d]);
-        return `<div class="avail-cell st${v}" onclick="toggleAvail(${s.id},'${d}',this)" title="${AVAIL_LABEL[v]}">${d}</div>`;
-      }).join('')}</div></td>
-      <td class="form-cell"><span class="form-badges">${TRAINING_BADGES.map(t=>`<span class="badge-training ${train.includes(t)?'done':''}" onclick="toggleTraining(${s.id},'${t}')">${t}</span>`).join('')}</span></td>
-      <td class="user-cell cf"><input class="cell-input txt" placeholder="usuario" value="${s.fever_user||''}" data-id="${s.id}" data-field="fever_user"></td>
-      <td class="cf">${pwField(s.id,'fever_pass',s.fever_pass)}</td>
-      <td class="user-cell cs"><input class="cell-input txt" placeholder="usuario" value="${s.sumup_user||''}" data-id="${s.id}" data-field="sumup_user"></td>
-      <td class="cs">${pwField(s.id,'sumup_pass',s.sumup_pass)}</td>
-      <td class="cn"><input class="cell-input" placeholder="—" value="${s.nfc_numero||''}" data-id="${s.id}" data-field="nfc_numero"></td>
-      <td class="cn"><input class="cell-input" type="number" min="0" placeholder="—" value="${numOrEmpty(ini)}" data-id="${s.id}" data-field="nfc_visitas_iniciales"></td>
-      <td class="cn"><input class="cell-input" type="number" min="0" placeholder="—" value="${numOrEmpty(web)}" data-id="${s.id}" data-field="nfc_stats_web"></td>
-      <td class="cn"><span class="visitas-calc ${gan?'pos':''}">${gan===null?'—':gan}</span></td>
-      <td><div class="staff-estado ${act?'on':''}" onclick="toggleStaffActivo(${s.id},${act})" title="Clic para cambiar">
-            <span class="sw"></span><span>${act?'Activo':'No activo'}</span></div></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="deleteStaff(${s.id})">✕</button></td>
-    </tr>`;
-  }).join('') : `<tr><td colspan="14" style="text-align:center;color:var(--text-soft);">No hay nadie con este filtro.</td></tr>`;
+  if(!thead || !tbody) return;
+
+  // cabecera
+  let head = '';
+  if(grupos){
+    head += '<tr class="grp-row">' + grupos.map(g=>
+      `<th colspan="${g.span}" class="${g.cls}">${g.label}</th>`).join('') + '</tr>';
+  }
+  head += '<tr>' + cols.map(c=>{
+    const cls = [c.cls||'', c.sort?'sortable':''].filter(Boolean).join(' ');
+    const onclick = c.sort ? ` onclick="sortStaff('${c.sort}')"` : '';
+    const arrow = c.sort ? ` <span class="sort-arrow" data-k="${c.sort}"></span>` : '';
+    return `<th class="${cls}" style="width:${c.w}px;"${onclick}>${c.th}${arrow}</th>`;
+  }).join('') + '</tr>';
+  thead.innerHTML = head;
+  document.getElementById('staff-table').classList.toggle('has-groups', !!grupos);
+
+  // cuerpo
+  tbody.innerHTML = list.length
+    ? list.map(s=>`<tr class="${s.activo!==false?'':'staff-off'}">${cols.map(c=>c.cell(s)).join('')}</tr>`).join('')
+    : `<tr><td colspan="${cols.length}" style="text-align:center;color:var(--text-soft);">No hay nadie con este filtro.</td></tr>`;
 
   tbody.querySelectorAll('input[data-field]').forEach(inp=>{
     inp.addEventListener('change', async (e)=>{
@@ -2925,14 +2965,8 @@ async function renderStaffTable(){
     });
   });
   renderEntradasMonthOptions();
-  tbody.querySelectorAll('.pw-toggle').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const inp = btn.previousElementSibling;
-      inp.type = inp.type==='password' ? 'text' : 'password';
-      btn.textContent = inp.type==='password' ? '🙈' : '👁';
-    });
-  });
 }
+
 async function addNewStaff(){
   const { data, error } = await sb.from('staff').insert({
     nombre:'Nuevo', apellido:'', horas:8,
