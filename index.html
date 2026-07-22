@@ -425,6 +425,9 @@
     border:1px solid var(--line-strong);border-radius:8px;padding:5px 12px;}
   .spv-kpi .k-l{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);}
   .spv-kpi .k-v{font-family:var(--font);font-weight:800;font-size:15px;line-height:1.1;}
+  .spv-kpi-btn{cursor:pointer;text-align:left;transition:.12s;font-family:inherit;}
+  .spv-kpi-btn:hover{border-color:var(--accent);background:var(--accent-soft);}
+  .spv-kpi-btn .k-v{color:var(--accent);}
   .spv-month{margin-left:auto;width:auto;min-width:150px;font-weight:700;padding:6px 10px;font-size:12.5px;}
   /* Solo la tabla hace scroll */
   .spv-tablebox{border:1px solid var(--line-strong);border-radius:9px;overflow:auto;
@@ -447,10 +450,14 @@
   #spv-grid-table .cell-input:focus{background:#2C3444!important;
     box-shadow:inset 0 0 0 1.5px var(--accent)!important;}
   /* Tienda gris más claro que Supervisores */
-  #spv-grid-table .grp-tienda{background:#3A3F4C!important;color:#E4E7EE!important;}
-  #spv-grid-table .col-tienda{background:#2B303B!important;}
-  #spv-grid-table .grp-superv{background:#23262F!important;color:#B9BECB!important;}
-  #spv-grid-table .col-superv{background:#1C1F27!important;}
+  #spv-grid-table .grp-tienda{background:#3A3F4C!important;color:#E4E7EE!important;
+    border:1px solid #545A6B!important;}
+  #spv-grid-table .col-tienda{background:#2B303B!important;border:1px solid #474D5C!important;}
+  #spv-grid-table .grp-superv{background:#23262F!important;color:#B9BECB!important;
+    border:1px solid #343845!important;}
+  #spv-grid-table .col-superv{background:#1C1F27!important;border:1px solid #2F333E!important;}
+  /* separación general entre celdas */
+  #spv-grid-table td,#spv-grid-table th{border:1px solid var(--line);}
   /* ============ EVALUACIONES ============ */
   .ev-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;align-items:start;}
   @media(max-width:1100px){.ev-layout{grid-template-columns:1fr;}}
@@ -1222,6 +1229,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="spv-kpi"><span class="k-l">Visitantes mes</span><span class="k-v" id="spv-tot-visit">0</span></div>
           <div class="spv-kpi"><span class="k-l">Total boutique</span><span class="k-v" id="spv-tot-money">0€</span></div>
           <div class="spv-kpi"><span class="k-l">SPV medio</span><span class="k-v" id="spv-avg">0.00€</span></div>
+          <div class="spv-kpi"><span class="k-l">Días con comisión</span><span class="k-v" id="spv-commission-days-top">0</span></div>
+          <button class="spv-kpi spv-kpi-btn" onclick="openSpvComisiones()" title="Ver comisiones del mes">
+            <span class="k-l">Comisiones</span><span class="k-v">Ver ▸</span>
+          </button>
           <select id="spv-month-select" class="spv-month"></select>
           <input id="spv-commission-rate" type="number" value="2" min="0" max="100" step="0.5" style="display:none;">
         </div>
@@ -2586,6 +2597,53 @@ async function onSpvCellChange(e){
   computeSpvSummary(data);
 }
 
+let spvComisionesMes = null;
+
+function openSpvComisiones(){
+  const d = spvComisionesMes;
+  if(!d){ alert('Todavía no hay datos de este mes.'); return; }
+  const puedeVerPaula = spvPuedeVerComision();
+
+  const filas = SPV_STAFF.filter(s=>d.qualTotals[s]>0)
+    .sort((a,b)=>d.qualTotals[b]-d.qualTotals[a])
+    .map(s=>`<tr>
+      <td style="text-align:left;"><b>${spvNombreCorto(s)}</b></td>
+      <td class="mono">${d.qualDays[s]}</td>
+      <td class="mono">${d.qualTotals[s].toFixed(2)}€</td>
+      <td class="mono" style="color:var(--ok);font-weight:800;">${(d.qualTotals[s]*d.rate/100).toFixed(2)}€</td>
+    </tr>`).join('')
+    || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado al umbral de comisión.</td></tr>';
+
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
+      <div class="modal" style="max-width:600px;">
+        <div class="modal-head"><h2>Comisiones · ${spvMonthLabel(spvSelectedMonth)}</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+            <div class="spv-kpi"><span class="k-l">Días con comisión</span><span class="k-v">${d.dias}</span></div>
+            <div class="spv-kpi"><span class="k-l">Rev. bruto</span><span class="k-v">${d.qualRevBruto.toFixed(2)}€</span></div>
+            <div class="spv-kpi"><span class="k-l">% aplicado</span><span class="k-v">${d.rate}%</span></div>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Persona</th><th>Días</th><th>Generado</th><th>Comisión</th></tr></thead>
+            <tbody>${filas}</tbody></table>
+          </div>
+          ${puedeVerPaula ? `
+          <div style="margin-top:16px;padding:12px 14px;border:1px solid var(--line-strong);
+                      border-radius:9px;background:var(--panel);display:flex;
+                      align-items:center;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-size:12.5px;font-weight:800;">Comisión tienda · Paula</div>
+              <div style="font-size:10.5px;color:var(--text-dim);margin-top:2px;">${d.rate}% del rev. bruto de los días con comisión</div>
+            </div>
+            <div style="font-family:var(--font);font-size:19px;font-weight:800;color:var(--ok);">${d.paulaCommission.toFixed(2)}€</div>
+          </div>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
 function computeSpvSummary(data){
   const rate = parseFloat(document.getElementById('spv-commission-rate').value)||0;
   const totVisit = data.days.reduce((a,r)=>a+(r.visitors||0),0);
@@ -2627,6 +2685,14 @@ function computeSpvSummary(data){
   document.getElementById('spv-commission-days').textContent = qualifyingDays.length;
   document.getElementById('spv-commission-revenue').textContent = qualRevBruto.toFixed(2)+'€';
   document.getElementById('spv-paula-commission').textContent = paulaCommission.toFixed(2)+'€';
+  const topDias = document.getElementById('spv-commission-days-top');
+  if(topDias) topDias.textContent = qualifyingDays.length;
+
+  // guardado para la ventana de comisiones
+  spvComisionesMes = {
+    rate, qualTotals, qualDays, qualRevBruto, paulaCommission,
+    dias: qualifyingDays.length
+  };
 
   return {totals: qualTotals, totVisit, totMoney, rate, qualifyingDaysCount: qualifyingDays.length, qualRevBruto, paulaCommission};
 }
