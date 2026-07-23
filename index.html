@@ -739,6 +739,51 @@
     color:var(--text-soft);}
   .lm-arrow,.lm-eur,.lm-cal{flex-shrink:0;font-weight:800;color:var(--accent);width:16px;text-align:center;}
 
+  /* ── LOOMIS ──────────────────────────────────────────────── */
+  .lm-layout{display:grid;grid-template-columns:minmax(0,52%) 280px;gap:14px;align-items:start;}
+  @media(max-width:900px){.lm-layout{grid-template-columns:1fr;}}
+  .lm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .loomis-table{border-collapse:collapse;width:100%;table-layout:fixed;}
+  /* cabecera */
+  .loomis-table thead th{padding:7px 4px;font-size:10.5px;font-weight:800;
+    text-align:center;border:2px solid #1A1A1A;letter-spacing:.4px;}
+  .lm-h-turnos{background:#4472C4;color:#FFF;width:108px;}
+  .lm-h-fever {background:#4472C4;color:#FFF;}
+  .lm-h-sumup {background:#1A1A1A;color:#FFF;}
+  .lm-h-total {background:#808080;color:#FFF;width:88px;}
+  /* todas las td */
+  .loomis-table td{border:1px solid #999;padding:0;text-align:center;vertical-align:middle;}
+  /* columna Turnos (fecha): azul */
+  .lm-date{background:#4472C4;color:#FFF;font-weight:700;font-size:11px;
+    padding:4px 5px;border:2px solid #1A1A1A;}
+  /* celdas de datos: blancas */
+  .lm-c-fever,.lm-c-sumup{background:#FFFFFF;}
+  /* columna TOTAL: gris */
+  .lm-total-cell{background:#D9D9D9;font-weight:600;font-size:12.5px;
+    color:#1A1A1A;border:2px solid #1A1A1A;}
+  /* fila subtotal: amarillo, texto negro negrita */
+  .lm-sub .lm-c-fever,
+  .lm-sub .lm-c-sumup{background:#FFFF00;color:#000;font-weight:800;font-size:12px;}
+  /* separador entre días */
+  .lm-sep td{background:#FFF;border:none;height:4px;padding:0;}
+  /* inputs */
+  .lm-in{width:100%;height:26px;text-align:center;background:transparent;
+    border:none;color:#1A1A1A;font-size:12px;padding:0 2px;-moz-appearance:textfield;}
+  .lm-in::-webkit-outer-spin-button,.lm-in::-webkit-inner-spin-button{-webkit-appearance:none;}
+  .lm-in:focus{outline:none;background:rgba(68,114,196,.15);}
+  /* TOTAL WEEK */
+  .lm-week-row td{border:2px solid #1A1A1A;padding:5px 4px;font-size:11.5px;font-weight:800;text-align:center;}
+  .lm-week-label{background:#1A1A1A;color:#FFF;font-size:9.5px;letter-spacing:.5px;}
+  .lm-week-fever{background:#FFFF00;color:#000;}
+  .lm-week-sumup{background:#FFFF00;color:#000;}
+  .lm-week-total{background:#404040;color:#FFF;}
+  /* panel derecho */
+  .lm-link{display:flex;align-items:center;gap:8px;color:var(--accent);text-decoration:none;font-weight:700;font-size:13px;}
+  .lm-link:hover{text-decoration:underline;}
+  .lm-info{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px;}
+  .lm-info li{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;line-height:1.4;color:var(--text-soft);}
+  .lm-arrow,.lm-eur,.lm-cal{flex-shrink:0;font-weight:800;color:var(--accent);width:16px;text-align:center;}
+
   /* ---- ENTRADAS DEL MES: mini tablas estrechas ---- */
   .entradas-mini{font-size:12.5px;}
   .entradas-mini th{padding:7px 8px;font-size:10px;}
@@ -1738,8 +1783,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <thead>
                 <tr>
                   <th class="lm-h-turnos">Turnos</th>
-                  <th class="lm-h-sumup">SumUp</th>
                   <th class="lm-h-fever">fever</th>
+                  <th class="lm-h-sumup">SumUp</th>
                   <th class="lm-h-total">TOTAL</th>
                 </tr>
               </thead>
@@ -4962,100 +5007,93 @@ function loomisWeek(delta){
 let loomisData = {};   // { 'YYYY-MM-DD': {sumup:[..], fever:[..]} }
 
 async function renderLoomis(){
-  const monday = new Date(loomisMonday);
-  const mondayIso = loomisIso(monday);
-  const sunday = new Date(monday); sunday.setDate(sunday.getDate()+6);
-  const fmt = d=> d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
-  const lbl = document.getElementById('loomis-week-label');
-  if(lbl) lbl.textContent = `${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
+  const monday=new Date(loomisMonday);
+  const mondayIso=loomisIso(monday);
+  const sunday=new Date(monday); sunday.setDate(sunday.getDate()+6);
+  const fmt=d=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  const lbl=document.getElementById('loomis-week-label');
+  if(lbl) lbl.textContent=`${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
 
-  loomisData = {};
+  loomisData={};
   try{
-    const { data } = await sb.from('loomis_semanas').select('*').eq('semana', mondayIso).single();
-    if(data && data.dias){
-      loomisData = (typeof data.dias==='string') ? JSON.parse(data.dias) : data.dias;
-    }
-  }catch(e){ loomisData = {}; }
+    const {data}=await sb.from('loomis_semanas').select('*').eq('semana',mondayIso).single();
+    if(data?.dias) loomisData=(typeof data.dias==='string')?JSON.parse(data.dias):data.dias;
+  }catch(e){}
 
-  const dias = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-  const body = document.getElementById('loomis-body');
-  let html = '';
+  const dias=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const body=document.getElementById('loomis-body');
+  let html='';
   for(let i=0;i<7;i++){
-    const d = new Date(monday); d.setDate(d.getDate()+i);
-    const iso = loomisIso(d);
-    const dd = loomisData[iso] || {};
-    const fe = dd.fever || ['',''];
-    const su = dd.sumup || ['',''];
-    const fecha = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const inp = (c,r,v,cls)=>
-      `<input class="lm-in ${cls||''}" type="number" step="0.01" placeholder=""
-        data-iso="${iso}" data-c="${c}" data-r="${r}" value="${v ?? ''}">`;
-
-    /* Estructura: 3 filas por día
-       fila 1: fecha | su[0] | fe[0] | (TOTAL rowspan 3)
-       fila 2: vacío | su[1] | fe[1] |
-       fila 3 amarilla (subtotal): vacío | Σsu | Σfe |   */
-    html += `
+    const d=new Date(monday); d.setDate(d.getDate()+i);
+    const iso=loomisIso(d);
+    const dd=loomisData[iso]||{};
+    const fe=dd.fever||['',''];
+    const su=dd.sumup||['',''];
+    const fecha=d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const inp=(c,r,v)=>`<input class="lm-in" type="number" step="0.01" placeholder=""
+      data-iso="${iso}" data-c="${c}" data-r="${r}" value="${v??''}">`;
+    /* 3 filas por día:
+       fila 1: fecha(rowspan3) | fever[0] | sumup[0] | total(rowspan3)
+       fila 2:                 | fever[1] | sumup[1] |
+       fila 3 amarilla:        | Σfever   | Σsumup   |              */
+    html+=`
     <tr class="lm-r1">
       <td class="lm-date" rowspan="3">${fecha}</td>
-      <td class="lm-c-sumup">${inp('sumup',0,su[0])}</td>
       <td class="lm-c-fever">${inp('fever',0,fe[0])}</td>
+      <td class="lm-c-sumup">${inp('sumup',0,su[0])}</td>
       <td class="lm-total-cell" rowspan="3" id="lm-total-${iso}">—</td>
     </tr>
     <tr class="lm-r2">
-      <td class="lm-c-sumup">${inp('sumup',1,su[1])}</td>
       <td class="lm-c-fever">${inp('fever',1,fe[1])}</td>
+      <td class="lm-c-sumup">${inp('sumup',1,su[1])}</td>
     </tr>
     <tr class="lm-sub">
-      <td class="lm-c-sumup lm-subt" id="lm-ss-${iso}">—</td>
-      <td class="lm-c-fever lm-subt" id="lm-sf-${iso}">—</td>
+      <td class="lm-c-fever" id="lm-sf-${iso}"></td>
+      <td class="lm-c-sumup" id="lm-ss-${iso}"></td>
     </tr>
     <tr class="lm-sep"><td colspan="4"></td></tr>`;
   }
-  body.innerHTML = html;
+  body.innerHTML=html;
   body.querySelectorAll('.lm-in').forEach(inp=>{
-    inp.addEventListener('input', onLoomisInput);
-    inp.addEventListener('keydown', loomisKeyNav);
+    inp.addEventListener('input',onLoomisInput);
+    inp.addEventListener('keydown',loomisKeyNav);
   });
   recalcLoomis();
 }
 
 function onLoomisInput(e){
-  const iso=e.target.dataset.iso, c=e.target.dataset.c, r=parseInt(e.target.dataset.r,10);
+  const iso=e.target.dataset.iso,c=e.target.dataset.c,r=parseInt(e.target.dataset.r,10);
   if(!loomisData[iso]) loomisData[iso]={fever:['',''],sumup:['','']};
-  if(!loomisData[iso][c]) loomisData[iso][c]=['',''];
+  loomisData[iso][c]=loomisData[iso][c]||['',''];
   loomisData[iso][c][r]=e.target.value;
   recalcLoomis();
 }
 
 function recalcLoomis(){
   const monday=new Date(loomisMonday);
-  let wSumup=0,wFever=0,wTotal=0;
+  let wFe=0,wSu=0,wTot=0;
   for(let i=0;i<7;i++){
     const d=new Date(monday); d.setDate(d.getDate()+i);
     const iso=loomisIso(d);
     const dd=loomisData[iso]||{};
-    const su=(dd.sumup||['','']).reduce((a,v)=>a+(parseFloat(v)||0),0);
     const fe=(dd.fever||['','']).reduce((a,v)=>a+(parseFloat(v)||0),0);
-    const total=su+fe;
-    wSumup+=su; wFever+=fe; wTotal+=total;
-
-    const ss=document.getElementById('lm-ss-'+iso);
-    if(ss){ ss.textContent=su?su.toFixed(2):''; }
+    const su=(dd.sumup||['','']).reduce((a,v)=>a+(parseFloat(v)||0),0);
+    const tot=fe+su;
+    wFe+=fe; wSu+=su; wTot+=tot;
     const sf=document.getElementById('lm-sf-'+iso);
-    if(sf){ sf.textContent=fe?fe.toFixed(2):''; }
+    if(sf) sf.textContent=fe?fe.toFixed(2):'';
+    const ss=document.getElementById('lm-ss-'+iso);
+    if(ss) ss.textContent=su?su.toFixed(2):'';
     const tc=document.getElementById('lm-total-'+iso);
-    if(tc){ tc.textContent=total?total.toFixed(2):'—'; tc.classList.toggle('has-total',total>0); }
+    if(tc) tc.textContent=tot?tot.toFixed(2):'—';
   }
   const foot=document.getElementById('loomis-foot');
-  if(foot){
-    foot.innerHTML=`<tr class="lm-week-row">
-      <td class="lm-week-label">TOTAL WEEK</td>
-      <td class="lm-week-sumup">${wSumup.toFixed(2)}</td>
-      <td class="lm-week-fever">${wFever.toFixed(2)}</td>
-      <td class="lm-week-total">${wTotal.toFixed(2)}</td>
-    </tr>`;
-  }
+  if(foot) foot.innerHTML=`<tr class="lm-week-row">
+    <td class="lm-week-label">TOTAL WEEK</td>
+    <td class="lm-week-fever">${wFe.toFixed(2)}</td>
+    <td class="lm-week-sumup">${wSu.toFixed(2)}</td>
+    <td class="lm-week-total">${wTot.toFixed(2)}</td>
+  </tr>`;
 }
 
 
