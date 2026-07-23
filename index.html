@@ -99,6 +99,10 @@
 
   .grid{display:grid;gap:14px;}
   .grid-4{grid-template-columns:repeat(4,1fr);}
+  /* cápsula pequeña para ratings */
+  .kpi.kpi-sm{padding:5px 10px;}
+  .kpi.kpi-sm .label{font-size:9.5px;margin-bottom:1px;}
+  .kpi.kpi-sm .value{font-size:16px;margin-top:0;}
   .grid-3{grid-template-columns:repeat(3,1fr);}
   .grid-2{grid-template-columns:1.3fr .9fr;}
   .grid-7{grid-template-columns:repeat(7,1fr);}
@@ -356,12 +360,13 @@
   #view-recap #rc-info-visitantes .recap-field label, #view-recap #rc-info-entrada .recap-field label{font-size:12px;}
   /* ---- Anchos más contenidos ---- */
   #view-entrevistas .card{max-width:820px;}
-  .bday-chip{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;
+  .bday-chip{display:flex;align-items:center;gap:3px;font-size:9px;font-weight:700;
     background:#3A2140;color:#F5B8E0;border:1px solid #5C3466;border-radius:20px;
-    padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    max-width:100%;position:absolute;bottom:4px;left:2px;right:2px;}
-  /* la celda del día tiene alto fijo para que los bday no la amplíen */
-  .day-col{min-height:130px;position:relative;}
+    padding:1px 5px;margin-top:4px;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;max-width:100%;}
+  .day-col{display:flex;flex-direction:column;}
+  .day-col .day-content{flex:1;}
+  .day-col .day-extras{margin-top:auto;padding-top:4px;}
   /* ============ STAFF — layout, grupos y disponibilidad ============ */
   .staff-shell{display:flex;flex-direction:column;min-height:0;}
   body.staff-open{overflow:hidden;}
@@ -692,13 +697,13 @@
   /* separación entre días */
   .loomis-table tr.lm-r1 td{border-top:2px solid var(--line-strong);}
   /* fila de subtotal del día */
-  .loomis-table tr.lm-sub td{background:#3A3413!important;font-weight:800;font-size:12px;
-    color:#F4DF7E;height:24px;}
-  .loomis-table tr.lm-sub td.has{color:#FFE03A;}
+  .loomis-table tr.lm-sub td{background:#3A3000!important;font-weight:800;font-size:12px;
+    color:#FFE03A;height:24px;}
+  .loomis-table tr.lm-sub td.has{color:#FFD700;}
   /* colores de cabecera */
   .lm-h-turnos{background:#2C3040!important;color:#9AA0B2!important;width:90px;}
-  .lm-h-fever {background:#12294D!important;color:#fff!important;}
-  .lm-h-sumup {background:#0A0A0A!important;color:#fff!important;}
+  .lm-h-fever {background:#0E1F3D!important;color:#9EC4FF!important;}
+  .lm-h-sumup {background:#0E1F3D!important;color:#9EC4FF!important;}
   .lm-h-total {background:#2C3040!important;color:#9AA0B2!important;width:80px;}
   /* columna de días */
   .loomis-table .lm-date{background:#2C3040;color:#9AA0B2;font-weight:800;font-size:11px;
@@ -706,8 +711,8 @@
   .loomis-table .lm-date span{display:block;}
   .loomis-table .lm-date small{font-weight:600;color:#7E90AE;font-size:9px;}
   /* celdas por grupo */
-  .lm-c-fever{background:#1A3B6B;}
-  .lm-c-sumup{background:#1A3B6B;}
+  .lm-c-fever{background:#12294D;}
+  .lm-c-sumup{background:#12294D;}
   .loomis-table .lm-in{width:100%;height:28px;text-align:center;background:transparent;
     border:none;color:#EAF1FB;font-size:12px;padding:0 2px;}
   .loomis-table .lm-in:hover{background:rgba(255,255,255,.05);}
@@ -1253,22 +1258,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
         <div class="grid grid-4" style="margin-bottom:14px;grid-template-columns:repeat(4,1fr);">
           <div class="card kpi"><div class="label">Visitantes LY</div><div class="value" id="dash-ly-visits" style="color:#B0B8C8;font-weight:800;">–</div><div class="delta" id="dash-ly-date" style="color:var(--text-soft);">–</div></div>
-          <div class="card kpi">
-            <div class="label">Ratings</div>
-            <div style="display:flex;gap:8px;align-items:baseline;margin-top:4px;">
-              <div style="text-align:center;flex:1;min-width:0;">
-                <div style="font-size:9px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">TA</div>
-                <div class="value" id="dash-ta-rating" style="font-size:18px;">–</div>
-              </div>
-              <div style="text-align:center;flex:1;min-width:0;">
-                <div style="font-size:9px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">G</div>
-                <div class="value" id="dash-google-rating" style="font-size:18px;">–</div>
-              </div>
-              <div style="text-align:center;flex:1;min-width:0;">
-                <div style="font-size:9px;color:var(--text-dim);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;">GYG</div>
-                <div class="value" id="dash-gyg-rating" style="font-size:18px;">–</div>
-              </div>
-            </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div class="card kpi kpi-sm"><div class="label">Tripadvisor</div><div class="value" id="dash-ta-rating">–</div></div>
+            <div class="card kpi kpi-sm"><div class="label">Google</div><div class="value" id="dash-google-rating">–</div></div>
+            <div class="card kpi kpi-sm"><div class="label">GetYourGuide</div><div class="value" id="dash-gyg-rating">–</div></div>
           </div>
           <div class="card kpi"><div class="label">Tus tareas PDA</div><div class="value" id="dash-my-tasks">–</div><div class="delta" style="color:var(--text-soft);" id="dash-my-tasks-sub">pendientes esta semana</div></div>
           <div class="card kpi" style="cursor:pointer;" onclick="goToRecapFromDashboard()"><div class="label">Recaps</div><div class="value" id="dash-recaps-unread">–</div><div class="delta" style="color:var(--text-soft);" id="dash-recaps-unread-sub">cargando…</div></div>
@@ -2426,8 +2419,8 @@ async function renderWeekCalendar(){
         <span class="ly-num">LY ${lyV !== null ? lyV.toLocaleString('es-ES') : '–'}</span>
         ${pctHtml}
       </div>
-      ${(cumples[d.iso.slice(5)]||[]).map(n=>
-        `<div class="bday-chip" title="Cumpleaños de ${esc(n)}">🎂 ${esc(n)}</div>`).join('')}
+      <div class="day-extras">${(cumples[d.iso.slice(5)]||[]).map(n=>
+        `<div class="bday-chip" title="Cumpleaños de ${esc(n)}">🎂 ${esc(n)}</div>`).join('')}</div>
     </div>`;
   }).join('');
 }
@@ -3263,8 +3256,9 @@ const STAFF_ALIAS = { Cecilia:'Ceci', Ceci:'Ceci', Paula:'Paula', Ignacio:'Ignac
 const STAFF_AVATAR_COLOR = 'Ceci';   // solo Ceci mantiene su color de roleColors
 function staffColor(nombre){
   const alias = STAFF_ALIAS[nombre] || nombre;
-  if(alias === 'Ceci') return roleColors['Ceci'] || '#4D8DF6';
-  return '#7BBFEF';  // azul cielo claro para el resto
+  if(alias === 'Ceci')  return roleColors['Ceci']  || '#4D8DF6';
+  if(alias === 'Paula') return roleColors['Paula'] || '#FF4FA0';
+  return '#7BBFEF';
 }
 function staffColumns(){
   const nombre = {key:'nombre', th:'Nombre', sort:'nombre', w:190, cell:s=>`
