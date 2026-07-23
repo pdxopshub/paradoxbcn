@@ -691,19 +691,25 @@
     flex-wrap:wrap;margin-bottom:10px;}
   .loomis-table{table-layout:fixed;width:100%;border-collapse:separate;border-spacing:0;}
   .loomis-table th{padding:4px 3px!important;font-size:9px;letter-spacing:.3px;text-align:center;
-    border:1px solid var(--line);}
+    border:1px solid #1E2840;}
   .loomis-table th.sub{font-size:8.5px;font-weight:700;opacity:.85;}
-  .loomis-table td{padding:0!important;height:23px;border:1px solid var(--line);text-align:center;}
+  .loomis-table td{padding:0!important;height:23px;border:1px solid #1E2840;text-align:center;}
+  /* línea gruesa entre Fever y SumUp, y entre SumUp y Total */
+  .loomis-table td.lm-c-sumup:first-of-type,
+  .loomis-table td.lm-c-sumup{border-left:2px solid #0B1428;}
+  .loomis-table td.lm-total{border-left:2.5px solid #0B1428;}
+  /* línea gruesa entre días */
+  .loomis-table tr.lm-r1 td{border-top:2px solid #0B1428 !important;}
   /* separación entre días */
   .loomis-table tr.lm-r1 td{border-top:2px solid var(--line-strong);}
   /* fila de subtotal del día */
-  .loomis-table tr.lm-sub td{background:#3A3000!important;font-weight:800;font-size:12px;
-    color:#FFE03A;height:24px;}
-  .loomis-table tr.lm-sub td.has{color:#FFD700;}
+  .loomis-table tr.lm-sub td{background:#F5C842!important;font-weight:800;font-size:12.5px;
+    color:#1A1A00;height:24px;}
+  .loomis-table tr.lm-sub td.has{color:#1A1A00;}
   /* colores de cabecera */
   .lm-h-turnos{background:#2C3040!important;color:#9AA0B2!important;width:90px;}
-  .lm-h-fever {background:#0E1F3D!important;color:#9EC4FF!important;}
-  .lm-h-sumup {background:#0E1F3D!important;color:#9EC4FF!important;}
+  .lm-h-fever {background:#2A4880!important;color:#E0EAFF!important;}
+  .lm-h-sumup {background:#2A4880!important;color:#E0EAFF!important;}
   .lm-h-total {background:#2C3040!important;color:#9AA0B2!important;width:80px;}
   /* columna de días */
   .loomis-table .lm-date{background:#2C3040;color:#9AA0B2;font-weight:800;font-size:11px;
@@ -711,20 +717,20 @@
   .loomis-table .lm-date span{display:block;}
   .loomis-table .lm-date small{font-weight:600;color:#7E90AE;font-size:9px;}
   /* celdas por grupo */
-  .lm-c-fever{background:#12294D;}
-  .lm-c-sumup{background:#12294D;}
+  .lm-c-fever{background:#3A5FA0;}
+  .lm-c-sumup{background:#3A5FA0;}
   .loomis-table .lm-in{width:100%;height:28px;text-align:center;background:transparent;
-    border:none;color:#EAF1FB;font-size:12px;padding:0 2px;}
+    border:none;color:#E8F0FF;font-size:12px;font-weight:600;padding:0 2px;}
   .loomis-table .lm-in:hover{background:rgba(255,255,255,.05);}
   .loomis-table .lm-in:focus{outline:none;background:#173A63;
     box-shadow:inset 0 0 0 1.5px var(--accent);}
   /* total del día */
-  .loomis-table .lm-total{background:#2C3040;font-weight:800;font-size:12.5px;color:#9AA0B2;}
-  .loomis-table .lm-total.has{color:#4FE0A0;}
+  .loomis-table .lm-total{background:#2A4880;font-weight:500;font-size:12.5px;color:#0B0E14;}
+  .loomis-table .lm-total.has{color:#0B0E14;font-weight:600;}
   /* total semana */
-  .loomis-table .lm-week td{background:#0F2A24;font-weight:800;font-size:12.5px;
-    color:#5FE0B0;border-top:2px solid #2E7A55;padding:7px 4px!important;height:auto;}
-  .loomis-table .lm-week td:first-child{color:#8FE7BE;font-size:10.5px;letter-spacing:.6px;}
+  .loomis-table .lm-week td{background:#2A4880;font-weight:700;font-size:12.5px;
+    color:#E8F0FF;border-top:2.5px solid #0B1428;padding:7px 4px!important;height:auto;}
+  .loomis-table .lm-week td:first-child{color:#C8D8F8;font-size:10.5px;letter-spacing:.6px;}
   /* panel derecho */
   .lm-link{display:flex;align-items:center;gap:8px;color:var(--accent);text-decoration:none;
     font-weight:700;font-size:13px;}
