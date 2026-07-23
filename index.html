@@ -685,7 +685,13 @@
   .loomis-table th{padding:6px 4px!important;font-size:9.5px;letter-spacing:.5px;text-align:center;
     border:1px solid var(--line);}
   .loomis-table th.sub{font-size:8.5px;font-weight:700;opacity:.85;}
-  .loomis-table td{padding:0!important;height:30px;border:1px solid var(--line);text-align:center;}
+  .loomis-table td{padding:0!important;height:26px;border:1px solid var(--line);text-align:center;}
+  /* separación entre días */
+  .loomis-table tr.lm-r1 td{border-top:2px solid var(--line-strong);}
+  /* fila de subtotal del día */
+  .loomis-table tr.lm-sub td{background:#16241D!important;font-weight:800;font-size:12px;
+    color:#6E7787;height:24px;}
+  .loomis-table tr.lm-sub td.has{color:#4FE0A0;}
   /* colores de cabecera */
   .lm-h-turnos{background:#111C33!important;color:#AFC4E8!important;}
   .lm-h-fever {background:#12294D!important;color:#fff!important;}
@@ -1714,16 +1720,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <table id="loomis-table" class="loomis-table no-filter">
               <thead>
                 <tr>
-                  <th rowspan="2" class="lm-h-turnos">Turnos</th>
-                  <th colspan="2" class="lm-h-fever">FEVER</th>
-                  <th colspan="2" class="lm-h-sumup">SUMUP</th>
-                  <th rowspan="2" class="lm-h-total">TOTAL</th>
-                </tr>
-                <tr>
-                  <th class="lm-h-fever sub">Turno 1</th>
-                  <th class="lm-h-fever sub">Turno 2</th>
-                  <th class="lm-h-sumup sub">Turno 1</th>
-                  <th class="lm-h-sumup sub">Turno 2</th>
+                  <th class="lm-h-turnos" style="width:112px;">Turnos</th>
+                  <th class="lm-h-fever">FEVER</th>
+                  <th class="lm-h-sumup">SUMUP</th>
+                  <th class="lm-h-total" style="width:98px;">TOTAL</th>
                 </tr>
               </thead>
               <tbody id="loomis-body"></tbody>
@@ -4959,13 +4959,20 @@ async function renderLoomis(){
     const fecha = d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});
     const inp = (c,r,v)=>`<input class="lm-in" type="number" step="0.01" placeholder="—"
         data-iso="${iso}" data-c="${c}" data-r="${r}" value="${v ?? ''}">`;
-    html += `<tr>
-      <td class="lm-date"><span>${dias[i]}</span><small>${fecha}</small></td>
+    html += `
+    <tr class="lm-r1">
+      <td class="lm-date" rowspan="3"><span>${dias[i]}</span><small>${fecha}</small></td>
       <td class="lm-c-fever">${inp('fever',0,fe[0])}</td>
-      <td class="lm-c-fever">${inp('fever',1,fe[1])}</td>
       <td class="lm-c-sumup">${inp('sumup',0,su[0])}</td>
+      <td class="lm-total" rowspan="3" id="lm-total-${iso}">—</td>
+    </tr>
+    <tr class="lm-r2">
+      <td class="lm-c-fever">${inp('fever',1,fe[1])}</td>
       <td class="lm-c-sumup">${inp('sumup',1,su[1])}</td>
-      <td class="lm-total" id="lm-total-${iso}">—</td>
+    </tr>
+    <tr class="lm-sub">
+      <td class="lm-c-fever" id="lm-sf-${iso}">—</td>
+      <td class="lm-c-sumup" id="lm-ss-${iso}">—</td>
     </tr>`;
   }
   body.innerHTML = html;
@@ -4992,6 +4999,11 @@ function recalcLoomis(){
     const su = (dd.sumup||['','']).reduce((a,v)=>a+(parseFloat(v)||0),0);
     const total = fe + su;
     wFever += fe; wSumup += su; wTotal += total;
+
+    const sf = document.getElementById('lm-sf-'+iso);
+    if(sf){ sf.textContent = fe ? fe.toFixed(2) : '—'; sf.classList.toggle('has', fe>0); }
+    const ss = document.getElementById('lm-ss-'+iso);
+    if(ss){ ss.textContent = su ? su.toFixed(2) : '—'; ss.classList.toggle('has', su>0); }
     const cell = document.getElementById('lm-total-'+iso);
     if(cell){
       cell.textContent = total ? total.toFixed(2) : '—';
@@ -5002,8 +5014,8 @@ function recalcLoomis(){
   if(foot){
     foot.innerHTML = `<tr class="lm-week">
       <td>TOTAL SEMANA</td>
-      <td colspan="2">${wFever.toFixed(2)}</td>
-      <td colspan="2">${wSumup.toFixed(2)}</td>
+      <td>${wFever.toFixed(2)}</td>
+      <td>${wSumup.toFixed(2)}</td>
       <td>${wTotal.toFixed(2)}</td>
     </tr>`;
   }
