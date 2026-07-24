@@ -1352,7 +1352,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <span class="k-l">Comisiones</span><span class="k-v">Ver ▸</span>
           </button>
           <select id="spv-month-select" class="spv-month"></select>
-          <input id="spv-commission-rate" type="number" value="2" min="0" max="100" step="0.5" style="display:none;">
+          <input id="spv-commission-rate" type="number" value="2.5" min="0" max="100" step="0.5" style="display:none;">
         </div>
         <h1 id="spv-month-title" style="display:none;"></h1>
 
@@ -1964,12 +1964,18 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       </div>
 
       <!-- ============ DIEGO ============ -->
-      <div class="view" id="view-diego" style="--diego-w:720px;">
-        <div class="card">
+      <div class="view" id="view-diego">
+        <div class="card" style="max-width:760px;">
           <div class="flex-between" style="margin-bottom:14px;">
-            <div class="section-title" style="margin:0;">Esta semana</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button class="btn btn-ghost btn-sm" onclick="diegoWeek(-1)">‹ Anterior</button>
+              <div class="section-title" style="margin:0;min-width:180px;text-align:center;" id="diego-week-label">Esta semana</div>
+              <button class="btn btn-ghost btn-sm" onclick="diegoWeek(1)">Siguiente ›</button>
+              <button class="btn btn-ghost btn-sm" onclick="diegoWeek(0)">Hoy</button>
+            </div>
             <div style="display:flex;gap:8px;">
-              <input id="diego-new-task" placeholder="Añadir tarea de mantenimiento…" style="width:280px;">
+              <input id="diego-new-task" placeholder="Añadir tarea de mantenimiento…" style="width:260px;"
+                     onkeydown="if(event.key==='Enter') addDiegoTask()">
               <button class="btn btn-primary btn-sm" onclick="addDiegoTask()">Añadir</button>
             </div>
           </div>
@@ -2824,7 +2830,7 @@ function computeSpvSummary(data){
     </tr>`).join('')
     || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado todavía al umbral de comisión (SPV Neto ≥ 1€).</td></tr>';
 
-  // comisión de tienda (Paula): 2% del rev. bruto total de los días con comisión
+  // comisión de tienda (Paula): 2,5% del rev. bruto neto de los días con comisión
   const qualRevBruto = qualifyingDays.reduce((a,r)=>a+rowRevBruto(r),0);
   const paulaCommission = qualRevBruto * rate/100;
   document.getElementById('spv-commission-days').textContent = qualifyingDays.length;
@@ -2874,7 +2880,7 @@ async function renderCommissionHistory(){
           <button class="btn btn-ghost btn-sm" onclick="deleteCommissionSnapshot(${entry.id})">Eliminar</button>
         </div>
       </div>
-      ${paulaComm>0?`<div class="note-banner" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div><b>Comisión tienda Paula:</b> ${paulaComm.toFixed(2)}€ (2% del Rev. Bruto de días con comisión)</div></div>`:''}
+      ${paulaComm>0?`<div class="note-banner" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div><b>Comisión tienda Paula:</b> ${paulaComm.toFixed(2)}€ (2,5% del Rev. Bruto neto)</div></div>`:''}
       <div class="table-wrap"><table><thead><tr><th>Persona</th><th>Total generado</th><th>Comisión</th></tr></thead>
       <tbody>${staffEntries.map(([s,v])=>`<tr><td>${s}</td><td class="mono">${v.toFixed(2)}€</td><td class="mono" style="color:var(--success);font-weight:700;">${(v*entry.rate/100).toFixed(2)}€</td></tr>`).join('')}</tbody></table></div>
     </div>`;
@@ -4448,13 +4454,13 @@ async function renderRecap(){
   // Configurar event listeners de auto-guardado
   ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews'].forEach(id=>{
     const el = document.getElementById(id);
-    if(el) el.addEventListener('change', () => saveRecap(true));
+    if(el) el.addEventListener('change', () => { if(!recapLoading) saveRecap(true); });
   });
   RECAP_TIENDA_STAFF.forEach(s=>{
     const el = document.getElementById(`rc-btq-${s}`);
-    if(el) el.addEventListener('change', () => saveRecap(true));
+    if(el) el.addEventListener('change', () => { if(!recapLoading) saveRecap(true); });
   });
-  document.getElementById('recap-cerrado-por')?.addEventListener('change', () => saveRecap(true));
+  document.getElementById('recap-cerrado-por')?.addEventListener('change', () => { if(!recapLoading) saveRecap(true); });
   document.getElementById('rc-observaciones')?.addEventListener('input', debounceRecapSave);
 
   renderRecapCapsules();
@@ -4471,11 +4477,25 @@ function updateRecapDateLabel(){
 }
 
 let recapDebounceTimer = null;
-function debounceRecapSave(){ clearTimeout(recapDebounceTimer); recapDebounceTimer = setTimeout(()=>saveRecap(true), 800); }
+function debounceRecapSave(){ if(recapLoading) return; clearTimeout(recapDebounceTimer); recapDebounceTimer = setTimeout(()=>saveRecap(true), 800); }
+
+let recapLoading = false;
 
 async function loadRecapData(){
+  recapLoading = true;
+  // Limpiar todos los campos antes de cargar (evita ver datos del día anterior)
+  ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos',
+   'rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews',
+   'rc-observaciones'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
+  });
+  document.getElementById('rc-visitantes-ly').textContent='–';
+  RECAP_TIENDA_STAFF.forEach(s=>{ const el=document.getElementById(`rc-btq-${s}`); if(el) el.value=''; });
+  updateBoutiqueTotal();
+
   // Fetch del recap guardado
-  const { data: rec } = await sb.from('recap').select('*').eq('fecha', recapDate).single().catch(()=>({data:null}));
+  const { data: rec } = await sb.from('recap').select('*').eq('fecha', recapDate).maybeSingle();
   recapData = rec || {};
 
   // LY desde spv_days — mismo DÍA DE LA SEMANA del año pasado (no el mismo número)
@@ -4534,6 +4554,8 @@ async function loadRecapData(){
   // Observaciones
   const obs = document.getElementById('rc-observaciones');
   if(obs) obs.value = recapData.observaciones || '';
+
+  recapLoading = false;
 }
 
 function setValue(id, val){
@@ -4579,7 +4601,13 @@ async function saveRecap(silent=false){
     payload.autor = recapData?.autor || me;
     payload.leido_por = recapData?.leido_por || [me];
   }
-  await sb.from('recap').upsert(payload, {onConflict:'fecha'});
+  // Comprobar si ya existe una fila para esta fecha
+  const { data: existing } = await sb.from('recap').select('fecha').eq('fecha', payload.fecha).maybeSingle();
+  if(existing){
+    await sb.from('recap').update(payload).eq('fecha', payload.fecha);
+  } else {
+    await sb.from('recap').insert(payload);
+  }
   await syncRecapBoutiqueToSpv(payload.fecha, payload.boutique);
   recapData = { ...recapData, ...payload };
   if(!silent){
@@ -4744,8 +4772,10 @@ async function refreshDashboardRecapBadge(){
 /* ============================================================
    DIEGO — tabla diego_tasks
    ============================================================ */
-async function fetchDiegoTasks(){
-  const { data, error } = await sb.from('diego_tasks').select('*').order('created_at');
+async function fetchDiegoTasks(weekIso){
+  let q=sb.from('diego_tasks').select('*').order('created_at');
+  if(weekIso) q=q.eq('week',weekIso);
+  const {data,error}=await q;
   if(error){ console.error(error); return []; }
   return data;
 }
@@ -5152,8 +5182,26 @@ async function saveLoomis(){
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2500); }
 }
 
+let diegoWeekOffset=0;
+function diegoMondayIso(offset){
+  const d=new Date(); d.setDate(d.getDate()-((d.getDay()+6)%7)+offset*7);
+  return d.toISOString().slice(0,10);
+}
+function diegoWeekRange(offset){
+  const m=new Date(); m.setDate(m.getDate()-((m.getDay()+6)%7)+offset*7);
+  const s=new Date(m); s.setDate(s.getDate()+6);
+  const fmt=d=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  return {lunes:m.toISOString().slice(0,10), label:`${fmt(m)} – ${fmt(s)}`};
+}
+function diegoWeek(delta){
+  if(delta===0) diegoWeekOffset=0; else diegoWeekOffset+=delta;
+  renderDiego();
+}
 async function renderDiego(){
-  const tasks = await fetchDiegoTasks();
+  const {lunes,label}=diegoWeekRange(diegoWeekOffset);
+  const lbl=document.getElementById('diego-week-label');
+  if(lbl) lbl.textContent=diegoWeekOffset===0?`Esta semana (${label})`:label;
+  const tasks = await fetchDiegoTasks(lunes);
   const list = document.getElementById('diego-list');
   list.innerHTML = tasks.length ? tasks.map(t=>`
     <div class="checkbox-row ${t.done?'done':''}" style="display:flex;align-items:center;gap:8px;">
@@ -5174,7 +5222,8 @@ async function addDiegoTask(){
   const input = document.getElementById('diego-new-task');
   const title = input.value.trim();
   if(!title) return;
-  await sb.from('diego_tasks').insert({title, done:false});
+  const {lunes}=diegoWeekRange(diegoWeekOffset);
+  await sb.from('diego_tasks').insert({title, done:false, week:lunes});
   input.value='';
   renderDiego();
 }
