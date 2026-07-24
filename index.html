@@ -5021,6 +5021,30 @@ function tipoPill(t){
   const c = TIPO_COLOR[t] || TIPO_COLOR['Otro'];
   return `<span class="tp-pill" style="background:${c.bg};color:${c.fg};border-color:${c.br};">${esc(t)}</span>`;
 }
+/* Tipos disponibles SOLO en Inbound/Outbound */
+const TIPOS_LEAD = ['Escuela','Escuela + Taller','Casal','Cultural','Corporativo',
+  'Corporativo + TB','Cumpleaños','Cumpleaños Enigma','Cumpleaños Ilusión',
+  'Cumpleaños Ilusión + Merch.','Cumpleaños Paradox','Grupo Familiar','Asociación'];
+
+/* Los cumpleaños y grupos familiares NO se guardan en el maestro de Grupos */
+const TIPOS_SIN_MAESTRO = ['Cumpleaños','Cumpleaños Enigma','Cumpleaños Ilusión',
+  'Cumpleaños Ilusión + Merch.','Cumpleaños Paradox','Grupo Familiar'];
+function vaAlMaestro(tipo){ return !!tipo && !TIPOS_SIN_MAESTRO.includes(tipo); }
+
+/* colores extra para los tipos que solo existen en leads */
+Object.assign(TIPO_COLOR, {
+  'Escuela + Taller':            {bg:'#12283F', fg:'#9EC4FF', br:'#24455F'},
+  'Cultural':                    {bg:'#0E2A2E', fg:'#5FD8E0', br:'#1C4A50'},
+  'Corporativo':                 {bg:'#3A1720', fg:'#F2606A', br:'#5C2430'},
+  'Corporativo + TB':            {bg:'#42121C', fg:'#FF8A94', br:'#6B2A34'},
+  'Cumpleaños':                  {bg:'#3A2140', fg:'#F5B8E0', br:'#5C3466'},
+  'Cumpleaños Enigma':           {bg:'#33184A', fg:'#D9A6FF', br:'#4E2870'},
+  'Cumpleaños Ilusión':          {bg:'#3D1638', fg:'#FFA6E8', br:'#5E2456'},
+  'Cumpleaños Ilusión + Merch.': {bg:'#451634', fg:'#FFB0D4', br:'#6B2851'},
+  'Cumpleaños Paradox':          {bg:'#2E1A48', fg:'#C9A6F5', br:'#472A6E'},
+  'Grupo Familiar':              {bg:'#2C3040', fg:'#C3CAD9', br:'#3E4456'},
+});
+
 const STATUS_OPTS = ['Pending','Confirmed','Rejected'];
 const STATUS_COLOR = {Pending:'st-wait', Confirmed:'st-ok', Rejected:'st-bad'};
 const METODOS_PAGO = ['Transfer','Credit Card','Box Office'];
@@ -5229,7 +5253,7 @@ function renderLeads(canal){
     el.dataset.filled = '1';
   };
   fill('status', STATUS_OPTS.map(o=>`<option>${o}</option>`).join(''));
-  fill('tipo',   TIPOS_GRUPO.map(o=>`<option>${o}</option>`).join(''));
+  fill('tipo',   TIPOS_LEAD.map(o=>`<option>${o}</option>`).join(''));
   fill('year',   ANYOS.map(y=>`<option>${y}</option>`).join(''));
   fill('month',  MESES_N.slice(1).map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''));
 
@@ -5281,8 +5305,9 @@ function renderLeads(canal){
       } else if(c.type==='tipo'){
         const cc = TIPO_COLOR[val] || TIPO_COLOR['Otro'];
         const st = val ? `background:${cc.bg};color:${cc.fg};` : '';
+        const opts = TIPOS_LEAD.includes(val) || !val ? TIPOS_LEAD : [val, ...TIPOS_LEAD];
         inner = `<select class="lc-in lc-tipo" style="${st}" ${dk}>
-          ${TIPOS_GRUPO.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
+          ${opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
       } else if(c.type==='metodo'){
         const cc = METODO_COLOR[val];
         const st = cc ? `background:${cc.bg};color:${cc.fg};` : '';
@@ -5426,28 +5451,80 @@ function editLeadNote(ev, id, campo){
 }
 
 function openLeadPicker(canal){
-  const opts = GM_CACHE.map(g=>`<option value="${g.id}">${esc(g.grupo)}${g.tipo?' · '+esc(g.tipo):''}</option>`).join('');
+  const opts = GM_CACHE.map(g=>`<option value="${g.id}">${esc(limpiaRef(g.grupo))}${g.tipo?' · '+esc(g.tipo):''}</option>`).join('');
   document.getElementById('modal-root').innerHTML = `
     <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
-      <div class="modal" style="max-width:520px;">
-        <div class="modal-head"><h2>Añadir lead ${canal}</h2>
+      <div class="modal" style="max-width:540px;">
+        <div class="modal-head"><h2>Añadir lead · ${canal}</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
         <div class="modal-body">
-          <div class="field"><label>Buscar grupo</label>
-            <input id="lp-search" placeholder="Escribe para filtrar…" oninput="filterLeadPicker()">
+          <div class="tab-strip" style="margin-bottom:14px;">
+            <button class="tab-btn active" id="lp-tab-exist" onclick="lpMode('exist')">De la base de datos</button>
+            <button class="tab-btn" id="lp-tab-new" onclick="lpMode('new')">Grupo nuevo</button>
           </div>
-          <div class="field"><label>Grupo</label>
-            <select id="lp-grupo" size="10" style="height:auto;">${opts}</select>
+
+          <div id="lp-pane-exist">
+            <div class="field"><label>Buscar grupo</label>
+              <input id="lp-search" placeholder="Escribe para filtrar…" oninput="filterLeadPicker()">
+            </div>
+            <div class="field"><label>Grupo</label>
+              <select id="lp-grupo" size="9" style="height:auto;">${opts}</select>
+            </div>
+            <div class="field"><label>Tipo para este lead</label>
+              <select id="lp-tipo-exist">${TIPOS_LEAD.map(t=>`<option>${t}</option>`).join('')}</select>
+            </div>
           </div>
-          <div class="hint">¿No está en la lista? Añádelo primero en la pestaña Grupos.</div>
+
+          <div id="lp-pane-new" style="display:none;">
+            <div class="field"><label>Nombre del grupo / cliente</label>
+              <input id="lpn-nombre" placeholder="Ej: Cumpleaños de Marc, Escola Sant Jordi…">
+            </div>
+            <div class="field"><label>Tipo</label>
+              <select id="lpn-tipo" onchange="lpAvisoMaestro()">
+                ${TIPOS_LEAD.map(t=>`<option>${t}</option>`).join('')}
+              </select>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Email</label><input id="lpn-email"></div>
+              <div class="field"><label>Contacto</label><input id="lpn-contacto"></div>
+            </div>
+            <div class="field"><label>Teléfono</label><input id="lpn-tel"></div>
+            <div id="lp-aviso" class="note-banner" style="margin-top:4px;"></div>
+          </div>
         </div>
         <div class="modal-foot">
           <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
-          <button class="btn btn-primary" onclick="addLeadFromPicker('${canal}')">Añadir</button>
+          <button class="btn btn-primary" id="lp-save" onclick="addLeadFromPicker('${canal}')">Añadir</button>
         </div>
       </div>
     </div>`;
+  lpAvisoMaestro();
   setTimeout(()=>document.getElementById('lp-search')?.focus(), 60);
+}
+
+let lpModo = 'exist';
+function lpMode(m){
+  lpModo = m;
+  document.getElementById('lp-tab-exist').classList.toggle('active', m==='exist');
+  document.getElementById('lp-tab-new').classList.toggle('active', m==='new');
+  document.getElementById('lp-pane-exist').style.display = m==='exist' ? 'block' : 'none';
+  document.getElementById('lp-pane-new').style.display   = m==='new'   ? 'block' : 'none';
+  if(m==='new') setTimeout(()=>document.getElementById('lpn-nombre')?.focus(), 40);
+}
+
+function lpAvisoMaestro(){
+  const el = document.getElementById('lp-aviso');
+  if(!el) return;
+  const tipo = document.getElementById('lpn-tipo')?.value || '';
+  if(vaAlMaestro(tipo)){
+    el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <div>Se guardará también en la pestaña <b>Grupos</b>.</div>`;
+    el.style.display = 'flex';
+  } else {
+    el.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+      <div>Solo quedará en ${'este canal'}: los cumpleaños y grupos familiares <b>no</b> se añaden a Grupos.</div>`;
+    el.style.display = 'flex';
+  }
 }
 
 function filterLeadPicker(){
@@ -5455,24 +5532,52 @@ function filterLeadPicker(){
   const sel = document.getElementById('lp-grupo');
   sel.innerHTML = GM_CACHE
     .filter(g=>!q || (g.grupo||'').toLowerCase().includes(q) || (g.tipo||'').toLowerCase().includes(q))
-    .map(g=>`<option value="${g.id}">${esc(g.grupo)}${g.tipo?' · '+esc(g.tipo):''}</option>`).join('');
+    .map(g=>`<option value="${g.id}">${esc(limpiaRef(g.grupo))}${g.tipo?' · '+esc(g.tipo):''}</option>`).join('');
 }
 
 async function addLeadFromPicker(canal){
-  const sel = document.getElementById('lp-grupo');
-  const gid = parseInt(sel.value,10);
-  const g = GM_CACHE.find(x=>x.id===gid);
-  if(!g){ alert('Elige un grupo.'); return; }
   const hoy = new Date().toISOString().slice(0,10);
-  const { error } = await sb.from('grupos_leads').insert({
-    canal, grupo_id:g.id, grupo_nombre:g.grupo, email:g.email,
-    contacto:(g.contacto && !/^#(REF|N\/A)/i.test(g.contacto)) ? g.contacto : null,
-    tipo_grupo:g.tipo, request_date:hoy, status:'Pending',
-    travel_year:new Date().getFullYear()
-  });
+  const anyo = new Date().getFullYear();
+  let payload;
+
+  if(lpModo === 'exist'){
+    const gid = parseInt(document.getElementById('lp-grupo').value,10);
+    const g = GM_CACHE.find(x=>x.id===gid);
+    if(!g){ alert('Elige un grupo de la lista.'); return; }
+    payload = {
+      canal, grupo_id:g.id, grupo_nombre:limpiaRef(g.grupo),
+      email:limpiaRef(g.email)||null, contacto:limpiaRef(g.contacto)||null,
+      tipo_grupo: document.getElementById('lp-tipo-exist').value,
+      request_date:hoy, status:'Pending', travel_year:anyo
+    };
+  } else {
+    const nombre = document.getElementById('lpn-nombre').value.trim();
+    const tipo   = document.getElementById('lpn-tipo').value;
+    if(!nombre){ alert('Ponle un nombre al grupo.'); return; }
+    const email    = document.getElementById('lpn-email').value.trim();
+    const contacto = document.getElementById('lpn-contacto').value.trim();
+    const tel      = document.getElementById('lpn-tel').value.trim();
+
+    let grupoId = null;
+    // Solo va al maestro si NO es cumpleaños ni grupo familiar
+    if(vaAlMaestro(tipo)){
+      const { data:nuevo, error:errG } = await sb.from('grupos_maestro')
+        .insert({grupo:nombre, tipo, email:email||null, tel1:tel||null, contacto:contacto||null})
+        .select('id').single();
+      if(errG) console.error('maestro', errG); else grupoId = nuevo?.id ?? null;
+    }
+    payload = {
+      canal, grupo_id:grupoId, grupo_nombre:nombre,
+      email:email||null, contacto:contacto||null, tipo_grupo:tipo,
+      request_date:hoy, status:'Pending', travel_year:anyo
+    };
+  }
+
+  const { error } = await sb.from('grupos_leads').insert(payload);
   if(error){ alert('No se pudo añadir: '+error.message); return; }
   closeModal();
   await loadGruposData();
+  const selTipo = document.getElementById('gm-tipo'); if(selTipo) delete selTipo.dataset.filled;
   renderLeads(canal);
 }
 
