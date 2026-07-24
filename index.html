@@ -769,15 +769,15 @@
   .lead-table thead th:first-child{z-index:4;}
   .lead-cell{position:relative;}
   .lead-cell.ta-left{text-align:left;}
-  .lc-in{width:100%;box-sizing:border-box;background:transparent!important;
+  .lc-in{width:100%;min-width:100%;box-sizing:border-box;background:transparent!important;
     border:none!important;box-shadow:none!important;border-radius:0!important;
-    color:var(--text);font-size:11.5px;padding:4px 5px;text-align:center;
+    color:var(--text);font-size:12px;padding:5px 6px;text-align:center;
     font-family:inherit;-webkit-appearance:none;appearance:none;}
   .lead-cell.ta-left .lc-in{text-align:left;}
   .lc-in:hover{background:rgba(255,255,255,.045)!important;}
   .lc-in:focus{outline:none;background:rgba(91,140,255,.13)!important;
     box-shadow:inset 0 0 0 1.5px var(--accent)!important;}
-  .lc-ta{resize:vertical;min-height:24px;line-height:1.3;overflow:hidden;}
+  .lc-ta{resize:vertical;min-height:26px;line-height:1.35;white-space:pre-wrap;}
   /* desplegables con color propio */
   .lc-in.lc-status,.lc-in.lc-tipo,.lc-in.lc-metodo{
     font-weight:700;font-size:10.5px;border-radius:20px!important;padding:3px 8px;
@@ -794,18 +794,15 @@
   /* cabecera de grupos de columnas */
   .lead-grp-row th{font-size:9px;letter-spacing:1.2px;font-weight:800;padding:5px 4px!important;
     border-bottom:2px solid var(--line-strong);text-align:center;}
-  .lead-grp-row .lg-info {background:#12283F!important;color:#7FB2FF!important;}
-  .lead-grp-row .lg-fecha{background:#0F2A24!important;color:#5FE0B0!important;}
-  .lead-grp-row .lg-pax  {background:#3A2C12!important;color:#F0AC3F!important;}
-  .lead-grp-row .lg-fact {background:#2A1F3A!important;color:#C9A6F5!important;}
-  .lead-grp-row .lg-obs  {background:#3A1720!important;color:#F2606A!important;}
+  .lead-grp-row th{background:#2C3040!important;color:#FFFFFF!important;font-weight:800!important;}
   .lead-col-row th{top:24px!important;}
   /* separación entre bloques */
   .lead-table th.grp-edge,.lead-table td.grp-edge{border-right:2.5px solid var(--line-strong)!important;}
-  /* que nada se corte */
-  .lead-table{table-layout:fixed;}
-  .lead-table th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .lc-in{min-width:0;}
+  /* la tabla crece a lo ancho: scroll horizontal, sin comprimir columnas */
+  .lead-table{table-layout:auto;width:max-content;min-width:100%;}
+  .lead-table th{white-space:nowrap;padding:6px 8px!important;}
+  .lead-table td{white-space:nowrap;}
+  .lead-table td.lead-cell{padding:2px 4px;}
   .lead-toolbar{gap:7px;}
   .lead-toolbar select{min-width:0;width:auto;padding:6px 9px;font-size:11.5px;}
   .lead-toolbar input{padding:6px 9px;font-size:11.5px;}
@@ -5214,8 +5211,8 @@ function renderLeads(canal){
 
   const colRow = '<tr class="lead-col-row">' + LEAD_COLS.map((c,i)=>{
     const last = LEAD_COLS[i+1] && LEAD_COLS[i+1].g !== c.g;
-    return `<th style="width:${c.w}px;${c.left?'text-align:left;':''}" class="${last?'grp-edge':''}">${c.t}</th>`;
-  }).join('') + '<th style="width:38px;"></th></tr>';
+    return `<th style="min-width:${c.w}px;${c.left?'text-align:left;':''}" class="${last?'grp-edge':''}">${c.t}</th>`;
+  }).join('') + '<th style="min-width:38px;"></th></tr>';
 
   const head = '<thead>' + grpRow + colRow + '</thead>';
 
