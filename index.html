@@ -1149,6 +1149,7 @@
   .day-block.other{opacity:.6;}
   .recap-nav{display:flex;align-items:center;gap:8px;}
   .recap-nav button{background:var(--panel);border:1px solid var(--line-strong);color:var(--text);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;font-weight:700;}
+  .recap-nav button:disabled{opacity:.5;cursor:wait;}
   .recap-nav button:hover{background:#262A35;}
   .recap-nav .today-btn{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);}
   .recap-saved-banner{display:none;background:var(--success-soft);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:700;margin-top:8px;}
@@ -1780,7 +1781,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
               Historial de Recaps
             </button>
-            <div class="recap-nav" style="flex-shrink:0;">
+            <div class="recap-nav" id="recap-nav-btns" style="flex-shrink:0;">
               <button onclick="recapPrevDay()">← Anterior</button>
               <button class="today-btn" onclick="recapGoToday()">Hoy</button>
               <button onclick="recapNextDay()">Siguiente →</button>
@@ -4879,8 +4880,15 @@ let recapDebounceTimer = null;
 function debounceRecapSave(){ if(recapLoading) return; clearTimeout(recapDebounceTimer); recapDebounceTimer = setTimeout(()=>saveRecap(true), 800); }
 
 let recapLoading = false;
+let recapLoadToken = 0;
 
 async function loadRecapData(){
+  // Token de esta llamada: si otra navegación empieza antes de que esta termine,
+  // esta se aborta al volver de cada await para no pisar los datos del día correcto
+  // con una respuesta tardía de un día anterior (esto era lo que borraba el recap
+  // al navegar rápido con Anterior/Siguiente).
+  const myToken = ++recapLoadToken;
+  const myDate = recapDate;
   recapLoading = true;
   // Limpiar todos los campos antes de cargar (evita ver datos del día anterior)
   ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos',
@@ -4894,13 +4902,15 @@ async function loadRecapData(){
   updateBoutiqueTotal();
 
   // Fetch del recap guardado
-  const { data: rec } = await sb.from('recap').select('*').eq('fecha', recapDate).maybeSingle();
+  const { data: rec } = await sb.from('recap').select('*').eq('fecha', myDate).maybeSingle();
+  if(myToken !== recapLoadToken) return; // ya hay una navegación más reciente en curso
   recapData = rec || {};
 
   // LY desde spv_days — mismo DÍA DE LA SEMANA del año pasado (no el mismo número)
-  const ly = lyIsoDow(recapDate);
+  const ly = lyIsoDow(myDate);
   const { data: lyRow } = await sb.from('spv_days').select('visitantes').eq('fecha', ly).single().catch(()=>({data:null}));
-  const { data: todayRow } = await sb.from('spv_days').select('visitantes').eq('fecha', recapDate).single().catch(()=>({data:null}));
+  const { data: todayRow } = await sb.from('spv_days').select('visitantes').eq('fecha', myDate).single().catch(()=>({data:null}));
+  if(myToken !== recapLoadToken) return;
 
   // Info general
   setValue('rc-visitantes', recapData.visitantes ?? todayRow?.visitantes ?? '');
@@ -4918,7 +4928,8 @@ async function loadRecapData(){
   const boutique = recapData.boutique || {};
   let spvEntries = {};
   if(Object.keys(boutique).length === 0){
-    const { data: entries } = await sb.from('spv_entries').select('staff_nombre,importe').eq('fecha', recapDate);
+    const { data: entries } = await sb.from('spv_entries').select('staff_nombre,importe').eq('fecha', myDate);
+    if(myToken !== recapLoadToken) return;
     (entries||[]).forEach(e=>spvEntries[e.staff_nombre]=e.importe);
   }
   RECAP_TIENDA_STAFF.forEach(s=>setValue(`rc-btq-${s}`, boutique[s] ?? spvEntries[s] ?? ''));
@@ -5051,12 +5062,21 @@ async function recapGoDate(iso){
   // Cancelar cualquier autoguardado en cola (evitaría escribir en la fecha nueva)
   clearTimeout(recapDebounceTimer);
   recapDebounceTimer = null;
-  // Guardar el día actual antes de movernos, si hay algo que guardar
-  if(!recapLoading && recapDate && recapDate !== iso){
-    try{ await saveRecap(true); }catch(e){ console.error('[RECAP] guardado previo', e); }
+  // Bloquea los botones de navegación mientras se guarda/carga: evita que un
+  // Anterior/Siguiente rápido solape dos cargas y una respuesta tardía borre
+  // los datos recién mostrados de la fecha correcta.
+  const nav = document.getElementById('recap-nav-btns');
+  if(nav) nav.querySelectorAll('button').forEach(b=>b.disabled = true);
+  try{
+    // Guardar el día actual antes de movernos, si hay algo que guardar
+    if(!recapLoading && recapDate && recapDate !== iso){
+      try{ await saveRecap(true); }catch(e){ console.error('[RECAP] guardado previo', e); }
+    }
+    recapDate = iso;
+    await renderRecap();
+  } finally {
+    if(nav) nav.querySelectorAll('button').forEach(b=>b.disabled = false);
   }
-  recapDate = iso;
-  renderRecap();
 }
 
 // Cambio de fecha manual desde el input
