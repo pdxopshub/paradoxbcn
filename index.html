@@ -4451,17 +4451,18 @@ async function renderRecap(){
   // Cargar datos de Supabase para esta fecha
   await loadRecapData();
 
-  // Configurar event listeners de auto-guardado
-  ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.addEventListener('change', () => { if(!recapLoading) saveRecap(true); });
-  });
-  RECAP_TIENDA_STAFF.forEach(s=>{
-    const el = document.getElementById(`rc-btq-${s}`);
-    if(el) el.addEventListener('change', () => { if(!recapLoading) saveRecap(true); });
-  });
-  document.getElementById('recap-cerrado-por')?.addEventListener('change', () => { if(!recapLoading) saveRecap(true); });
-  document.getElementById('rc-observaciones')?.addEventListener('input', debounceRecapSave);
+  // Listeners de auto-guardado (marcados para no duplicarse al renderizar de nuevo)
+  const bindSave = (el, evt, fn)=>{
+    if(!el || el.dataset.rcBound === evt) return;
+    el.dataset.rcBound = evt;
+    el.addEventListener(evt, fn);
+  };
+  const onChange = () => { if(!recapLoading) saveRecap(true); };
+  ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews']
+    .forEach(id=> bindSave(document.getElementById(id), 'change', onChange));
+  RECAP_TIENDA_STAFF.forEach(s=> bindSave(document.getElementById(`rc-btq-${s}`), 'change', onChange));
+  bindSave(document.getElementById('recap-cerrado-por'), 'change', onChange);
+  bindSave(document.getElementById('rc-observaciones'), 'input', debounceRecapSave);
 
   renderRecapCapsules();
 }
@@ -4495,9 +4496,7 @@ async function loadRecapData(){
   updateBoutiqueTotal();
 
   // Fetch del recap guardado
-  console.log('[RECAP] Cargando fecha:', recapDate);
-  const { data: rec, error: recError } = await sb.from('recap').select('*').eq('fecha', recapDate).maybeSingle();
-  console.log('[RECAP] Resultado:', rec, 'Error:', recError);
+  const { data: rec } = await sb.from('recap').select('*').eq('fecha', recapDate).maybeSingle();
   recapData = rec || {};
 
   // LY desde spv_days — mismo DÍA DE LA SEMANA del año pasado (no el mismo número)
@@ -4592,6 +4591,7 @@ function getRecapPayload(){
 }
 
 async function saveRecap(silent=false){
+  if(recapLoading) return;   // nunca guardar mientras se cargan los campos
   const payload = getRecapPayload();
   const me = currentProfile?.nombre || '';
   if(!silent){
@@ -4603,17 +4603,8 @@ async function saveRecap(silent=false){
     payload.autor = recapData?.autor || me;
     payload.leido_por = recapData?.leido_por || [me];
   }
-  // Comprobar si ya existe una fila para esta fecha
-  console.log('[RECAP] Guardando fecha:', payload.fecha, 'visitantes:', payload.visitantes);
-  const { data: existing, error: existErr } = await sb.from('recap').select('fecha').eq('fecha', payload.fecha).maybeSingle();
-  console.log('[RECAP] ¿Existe?', existing, existErr);
-  let saveResult;
-  if(existing){
-    saveResult = await sb.from('recap').update(payload).eq('fecha', payload.fecha);
-  } else {
-    saveResult = await sb.from('recap').insert(payload);
-  }
-  console.log('[RECAP] Resultado guardado:', saveResult?.error || 'OK');
+  const { error: saveError } = await sb.from('recap').upsert(payload, {onConflict:'fecha'});
+  if(saveError) console.error('[RECAP] Error guardando:', saveError);
   await syncRecapBoutiqueToSpv(payload.fecha, payload.boutique);
   recapData = { ...recapData, ...payload };
   if(!silent){
@@ -4658,7 +4649,17 @@ function recapPrevDay(){ recapGoDate(offsetDate(recapDate,-1)); }
 function recapNextDay(){ recapGoDate(offsetDate(recapDate,+1)); }
 function recapGoToday(){ recapGoDate(todayIso()); }
 function offsetDate(iso, days){ const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
-function recapGoDate(iso){ recapDate=iso; renderRecap(); }
+async function recapGoDate(iso){
+  // Cancelar cualquier autoguardado en cola (evitaría escribir en la fecha nueva)
+  clearTimeout(recapDebounceTimer);
+  recapDebounceTimer = null;
+  // Guardar el día actual antes de movernos, si hay algo que guardar
+  if(!recapLoading && recapDate && recapDate !== iso){
+    try{ await saveRecap(true); }catch(e){ console.error('[RECAP] guardado previo', e); }
+  }
+  recapDate = iso;
+  renderRecap();
+}
 
 // Cambio de fecha manual desde el input
 document.addEventListener('DOMContentLoaded', ()=>{
