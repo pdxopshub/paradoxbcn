@@ -791,6 +791,21 @@
   .tp-pill{display:inline-block;font-size:10px;font-weight:800;padding:2px 9px;
     border-radius:20px;border:1px solid;letter-spacing:.2px;white-space:nowrap;}
   /* barra de filtros de leads */
+  /* cabecera de grupos de columnas */
+  .lead-grp-row th{font-size:9px;letter-spacing:1.2px;font-weight:800;padding:5px 4px!important;
+    border-bottom:2px solid var(--line-strong);text-align:center;}
+  .lead-grp-row .lg-info {background:#12283F!important;color:#7FB2FF!important;}
+  .lead-grp-row .lg-fecha{background:#0F2A24!important;color:#5FE0B0!important;}
+  .lead-grp-row .lg-pax  {background:#3A2C12!important;color:#F0AC3F!important;}
+  .lead-grp-row .lg-fact {background:#2A1F3A!important;color:#C9A6F5!important;}
+  .lead-grp-row .lg-obs  {background:#3A1720!important;color:#F2606A!important;}
+  .lead-col-row th{top:24px!important;}
+  /* separación entre bloques */
+  .lead-table th.grp-edge,.lead-table td.grp-edge{border-right:2.5px solid var(--line-strong)!important;}
+  /* que nada se corte */
+  .lead-table{table-layout:fixed;}
+  .lead-table th{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lc-in{min-width:0;}
   .lead-toolbar{gap:7px;}
   .lead-toolbar select{min-width:0;width:auto;padding:6px 9px;font-size:11.5px;}
   .lead-toolbar input{padding:6px 9px;font-size:11.5px;}
@@ -1427,6 +1442,14 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
           <div class="grid grid-7" id="week-calendar" style="gap:6px;"></div>
         </div>
+
+        <div class="card" style="margin-top:14px;">
+          <div class="flex-between" style="margin-bottom:12px;">
+            <div class="section-title" style="margin:0;">Grupos confirmados <span class="hint">Próximas visitas</span></div>
+            <button class="btn btn-ghost btn-sm" onclick="goView('grupos')">Ver todos →</button>
+          </div>
+          <div id="dash-grupos-cal"></div>
+        </div>
       </div>
 
       <!-- ============ SPV ============ -->
@@ -1956,7 +1979,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div class="gv-pane" id="gv-inbound" style="display:none;">
           <div class="gv-toolbar lead-toolbar">
             <input id="in-search" placeholder="Buscar nombre, email, contacto…" oninput="renderLeads('inbound')" style="width:230px;">
-            <select id="in-status" onchange="renderLeads('inbound')"><option value="">Status</option></select>
+            <select id="in-status" onchange="renderLeads('inbound')"><option value="">Todos</option></select>
             <select id="in-tipo"   onchange="renderLeads('inbound')"><option value="">Tipo</option></select>
             <select id="in-year"   onchange="renderLeads('inbound')"><option value="">Año</option></select>
             <select id="in-month"  onchange="renderLeads('inbound')"><option value="">Mes</option></select>
@@ -1974,7 +1997,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div class="gv-pane" id="gv-outbound" style="display:none;">
           <div class="gv-toolbar lead-toolbar">
             <input id="out-search" placeholder="Buscar nombre, email, contacto…" oninput="renderLeads('outbound')" style="width:230px;">
-            <select id="out-status" onchange="renderLeads('outbound')"><option value="">Status</option></select>
+            <select id="out-status" onchange="renderLeads('outbound')"><option value="">Todos</option></select>
             <select id="out-tipo"   onchange="renderLeads('outbound')"><option value="">Tipo</option></select>
             <select id="out-year"   onchange="renderLeads('outbound')"><option value="">Año</option></select>
             <select id="out-month"  onchange="renderLeads('outbound')"><option value="">Mes</option></select>
@@ -2421,7 +2444,7 @@ function goView(v){
   if(v==='turnos') renderTurnos();
   if(v==='ev') renderEvTimeline();
   if(v==='diego') renderDiego();
-  if(v==='dashboard') refreshDashboard();
+  if(v==='dashboard'){ refreshDashboard(); renderDashGrupos(); }
   if(v==='recap') renderRecap();
   if(v==='resenas') renderResenas();
   if(v==='marketing') renderMarketing();
@@ -2480,6 +2503,7 @@ function initApp(){
   appInitialised = true;
   initNav();
   renderRecap();      // el Recap es la vista inicial: dibujarlo ya
+  renderDashGrupos(); // grupos confirmados en el Resumen
   refreshDashboard(); // carga visitas reales + calendario
   renderResenas('tripadvisor');
   renderPDA();
@@ -4953,6 +4977,11 @@ const TIPO_COLOR = {
   'Empresa':      {bg:'#3A1720', fg:'#F2606A', br:'#5C2430'},
   'Otro':         {bg:'#2C3040', fg:'#9AA0B2', br:'#3E4456'},
 };
+function limpiaRef(v){
+  if(v === null || v === undefined) return '';
+  const s = String(v).trim();
+  return /^#(REF|N\/A|VALUE|NAME|DIV|NULL|NUM)/i.test(s) ? '' : s;
+}
 function tipoPill(t){
   if(!t) return '<span class="tp-pill" style="background:#2C3040;color:#767C8C;border-color:#3E4456;">—</span>';
   const c = TIPO_COLOR[t] || TIPO_COLOR['Otro'];
@@ -4974,29 +5003,36 @@ let gvView = 'maestro';
 const MESES_N = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const ANYOS = (()=>{ const y=new Date().getFullYear(); return Array.from({length:7},(_,i)=>y-1+i); })();
 
+const LEAD_GRUPOS = [
+  {id:'info',  label:'INFO',          cls:'lg-info'},
+  {id:'fecha', label:'FECHAS',        cls:'lg-fecha'},
+  {id:'pax',   label:'PAX',           cls:'lg-pax'},
+  {id:'fact',  label:'FACTURACIÓN',   cls:'lg-fact'},
+  {id:'obs',   label:'OBSERVACIONES', cls:'lg-obs'},
+];
 const LEAD_COLS = [
-  {k:'grupo_nombre',   t:'Grupo',          w:260, type:'text',   left:true},
-  {k:'email',          t:'Email',          w:250, type:'text',   left:true},
-  {k:'request_date',   t:'Request date',   w:130, type:'date'},
-  {k:'status',         t:'Status',         w:130, type:'status'},
-  {k:'contacto',       t:'Contacto',       w:180, type:'text',   left:true},
-  {k:'tipo_grupo',     t:'Tipo grupo',     w:150, type:'tipo'},
-  {k:'travel_date',    t:'Travel date',    w:130, type:'date'},
-  {k:'travel_year',    t:'Year',           w:95,  type:'year'},
-  {k:'travel_month',   t:'Month',          w:120, type:'month'},
-  {k:'hora',           t:'Hora',           w:90,  type:'time'},
-  {k:'pax',            t:'PAX',            w:80,  type:'number'},
-  {k:'total_eur',      t:'Total €',        w:105, type:'number'},
-  {k:'pago1_importe',  t:'1er pago',       w:105, type:'number'},
-  {k:'pago1_fecha',    t:'Fecha 1º',       w:130, type:'date'},
-  {k:'pago1_metodo',   t:'Método 1º',      w:140, type:'metodo'},
-  {k:'pago2_importe',  t:'2º pago',        w:105, type:'number'},
-  {k:'pago2_fecha',    t:'Fecha 2º',       w:130, type:'date'},
-  {k:'pago2_metodo',   t:'Método 2º',      w:140, type:'metodo'},
-  {k:'datos_fiscales', t:'Datos fiscales', w:280, type:'textarea', left:true},
-  {k:'seguimiento',    t:'Seguimiento',    w:260, type:'textarea', left:true},
-  {k:'next_contact',   t:'Next contact',   w:130, type:'date'},
-  {k:'motivo_reject',  t:'Motivo reject',  w:220, type:'textarea', left:true},
+  {g:'info',  k:'grupo_nombre',   t:'Grupo',          w:290, type:'text',   left:true},
+  {g:'info',  k:'email',          t:'Email',          w:270, type:'text',   left:true},
+  {g:'info',  k:'request_date',   t:'Request date',   w:140, type:'date'},
+  {g:'info',  k:'status',         t:'Status',         w:132, type:'status'},
+  {g:'info',  k:'contacto',       t:'Contacto',       w:200, type:'text',   left:true},
+  {g:'info',  k:'tipo_grupo',     t:'Tipo grupo',     w:160, type:'tipo'},
+  {g:'fecha', k:'travel_date',    t:'Travel date',    w:140, type:'date'},
+  {g:'fecha', k:'travel_year',    t:'Year',           w:105, type:'year'},
+  {g:'fecha', k:'travel_month',   t:'Month',          w:130, type:'month'},
+  {g:'fecha', k:'hora',           t:'Hora',           w:100, type:'time'},
+  {g:'pax',   k:'pax',            t:'PAX',            w:100, type:'number'},
+  {g:'fact',  k:'total_eur',      t:'Total €',        w:115, type:'number'},
+  {g:'fact',  k:'pago1_importe',  t:'1er pago',       w:115, type:'number'},
+  {g:'fact',  k:'pago1_fecha',    t:'Fecha 1º',       w:140, type:'date'},
+  {g:'fact',  k:'pago1_metodo',   t:'Método 1º',      w:150, type:'metodo'},
+  {g:'fact',  k:'pago2_importe',  t:'2º pago',        w:115, type:'number'},
+  {g:'fact',  k:'pago2_fecha',    t:'Fecha 2º',       w:140, type:'date'},
+  {g:'fact',  k:'pago2_metodo',   t:'Método 2º',      w:150, type:'metodo'},
+  {g:'fact',  k:'datos_fiscales', t:'Datos fiscales', w:300, type:'textarea', left:true},
+  {g:'obs',   k:'seguimiento',    t:'Seguimiento',    w:280, type:'textarea', left:true},
+  {g:'obs',   k:'next_contact',   t:'Next contact',   w:140, type:'date'},
+  {g:'obs',   k:'motivo_reject',  t:'Motivo reject',  w:240, type:'textarea', left:true},
 ];
 
 async function initGruposV2(){
@@ -5058,15 +5094,15 @@ function renderGruposMaestro(){
   const tbody = document.querySelector('#gm-table tbody');
   tbody.innerHTML = list.length ? list.map(g=>`
     <tr>
-      <td class="gm-name" onclick="openGrupoModal(${g.id})">${esc(g.grupo)}</td>
+      <td class="gm-name" onclick="openGrupoModal(${g.id})">${esc(limpiaRef(g.grupo))}</td>
       <td>${tipoPill(g.tipo)}</td>
-      <td class="gm-mail">${esc(g.email)||''}</td>
+      <td class="gm-mail">${esc(limpiaRef(g.email))}</td>
       <td class="gm-tels">
-        <div>${esc(g.tel1)||''}</div>
-        <div>${esc(g.tel2)||''}</div>
+        <div>${esc(limpiaRef(g.tel1))||'&nbsp;'}</div>
+        <div>${esc(limpiaRef(g.tel2))||'&nbsp;'}</div>
       </td>
-      <td>${esc(g.contacto)||''}</td>
-      <td class="gm-obs" title="${esc(g.comentarios)}">${esc(g.comentarios)||''}</td>
+      <td>${esc(limpiaRef(g.contacto))}</td>
+      <td class="gm-obs" title="${esc(limpiaRef(g.comentarios))}">${esc(limpiaRef(g.comentarios))}</td>
       <td><button class="row-del" onclick="deleteGrupo(${g.id})">✕</button></td>
     </tr>`).join('')
     : '<tr><td colspan="7" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
@@ -5080,7 +5116,7 @@ function openGrupoModal(id){
         <div class="modal-head"><h2>${id?'Editar grupo':'Nuevo grupo'}</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
         <div class="modal-body">
-          <div class="field"><label>Grupo</label><input id="gmf-grupo" value="${esc(g.grupo)||''}"></div>
+          <div class="field"><label>Grupo</label><input id="gmf-grupo" value="${esc(limpiaRef(g.grupo))}"></div>
           <div class="field-row">
             <div class="field"><label>Tipo</label>
               <select id="gmf-tipo">
@@ -5088,14 +5124,14 @@ function openGrupoModal(id){
                 ${TIPOS_GRUPO.map(t=>`<option${t===g.tipo?' selected':''}>${t}</option>`).join('')}
               </select>
             </div>
-            <div class="field"><label>Contacto</label><input id="gmf-contacto" value="${esc(g.contacto)||''}"></div>
+            <div class="field"><label>Contacto</label><input id="gmf-contacto" value="${esc(limpiaRef(g.contacto))}"></div>
           </div>
-          <div class="field"><label>Email</label><input id="gmf-email" value="${esc(g.email)||''}"></div>
+          <div class="field"><label>Email</label><input id="gmf-email" value="${esc(limpiaRef(g.email))}"></div>
           <div class="field-row">
-            <div class="field"><label>Teléfono 1</label><input id="gmf-tel1" value="${esc(g.tel1)||''}"></div>
-            <div class="field"><label>Teléfono 2</label><input id="gmf-tel2" value="${esc(g.tel2)||''}"></div>
+            <div class="field"><label>Teléfono 1</label><input id="gmf-tel1" value="${esc(limpiaRef(g.tel1))}"></div>
+            <div class="field"><label>Teléfono 2</label><input id="gmf-tel2" value="${esc(limpiaRef(g.tel2))}"></div>
           </div>
-          <div class="field"><label>Comentarios</label><textarea id="gmf-com" rows="3">${esc(g.comentarios)||''}</textarea></div>
+          <div class="field"><label>Comentarios</label><textarea id="gmf-com" rows="3">${esc(limpiaRef(g.comentarios))}</textarea></div>
         </div>
         <div class="modal-foot">
           <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
@@ -5170,17 +5206,27 @@ function renderLeads(canal){
   const cnt = document.getElementById(pre+'-count');
   if(cnt) cnt.textContent = `${list.length} leads`;
 
-  const head = '<thead><tr>' + LEAD_COLS.map(c=>
-    `<th style="width:${c.w}px;${c.left?'text-align:left;':''}">${c.t}</th>`).join('') +
-    '<th style="width:38px;"></th></tr></thead>';
+  // fila de grupos (INFO / FECHAS / PAX / FACTURACIÓN / OBSERVACIONES)
+  const grpRow = '<tr class="lead-grp-row">' + LEAD_GRUPOS.map(g=>{
+    const n = LEAD_COLS.filter(c=>c.g===g.id).length;
+    return `<th colspan="${n}" class="${g.cls}">${g.label}</th>`;
+  }).join('') + '<th></th></tr>';
+
+  const colRow = '<tr class="lead-col-row">' + LEAD_COLS.map((c,i)=>{
+    const last = LEAD_COLS[i+1] && LEAD_COLS[i+1].g !== c.g;
+    return `<th style="width:${c.w}px;${c.left?'text-align:left;':''}" class="${last?'grp-edge':''}">${c.t}</th>`;
+  }).join('') + '<th style="width:38px;"></th></tr>';
+
+  const head = '<thead>' + grpRow + colRow + '</thead>';
 
   const body = '<tbody>' + (list.length ? list.map(l=>{
     const notas = l.notas || {};
-    const tds = LEAD_COLS.map(c=>{
+    const tds = LEAD_COLS.map((c,ci)=>{
       const nota = notas[c.k] || '';
       let val = l[c.k] ?? '';
       if(typeof val === 'string' && /^#(REF|N\/A|VALUE|NAME)/i.test(val.trim())) val = '';
-      const cls  = ['lead-cell', c.left?'ta-left':'', nota?'has-note':''].filter(Boolean).join(' ');
+      const edge = LEAD_COLS[ci+1] && LEAD_COLS[ci+1].g !== c.g;
+      const cls  = ['lead-cell', c.left?'ta-left':'', nota?'has-note':'', edge?'grp-edge':''].filter(Boolean).join(' ');
       const tip  = nota ? ` data-note="${esc(nota)}"` : '';
       let inner;
       const dk = `data-id="${l.id}" data-k="${c.k}"`;
@@ -5319,6 +5365,36 @@ async function deleteLead(id){
   await sb.from('grupos_leads').delete().eq('id', id);
   await loadGruposData();
   renderLeads(lead?.canal || 'inbound');
+}
+
+/* Calendario resumido de grupos para el Dashboard */
+async function renderDashGrupos(){
+  const el = document.getElementById('dash-grupos-cal');
+  if(!el) return;
+  if(!GL_CACHE.length){
+    try{
+      const {data} = await sb.from('grupos_leads').select('*');
+      GL_CACHE = data || [];
+    }catch(e){ }
+  }
+  const hoy = new Date().toISOString().slice(0,10);
+  const prox = GL_CACHE
+    .filter(l=> l.status==='Confirmed' && l.travel_date && l.travel_date>=hoy)
+    .sort((a,b)=>a.travel_date.localeCompare(b.travel_date))
+    .slice(0,8);
+
+  el.innerHTML = prox.length ? prox.map(l=>{
+    const d = new Date(l.travel_date+'T12:00:00');
+    const dias = Math.round((d - new Date(hoy+'T12:00:00'))/86400000);
+    const cuando = dias===0 ? 'Hoy' : dias===1 ? 'Mañana' : `En ${dias} días`;
+    return `<div class="gcal-row">
+      <span class="gcal-date">${d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'})}</span>
+      <b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.grupo_nombre)}</b>
+      <span class="pill grey">${esc(l.hora)||'—'}</span>
+      <span class="pill blue">${l.pax||'?'} pax</span>
+      <span class="pill ${dias<=1?'green':'grey'}">${cuando}</span>
+    </div>`;
+  }).join('') : '<div style="color:var(--text-soft);font-size:12.5px;">No hay grupos confirmados próximamente.</div>';
 }
 
 /* ---------------- CALENDARIO ---------------- */
