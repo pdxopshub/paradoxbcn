@@ -780,7 +780,7 @@
   .lc-in:hover{background:rgba(255,255,255,.045)!important;}
   .lc-in:focus{outline:none;background:rgba(91,140,255,.13)!important;
     box-shadow:inset 0 0 0 1.5px var(--accent)!important;}
-  .lc-ta{resize:vertical;min-height:26px;line-height:1.35;white-space:pre-wrap;}
+  .lc-ta{resize:none;min-height:26px;line-height:1.35;white-space:pre-wrap;overflow:hidden;}
   /* desplegables con color propio */
   .lc-in.lc-status,.lc-in.lc-tipo,.lc-in.lc-metodo{
     font-weight:700;font-size:10.5px;border-radius:20px!important;padding:3px 8px;
@@ -2080,7 +2080,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <input   id="cum-to"    type="date" onchange="renderLeads('cumples')" style="width:132px;">
             <button class="btn btn-ghost btn-sm" onclick="clearLeadFilters('cumples')">Limpiar</button>
             <span class="gv-count" id="cum-count"></span>
-            <button class="btn btn-primary btn-sm" onclick="openLeadPicker('cumples')">+ Añadir cumpleaños</button>
+            <button class="btn btn-primary btn-sm" onclick="openCumpleForm()">+ Añadir cumpleaños</button>
           </div>
           <div class="gv-tablebox lead-box"><table id="cum-table" class="gv-table lead-table no-filter"></table></div>
         </div>
@@ -5203,12 +5203,12 @@ const LEAD_COLS = [
   {g:'fecha', k:'hora',           t:'Hora',           w:80,  type:'hora'},
   {g:'pax',   k:'pax',            t:'PAX',            w:52,  type:'number'},
   {g:'fact',  k:'total_eur',      t:'Total €',        w:250, type:'desglose'},
-  {g:'fact',  k:'pago1_importe',  t:'1er pago',       w:74,  type:'number'},
-  {g:'fact',  k:'pago1_fecha',    t:'Fecha 1º',       w:128, type:'date'},
-  {g:'fact',  k:'pago1_metodo',   t:'Método 1º',      w:132, type:'metodo'},
-  {g:'fact',  k:'pago2_importe',  t:'2º pago',        w:74,  type:'number'},
-  {g:'fact',  k:'pago2_fecha',    t:'Fecha 2º',       w:128, type:'date'},
-  {g:'fact',  k:'pago2_metodo',   t:'Método 2º',      w:132, type:'metodo'},
+  {g:'fact',  k:'pago1_importe',  t:'PRIMER PAGO',        w:110, type:'number'},
+  {g:'fact',  k:'pago1_fecha',    t:'FECHA PRIMER PAGO',  w:150, type:'date'},
+  {g:'fact',  k:'pago1_metodo',   t:'MÉTODO PRIMER PAGO', w:150, type:'metodo'},
+  {g:'fact',  k:'pago2_importe',  t:'SEGUNDO PAGO',       w:110, type:'number'},
+  {g:'fact',  k:'pago2_fecha',    t:'FECHA SEGUNDO PAGO', w:150, type:'date'},
+  {g:'fact',  k:'pago2_metodo',   t:'MÉTODO SEGUNDO PAGO',w:150, type:'metodo'},
   {g:'fact',  k:'datos_fiscales', t:'Datos fiscales', w:230, type:'textarea', left:true},
   {g:'obs',   k:'seguimiento',    t:'Seguimiento',    w:230, type:'textarea', left:true},
   {g:'obs',   k:'next_contact',   t:'Next contact',   w:128, type:'date'},
@@ -5398,7 +5398,7 @@ function renderLeads(canal){
 
   const colRow = '<tr class="lead-col-row">' + LEAD_COLS.map((c,i)=>{
     const last = LEAD_COLS[i+1] && LEAD_COLS[i+1].g !== c.g;
-    return `<th style="min-width:${c.w}px;${c.left?'text-align:left;':''}" class="${last?'grp-edge':''}">${c.t}</th>`;
+    return `<th style="min-width:${c.w}px;text-align:${c.left?'left':'center'};" class="${last?'grp-edge':''}">${c.t}</th>`;
   }).join('') + '<th style="min-width:38px;"></th></tr>';
 
   const head = '<thead>' + grpRow + colRow + '</thead>';
@@ -5481,6 +5481,10 @@ function renderLeads(canal){
   });
   table.querySelectorAll('.dsg-in').forEach(el=>{
     el.addEventListener('change', saveDesglose);
+  });
+  table.querySelectorAll('.lc-ta').forEach(el=>{
+    autoGrowTA(el);
+    el.addEventListener('input', ()=>autoGrowTA(el));
   });
 }
 
@@ -5705,6 +5709,7 @@ async function addLeadFromPicker(canal){
     payload = {
       canal, grupo_id:g.id, grupo_nombre:limpiaRef(g.grupo),
       email:limpiaRef(g.email)||null, contacto:limpiaRef(g.contacto)||null,
+      telefono:limpiaRef(g.tel1)||null,
       tipo_grupo: document.getElementById('lp-tipo-exist').value,
       request_date:hoy, status:'Pending', travel_year:anyo
     };
@@ -5726,7 +5731,7 @@ async function addLeadFromPicker(canal){
     }
     payload = {
       canal, grupo_id:grupoId, grupo_nombre:nombre,
-      email:email||null, contacto:contacto||null, tipo_grupo:tipo,
+      email:email||null, contacto:contacto||null, telefono:tel||null, tipo_grupo:tipo,
       request_date:hoy, status:'Pending', travel_year:anyo
     };
   }
@@ -5737,6 +5742,76 @@ async function addLeadFromPicker(canal){
   await loadGruposData();
   const selTipo = document.getElementById('gm-tipo'); if(selTipo) delete selTipo.dataset.filled;
   renderLeads(canal);
+}
+
+/* ---------------- CUMPLEAÑOS: alta dedicada ---------------- */
+/* Los cumpleaños nunca se vinculan al maestro de Grupos: siempre nacen
+   como lead nuevo (grupo_id null) con su propio formulario. */
+function openCumpleForm(){
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
+      <div class="modal" style="max-width:520px;">
+        <div class="modal-head"><h2>Añadir cumpleaños</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Nombre del niño</label>
+            <input id="cf-nino" placeholder="Nombre del niño/a">
+          </div>
+          <div class="field"><label>Nombre del padre/madre encargado</label>
+            <input id="cf-padre" placeholder="Nombre del adulto responsable">
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Nº niños invitados</label><input id="cf-ninos" type="number" min="0" step="1" value="0"></div>
+            <div class="field"><label>Nº padres invitados</label><input id="cf-adultos" type="number" min="0" step="1" value="0"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Email</label><input id="cf-email" type="email"></div>
+            <div class="field"><label>Teléfono</label><input id="cf-tel"></div>
+          </div>
+          <div class="field"><label>Tipo de cumpleaños</label>
+            <select id="cf-tipo">${TIPOS_CUMPLE.map(t=>`<option>${esc(t)}</option>`).join('')}</select>
+          </div>
+          <div class="note-banner" style="margin-top:4px;display:flex;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+            <div>Los cumpleaños no se vinculan a la base de Grupos: esto siempre crea un lead nuevo.</div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveCumpleForm()">Añadir</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>document.getElementById('cf-nino')?.focus(), 60);
+}
+
+async function saveCumpleForm(){
+  const nino = document.getElementById('cf-nino').value.trim();
+  if(!nino){ alert('Ponle el nombre del niño.'); return; }
+  const padre   = document.getElementById('cf-padre').value.trim();
+  const ninos   = parseInt(document.getElementById('cf-ninos').value,10)   || 0;
+  const adultos = parseInt(document.getElementById('cf-adultos').value,10) || 0;
+  const email   = document.getElementById('cf-email').value.trim();
+  const tel     = document.getElementById('cf-tel').value.trim();
+  const tipo    = document.getElementById('cf-tipo').value;
+
+  const hoy  = new Date().toISOString().slice(0,10);
+  const anyo = new Date().getFullYear();
+  const desglose = {ninos, adultos};
+  const total = calcTotalLead({tipo_grupo:tipo, desglose});
+
+  const payload = {
+    canal:'cumples', grupo_id:null, grupo_nombre:nino,
+    email:email||null, contacto:padre||null, telefono:tel||null,
+    tipo_grupo:tipo, desglose, total_eur:total, pax:(ninos+adultos)||null,
+    request_date:hoy, status:'Pending', travel_year:anyo
+  };
+  const { error } = await sb.from('grupos_leads').insert(payload);
+  if(error){ alert('No se pudo añadir: '+error.message); return; }
+  closeModal();
+  await loadGruposData();
+  const selTipo = document.getElementById('cum-tipo'); if(selTipo) delete selTipo.dataset.filled;
+  renderLeads('cumples');
 }
 
 async function deleteLead(id){
@@ -5843,8 +5918,11 @@ function renderGruposCalendar(){
     const cls = ['gcal-day', iso===hoy?'today':'', items.length?'has':''].filter(Boolean).join(' ');
     html += `<div class="${cls}">
       <div class="gcal-num">${d}</div>
-      ${items.slice(0,3).map(l=>`<div class="gcal-item" title="${esc(l.grupo_nombre)} · ${l.pax||'?'} pax · ${esc(l.hora)||'sin hora'}">
-        ${esc(l.hora)||''} ${esc(l.grupo_nombre)}</div>`).join('')}
+      ${items.slice(0,3).map(l=>{
+        const cc = TIPO_COLOR[l.tipo_grupo] || TIPO_COLOR['Otro'];
+        return `<div class="gcal-item" style="border-left:3px solid ${cc.fg};" title="${esc(l.tipo_grupo)||'Sin tipo'} · ${esc(l.grupo_nombre)} · ${l.pax||'?'} pax · ${esc(l.hora)||'sin hora'}">
+        ${esc(l.hora)||''} ${esc(l.grupo_nombre)}</div>`;
+      }).join('')}
       ${items.length>3?`<div class="gcal-more">+${items.length-3} más</div>`:''}
     </div>`;
   }
@@ -5859,6 +5937,7 @@ function renderGruposCalendar(){
     return `<div class="gcal-row">
       <span class="gcal-date">${d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'})}</span>
       <b style="flex:1;min-width:0;">${esc(l.grupo_nombre)}</b>
+      ${tipoPill(l.tipo_grupo)}
       <span class="pill grey">${esc(l.hora)||'—'}</span>
       <span class="pill blue">${l.pax||'?'} pax</span>
       <span class="pill ${l.canal==='inbound'?'green':'violet'}">${l.canal}</span>
@@ -6457,6 +6536,7 @@ const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
 const esc = (s) => (s||'').toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function autoGrowTA(el){ el.style.height='auto'; el.style.height = el.scrollHeight+'px'; }
 
 function iconSvg(name){
   const icons = {
