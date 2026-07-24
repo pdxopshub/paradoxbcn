@@ -880,10 +880,8 @@
     max-width:240px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.6);text-align:left;
     pointer-events:none;margin-bottom:4px;}
   /* estado de la fila */
-  .lead-row.st-ok  td:first-child{border-left:3px solid var(--ok);}
-  .lead-row.st-bad td:first-child{border-left:3px solid var(--danger);}
-  .lead-row.st-wait td:first-child{border-left:3px solid var(--warning);}
-  .lead-row.st-off td:first-child{border-left:3px solid var(--line-strong);}
+  /* el nombre del grupo (columna fija) nunca se tiñe del color de estado */
+  .lead-row td:first-child{border-left:3px solid transparent;}
   /* calendario de grupos */
   .gcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
   .gcal-dow{font-size:10px;font-weight:800;text-align:center;color:var(--text-dim);
@@ -1919,9 +1917,19 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <div class="section-title" style="margin:0;">Registro de influencers</div>
               <button class="btn btn-primary btn-sm" onclick="openMktInfluencer()">+ Nuevo influencer</button>
             </div>
-            <div class="table-wrap" style="max-width:920px;">
+            <div class="table-wrap">
               <table id="mk-influencers-table">
-                <thead><tr><th>Fecha</th><th>Influencer</th><th>Red</th><th>Seguidores</th><th>Acuerdo</th><th>Estado</th><th></th></tr></thead>
+                <thead><tr>
+                  <th style="text-align:center;">Fecha</th>
+                  <th style="text-align:center;">Hora</th>
+                  <th style="text-align:center;">Nombre del Creator</th>
+                  <th style="text-align:center;">Nº Personas</th>
+                  <th style="text-align:center;">Campaña/s</th>
+                  <th style="text-align:center;">Hora Entrada</th>
+                  <th style="text-align:center;">Staff que Registra</th>
+                  <th style="text-align:center;">Observaciones</th>
+                  <th></th>
+                </tr></thead>
                 <tbody></tbody>
               </table>
             </div>
@@ -3037,7 +3045,7 @@ function openSpvComisiones(){
       <td style="text-align:left;"><b>${spvNombreCorto(s)}</b></td>
       <td class="mono">${d.qualDays[s]}</td>
       <td class="mono">${d.qualTotals[s].toFixed(2)}€</td>
-      <td class="mono" style="color:var(--ok);font-weight:800;">${(d.qualTotals[s]*d.rate/100).toFixed(2)}€</td>
+      <td class="mono" style="color:var(--ok);font-weight:800;">${(d.qualTotals[s]/1.21*d.rate/100).toFixed(2)}€</td>
     </tr>`).join('')
     || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado al umbral de comisión.</td></tr>';
 
@@ -3050,10 +3058,11 @@ function openSpvComisiones(){
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
             <div class="spv-kpi"><span class="k-l">Días con comisión</span><span class="k-v">${d.dias}</span></div>
             <div class="spv-kpi"><span class="k-l">Rev. bruto</span><span class="k-v">${d.qualRevBruto.toFixed(2)}€</span></div>
+            <div class="spv-kpi"><span class="k-l">Rev. neto (−21%)</span><span class="k-v">${d.qualRevNeto.toFixed(2)}€</span></div>
             <div class="spv-kpi"><span class="k-l">% aplicado</span><span class="k-v">${d.rate}%</span></div>
           </div>
           <div class="table-wrap">
-            <table><thead><tr><th>Persona</th><th>Días</th><th>Generado</th><th>Comisión</th></tr></thead>
+            <table><thead><tr><th>Persona</th><th>Días</th><th>Generado (bruto)</th><th>Comisión (s/neto)</th></tr></thead>
             <tbody>${filas}</tbody></table>
           </div>
           ${puedeVerPaula ? `
@@ -3102,13 +3111,14 @@ function computeSpvSummary(data){
       <td style="text-align:left;"><b>${s}</b></td>
       <td class="mono">${qualDays[s]} día${qualDays[s]!==1?'s':''}</td>
       <td class="mono">${qualTotals[s].toFixed(2)}€</td>
-      <td class="mono" style="color:var(--success);font-weight:700;">${(qualTotals[s]*rate/100).toFixed(2)}€</td>
+      <td class="mono" style="color:var(--success);font-weight:700;">${(qualTotals[s]/1.21*rate/100).toFixed(2)}€</td>
     </tr>`).join('')
     || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado todavía al umbral de comisión (SPV Neto ≥ 1€).</td></tr>';
 
-  // comisión de tienda (Paula): 2,5% del rev. bruto neto de los días con comisión
+  // comisión de tienda (Paula): 2,5% del NETO (sin el 21%) de los días con comisión
   const qualRevBruto = qualifyingDays.reduce((a,r)=>a+rowRevBruto(r),0);
-  const paulaCommission = qualRevBruto * rate/100;
+  const qualRevNeto = qualRevBruto / 1.21;
+  const paulaCommission = qualRevNeto * rate/100;
   document.getElementById('spv-commission-days').textContent = qualifyingDays.length;
   document.getElementById('spv-commission-revenue').textContent = qualRevBruto.toFixed(2)+'€';
   document.getElementById('spv-paula-commission').textContent = paulaCommission.toFixed(2)+'€';
@@ -3117,7 +3127,7 @@ function computeSpvSummary(data){
 
   // guardado para la ventana de comisiones
   spvComisionesMes = {
-    rate, qualTotals, qualDays, qualRevBruto, paulaCommission,
+    rate, qualTotals, qualDays, qualRevBruto, qualRevNeto, paulaCommission,
     dias: qualifyingDays.length
   };
 
@@ -3157,8 +3167,8 @@ async function renderCommissionHistory(){
         </div>
       </div>
       ${paulaComm>0?`<div class="note-banner" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div><b>Comisión tienda Paula:</b> ${paulaComm.toFixed(2)}€ (2,5% del Rev. Bruto neto)</div></div>`:''}
-      <div class="table-wrap"><table><thead><tr><th>Persona</th><th>Total generado</th><th>Comisión</th></tr></thead>
-      <tbody>${staffEntries.map(([s,v])=>`<tr><td>${s}</td><td class="mono">${v.toFixed(2)}€</td><td class="mono" style="color:var(--success);font-weight:700;">${(v*entry.rate/100).toFixed(2)}€</td></tr>`).join('')}</tbody></table></div>
+      <div class="table-wrap"><table><thead><tr><th>Persona</th><th>Total generado (bruto)</th><th>Comisión (s/neto)</th></tr></thead>
+      <tbody>${staffEntries.map(([s,v])=>`<tr><td>${s}</td><td class="mono">${v.toFixed(2)}€</td><td class="mono" style="color:var(--success);font-weight:700;">${(v/1.21*entry.rate/100).toFixed(2)}€</td></tr>`).join('')}</tbody></table></div>
     </div>`;
   }).join('');
 }
@@ -5979,12 +5989,16 @@ const MKT_ESTADOS = {
   planificada:{label:'Planificada',cls:'st-wait'},
   finalizada: {label:'Finalizada', cls:'st-off'},
 };
-const MKT_INF_ESTADOS = {
-  contactado:{label:'Contactado', cls:'st-wait'},
-  confirmado:{label:'Confirmado', cls:'st-ok'},
-  visito:    {label:'Visitó',     cls:'st-ok'},
-  descartado:{label:'Descartado', cls:'st-off'},
-};
+/* Campañas activas para poblar el multi-select de "Campaña/s" en Influencers */
+function campanasActivasOpts(seleccionadas){
+  const sel = seleccionadas || [];
+  if(!mktCampanas.length) return '<div class="hint">No hay campañas creadas todavía.</div>';
+  return mktCampanas.map(c=>`
+    <label style="display:flex;align-items:center;gap:6px;font-weight:400;padding:3px 0;">
+      <input type="checkbox" class="mki-camp-chk" value="${esc(c.nombre)}" ${sel.includes(c.nombre)?'checked':''}>
+      ${esc(c.nombre)}
+    </label>`).join('');
+}
 
 async function renderMarketing(){
   if(!mktTabInit){
@@ -6091,18 +6105,20 @@ function renderMktInfluencers(){
   const tbody = document.querySelector('#mk-influencers-table tbody');
   if(!tbody) return;
   if(!mktInfluencers.length){
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-soft);">Sin influencers registrados todavía.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-soft);">Sin creators registrados todavía.</td></tr>';
     return;
   }
   tbody.innerHTML = mktInfluencers.map(f=>{
-    const est = MKT_INF_ESTADOS[f.estado] || MKT_INF_ESTADOS.contactado;
+    const camp = (f.campanas||[]).join(', ');
     return `<tr>
       <td>${f.fecha||'—'}</td>
-      <td style="text-align:left;"><b>${esc(f.nombre||'')}</b>${f.handle?`<br><small style="color:var(--text-dim);">${esc(f.handle)}</small>`:''}</td>
-      <td>${esc(f.red||'—')}</td>
-      <td class="mono">${f.seguidores?Number(f.seguidores).toLocaleString('es-ES'):'—'}</td>
-      <td style="text-align:left;">${esc(f.acuerdo||'—')}</td>
-      <td><span class="st ${est.cls}">${est.label}</span></td>
+      <td>${esc(f.hora)||'—'}</td>
+      <td style="text-align:left;"><b>${esc(f.nombre_creator||'')}</b></td>
+      <td class="mono">${f.num_personas ?? '—'}</td>
+      <td style="text-align:left;">${esc(camp)||'—'}</td>
+      <td>${esc(f.hora_entrada)||'—'}</td>
+      <td>${esc(f.staff_registra)||'—'}</td>
+      <td style="text-align:left;">${esc(f.observaciones)||'—'}</td>
       <td class="row-tools">
         <button class="btn btn-ghost btn-sm" onclick="openMktInfluencer(${f.id})">✎</button>
         <button class="row-del" onclick="deleteMktInfluencer(${f.id})">✕</button>
@@ -6110,24 +6126,36 @@ function renderMktInfluencers(){
     </tr>`;
   }).join('');
 }
-function openMktInfluencer(id){
+async function openMktInfluencer(id){
   const f = id ? mktInfluencers.find(x=>x.id===id) : {};
-  const estOpts = Object.entries(MKT_INF_ESTADOS).map(([k,v])=>`<option value="${k}" ${f.estado===k?'selected':''}>${v.label}</option>`).join('');
+  const staffList = (await fetchStaff()).filter(s=>s.activo !== false);
   document.getElementById('modal-root').innerHTML = `
     <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal">
-        <div class="modal-head"><h2>${id?'Editar influencer':'Nuevo influencer'}</h2>
+        <div class="modal-head"><h2>${id?'Editar creator':'Nuevo creator'}</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
         <div class="modal-body">
-          <div class="field"><label>Nombre</label><input id="mki-nombre" value="${esc(f.nombre||'')}"></div>
-          <div class="field"><label>Usuario / handle</label><input id="mki-handle" placeholder="@usuario" value="${esc(f.handle||'')}"></div>
+          <div class="field"><label>Nombre del Creator</label><input id="mki-nombre" value="${esc(f.nombre_creator||'')}"></div>
           <div class="field-row">
-            <div class="field"><label>Red social</label><input id="mki-red" placeholder="Instagram, TikTok…" value="${esc(f.red||'')}"></div>
-            <div class="field"><label>Seguidores</label><input type="number" id="mki-seguidores" value="${f.seguidores||''}"></div>
+            <div class="field"><label>Fecha</label><input type="date" id="mki-fecha" value="${f.fecha||''}"></div>
+            <div class="field"><label>Hora</label><input id="mki-hora" placeholder="18:00" value="${esc(f.hora||'')}"></div>
           </div>
-          <div class="field"><label>Fecha de visita</label><input type="date" id="mki-fecha" value="${f.fecha||''}"></div>
-          <div class="field"><label>Acuerdo</label><input id="mki-acuerdo" placeholder="2 entradas a cambio de reel…" value="${esc(f.acuerdo||'')}"></div>
-          <div class="field"><label>Estado</label><select id="mki-estado">${estOpts}</select></div>
+          <div class="field-row">
+            <div class="field"><label>Nº Personas</label><input type="number" min="1" id="mki-personas" value="${f.num_personas ?? 1}"></div>
+            <div class="field"><label>Hora Entrada</label><input id="mki-hora-entrada" placeholder="18:15" value="${esc(f.hora_entrada||'')}"></div>
+          </div>
+          <div class="field"><label>Campaña/s</label>
+            <div style="max-height:120px;overflow:auto;border:1px solid var(--line-strong);border-radius:7px;padding:6px 10px;">
+              ${campanasActivasOpts(f.campanas)}
+            </div>
+          </div>
+          <div class="field"><label>Staff que Registra</label>
+            <select id="mki-staff">
+              <option value="">— Selecciona —</option>
+              ${staffList.map(s=>`<option ${f.staff_registra===s.nombre?'selected':''}>${esc(s.nombre)}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field"><label>Observaciones</label><textarea id="mki-obs" rows="3">${esc(f.observaciones||'')}</textarea></div>
         </div>
         <div class="modal-foot">
           <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
@@ -6137,16 +6165,18 @@ function openMktInfluencer(id){
     </div>`;
 }
 async function saveMktInfluencer(id){
+  const campanas = Array.from(document.querySelectorAll('.mki-camp-chk:checked')).map(el=>el.value);
   const payload = {
-    nombre: document.getElementById('mki-nombre').value.trim(),
-    handle: document.getElementById('mki-handle').value.trim(),
-    red: document.getElementById('mki-red').value.trim(),
-    seguidores: parseInt(document.getElementById('mki-seguidores').value)||null,
+    nombre_creator: document.getElementById('mki-nombre').value.trim(),
     fecha: document.getElementById('mki-fecha').value || null,
-    acuerdo: document.getElementById('mki-acuerdo').value.trim(),
-    estado: document.getElementById('mki-estado').value,
+    hora: document.getElementById('mki-hora').value.trim() || null,
+    num_personas: parseInt(document.getElementById('mki-personas').value,10) || null,
+    hora_entrada: document.getElementById('mki-hora-entrada').value.trim() || null,
+    campanas,
+    staff_registra: document.getElementById('mki-staff').value || null,
+    observaciones: document.getElementById('mki-obs').value.trim() || null,
   };
-  if(!payload.nombre){ alert('Ponle un nombre.'); return; }
+  if(!payload.nombre_creator){ alert('Ponle el nombre del creator.'); return; }
   if(id) await sb.from('mkt_influencers').update(payload).eq('id', id);
   else await sb.from('mkt_influencers').insert(payload);
   closeModal();
