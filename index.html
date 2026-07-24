@@ -786,7 +786,19 @@
   .lc-status.st-bad {background:var(--bad-bg)!important;color:var(--bad)!important;}
   .lc-status.st-wait{background:var(--wait-bg)!important;color:var(--wait)!important;}
   .lc-status.st-off {background:var(--panel)!important;color:var(--text-soft)!important;}
-  .lc-in option{background:#20242E;color:#EDEEF3;font-weight:600;}
+  .lc-in option{background:#20242E!important;color:#EDEEF3!important;font-weight:600;padding:6px;}
+  .lc-in optgroup{background:#20242E;color:#8D91A3;}
+  /* icono de estado junto al grupo */
+  .grupo-cell{display:flex;align-items:center;gap:6px;min-width:0;}
+  .grupo-cell .lc-in{flex:1;min-width:0;}
+  .st-ico{flex-shrink:0;width:16px;height:16px;border-radius:50%;display:inline-flex;
+    align-items:center;justify-content:center;font-size:10px;font-weight:900;line-height:1;}
+  .st-ico.ok  {background:var(--ok-bg);color:var(--ok);}
+  .st-ico.wait{background:var(--wait-bg);color:var(--wait);}
+  .st-ico.bad {background:var(--bad-bg);color:var(--bad);}
+  /* campos de fecha y hora en oscuro */
+  .lc-in[type=date]{color-scheme:dark;}
+  .lead-table select.lc-in{color-scheme:dark;}
   /* pastilla de tipo en el maestro */
   .tp-pill{display:inline-block;font-size:10px;font-weight:800;padding:2px 9px;
     border-radius:20px;border:1px solid;letter-spacing:.2px;white-space:nowrap;}
@@ -5007,29 +5019,39 @@ const LEAD_GRUPOS = [
   {id:'fact',  label:'FACTURACIÓN',   cls:'lg-fact'},
   {id:'obs',   label:'OBSERVACIONES', cls:'lg-obs'},
 ];
+const HORAS_OPTS = (()=>{
+  const out = [''];
+  for(let h=10; h<=20; h++)
+    for(const m of ['00','15','30','45']){
+      if(h===20 && m!=='00') continue;
+      out.push(`${String(h).padStart(2,'0')}:${m}`);
+    }
+  return out;
+})();
+
 const LEAD_COLS = [
-  {g:'info',  k:'grupo_nombre',   t:'Grupo',          w:290, type:'text',   left:true},
-  {g:'info',  k:'email',          t:'Email',          w:270, type:'text',   left:true},
-  {g:'info',  k:'request_date',   t:'Request date',   w:140, type:'date'},
-  {g:'info',  k:'status',         t:'Status',         w:132, type:'status'},
-  {g:'info',  k:'contacto',       t:'Contacto',       w:200, type:'text',   left:true},
-  {g:'info',  k:'tipo_grupo',     t:'Tipo grupo',     w:160, type:'tipo'},
-  {g:'fecha', k:'travel_date',    t:'Travel date',    w:140, type:'date'},
-  {g:'fecha', k:'travel_year',    t:'Year',           w:105, type:'year'},
-  {g:'fecha', k:'travel_month',   t:'Month',          w:130, type:'month'},
-  {g:'fecha', k:'hora',           t:'Hora',           w:100, type:'time'},
-  {g:'pax',   k:'pax',            t:'PAX',            w:100, type:'number'},
-  {g:'fact',  k:'total_eur',      t:'Total €',        w:115, type:'number'},
-  {g:'fact',  k:'pago1_importe',  t:'1er pago',       w:115, type:'number'},
-  {g:'fact',  k:'pago1_fecha',    t:'Fecha 1º',       w:140, type:'date'},
-  {g:'fact',  k:'pago1_metodo',   t:'Método 1º',      w:150, type:'metodo'},
-  {g:'fact',  k:'pago2_importe',  t:'2º pago',        w:115, type:'number'},
-  {g:'fact',  k:'pago2_fecha',    t:'Fecha 2º',       w:140, type:'date'},
-  {g:'fact',  k:'pago2_metodo',   t:'Método 2º',      w:150, type:'metodo'},
-  {g:'fact',  k:'datos_fiscales', t:'Datos fiscales', w:300, type:'textarea', left:true},
-  {g:'obs',   k:'seguimiento',    t:'Seguimiento',    w:280, type:'textarea', left:true},
-  {g:'obs',   k:'next_contact',   t:'Next contact',   w:140, type:'date'},
-  {g:'obs',   k:'motivo_reject',  t:'Motivo reject',  w:240, type:'textarea', left:true},
+  {g:'info',  k:'grupo_nombre',   t:'Grupo',          w:210, type:'text',   left:true},
+  {g:'info',  k:'email',          t:'Email',          w:190, type:'text',   left:true},
+  {g:'info',  k:'request_date',   t:'Request',        w:128, type:'date'},
+  {g:'info',  k:'status',         t:'Status',         w:108, type:'status'},
+  {g:'info',  k:'contacto',       t:'Contacto',       w:150, type:'text',   left:true},
+  {g:'info',  k:'tipo_grupo',     t:'Tipo grupo',     w:132, type:'tipo'},
+  {g:'fecha', k:'travel_date',    t:'Travel date',    w:128, type:'date'},
+  {g:'fecha', k:'travel_year',    t:'Year',           w:72,  type:'year'},
+  {g:'fecha', k:'travel_month',   t:'Month',          w:96,  type:'month'},
+  {g:'fecha', k:'hora',           t:'Hora',           w:80,  type:'hora'},
+  {g:'pax',   k:'pax',            t:'PAX',            w:58,  type:'number'},
+  {g:'fact',  k:'total_eur',      t:'Total €',        w:74,  type:'number'},
+  {g:'fact',  k:'pago1_importe',  t:'1er pago',       w:74,  type:'number'},
+  {g:'fact',  k:'pago1_fecha',    t:'Fecha 1º',       w:128, type:'date'},
+  {g:'fact',  k:'pago1_metodo',   t:'Método 1º',      w:132, type:'metodo'},
+  {g:'fact',  k:'pago2_importe',  t:'2º pago',        w:74,  type:'number'},
+  {g:'fact',  k:'pago2_fecha',    t:'Fecha 2º',       w:128, type:'date'},
+  {g:'fact',  k:'pago2_metodo',   t:'Método 2º',      w:132, type:'metodo'},
+  {g:'fact',  k:'datos_fiscales', t:'Datos fiscales', w:230, type:'textarea', left:true},
+  {g:'obs',   k:'seguimiento',    t:'Seguimiento',    w:230, type:'textarea', left:true},
+  {g:'obs',   k:'next_contact',   t:'Next contact',   w:128, type:'date'},
+  {g:'obs',   k:'motivo_reject',  t:'Motivo reject',  w:190, type:'textarea', left:true},
 ];
 
 async function initGruposV2(){
@@ -5250,8 +5272,16 @@ function renderLeads(canal){
         inner = `<select class="lc-in" ${dk}>
           <option value=""></option>
           ${MESES_N.slice(1).map((mn,i)=>`<option value="${i+1}"${String(i+1)===String(val)?' selected':''}>${mn}</option>`).join('')}</select>`;
+      } else if(c.type==='hora'){
+        inner = `<select class="lc-in" ${dk}>
+          ${HORAS_OPTS.map(h=>`<option value="${h}"${h===val?' selected':''}>${h}</option>`).join('')}</select>`;
       } else if(c.type==='textarea'){
         inner = `<textarea class="lc-in lc-ta" ${dk} rows="1">${esc(val)}</textarea>`;
+      } else if(c.k==='grupo_nombre'){
+        const ico = {Confirmed:'<span class="st-ico ok">✓</span>',
+                     Pending:'<span class="st-ico wait">◕</span>',
+                     Rejected:'<span class="st-ico bad">✕</span>'}[l.status] || '';
+        inner = `<div class="grupo-cell">${ico}<input class="lc-in" type="text" ${dk} value="${esc(val)}"></div>`;
       } else {
         inner = `<input class="lc-in" type="${c.type}" ${dk} value="${esc(val)}">`;
       }
