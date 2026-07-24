@@ -913,6 +913,9 @@
     border-bottom:1px solid var(--line);font-size:12.5px;}
   .gcal-row:last-child{border-bottom:none;}
   .gcal-date{font-weight:800;color:var(--accent);min-width:96px;font-size:11.5px;text-transform:capitalize;}
+  /* ── Resumen: saludo integrado en la topbar, pequeño y sobrio ── */
+  .topbar-greeting{font-size:11.5px;font-weight:600;color:var(--text-dim);
+    flex:1;text-align:center;padding:0 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   /* ── LOOMIS ──────────────────────────────────────────────── */
   .lq-topbar{font-size:11px;font-style:italic;color:var(--text-soft);
     flex:1;text-align:center;padding:0 14px;opacity:0;transition:opacity .4s ease;
@@ -1498,6 +1501,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div class="topbar-title" id="page-title">Resumen</div>
         <div class="topbar-sub" id="today-date"></div>
       </div>
+      <div id="dash-greeting-topbar" class="topbar-greeting">Buenos días 👋 · Esto es lo que está pasando hoy en el museo</div>
       <div id="loomis-quote-topbar" class="lq-topbar" style="display:none;"></div>
       <span class="proto-badge" style="background:var(--success-soft);color:var(--success);border-color:#1E5039;">● Conectado a Supabase</span>
     </div>
@@ -1506,7 +1510,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ DASHBOARD ============ -->
       <div class="view active" id="view-dashboard">
-        <div class="page-head"><div><h1>Buenos días 👋</h1><p>Esto es lo que está pasando hoy en el museo.</p></div></div>
 
         <div class="grid grid-2" style="margin-bottom:14px;grid-template-columns:repeat(2,1fr);">
           <div class="card kpi"><div class="label">Visitantes LY</div><div class="value" id="dash-ly-visits" style="color:#B0B8C8;font-weight:800;">–</div><div class="delta" id="dash-ly-date" style="color:var(--text-soft);">–</div></div>
@@ -2598,6 +2601,9 @@ function goView(v){
   // Ocultar frases Loomis al salir
   const _lqel = document.getElementById('loomis-quote-topbar');
   if(_lqel) _lqel.style.display = (v==='loomis') ? 'block' : 'none';
+  // Saludo del Resumen solo se ve en la vista Resumen
+  const _dgel = document.getElementById('dash-greeting-topbar');
+  if(_dgel) _dgel.style.display = (v==='dashboard') ? 'block' : 'none';
   document.body.classList.toggle('chat-open', v==='chat');
   document.body.classList.toggle('staff-open', v==='staff');
   document.body.classList.toggle('spv-open', v==='spv');
