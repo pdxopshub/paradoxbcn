@@ -840,6 +840,26 @@
   .lead-table th{white-space:nowrap;padding:6px 8px!important;}
   .lead-table td{white-space:nowrap;}
   .lead-table td.lead-cell{padding:2px 4px;}
+  /* desglose del total */
+  .dsg{display:flex;flex-direction:column;gap:3px;padding:3px 2px;}
+  .dsg-campos{display:grid;gap:3px;}
+  .dsg-f{display:flex;flex-direction:column;gap:1px;min-width:0;}
+  .dsg-f label{font-size:8px;font-weight:800;color:var(--text-dim);text-transform:uppercase;
+    letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .dsg-in{width:100%;box-sizing:border-box;background:rgba(255,255,255,.04);
+    border:1px solid var(--line);border-radius:4px;color:var(--text);
+    font-size:11px;padding:2px 4px;text-align:center;}
+  .dsg-in:focus{outline:none;border-color:var(--accent);background:rgba(91,140,255,.14);}
+  .dsg-total{font-family:var(--font);font-weight:800;font-size:12.5px;color:var(--ok);
+    text-align:right;padding-right:3px;border-top:1px solid var(--line);padding-top:2px;}
+  /* tabla de precios */
+  #precios-table td{padding:5px 8px;}
+  #precios-table tr.pr-extra td{background:rgba(255,255,255,.02);font-size:12px;}
+  .pr-plus{color:var(--accent);font-weight:900;margin-right:4px;}
+  .pr-in{width:90px;text-align:center;background:#10233A;border:1.5px solid #2E4C6E;
+    border-radius:6px;color:#EAF1FB;padding:4px 6px;font-weight:700;font-size:12.5px;}
+  .pr-in:focus{outline:none;border-color:var(--accent);background:#173A63;}
+  .pr-dif{font-weight:800;color:var(--ok);}
   .lead-toolbar{gap:7px;}
   .lead-toolbar select{min-width:0;width:auto;padding:6px 9px;font-size:11.5px;}
   .lead-toolbar input{padding:6px 9px;font-size:11.5px;}
@@ -1982,7 +2002,9 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <button class="tab-btn active" data-gv="maestro">Grupos</button>
           <button class="tab-btn" data-gv="inbound">Inbound</button>
           <button class="tab-btn" data-gv="outbound">Outbound</button>
+          <button class="tab-btn" data-gv="cumples">Cumpleaños</button>
           <button class="tab-btn" data-gv="calendario">Calendario</button>
+          <button class="tab-btn" data-gv="precios">Precios entradas</button>
         </div>
 
         <!-- ---------- MAESTRO ---------- -->
@@ -2043,6 +2065,45 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <button class="btn btn-primary btn-sm" onclick="openLeadPicker('outbound')">+ Añadir lead</button>
           </div>
           <div class="gv-tablebox lead-box"><table id="out-table" class="gv-table lead-table no-filter"></table></div>
+        </div>
+
+        <!-- ---------- CUMPLEAÑOS ---------- -->
+        <div class="gv-pane" id="gv-cumples" style="display:none;">
+          <div class="gv-toolbar lead-toolbar">
+            <input id="cum-search" placeholder="Buscar…" oninput="renderLeads('cumples')" style="width:210px;">
+            <select id="cum-status" onchange="renderLeads('cumples')"><option value="">Todos</option></select>
+            <select id="cum-tipo"   onchange="renderLeads('cumples')"><option value="">Tipo</option></select>
+            <select id="cum-year"   onchange="renderLeads('cumples')"><option value="">Año</option></select>
+            <select id="cum-month"  onchange="renderLeads('cumples')"><option value="">Mes</option></select>
+            <input   id="cum-hora"  placeholder="Hora" oninput="renderLeads('cumples')" style="width:78px;">
+            <input   id="cum-from"  type="date" onchange="renderLeads('cumples')" style="width:132px;">
+            <input   id="cum-to"    type="date" onchange="renderLeads('cumples')" style="width:132px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearLeadFilters('cumples')">Limpiar</button>
+            <span class="gv-count" id="cum-count"></span>
+            <button class="btn btn-primary btn-sm" onclick="openLeadPicker('cumples')">+ Añadir cumpleaños</button>
+          </div>
+          <div class="gv-tablebox lead-box"><table id="cum-table" class="gv-table lead-table no-filter"></table></div>
+        </div>
+
+        <!-- ---------- PRECIOS ---------- -->
+        <div class="gv-pane" id="gv-precios" style="display:none;">
+          <div class="card" style="max-width:760px;">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Precios de entradas <span class="hint">Editables · se usan para calcular los totales</span></div>
+              <span id="precios-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓ Guardado</span>
+            </div>
+            <div class="table-wrap">
+              <table id="precios-table" class="no-filter">
+                <thead><tr>
+                  <th style="text-align:left;">Tipo</th>
+                  <th style="width:130px;">Precio original</th>
+                  <th style="width:130px;">Precio grupo</th>
+                  <th style="width:110px;">Diferencia</th>
+                </tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <!-- ---------- CALENDARIO ---------- -->
@@ -5021,14 +5082,65 @@ function tipoPill(t){
   const c = TIPO_COLOR[t] || TIPO_COLOR['Otro'];
   return `<span class="tp-pill" style="background:${c.bg};color:${c.fg};border-color:${c.br};">${esc(t)}</span>`;
 }
-/* Tipos disponibles SOLO en Inbound/Outbound */
+/* Tipos de Inbound / Outbound (sin cumpleaños) */
 const TIPOS_LEAD = ['Escuela','Escuela + Taller','Casal','Cultural','Corporativo',
-  'Corporativo + TB','Cumpleaños','Cumpleaños Enigma','Cumpleaños Ilusión',
-  'Cumpleaños Ilusión + Merch.','Cumpleaños Paradox','Grupo Familiar','Asociación'];
+  'Corporativo + TB','Grupo Familiar','Asociación','ONG'];
 
-/* Los cumpleaños y grupos familiares NO se guardan en el maestro de Grupos */
-const TIPOS_SIN_MAESTRO = ['Cumpleaños','Cumpleaños Enigma','Cumpleaños Ilusión',
-  'Cumpleaños Ilusión + Merch.','Cumpleaños Paradox','Grupo Familiar'];
+/* Tipos exclusivos de la pestaña Cumpleaños */
+const TIPOS_CUMPLE = ['Cumpleaños','Cumpleaños Enigma','Cumpleaños Ilusión',
+  'Cumpleaños Ilusión + Merch.','Cumpleaños Paradox'];
+
+function tiposDe(canal){ return canal==='cumples' ? TIPOS_CUMPLE : TIPOS_LEAD; }
+
+/* Estos no se guardan en el maestro de Grupos */
+const TIPOS_SIN_MAESTRO = [...TIPOS_CUMPLE, 'Grupo Familiar'];
+
+/* ---- Desglose de TOTAL € según el tipo de grupo ---- */
+const DESGLOSE = {
+  escuela: {tipos:['Escuela','Escuela + Taller','Casal'],
+    campos:[{k:'ninos412', t:'Niños 4-12', precio:'school_4_12'},
+            {k:'ninos13',  t:'Niños 12+',  precio:'school_13'},
+            {k:'taller',   t:'Taller',     precio:'taller'},
+            {k:'monitor',  t:'Monitor',    precio:'monitor'}]},
+  corporativo: {tipos:['Corporativo','Corporativo + TB'],
+    campos:[{k:'entrada',  t:'Entrada',    precio:'corporativo'},
+            {k:'tb',       t:'Team Build.',precio:'corp_tb'},
+            {k:'catering', t:'Catering',   precio:'corp_catering'},
+            {k:'flexible', t:'Flexible €', precio:null, libre:true}]},
+  cultural: {tipos:['Asociación','Cultural','ONG'],
+    campos:[{k:'entrada',  t:'Entrada',    precio:'ong'},
+            {k:'monitor',  t:'Monitor',    precio:'monitor'}]},
+  grupo: {tipos:['Grupo Familiar'],
+    campos:[{k:'nino',     t:'Niño',       precio:'school_4_12'},
+            {k:'joven',    t:'Joven',      precio:'uni'},
+            {k:'adulto',   t:'Adulto',     precio:'adult'},
+            {k:'senior',   t:'Senior',     precio:'senior'}]},
+  cumple: {tipos:TIPOS_CUMPLE,
+    campos:[{k:'ninos',    t:'Niños',      precio:'school_4_12'},
+            {k:'adultos',  t:'Adultos',    precio:'adult'},
+            {k:'extras',   t:'Extras €',   precio:null, libre:true}]},
+};
+function desgloseDe(tipo){
+  for(const g of Object.values(DESGLOSE)) if(g.tipos.includes(tipo)) return g.campos;
+  return null;
+}
+
+let GP_CACHE = [];   // precios
+function precioDe(clave){
+  const p = GP_CACHE.find(x=>x.clave===clave);
+  return p ? (parseFloat(p.precio_grupo)||0) : 0;
+}
+function calcTotalLead(l){
+  const campos = desgloseDe(l.tipo_grupo);
+  if(!campos) return null;
+  const d = l.desglose || {};
+  let total = 0;
+  campos.forEach(c=>{
+    const v = parseFloat(d[c.k]) || 0;
+    total += c.libre ? v : v * precioDe(c.precio);
+  });
+  return total;
+}
 function vaAlMaestro(tipo){ return !!tipo && !TIPOS_SIN_MAESTRO.includes(tipo); }
 
 /* colores extra para los tipos que solo existen en leads */
@@ -5090,7 +5202,7 @@ const LEAD_COLS = [
   {g:'fecha', k:'travel_month',   t:'Month',          w:96,  type:'month'},
   {g:'fecha', k:'hora',           t:'Hora',           w:80,  type:'hora'},
   {g:'pax',   k:'pax',            t:'PAX',            w:52,  type:'number'},
-  {g:'fact',  k:'total_eur',      t:'Total €',        w:74,  type:'number'},
+  {g:'fact',  k:'total_eur',      t:'Total €',        w:250, type:'desglose'},
   {g:'fact',  k:'pago1_importe',  t:'1er pago',       w:74,  type:'number'},
   {g:'fact',  k:'pago1_fecha',    t:'Fecha 1º',       w:128, type:'date'},
   {g:'fact',  k:'pago1_metodo',   t:'Método 1º',      w:132, type:'metodo'},
@@ -5122,18 +5234,22 @@ function setGruposView(v){
   if(v==='maestro')    renderGruposMaestro();
   if(v==='inbound')    renderLeads('inbound');
   if(v==='outbound')   renderLeads('outbound');
+  if(v==='cumples')    renderLeads('cumples');
   if(v==='calendario') renderGruposCalendar();
+  if(v==='precios')    renderPrecios();
 }
 
 async function loadGruposData(){
-  const [gm, gl] = await Promise.all([
+  const [gm, gl, gp] = await Promise.all([
     sb.from('grupos_maestro').select('*').order('grupo'),
     sb.from('grupos_leads').select('*').order('travel_date', {ascending:true, nullsFirst:false}),
+    sb.from('grupos_precios').select('*').order('orden'),
   ]);
   if(gm.error) console.error('grupos_maestro', gm.error);
   if(gl.error) console.error('grupos_leads', gl.error);
   GM_CACHE = gm.data || [];
   GL_CACHE = gl.data || [];
+  GP_CACHE = gp.data || [];
 }
 
 /* ---------------- MAESTRO ---------------- */
@@ -5230,14 +5346,14 @@ async function deleteGrupo(id){
 
 /* ---------------- LEADS (inbound / outbound) ---------------- */
 function clearLeadFilters(canal){
-  const pre = canal==='inbound' ? 'in' : 'out';
+  const pre = canal==='inbound' ? 'in' : canal==='cumples' ? 'cum' : 'out';
   ['search','status','tipo','year','month','hora','from','to']
     .forEach(k=>{ const el=document.getElementById(pre+'-'+k); if(el) el.value=''; });
   renderLeads(canal);
 }
 
 function renderLeads(canal){
-  const pre = canal==='inbound' ? 'in' : 'out';
+  const pre = canal==='inbound' ? 'in' : canal==='cumples' ? 'cum' : 'out';
   const val = k => document.getElementById(pre+'-'+k)?.value || '';
   const q = val('search').toLowerCase().trim();
   const st = val('status'), tp = val('tipo'), yr = val('year'),
@@ -5253,7 +5369,7 @@ function renderLeads(canal){
     el.dataset.filled = '1';
   };
   fill('status', STATUS_OPTS.map(o=>`<option>${o}</option>`).join(''));
-  fill('tipo',   TIPOS_LEAD.map(o=>`<option>${o}</option>`).join(''));
+  fill('tipo',   tiposDe(canal).map(o=>`<option>${o}</option>`).join(''));
   fill('year',   ANYOS.map(y=>`<option>${y}</option>`).join(''));
   fill('month',  MESES_N.slice(1).map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''));
 
@@ -5305,7 +5421,8 @@ function renderLeads(canal){
       } else if(c.type==='tipo'){
         const cc = TIPO_COLOR[val] || TIPO_COLOR['Otro'];
         const st = val ? `background:${cc.bg};color:${cc.fg};` : '';
-        const opts = TIPOS_LEAD.includes(val) || !val ? TIPOS_LEAD : [val, ...TIPOS_LEAD];
+        const listaTipos = tiposDe(canal);
+        const opts = listaTipos.includes(val) || !val ? listaTipos : [val, ...listaTipos];
         inner = `<select class="lc-in lc-tipo" style="${st}" ${dk}>
           ${opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
       } else if(c.type==='metodo'){
@@ -5319,6 +5436,25 @@ function renderLeads(canal){
       } else if(c.type==='month'){
         inner = `<select class="lc-in" ${dk}>
           ${MESES_N.slice(1).map((mn,i)=>`<option value="${i+1}"${String(i+1)===String(val)?' selected':''}>${mn}</option>`).join('')}</select>`;
+      } else if(c.type==='desglose'){
+        const campos = desgloseDe(l.tipo_grupo);
+        const d = l.desglose || {};
+        if(!campos){
+          inner = `<input class="lc-in" type="number" ${dk} value="${esc(val)}">`;
+        } else {
+          const total = calcTotalLead(l);
+          inner = `<div class="dsg">
+            <div class="dsg-campos" style="grid-template-columns:repeat(${Math.min(campos.length,2)},1fr);">
+              ${campos.map(f=>`
+                <div class="dsg-f">
+                  <label title="${f.t}${f.precio?' · '+precioDe(f.precio)+'€':''}">${f.t}</label>
+                  <input class="dsg-in" type="number" step="${f.libre?'0.01':'1'}" min="0"
+                         data-id="${l.id}" data-dk="${f.k}" value="${d[f.k] ?? ''}">
+                </div>`).join('')}
+            </div>
+            <div class="dsg-total">${total ? total.toFixed(2)+'€' : '—'}</div>
+          </div>`;
+        }
       } else if(c.type==='hora'){
         inner = `<div class="hora-cell" onclick="openHoraPicker(event,${l.id})">
           <span class="hora-val">${esc(val)||'—'}</span></div>`;
@@ -5342,6 +5478,9 @@ function renderLeads(canal){
   table.innerHTML = head + body;
   table.querySelectorAll('.lc-in').forEach(el=>{
     el.addEventListener('change', saveLeadCell);
+  });
+  table.querySelectorAll('.dsg-in').forEach(el=>{
+    el.addEventListener('change', saveDesglose);
   });
 }
 
@@ -5413,6 +5552,25 @@ function openHoraPicker(ev, leadId){
   }), 10);
 }
 
+async function saveDesglose(e){
+  const id = parseInt(e.target.dataset.id,10);
+  const k  = e.target.dataset.dk;
+  const lead = GL_CACHE.find(x=>x.id===id);
+  if(!lead) return;
+  const d = Object.assign({}, lead.desglose||{});
+  const v = e.target.value;
+  if(v==='') delete d[k]; else d[k] = parseFloat(v)||0;
+  lead.desglose = d;
+  const total = calcTotalLead(lead);
+  lead.total_eur = total;
+  const { error } = await sb.from('grupos_leads')
+    .update({desglose:d, total_eur:total, updated_at:new Date().toISOString()}).eq('id', id);
+  if(error){ console.error(error); return; }
+  // refrescar solo el total de esa fila
+  const cel = e.target.closest('.dsg')?.querySelector('.dsg-total');
+  if(cel) cel.textContent = total ? total.toFixed(2)+'€' : '—';
+}
+
 async function saveLeadCell(e){
   const id = parseInt(e.target.dataset.id,10);
   const k  = e.target.dataset.k;
@@ -5431,7 +5589,7 @@ async function saveLeadCell(e){
   if(error){ console.error(error); return; }
   const row = GL_CACHE.find(x=>x.id===id);
   if(row) Object.assign(row, upd);
-  if(k==='status' || k==='travel_date') renderLeads(row?.canal || 'inbound');
+  if(['status','travel_date','tipo_grupo'].includes(k)) renderLeads(row?.canal || 'inbound');
 }
 
 /* Nota de celda: clic derecho */
@@ -5617,6 +5775,40 @@ async function renderDashGrupos(){
       <span class="pill ${dias<=1?'green':'grey'}">${cuando}</span>
     </div>`;
   }).join('') : '<div style="color:var(--text-soft);font-size:12.5px;">No hay grupos confirmados próximamente.</div>';
+}
+
+/* ---------------- PRECIOS ---------------- */
+function renderPrecios(){
+  const tb = document.querySelector('#precios-table tbody');
+  if(!tb) return;
+  tb.innerHTML = GP_CACHE.map(p=>{
+    const dif = (p.precio_original!=null && p.precio_grupo!=null)
+      ? (parseFloat(p.precio_original)-parseFloat(p.precio_grupo)) : null;
+    return `<tr class="${p.extra?'pr-extra':''}">
+      <td style="text-align:left;font-weight:${p.extra?'600':'700'};">
+        ${p.extra?'<span class="pr-plus">+</span>':''}${esc(p.etiqueta)}
+      </td>
+      <td><input class="pr-in" type="number" step="0.5" min="0" data-id="${p.id}" data-k="precio_original"
+                 value="${p.precio_original ?? ''}" placeholder="—"></td>
+      <td><input class="pr-in" type="number" step="0.5" min="0" data-id="${p.id}" data-k="precio_grupo"
+                 value="${p.precio_grupo ?? ''}" placeholder="—"></td>
+      <td class="pr-dif">${dif!==null ? dif.toFixed(2)+'€' : '—'}</td>
+    </tr>`;
+  }).join('');
+  tb.querySelectorAll('.pr-in').forEach(el=> el.addEventListener('change', savePrecio));
+}
+
+async function savePrecio(e){
+  const id = parseInt(e.target.dataset.id,10);
+  const k  = e.target.dataset.k;
+  const v  = e.target.value==='' ? null : parseFloat(e.target.value);
+  const { error } = await sb.from('grupos_precios').update({[k]:v}).eq('id', id);
+  if(error){ console.error(error); return; }
+  const row = GP_CACHE.find(x=>x.id===id);
+  if(row) row[k] = v;
+  renderPrecios();
+  const b = document.getElementById('precios-saved');
+  if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2000); }
 }
 
 /* ---------------- CALENDARIO ---------------- */
