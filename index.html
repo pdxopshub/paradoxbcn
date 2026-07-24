@@ -739,6 +739,73 @@
     color:var(--text-soft);}
   .lm-arrow,.lm-eur,.lm-cal{flex-shrink:0;font-weight:800;color:var(--accent);width:16px;text-align:center;}
 
+  /* ── GRUPOS v2 ─────────────────────────────────────────────── */
+  .gv-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+  .gv-toolbar input[type=text],.gv-toolbar input:not([type]){width:220px;}
+  .gv-toolbar select{width:auto;min-width:150px;}
+  .gv-count{font-size:11.5px;color:var(--text-dim);font-weight:700;}
+  .gv-toolbar .btn{margin-left:auto;}
+  .gv-tablebox{border:1px solid var(--line-strong);border-radius:9px;overflow:auto;
+    max-height:calc(100vh - 230px);background:var(--surface);}
+  .gv-table{border-collapse:separate;border-spacing:0;font-size:12px;width:100%;}
+  .gv-table th{position:sticky;top:0;z-index:3;background:var(--panel);
+    padding:7px 6px;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;
+    border-bottom:1px solid var(--line-strong);white-space:nowrap;}
+  .gv-table td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:center;}
+  .gv-table tbody tr:hover td{background:rgba(255,255,255,.02);}
+  .gm-name{text-align:left!important;font-weight:700;cursor:pointer;color:#EAF1FB;}
+  .gm-name:hover{color:var(--accent);text-decoration:underline;}
+  .gm-mail{font-size:11px;color:var(--text-soft);}
+  .gm-tels{font-size:10.5px;line-height:1.35;color:var(--text-soft);}
+  .gm-tels div{border-bottom:1px dotted var(--line);padding:1px 0;}
+  .gm-tels div:last-child{border-bottom:none;}
+  .gm-obs{text-align:left!important;font-size:11.5px;color:var(--text-soft);
+    max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* tabla de leads */
+  .lead-box{max-height:calc(100vh - 210px);}
+  .lead-table td{padding:2px 3px;}
+  .lead-table th:first-child,.lead-table td:first-child{position:sticky;left:0;z-index:2;
+    background:var(--panel);border-right:2px solid var(--line-strong);}
+  .lead-table thead th:first-child{z-index:4;}
+  .lead-cell{position:relative;}
+  .lead-cell.ta-left{text-align:left;}
+  .lc-in{width:100%;box-sizing:border-box;background:transparent;border:none;
+    color:var(--text);font-size:11.5px;padding:3px 4px;border-radius:4px;text-align:center;}
+  .lead-cell.ta-left .lc-in{text-align:left;}
+  .lc-in:hover{background:#12253C;}
+  .lc-in:focus{outline:none;background:#173A63;box-shadow:inset 0 0 0 1.5px var(--accent);}
+  .lc-ta{resize:vertical;min-height:26px;font-family:inherit;line-height:1.3;}
+  /* nota en celda (bocadillo al pasar el ratón) */
+  .lead-cell.has-note::after{content:'';position:absolute;top:2px;right:2px;
+    width:0;height:0;border-top:6px solid #F2913D;border-left:6px solid transparent;}
+  .lead-cell.has-note:hover::before{
+    content:attr(data-note);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+    background:#20242E;color:#EDEEF3;border:1px solid var(--line-strong);border-radius:7px;
+    padding:7px 10px;font-size:11.5px;font-weight:500;white-space:pre-wrap;width:max-content;
+    max-width:240px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.6);text-align:left;
+    pointer-events:none;margin-bottom:4px;}
+  /* estado de la fila */
+  .lead-row.st-ok  td:first-child{border-left:3px solid var(--ok);}
+  .lead-row.st-bad td:first-child{border-left:3px solid var(--danger);}
+  .lead-row.st-wait td:first-child{border-left:3px solid var(--warning);}
+  .lead-row.st-off td:first-child{border-left:3px solid var(--line-strong);}
+  /* calendario de grupos */
+  .gcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .gcal-dow{font-size:10px;font-weight:800;text-align:center;color:var(--text-dim);
+    text-transform:uppercase;padding-bottom:4px;}
+  .gcal-day{min-height:78px;background:var(--panel);border:1px solid var(--line);
+    border-radius:7px;padding:4px 5px;display:flex;flex-direction:column;gap:2px;}
+  .gcal-day.pad{visibility:hidden;}
+  .gcal-day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);}
+  .gcal-day.has{background:#16241D;border-color:#2E7A55;}
+  .gcal-num{font-size:11px;font-weight:800;color:var(--text-soft);}
+  .gcal-item{font-size:9.5px;font-weight:700;background:#245C40;color:#C6F3DC;
+    border-radius:4px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .gcal-more{font-size:9px;color:var(--text-dim);font-weight:700;}
+  .gcal-row{display:flex;align-items:center;gap:10px;padding:7px 0;
+    border-bottom:1px solid var(--line);font-size:12.5px;}
+  .gcal-row:last-child{border-bottom:none;}
+  .gcal-date{font-weight:800;color:var(--accent);min-width:96px;font-size:11.5px;text-transform:capitalize;}
   /* ── LOOMIS ──────────────────────────────────────────────── */
   .lq-topbar{font-size:11px;font-style:italic;color:var(--text-soft);
     flex:1;text-align:center;padding:0 14px;opacity:0;transition:opacity .4s ease;
@@ -1834,24 +1901,82 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <!-- ============ GRUPOS (PDXspot) ============ -->
       <div class="view" id="view-grupos">
         <div class="tab-strip">
-          <button class="tab-btn active" data-gtab="grupos">Grupos</button>
-          <button class="tab-btn" data-gtab="cumpleanos">Cumpleaños</button>
-          <button class="tab-btn" data-gtab="visitas">Visitas</button>
-          <button class="tab-btn" data-gtab="campanas">Campañas</button>
-          <button class="tab-btn" data-gtab="calendario">Calendario</button>
-          <button class="tab-btn" data-gtab="inbound">Inbound</button>
-          <button class="tab-btn" data-gtab="outbound">Outbound</button>
+          <button class="tab-btn active" data-gv="maestro">Grupos</button>
+          <button class="tab-btn" data-gv="inbound">Inbound</button>
+          <button class="tab-btn" data-gv="outbound">Outbound</button>
+          <button class="tab-btn" data-gv="calendario">Calendario</button>
         </div>
-        <div id="pdxspot-embed">
-          <h1 id="pdx-page-title" style="display:none;"></h1>
-          <div class="flex-between" style="margin-bottom:14px;align-items:flex-start;">
-            <div class="hint" id="pdx-page-sub" style="font-size:12.5px;"></div>
-            <div id="pdx-topbar-actions"></div>
+
+        <!-- ---------- MAESTRO ---------- -->
+        <div class="gv-pane" id="gv-maestro">
+          <div class="gv-toolbar">
+            <input id="gm-search" placeholder="Buscar grupo…" oninput="renderGruposMaestro()">
+            <select id="gm-tipo" onchange="renderGruposMaestro()"><option value="">Todos los tipos</option></select>
+            <span class="gv-count" id="gm-count"></span>
+            <button class="btn btn-primary btn-sm" onclick="openGrupoModal()">+ Nuevo grupo</button>
           </div>
-          <div id="view-root"></div>
+          <div class="gv-tablebox">
+            <table id="gm-table" class="gv-table no-filter">
+              <thead><tr>
+                <th style="width:230px;text-align:left;">Grupo</th>
+                <th style="width:120px;">Tipo</th>
+                <th style="width:210px;">Email</th>
+                <th style="width:130px;">Teléfonos</th>
+                <th style="width:150px;">Contacto</th>
+                <th style="text-align:left;">Comentarios</th>
+                <th style="width:40px;"></th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ---------- INBOUND ---------- -->
+        <div class="gv-pane" id="gv-inbound" style="display:none;">
+          <div class="gv-toolbar">
+            <input id="in-search" placeholder="Buscar…" oninput="renderLeads('inbound')">
+            <select id="in-status" onchange="renderLeads('inbound')">
+              <option value="">Todos los estados</option>
+              <option>Nuevo</option><option>En conversación</option>
+              <option>Confirmado</option><option>Realizado</option><option>Rechazado</option>
+            </select>
+            <span class="gv-count" id="in-count"></span>
+            <button class="btn btn-primary btn-sm" onclick="openLeadPicker('inbound')">+ Añadir lead</button>
+          </div>
+          <div class="gv-tablebox lead-box"><table id="in-table" class="gv-table lead-table no-filter"></table></div>
+        </div>
+
+        <!-- ---------- OUTBOUND ---------- -->
+        <div class="gv-pane" id="gv-outbound" style="display:none;">
+          <div class="gv-toolbar">
+            <input id="out-search" placeholder="Buscar…" oninput="renderLeads('outbound')">
+            <select id="out-status" onchange="renderLeads('outbound')">
+              <option value="">Todos los estados</option>
+              <option>Nuevo</option><option>En conversación</option>
+              <option>Confirmado</option><option>Realizado</option><option>Rechazado</option>
+            </select>
+            <span class="gv-count" id="out-count"></span>
+            <button class="btn btn-primary btn-sm" onclick="openLeadPicker('outbound')">+ Añadir lead</button>
+          </div>
+          <div class="gv-tablebox lead-box"><table id="out-table" class="gv-table lead-table no-filter"></table></div>
+        </div>
+
+        <!-- ---------- CALENDARIO ---------- -->
+        <div class="gv-pane" id="gv-calendario" style="display:none;">
+          <div class="gv-toolbar">
+            <button class="btn btn-ghost btn-sm" onclick="gcalMonth(-1)">‹ Anterior</button>
+            <div class="section-title" style="margin:0;min-width:170px;text-align:center;" id="gcal-label"></div>
+            <button class="btn btn-ghost btn-sm" onclick="gcalMonth(1)">Siguiente ›</button>
+            <button class="btn btn-ghost btn-sm" onclick="gcalMonth(0)">Hoy</button>
+            <span class="hint" style="margin-left:auto;">Solo grupos confirmados</span>
+          </div>
+          <div class="card"><div id="gcal-grid"></div></div>
+          <div class="card" style="margin-top:12px;">
+            <div class="section-title">Próximas visitas confirmadas</div>
+            <div id="gcal-list"></div>
+          </div>
         </div>
       </div>
-
 
       <!-- ============ CHAT ============ -->
       <div class="view" id="view-chat">
@@ -2275,7 +2400,7 @@ function goView(v){
   if(v==='marketing') renderMarketing();
   if(v==='loomis') renderLoomis();
   setTimeout(installTableFilters, 60);
-  if(v==='grupos') initPdxspotEmbed();
+  if(v==='grupos') initGruposV2();
   // Ocultar frases Loomis al salir
   const _lqel = document.getElementById('loomis-quote-topbar');
   if(_lqel) _lqel.style.display = (v==='loomis') ? 'block' : 'none';
@@ -4786,6 +4911,361 @@ async function fetchDiegoTasks(weekIso){
   if(error){ console.error(error); return []; }
   return data;
 }
+/* ============================================================
+   GRUPOS v2 — maestro, inbound, outbound y calendario
+   ============================================================ */
+let GM_CACHE = [];        // grupos_maestro
+let GL_CACHE = [];        // grupos_leads
+let gvView = 'maestro';
+
+const LEAD_COLS = [
+  {k:'grupo_nombre',   t:'Grupo',          w:180, type:'text',  left:true},
+  {k:'email',          t:'Email',          w:180, type:'text'},
+  {k:'request_date',   t:'Request date',   w:120, type:'date'},
+  {k:'status',         t:'Status',         w:140, type:'select',
+   opts:['Nuevo','En conversación','Confirmado','Realizado','Rechazado']},
+  {k:'contacto',       t:'Contacto',       w:140, type:'text'},
+  {k:'tipo_grupo',     t:'Tipo grupo',     w:120, type:'text'},
+  {k:'travel_date',    t:'Travel date',    w:120, type:'date'},
+  {k:'travel_year',    t:'Year',           w:70,  type:'number'},
+  {k:'travel_month',   t:'Month',          w:70,  type:'number'},
+  {k:'hora',           t:'Hora',           w:80,  type:'text'},
+  {k:'pax',            t:'PAX',            w:70,  type:'number'},
+  {k:'total_eur',      t:'Total €',        w:90,  type:'number'},
+  {k:'pago1_importe',  t:'1er pago',       w:90,  type:'number'},
+  {k:'pago1_fecha',    t:'Fecha 1º',       w:115, type:'date'},
+  {k:'pago1_metodo',   t:'Método 1º',      w:110, type:'text'},
+  {k:'pago2_importe',  t:'2º pago',        w:90,  type:'number'},
+  {k:'pago2_fecha',    t:'Fecha 2º',       w:115, type:'date'},
+  {k:'pago2_metodo',   t:'Método 2º',      w:110, type:'text'},
+  {k:'datos_fiscales', t:'Datos fiscales', w:220, type:'textarea', left:true},
+  {k:'seguimiento',    t:'Seguimiento',    w:200, type:'textarea', left:true},
+  {k:'next_contact',   t:'Next contact',   w:120, type:'date'},
+  {k:'motivo_reject',  t:'Motivo reject',  w:180, type:'textarea', left:true},
+];
+
+async function initGruposV2(){
+  document.querySelectorAll('[data-gv]').forEach(b=>{
+    if(b.dataset.bound) return;
+    b.dataset.bound = '1';
+    b.addEventListener('click', ()=> setGruposView(b.dataset.gv));
+  });
+  await loadGruposData();
+  setGruposView(gvView);
+}
+
+function setGruposView(v){
+  gvView = v;
+  document.querySelectorAll('[data-gv]').forEach(b=>b.classList.toggle('active', b.dataset.gv===v));
+  document.querySelectorAll('.gv-pane').forEach(p=>p.style.display='none');
+  const pane = document.getElementById('gv-'+v);
+  if(pane) pane.style.display='block';
+  if(v==='maestro')    renderGruposMaestro();
+  if(v==='inbound')    renderLeads('inbound');
+  if(v==='outbound')   renderLeads('outbound');
+  if(v==='calendario') renderGruposCalendar();
+}
+
+async function loadGruposData(){
+  const [gm, gl] = await Promise.all([
+    sb.from('grupos_maestro').select('*').order('grupo'),
+    sb.from('grupos_leads').select('*').order('travel_date', {ascending:true, nullsFirst:false}),
+  ]);
+  if(gm.error) console.error('grupos_maestro', gm.error);
+  if(gl.error) console.error('grupos_leads', gl.error);
+  GM_CACHE = gm.data || [];
+  GL_CACHE = gl.data || [];
+}
+
+/* ---------------- MAESTRO ---------------- */
+function renderGruposMaestro(){
+  const q    = (document.getElementById('gm-search')?.value||'').toLowerCase().trim();
+  const tipo = document.getElementById('gm-tipo')?.value || '';
+
+  // rellenar el selector de tipos
+  const sel = document.getElementById('gm-tipo');
+  if(sel && !sel.dataset.filled){
+    const tipos = [...new Set(GM_CACHE.map(g=>g.tipo).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">Todos los tipos</option>' +
+      tipos.map(t=>`<option>${esc(t)}</option>`).join('');
+    sel.dataset.filled = '1';
+  }
+
+  const list = GM_CACHE.filter(g=>{
+    if(tipo && g.tipo !== tipo) return false;
+    if(!q) return true;
+    return [g.grupo,g.email,g.contacto,g.comentarios].some(v=>(v||'').toLowerCase().includes(q));
+  });
+
+  const cnt = document.getElementById('gm-count');
+  if(cnt) cnt.textContent = `${list.length} grupos`;
+
+  const tbody = document.querySelector('#gm-table tbody');
+  tbody.innerHTML = list.length ? list.map(g=>`
+    <tr>
+      <td class="gm-name" onclick="openGrupoModal(${g.id})">${esc(g.grupo)}</td>
+      <td>${g.tipo?`<span class="pill grey">${esc(g.tipo)}</span>`:'—'}</td>
+      <td class="gm-mail">${esc(g.email)||'—'}</td>
+      <td class="gm-tels">
+        <div>${esc(g.tel1)||'—'}</div>
+        <div>${esc(g.tel2)||'—'}</div>
+        <div>${esc(g.tel3)||'—'}</div>
+      </td>
+      <td>${esc(g.contacto)||'—'}</td>
+      <td class="gm-obs" title="${esc(g.comentarios)}">${esc(g.comentarios)||'—'}</td>
+      <td><button class="row-del" onclick="deleteGrupo(${g.id})">✕</button></td>
+    </tr>`).join('')
+    : '<tr><td colspan="7" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
+}
+
+function openGrupoModal(id){
+  const g = id ? GM_CACHE.find(x=>x.id===id) : {};
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <div class="modal-head"><h2>${id?'Editar grupo':'Nuevo grupo'}</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Grupo</label><input id="gmf-grupo" value="${esc(g.grupo)||''}"></div>
+          <div class="field-row">
+            <div class="field"><label>Tipo</label><input id="gmf-tipo" placeholder="Escuela, Hotel, Asociación…" value="${esc(g.tipo)||''}"></div>
+            <div class="field"><label>Contacto</label><input id="gmf-contacto" value="${esc(g.contacto)||''}"></div>
+          </div>
+          <div class="field"><label>Email</label><input id="gmf-email" value="${esc(g.email)||''}"></div>
+          <div class="field-row">
+            <div class="field"><label>Teléfono 1</label><input id="gmf-tel1" value="${esc(g.tel1)||''}"></div>
+            <div class="field"><label>Teléfono 2</label><input id="gmf-tel2" value="${esc(g.tel2)||''}"></div>
+          </div>
+          <div class="field"><label>Teléfono 3</label><input id="gmf-tel3" value="${esc(g.tel3)||''}"></div>
+          <div class="field"><label>Comentarios</label><textarea id="gmf-com" rows="3">${esc(g.comentarios)||''}</textarea></div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveGrupo(${id||'null'})">Guardar</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function saveGrupo(id){
+  const v = k => document.getElementById('gmf-'+k).value.trim();
+  const payload = {grupo:v('grupo'), tipo:v('tipo'), email:v('email'),
+                   tel1:v('tel1'), tel2:v('tel2'), tel3:v('tel3'),
+                   contacto:v('contacto'), comentarios:v('com')};
+  if(!payload.grupo){ alert('Ponle nombre al grupo.'); return; }
+  if(id) await sb.from('grupos_maestro').update(payload).eq('id', id);
+  else   await sb.from('grupos_maestro').insert(payload);
+  closeModal();
+  const sel = document.getElementById('gm-tipo'); if(sel) delete sel.dataset.filled;
+  await loadGruposData(); renderGruposMaestro();
+}
+
+async function deleteGrupo(id){
+  if(!confirm('¿Eliminar este grupo del maestro?')) return;
+  await sb.from('grupos_maestro').delete().eq('id', id);
+  await loadGruposData(); renderGruposMaestro();
+}
+
+/* ---------------- LEADS (inbound / outbound) ---------------- */
+function renderLeads(canal){
+  const pre = canal==='inbound' ? 'in' : 'out';
+  const q = (document.getElementById(pre+'-search')?.value||'').toLowerCase().trim();
+  const st = document.getElementById(pre+'-status')?.value || '';
+
+  const list = GL_CACHE.filter(l=>{
+    if(l.canal !== canal) return false;
+    if(st && l.status !== st) return false;
+    if(!q) return true;
+    return [l.grupo_nombre,l.email,l.contacto,l.seguimiento].some(v=>(v||'').toLowerCase().includes(q));
+  });
+
+  const cnt = document.getElementById(pre+'-count');
+  if(cnt) cnt.textContent = `${list.length} leads`;
+
+  const head = '<thead><tr>' + LEAD_COLS.map(c=>
+    `<th style="width:${c.w}px;${c.left?'text-align:left;':''}">${c.t}</th>`).join('') +
+    '<th style="width:38px;"></th></tr></thead>';
+
+  const body = '<tbody>' + (list.length ? list.map(l=>{
+    const notas = l.notas || {};
+    const tds = LEAD_COLS.map(c=>{
+      const nota = notas[c.k] || '';
+      const val  = l[c.k] ?? '';
+      const cls  = ['lead-cell', c.left?'ta-left':'', nota?'has-note':''].filter(Boolean).join(' ');
+      const tip  = nota ? ` data-note="${esc(nota)}"` : '';
+      let inner;
+      if(c.type==='select'){
+        inner = `<select class="lc-in" data-id="${l.id}" data-k="${c.k}">
+          ${c.opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
+      } else if(c.type==='textarea'){
+        inner = `<textarea class="lc-in lc-ta" data-id="${l.id}" data-k="${c.k}" rows="1">${esc(val)}</textarea>`;
+      } else {
+        inner = `<input class="lc-in" type="${c.type}" data-id="${l.id}" data-k="${c.k}" value="${esc(val)}">`;
+      }
+      return `<td class="${cls}"${tip} oncontextmenu="editLeadNote(event,${l.id},'${c.k}')">${inner}</td>`;
+    }).join('');
+    const stCls = {'Confirmado':'st-ok','Realizado':'st-ok','Rechazado':'st-bad',
+                   'En conversación':'st-wait','Nuevo':'st-off'}[l.status] || '';
+    return `<tr class="lead-row ${stCls}">${tds}<td><button class="row-del" onclick="deleteLead(${l.id})">✕</button></td></tr>`;
+  }).join('') : `<tr><td colspan="${LEAD_COLS.length+1}" style="text-align:center;color:var(--text-soft);padding:20px;">Sin leads. Usa "+ Añadir lead".</td></tr>`) + '</tbody>';
+
+  const table = document.getElementById(pre+'-table');
+  table.innerHTML = head + body;
+  table.querySelectorAll('.lc-in').forEach(el=>{
+    el.addEventListener('change', saveLeadCell);
+  });
+}
+
+async function saveLeadCell(e){
+  const id = parseInt(e.target.dataset.id,10);
+  const k  = e.target.dataset.k;
+  let v = e.target.value;
+  if(['travel_year','travel_month','pax'].includes(k)) v = v===''?null:parseInt(v,10);
+  if(['total_eur','pago1_importe','pago2_importe'].includes(k)) v = v===''?null:parseFloat(v);
+  if(v==='') v = null;
+  const upd = {[k]: v, updated_at:new Date().toISOString()};
+  // si cambia travel_date, rellenar año y mes solos
+  if(k==='travel_date' && v){
+    const d = new Date(v+'T12:00:00');
+    upd.travel_year = d.getFullYear();
+    upd.travel_month = d.getMonth()+1;
+  }
+  const { error } = await sb.from('grupos_leads').update(upd).eq('id', id);
+  if(error){ console.error(error); return; }
+  const row = GL_CACHE.find(x=>x.id===id);
+  if(row) Object.assign(row, upd);
+  if(k==='status' || k==='travel_date') renderLeads(row?.canal || 'inbound');
+}
+
+/* Nota de celda: clic derecho */
+function editLeadNote(ev, id, campo){
+  ev.preventDefault();
+  const lead = GL_CACHE.find(x=>x.id===id);
+  const actual = (lead?.notas||{})[campo] || '';
+  const txt = prompt('Nota para esta celda (deja vacío para borrarla):', actual);
+  if(txt === null) return;
+  const notas = Object.assign({}, lead.notas||{});
+  if(txt.trim()) notas[campo] = txt.trim(); else delete notas[campo];
+  sb.from('grupos_leads').update({notas}).eq('id', id).then(({error})=>{
+    if(error){ console.error(error); return; }
+    lead.notas = notas;
+    renderLeads(lead.canal);
+  });
+}
+
+function openLeadPicker(canal){
+  const opts = GM_CACHE.map(g=>`<option value="${g.id}">${esc(g.grupo)}${g.tipo?' · '+esc(g.tipo):''}</option>`).join('');
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
+      <div class="modal" style="max-width:520px;">
+        <div class="modal-head"><h2>Añadir lead ${canal}</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <div class="field"><label>Buscar grupo</label>
+            <input id="lp-search" placeholder="Escribe para filtrar…" oninput="filterLeadPicker()">
+          </div>
+          <div class="field"><label>Grupo</label>
+            <select id="lp-grupo" size="10" style="height:auto;">${opts}</select>
+          </div>
+          <div class="hint">¿No está en la lista? Añádelo primero en la pestaña Grupos.</div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="addLeadFromPicker('${canal}')">Añadir</button>
+        </div>
+      </div>
+    </div>`;
+  setTimeout(()=>document.getElementById('lp-search')?.focus(), 60);
+}
+
+function filterLeadPicker(){
+  const q = document.getElementById('lp-search').value.toLowerCase().trim();
+  const sel = document.getElementById('lp-grupo');
+  sel.innerHTML = GM_CACHE
+    .filter(g=>!q || (g.grupo||'').toLowerCase().includes(q) || (g.tipo||'').toLowerCase().includes(q))
+    .map(g=>`<option value="${g.id}">${esc(g.grupo)}${g.tipo?' · '+esc(g.tipo):''}</option>`).join('');
+}
+
+async function addLeadFromPicker(canal){
+  const sel = document.getElementById('lp-grupo');
+  const gid = parseInt(sel.value,10);
+  const g = GM_CACHE.find(x=>x.id===gid);
+  if(!g){ alert('Elige un grupo.'); return; }
+  const hoy = new Date().toISOString().slice(0,10);
+  const { error } = await sb.from('grupos_leads').insert({
+    canal, grupo_id:g.id, grupo_nombre:g.grupo, email:g.email,
+    contacto:g.contacto, tipo_grupo:g.tipo, request_date:hoy, status:'Nuevo'
+  });
+  if(error){ alert('No se pudo añadir: '+error.message); return; }
+  closeModal();
+  await loadGruposData();
+  renderLeads(canal);
+}
+
+async function deleteLead(id){
+  if(!confirm('¿Eliminar este lead?')) return;
+  const lead = GL_CACHE.find(x=>x.id===id);
+  await sb.from('grupos_leads').delete().eq('id', id);
+  await loadGruposData();
+  renderLeads(lead?.canal || 'inbound');
+}
+
+/* ---------------- CALENDARIO ---------------- */
+let gcalDate = new Date();
+function gcalMonth(d){
+  if(d===0) gcalDate = new Date(); else gcalDate.setMonth(gcalDate.getMonth()+d);
+  renderGruposCalendar();
+}
+
+function renderGruposCalendar(){
+  const MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const y = gcalDate.getFullYear(), m = gcalDate.getMonth();
+  const lbl = document.getElementById('gcal-label');
+  if(lbl) lbl.textContent = `${MES[m]} ${y}`;
+
+  // grupos confirmados con fecha
+  const confirmados = GL_CACHE.filter(l=>
+    ['Confirmado','Realizado'].includes(l.status) && l.travel_date);
+
+  const porDia = {};
+  confirmados.forEach(l=>{ (porDia[l.travel_date] = porDia[l.travel_date]||[]).push(l); });
+
+  const offset = (new Date(y,m,1).getDay()+6)%7;
+  const ndays  = new Date(y,m+1,0).getDate();
+  const hoy    = new Date().toISOString().slice(0,10);
+  const dows   = ['L','M','X','J','V','S','D'];
+
+  let html = '<div class="gcal-grid">' + dows.map(d=>`<div class="gcal-dow">${d}</div>`).join('');
+  for(let i=0;i<offset;i++) html += '<div class="gcal-day pad"></div>';
+  for(let d=1; d<=ndays; d++){
+    const iso = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const items = porDia[iso] || [];
+    const cls = ['gcal-day', iso===hoy?'today':'', items.length?'has':''].filter(Boolean).join(' ');
+    html += `<div class="${cls}">
+      <div class="gcal-num">${d}</div>
+      ${items.slice(0,3).map(l=>`<div class="gcal-item" title="${esc(l.grupo_nombre)} · ${l.pax||'?'} pax · ${esc(l.hora)||'sin hora'}">
+        ${esc(l.hora)||''} ${esc(l.grupo_nombre)}</div>`).join('')}
+      ${items.length>3?`<div class="gcal-more">+${items.length-3} más</div>`:''}
+    </div>`;
+  }
+  html += '</div>';
+  document.getElementById('gcal-grid').innerHTML = html;
+
+  // listado de próximas
+  const futuras = confirmados.filter(l=>l.travel_date >= hoy)
+    .sort((a,b)=>a.travel_date.localeCompare(b.travel_date)).slice(0,25);
+  document.getElementById('gcal-list').innerHTML = futuras.length ? futuras.map(l=>{
+    const d = new Date(l.travel_date+'T12:00:00');
+    return `<div class="gcal-row">
+      <span class="gcal-date">${d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'})}</span>
+      <b style="flex:1;min-width:0;">${esc(l.grupo_nombre)}</b>
+      <span class="pill grey">${esc(l.hora)||'—'}</span>
+      <span class="pill blue">${l.pax||'?'} pax</span>
+      <span class="pill ${l.canal==='inbound'?'green':'violet'}">${l.canal}</span>
+    </div>`;
+  }).join('') : '<div style="color:var(--text-soft);font-size:12.5px;">No hay visitas confirmadas próximamente.</div>';
+}
+
 /* ============================================================
    MARKETING — campañas, influencers y calendario
    Tablas Supabase: mkt_campanas, mkt_influencers
