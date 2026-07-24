@@ -4495,7 +4495,9 @@ async function loadRecapData(){
   updateBoutiqueTotal();
 
   // Fetch del recap guardado
-  const { data: rec } = await sb.from('recap').select('*').eq('fecha', recapDate).maybeSingle();
+  console.log('[RECAP] Cargando fecha:', recapDate);
+  const { data: rec, error: recError } = await sb.from('recap').select('*').eq('fecha', recapDate).maybeSingle();
+  console.log('[RECAP] Resultado:', rec, 'Error:', recError);
   recapData = rec || {};
 
   // LY desde spv_days — mismo DÍA DE LA SEMANA del año pasado (no el mismo número)
@@ -4602,12 +4604,16 @@ async function saveRecap(silent=false){
     payload.leido_por = recapData?.leido_por || [me];
   }
   // Comprobar si ya existe una fila para esta fecha
-  const { data: existing } = await sb.from('recap').select('fecha').eq('fecha', payload.fecha).maybeSingle();
+  console.log('[RECAP] Guardando fecha:', payload.fecha, 'visitantes:', payload.visitantes);
+  const { data: existing, error: existErr } = await sb.from('recap').select('fecha').eq('fecha', payload.fecha).maybeSingle();
+  console.log('[RECAP] ¿Existe?', existing, existErr);
+  let saveResult;
   if(existing){
-    await sb.from('recap').update(payload).eq('fecha', payload.fecha);
+    saveResult = await sb.from('recap').update(payload).eq('fecha', payload.fecha);
   } else {
-    await sb.from('recap').insert(payload);
+    saveResult = await sb.from('recap').insert(payload);
   }
+  console.log('[RECAP] Resultado guardado:', saveResult?.error || 'OK');
   await syncRecapBoutiqueToSpv(payload.fecha, payload.boutique);
   recapData = { ...recapData, ...payload };
   if(!silent){
