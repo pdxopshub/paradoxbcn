@@ -451,18 +451,18 @@
     max-height:calc(100vh - 190px);background:var(--surface);margin-bottom:14px;}
   #spv-grid-table{font-size:11px;border-collapse:separate;border-spacing:0;}
   #spv-grid-table th{padding:5px 4px!important;font-size:9px;letter-spacing:.3px;
-    position:sticky;z-index:3;background:#111C33!important;color:#AFC4E8!important;}
-  /* columnas de visitantes también en azul oscuro */
-  #spv-grid-table .grp-visit{background:#111C33!important;color:#AFC4E8!important;}
-  #spv-grid-table td.col-visit{background:#0E1728!important;}
-  #spv-grid-table td.col-visit.total-cell{background:#132038!important;font-weight:800;}
+    position:sticky;z-index:3;background:#3A3D42!important;color:#D8DADC!important;}
+  /* columnas de visitantes en gris oscuro */
+  #spv-grid-table .grp-visit{background:#3A3D42!important;color:#D8DADC!important;}
+  #spv-grid-table td.col-visit{background:#4A4D52!important;}
+  #spv-grid-table td.col-visit.total-cell{background:#45484D!important;font-weight:800;}
   #spv-grid-table thead tr:first-child th{top:0;z-index:5;}
   #spv-grid-table thead tr:nth-child(2) th{top:23px;z-index:5;}
   #spv-grid-table td{padding:2px 3px!important;height:26px;}
-  /* primera columna (día) fija */
-  #spv-grid-table th:first-child{position:sticky;left:0;z-index:6;background:#111C33!important;}
+  /* primera columna (día) fija, gris oscuro */
+  #spv-grid-table th:first-child{position:sticky;left:0;z-index:6;background:#3A3D42!important;}
   #spv-grid-table td:first-child{position:sticky;left:0;z-index:4;
-    background:#132038!important;color:#CBD8EF;font-weight:700;
+    background:#45484D!important;color:#D8DADC;font-weight:700;
     border-right:3px solid var(--line-strong)!important;}
   #spv-grid-table thead th:first-child{z-index:6;}
   /* celdas sin azul */
@@ -472,9 +472,9 @@
   #spv-grid-table .cell-input:hover{background:#DCEAFF!important;}
   #spv-grid-table .cell-input:focus{background:#D2E4FF!important;color:#123A73!important;
     box-shadow:inset 0 0 0 1.5px var(--accent)!important;}
-  /* texto claro dentro de las columnas de Visitantes (fondo azul oscuro) */
-  #spv-grid-table .col-visit .cell-input{color:#CBD8EF!important;}
-  #spv-grid-table .col-visit .cell-input::placeholder{color:#5F7CA8!important;}
+  /* texto claro dentro de las columnas de Visitantes (fondo gris oscuro) */
+  #spv-grid-table .col-visit .cell-input{color:#D8DADC!important;}
+  #spv-grid-table .col-visit .cell-input::placeholder{color:#8A8D92!important;}
   #spv-grid-table .col-visit .cell-input:focus{color:#123A73!important;}
   /* Tienda gris más claro que Supervisores */
   /* Tienda y Supervisores con el mismo fondo que el staff */
@@ -908,9 +908,9 @@
     border-radius:7px;padding:4px 5px;display:flex;flex-direction:column;gap:2px;}
   .gcal-day.pad{visibility:hidden;}
   .gcal-day.today{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);}
-  .gcal-day.has{background:#16241D;border-color:#2E7A55;}
+  .gcal-day.has{background:#E1F5EA;border-color:#A9DFC0;}
   .gcal-num{font-size:11px;font-weight:800;color:var(--text-soft);}
-  .gcal-item{font-size:9.5px;font-weight:700;background:#245C40;color:#C6F3DC;
+  .gcal-item{font-size:9.5px;font-weight:700;background:#BFE9D2;color:#0E6B45;
     border-radius:4px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .gcal-more{font-size:9px;color:var(--text-dim);font-weight:700;}
   .gcal-row{display:flex;align-items:center;gap:10px;padding:7px 0;
@@ -997,10 +997,10 @@
   .vac-day:hover{border-color:var(--accent);filter:brightness(1.2);}
   .vac-day.wknd{color:#5A6070;}
   .vac-day.today{font-weight:900;color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent);}
-  .vac-day.bloq{background:#4A2226;color:#FFB3BC;}
-  .vac-day.apro{background:#245C40;color:#B8F0D4;font-weight:700;}
-  .vac-day.pend{background:#5A4A18;color:#F4DFA0;font-weight:700;}
-  .vac-day.recu{background:#243F5C;color:#B4D5F5;font-weight:700;}
+  .vac-day.bloq{background:#1C1C1C;color:#FFFFFF;}
+  .vac-day.apro{background:#DCF3E7;color:#0E6B45;font-weight:700;}
+  .vac-day.pend{background:#FCF0DC;color:#8A6D0F;font-weight:700;}
+  .vac-day.recu{background:#DCEBFF;color:#0B5FA8;font-weight:700;}
   .vac-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
   .vac-card{background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:14px;}
   .vac-card .vc-n{font-size:26px;font-weight:800;line-height:1;}
@@ -1539,6 +1539,11 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
 
         <div class="card" style="margin-top:14px;">
+          <div class="section-title" style="margin-bottom:10px;">Hoy en el equipo <span class="hint">Vacaciones, recuperación y cambios de turno</span></div>
+          <div id="dash-team-today" class="dash-pda-readonly"></div>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
           <div class="section-title" style="margin:0;">Grupos confirmados</div>
           <div class="value" style="font-size:30px;font-weight:800;color:var(--accent);margin-top:8px;" id="dash-grupos-confirmados-count">–</div>
           <div style="font-size:11.5px;color:var(--text-soft);margin-top:2px;">reservas de grupo confirmadas</div>
@@ -1624,14 +1629,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <thead id="staff-thead"></thead>
               <tbody></tbody>
             </table>
-          </div>
-
-          <div class="card" style="margin-top:14px;" id="staff-entradas-card">
-            <div class="flex-between" style="margin-bottom:12px;">
-              <div class="section-title" style="margin:0;">Entradas del mes <span class="hint">Máximo 4 por persona</span></div>
-              <select id="entradas-month" style="width:170px;"></select>
-            </div>
-            <div id="entradas-split" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:620px;"></div>
           </div>
 
         </div>
@@ -2229,10 +2226,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <button class="btn btn-primary btn-sm" onclick="openVacRequest()">+ Solicitar días</button>
             </div>
             <div class="vac-legend" style="margin-bottom:14px;">
-              <span><i class="vac-dot" style="background:#245C40"></i> Aprobado</span>
-              <span><i class="vac-dot" style="background:#5A4A18"></i> Pendiente</span>
-              <span><i class="vac-dot" style="background:#243F5C"></i> Recuperación</span>
-              <span><i class="vac-dot" style="background:#4A2226"></i> Bloqueado</span>
+              <span><i class="vac-dot" style="background:#DCF3E7"></i> Aprobado</span>
+              <span><i class="vac-dot" style="background:#FCF0DC"></i> Pendiente</span>
+              <span><i class="vac-dot" style="background:#DCEBFF"></i> Recuperación</span>
+              <span><i class="vac-dot" style="background:#1C1C1C"></i> Bloqueado</span>
             </div>
             <div class="vac-year" id="vac-year-grid"></div>
           </div>
@@ -2678,9 +2675,55 @@ function lyIsoDow(isoStr){ const d=new Date(isoStr+'T12:00:00'); d.setDate(d.get
 function isoToLabel(isoStr){ const [y,m,dd]=isoStr.split('-'); return `${parseInt(dd)} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][parseInt(m)-1]} ${y}`; }
 
 async function refreshDashboard(){
-  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA()]);
+  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA(), renderDashTeamToday()]);
   updateDashboardMyTasks(tasks);
   refreshDashboardRecapBadge();
+}
+
+/* Resumen — quién está de vacaciones/recuperación hoy y quién cubre un cambio de turno hoy */
+async function renderDashTeamToday(){
+  const el = document.getElementById('dash-team-today');
+  if(!el) return;
+  const hoy = todayIso();
+
+  let fueraHoy = [];
+  try{
+    const { data } = await sb.from('vac_solicitudes').select('*')
+      .lte('fecha_inicio', hoy).gte('fecha_fin', hoy).eq('estado','aprobado');
+    fueraHoy = (data||[]).filter(s=> s.tipo==='vacaciones' || s.tipo==='recuperacion');
+  }catch(e){ fueraHoy = []; }
+
+  let cambiosHoy = [];
+  try{
+    const { data } = await sb.from('turnos').select('*').eq('estado','Aprobado');
+    (data||[]).forEach(t=>{
+      if(t.p1_fecha === hoy) cambiosHoy.push({cede:t.p1_staff, coge:t.p2_staff, hora:t.p1_hora});
+      if(t.p2_fecha === hoy) cambiosHoy.push({cede:t.p2_staff, coge:t.p1_staff, hora:t.p2_hora});
+    });
+  }catch(e){ cambiosHoy = []; }
+
+  if(!fueraHoy.length && !cambiosHoy.length){
+    el.innerHTML = emptyState('Todo normal hoy','Nadie de vacaciones/recuperación y sin cambios de turno.');
+    return;
+  }
+
+  let html = '';
+  fueraHoy.forEach(s=>{
+    const tipoLbl = (typeof VAC_TIPOS!=='undefined' && VAC_TIPOS[s.tipo]?.label) || s.tipo;
+    const color = (typeof roleColors!=='undefined' && roleColors[s.persona]) || 'var(--accent)';
+    html += `<div class="dash-pda-row">
+      <span class="dash-pda-person" style="background:${color};">${esc((s.persona||'?')[0])}</span>
+      <span class="dash-pda-txt"><b>${esc(s.persona)}</b> — ${esc(tipoLbl)} (hasta ${esc(s.fecha_fin)})</span>
+    </div>`;
+  });
+  cambiosHoy.forEach(c=>{
+    const color = (typeof roleColors!=='undefined' && roleColors[c.coge]) || 'var(--accent)';
+    html += `<div class="dash-pda-row">
+      <span class="dash-pda-person" style="background:${color};">${esc((c.coge||'?')[0])}</span>
+      <span class="dash-pda-txt"><b>${esc(c.coge)}</b> cubre el turno de <b>${esc(c.cede)}</b>${c.hora?` (${esc(c.hora)})`:''}</span>
+    </div>`;
+  });
+  el.innerHTML = html;
 }
 function goToRecapFromDashboard(){
   document.querySelector('.navitem[data-view="recap"]')?.click();
@@ -3784,7 +3827,6 @@ async function renderStaffTable(){
       renderStaffTable();
     });
   });
-  renderEntradasMonthOptions();
 }
 
 async function addNewStaff(){
@@ -5139,15 +5181,15 @@ async function fetchDiegoTasks(weekIso){
    ============================================================ */
 const TIPOS_GRUPO = ['Escuela','Summer School','Casal','Asociación','Hotel','Agencia','Crucero','Empresa','Otro'];
 const TIPO_COLOR = {
-  'Escuela':      {bg:'#12283F', fg:'#7FB2FF', br:'#24455F'},
-  'Summer School':{bg:'#0F2A24', fg:'#5FE0B0', br:'#1E5039'},
-  'Casal':        {bg:'#2A1F3A', fg:'#C9A6F5', br:'#43325C'},
-  'Asociación':   {bg:'#3A2140', fg:'#F5B8E0', br:'#5C3466'},
-  'Hotel':        {bg:'#3A2C12', fg:'#F0AC3F', br:'#5C4620'},
-  'Agencia':      {bg:'#132038', fg:'#9EC4FF', br:'#25406B'},
-  'Crucero':      {bg:'#0E2A2E', fg:'#5FD8E0', br:'#1C4A50'},
-  'Empresa':      {bg:'#3A1720', fg:'#F2606A', br:'#5C2430'},
-  'Otro':         {bg:'#2C3040', fg:'#9AA0B2', br:'#3E4456'},
+  'Escuela':      {bg:'#DCEBFF', fg:'#0B5FA8', br:'#B7D8FF'},
+  'Summer School':{bg:'#DFF5EE', fg:'#0E8F5C', br:'#B8E8D3'},
+  'Casal':        {bg:'#EDE7FA', fg:'#7B4FC7', br:'#D9CCF2'},
+  'Asociación':   {bg:'#FBE4F5', fg:'#A13D8A', br:'#F0C6E8'},
+  'Hotel':        {bg:'#FCF0DC', fg:'#B4770F', br:'#EFCB8D'},
+  'Agencia':      {bg:'#E4ECFF', fg:'#1B4E9C', br:'#C4D8FF'},
+  'Crucero':      {bg:'#DEF4F5', fg:'#0E7F8A', br:'#B8E8EC'},
+  'Empresa':      {bg:'#FCE4E6', fg:'#D93C46', br:'#F2B4B9'},
+  'Otro':         {bg:'#E7E9EE', fg:'#5B6270', br:'#D3D7DF'},
 };
 function limpiaRef(v){
   if(v === null || v === undefined) return '';
@@ -5155,7 +5197,7 @@ function limpiaRef(v){
   return /^#(REF|N\/A|VALUE|NAME|DIV|NULL|NUM)/i.test(s) ? '' : s;
 }
 function tipoPill(t){
-  if(!t) return '<span class="tp-pill" style="background:#2C3040;color:#767C8C;border-color:#3E4456;">—</span>';
+  if(!t) return '<span class="tp-pill" style="background:#E7E9EE;color:#5B6270;border-color:#D3D7DF;">—</span>';
   const c = TIPO_COLOR[t] || TIPO_COLOR['Otro'];
   return `<span class="tp-pill" style="background:${c.bg};color:${c.fg};border-color:${c.br};">${esc(t)}</span>`;
 }
@@ -5222,25 +5264,25 @@ function vaAlMaestro(tipo){ return !!tipo && !TIPOS_SIN_MAESTRO.includes(tipo); 
 
 /* colores extra para los tipos que solo existen en leads */
 Object.assign(TIPO_COLOR, {
-  'Escuela + Taller':            {bg:'#12283F', fg:'#9EC4FF', br:'#24455F'},
-  'Cultural':                    {bg:'#0E2A2E', fg:'#5FD8E0', br:'#1C4A50'},
-  'Corporativo':                 {bg:'#3A1720', fg:'#F2606A', br:'#5C2430'},
-  'Corporativo + TB':            {bg:'#42121C', fg:'#FF8A94', br:'#6B2A34'},
-  'Cumpleaños':                  {bg:'#3A2140', fg:'#F5B8E0', br:'#5C3466'},
-  'Cumpleaños Enigma':           {bg:'#33184A', fg:'#D9A6FF', br:'#4E2870'},
-  'Cumpleaños Ilusión':          {bg:'#3D1638', fg:'#FFA6E8', br:'#5E2456'},
-  'Cumpleaños Ilusión + Merch.': {bg:'#451634', fg:'#FFB0D4', br:'#6B2851'},
-  'Cumpleaños Paradox':          {bg:'#2E1A48', fg:'#C9A6F5', br:'#472A6E'},
-  'Grupo Familiar':              {bg:'#2C3040', fg:'#C3CAD9', br:'#3E4456'},
+  'Escuela + Taller':            {bg:'#DCEBFF', fg:'#0B5FA8', br:'#B7D8FF'},
+  'Cultural':                    {bg:'#DEF4F5', fg:'#0E7F8A', br:'#B8E8EC'},
+  'Corporativo':                 {bg:'#FCE4E6', fg:'#D93C46', br:'#F2B4B9'},
+  'Corporativo + TB':            {bg:'#FCE0E3', fg:'#C22F3D', br:'#F0AEB5'},
+  'Cumpleaños':                  {bg:'#FBE4F5', fg:'#A13D8A', br:'#F0C6E8'},
+  'Cumpleaños Enigma':           {bg:'#F0E4FB', fg:'#7A3DB8', br:'#DDC6F2'},
+  'Cumpleaños Ilusión':          {bg:'#FBE0F5', fg:'#B23D96', br:'#F2C2E8'},
+  'Cumpleaños Ilusión + Merch.': {bg:'#FCE0EC', fg:'#B23D6E', br:'#F2C2D8'},
+  'Cumpleaños Paradox':          {bg:'#EDE4FA', fg:'#7B4FC7', br:'#D9CCF2'},
+  'Grupo Familiar':              {bg:'#E7E9EE', fg:'#5B6270', br:'#D3D7DF'},
 });
 
 const STATUS_OPTS = ['Pending','Confirmed','Rejected'];
 const STATUS_COLOR = {Pending:'st-wait', Confirmed:'st-ok', Rejected:'st-bad'};
 const METODOS_PAGO = ['Transfer','Credit Card','Box Office'];
 const METODO_COLOR = {
-  'Transfer':   {bg:'#12283F', fg:'#7FB2FF', br:'#24455F'},
-  'Credit Card':{bg:'#2A1F3A', fg:'#C9A6F5', br:'#43325C'},
-  'Box Office': {bg:'#16181D', fg:'#9AA0B2', br:'#2B303C'},
+  'Transfer':   {bg:'#DCEBFF', fg:'#0B5FA8', br:'#B7D8FF'},
+  'Credit Card':{bg:'#EDE7FA', fg:'#7B4FC7', br:'#D9CCF2'},
+  'Box Office': {bg:'#E7E9EE', fg:'#5B6270', br:'#D3D7DF'},
 };
 
 let GM_CACHE = [];        // grupos_maestro
@@ -5951,10 +5993,10 @@ async function renderDashGrupos(){
 /* Agrupación visual de la tabla de precios. taller/monitor van con
    School Kid porque son los suplementos propios de Escuela/Casal. */
 const PRECIOS_SECCIONES = [
-  {label:'ONG',         claves:['ong'],                                        color:'#5FD8E0'},
-  {label:'CORPORATIVO', claves:['corporativo','corp_tb','corp_catering'],      color:'#F2606A'},
-  {label:'SCHOOL KID',  claves:['school_4_12','school_13','taller','monitor'], color:'#7FB2FF'},
-  {label:'GROUPS',      claves:['uni','adult','senior'],                       color:'#33C98B'},
+  {label:'ONG',         claves:['ong'],                                        color:'var(--text-soft)'},
+  {label:'CORPORATIVO', claves:['corporativo','corp_tb','corp_catering'],      color:'var(--text-soft)'},
+  {label:'ESCUELAS',    claves:['school_4_12','school_13','taller','monitor'], color:'var(--text-soft)'},
+  {label:'GRUPOS',      claves:['uni','adult','senior'],                       color:'var(--text-soft)'},
 ];
 function renderPrecios(){
   const tb = document.querySelector('#precios-table tbody');
@@ -6425,7 +6467,6 @@ async function renderLoomis(){
   startLoomisQuotes();
   body.querySelectorAll('.lm-in').forEach(inp=>{
     inp.addEventListener('input',onLoomisInput);
-    inp.addEventListener('keydown',loomisKeyNav);
   });
   recalcLoomis();
 }
