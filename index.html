@@ -769,12 +769,33 @@
   .lead-table thead th:first-child{z-index:4;}
   .lead-cell{position:relative;}
   .lead-cell.ta-left{text-align:left;}
-  .lc-in{width:100%;box-sizing:border-box;background:transparent;border:none;
-    color:var(--text);font-size:11.5px;padding:3px 4px;border-radius:4px;text-align:center;}
+  .lc-in{width:100%;box-sizing:border-box;background:transparent!important;
+    border:none!important;box-shadow:none!important;border-radius:0!important;
+    color:var(--text);font-size:11.5px;padding:4px 5px;text-align:center;
+    font-family:inherit;-webkit-appearance:none;appearance:none;}
   .lead-cell.ta-left .lc-in{text-align:left;}
-  .lc-in:hover{background:#12253C;}
-  .lc-in:focus{outline:none;background:#173A63;box-shadow:inset 0 0 0 1.5px var(--accent);}
-  .lc-ta{resize:vertical;min-height:26px;font-family:inherit;line-height:1.3;}
+  .lc-in:hover{background:rgba(255,255,255,.045)!important;}
+  .lc-in:focus{outline:none;background:rgba(91,140,255,.13)!important;
+    box-shadow:inset 0 0 0 1.5px var(--accent)!important;}
+  .lc-ta{resize:vertical;min-height:24px;line-height:1.3;overflow:hidden;}
+  /* desplegables con color propio */
+  .lc-in.lc-status,.lc-in.lc-tipo,.lc-in.lc-metodo{
+    font-weight:700;font-size:10.5px;border-radius:20px!important;padding:3px 8px;
+    text-align:center;text-align-last:center;cursor:pointer;}
+  .lc-status.st-ok  {background:var(--ok-bg)!important;color:var(--ok)!important;}
+  .lc-status.st-bad {background:var(--bad-bg)!important;color:var(--bad)!important;}
+  .lc-status.st-wait{background:var(--wait-bg)!important;color:var(--wait)!important;}
+  .lc-status.st-off {background:var(--panel)!important;color:var(--text-soft)!important;}
+  .lc-in option{background:#20242E;color:#EDEEF3;font-weight:600;}
+  /* pastilla de tipo en el maestro */
+  .tp-pill{display:inline-block;font-size:10px;font-weight:800;padding:2px 9px;
+    border-radius:20px;border:1px solid;letter-spacing:.2px;white-space:nowrap;}
+  /* barra de filtros de leads */
+  .lead-toolbar{gap:7px;}
+  .lead-toolbar select{min-width:0;width:auto;padding:6px 9px;font-size:11.5px;}
+  .lead-toolbar input{padding:6px 9px;font-size:11.5px;}
+  .lead-toolbar .gv-count{margin-left:auto;}
+  .lead-toolbar .btn{margin-left:0;}
   /* nota en celda (bocadillo al pasar el ratón) */
   .lead-cell.has-note::after{content:'';position:absolute;top:2px;right:2px;
     width:0;height:0;border-top:6px solid #F2913D;border-left:6px solid transparent;}
@@ -1921,7 +1942,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <th style="width:230px;text-align:left;">Grupo</th>
                 <th style="width:120px;">Tipo</th>
                 <th style="width:210px;">Email</th>
-                <th style="width:130px;">Teléfonos</th>
+                <th style="width:120px;">Teléfonos</th>
                 <th style="width:150px;">Contacto</th>
                 <th style="text-align:left;">Comentarios</th>
                 <th style="width:40px;"></th>
@@ -1933,13 +1954,16 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
         <!-- ---------- INBOUND ---------- -->
         <div class="gv-pane" id="gv-inbound" style="display:none;">
-          <div class="gv-toolbar">
-            <input id="in-search" placeholder="Buscar…" oninput="renderLeads('inbound')">
-            <select id="in-status" onchange="renderLeads('inbound')">
-              <option value="">Todos los estados</option>
-              <option>Nuevo</option><option>En conversación</option>
-              <option>Confirmado</option><option>Realizado</option><option>Rechazado</option>
-            </select>
+          <div class="gv-toolbar lead-toolbar">
+            <input id="in-search" placeholder="Buscar nombre, email, contacto…" oninput="renderLeads('inbound')" style="width:230px;">
+            <select id="in-status" onchange="renderLeads('inbound')"><option value="">Status</option></select>
+            <select id="in-tipo"   onchange="renderLeads('inbound')"><option value="">Tipo</option></select>
+            <select id="in-year"   onchange="renderLeads('inbound')"><option value="">Año</option></select>
+            <select id="in-month"  onchange="renderLeads('inbound')"><option value="">Mes</option></select>
+            <input   id="in-hora"  placeholder="Hora" oninput="renderLeads('inbound')" style="width:78px;">
+            <input   id="in-from"  type="date" onchange="renderLeads('inbound')" title="Desde" style="width:132px;">
+            <input   id="in-to"    type="date" onchange="renderLeads('inbound')" title="Hasta" style="width:132px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearLeadFilters('inbound')">Limpiar</button>
             <span class="gv-count" id="in-count"></span>
             <button class="btn btn-primary btn-sm" onclick="openLeadPicker('inbound')">+ Añadir lead</button>
           </div>
@@ -1948,13 +1972,16 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
         <!-- ---------- OUTBOUND ---------- -->
         <div class="gv-pane" id="gv-outbound" style="display:none;">
-          <div class="gv-toolbar">
-            <input id="out-search" placeholder="Buscar…" oninput="renderLeads('outbound')">
-            <select id="out-status" onchange="renderLeads('outbound')">
-              <option value="">Todos los estados</option>
-              <option>Nuevo</option><option>En conversación</option>
-              <option>Confirmado</option><option>Realizado</option><option>Rechazado</option>
-            </select>
+          <div class="gv-toolbar lead-toolbar">
+            <input id="out-search" placeholder="Buscar nombre, email, contacto…" oninput="renderLeads('outbound')" style="width:230px;">
+            <select id="out-status" onchange="renderLeads('outbound')"><option value="">Status</option></select>
+            <select id="out-tipo"   onchange="renderLeads('outbound')"><option value="">Tipo</option></select>
+            <select id="out-year"   onchange="renderLeads('outbound')"><option value="">Año</option></select>
+            <select id="out-month"  onchange="renderLeads('outbound')"><option value="">Mes</option></select>
+            <input   id="out-hora"  placeholder="Hora" oninput="renderLeads('outbound')" style="width:78px;">
+            <input   id="out-from"  type="date" onchange="renderLeads('outbound')" title="Desde" style="width:132px;">
+            <input   id="out-to"    type="date" onchange="renderLeads('outbound')" title="Hasta" style="width:132px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearLeadFilters('outbound')">Limpiar</button>
             <span class="gv-count" id="out-count"></span>
             <button class="btn btn-primary btn-sm" onclick="openLeadPicker('outbound')">+ Añadir lead</button>
           </div>
@@ -4914,34 +4941,62 @@ async function fetchDiegoTasks(weekIso){
 /* ============================================================
    GRUPOS v2 — maestro, inbound, outbound y calendario
    ============================================================ */
+const TIPOS_GRUPO = ['Escuela','Summer School','Casal','Asociación','Hotel','Agencia','Crucero','Empresa','Otro'];
+const TIPO_COLOR = {
+  'Escuela':      {bg:'#12283F', fg:'#7FB2FF', br:'#24455F'},
+  'Summer School':{bg:'#0F2A24', fg:'#5FE0B0', br:'#1E5039'},
+  'Casal':        {bg:'#2A1F3A', fg:'#C9A6F5', br:'#43325C'},
+  'Asociación':   {bg:'#3A2140', fg:'#F5B8E0', br:'#5C3466'},
+  'Hotel':        {bg:'#3A2C12', fg:'#F0AC3F', br:'#5C4620'},
+  'Agencia':      {bg:'#132038', fg:'#9EC4FF', br:'#25406B'},
+  'Crucero':      {bg:'#0E2A2E', fg:'#5FD8E0', br:'#1C4A50'},
+  'Empresa':      {bg:'#3A1720', fg:'#F2606A', br:'#5C2430'},
+  'Otro':         {bg:'#2C3040', fg:'#9AA0B2', br:'#3E4456'},
+};
+function tipoPill(t){
+  if(!t) return '<span class="tp-pill" style="background:#2C3040;color:#767C8C;border-color:#3E4456;">—</span>';
+  const c = TIPO_COLOR[t] || TIPO_COLOR['Otro'];
+  return `<span class="tp-pill" style="background:${c.bg};color:${c.fg};border-color:${c.br};">${esc(t)}</span>`;
+}
+const STATUS_OPTS = ['Pending','Confirmed','Rejected'];
+const STATUS_COLOR = {Pending:'st-wait', Confirmed:'st-ok', Rejected:'st-bad'};
+const METODOS_PAGO = ['','Transfer','Credit Card','Box Office'];
+const METODO_COLOR = {
+  'Transfer':   {bg:'#12283F', fg:'#7FB2FF', br:'#24455F'},
+  'Credit Card':{bg:'#2A1F3A', fg:'#C9A6F5', br:'#43325C'},
+  'Box Office': {bg:'#16181D', fg:'#9AA0B2', br:'#2B303C'},
+};
+
 let GM_CACHE = [];        // grupos_maestro
 let GL_CACHE = [];        // grupos_leads
 let gvView = 'maestro';
 
+const MESES_N = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const ANYOS = (()=>{ const y=new Date().getFullYear(); return Array.from({length:7},(_,i)=>y-1+i); })();
+
 const LEAD_COLS = [
-  {k:'grupo_nombre',   t:'Grupo',          w:180, type:'text',  left:true},
-  {k:'email',          t:'Email',          w:180, type:'text'},
-  {k:'request_date',   t:'Request date',   w:120, type:'date'},
-  {k:'status',         t:'Status',         w:140, type:'select',
-   opts:['Nuevo','En conversación','Confirmado','Realizado','Rechazado']},
-  {k:'contacto',       t:'Contacto',       w:140, type:'text'},
-  {k:'tipo_grupo',     t:'Tipo grupo',     w:120, type:'text'},
-  {k:'travel_date',    t:'Travel date',    w:120, type:'date'},
-  {k:'travel_year',    t:'Year',           w:70,  type:'number'},
-  {k:'travel_month',   t:'Month',          w:70,  type:'number'},
-  {k:'hora',           t:'Hora',           w:80,  type:'text'},
-  {k:'pax',            t:'PAX',            w:70,  type:'number'},
-  {k:'total_eur',      t:'Total €',        w:90,  type:'number'},
-  {k:'pago1_importe',  t:'1er pago',       w:90,  type:'number'},
-  {k:'pago1_fecha',    t:'Fecha 1º',       w:115, type:'date'},
-  {k:'pago1_metodo',   t:'Método 1º',      w:110, type:'text'},
-  {k:'pago2_importe',  t:'2º pago',        w:90,  type:'number'},
-  {k:'pago2_fecha',    t:'Fecha 2º',       w:115, type:'date'},
-  {k:'pago2_metodo',   t:'Método 2º',      w:110, type:'text'},
-  {k:'datos_fiscales', t:'Datos fiscales', w:220, type:'textarea', left:true},
-  {k:'seguimiento',    t:'Seguimiento',    w:200, type:'textarea', left:true},
-  {k:'next_contact',   t:'Next contact',   w:120, type:'date'},
-  {k:'motivo_reject',  t:'Motivo reject',  w:180, type:'textarea', left:true},
+  {k:'grupo_nombre',   t:'Grupo',          w:260, type:'text',   left:true},
+  {k:'email',          t:'Email',          w:250, type:'text',   left:true},
+  {k:'request_date',   t:'Request date',   w:130, type:'date'},
+  {k:'status',         t:'Status',         w:130, type:'status'},
+  {k:'contacto',       t:'Contacto',       w:180, type:'text',   left:true},
+  {k:'tipo_grupo',     t:'Tipo grupo',     w:150, type:'tipo'},
+  {k:'travel_date',    t:'Travel date',    w:130, type:'date'},
+  {k:'travel_year',    t:'Year',           w:95,  type:'year'},
+  {k:'travel_month',   t:'Month',          w:120, type:'month'},
+  {k:'hora',           t:'Hora',           w:90,  type:'time'},
+  {k:'pax',            t:'PAX',            w:80,  type:'number'},
+  {k:'total_eur',      t:'Total €',        w:105, type:'number'},
+  {k:'pago1_importe',  t:'1er pago',       w:105, type:'number'},
+  {k:'pago1_fecha',    t:'Fecha 1º',       w:130, type:'date'},
+  {k:'pago1_metodo',   t:'Método 1º',      w:140, type:'metodo'},
+  {k:'pago2_importe',  t:'2º pago',        w:105, type:'number'},
+  {k:'pago2_fecha',    t:'Fecha 2º',       w:130, type:'date'},
+  {k:'pago2_metodo',   t:'Método 2º',      w:140, type:'metodo'},
+  {k:'datos_fiscales', t:'Datos fiscales', w:280, type:'textarea', left:true},
+  {k:'seguimiento',    t:'Seguimiento',    w:260, type:'textarea', left:true},
+  {k:'next_contact',   t:'Next contact',   w:130, type:'date'},
+  {k:'motivo_reject',  t:'Motivo reject',  w:220, type:'textarea', left:true},
 ];
 
 async function initGruposV2(){
@@ -4985,16 +5040,16 @@ function renderGruposMaestro(){
   // rellenar el selector de tipos
   const sel = document.getElementById('gm-tipo');
   if(sel && !sel.dataset.filled){
-    const tipos = [...new Set(GM_CACHE.map(g=>g.tipo).filter(Boolean))].sort();
     sel.innerHTML = '<option value="">Todos los tipos</option>' +
-      tipos.map(t=>`<option>${esc(t)}</option>`).join('');
+      TIPOS_GRUPO.map(t=>`<option>${t}</option>`).join('');
     sel.dataset.filled = '1';
   }
 
   const list = GM_CACHE.filter(g=>{
     if(tipo && g.tipo !== tipo) return false;
     if(!q) return true;
-    return [g.grupo,g.email,g.contacto,g.comentarios].some(v=>(v||'').toLowerCase().includes(q));
+    return [g.grupo,g.email,g.contacto,g.comentarios,g.tel1,g.tel2]
+      .some(v=>(v||'').toString().toLowerCase().includes(q));
   });
 
   const cnt = document.getElementById('gm-count');
@@ -5004,15 +5059,14 @@ function renderGruposMaestro(){
   tbody.innerHTML = list.length ? list.map(g=>`
     <tr>
       <td class="gm-name" onclick="openGrupoModal(${g.id})">${esc(g.grupo)}</td>
-      <td>${g.tipo?`<span class="pill grey">${esc(g.tipo)}</span>`:'—'}</td>
-      <td class="gm-mail">${esc(g.email)||'—'}</td>
+      <td>${tipoPill(g.tipo)}</td>
+      <td class="gm-mail">${esc(g.email)||''}</td>
       <td class="gm-tels">
-        <div>${esc(g.tel1)||'—'}</div>
-        <div>${esc(g.tel2)||'—'}</div>
-        <div>${esc(g.tel3)||'—'}</div>
+        <div>${esc(g.tel1)||''}</div>
+        <div>${esc(g.tel2)||''}</div>
       </td>
-      <td>${esc(g.contacto)||'—'}</td>
-      <td class="gm-obs" title="${esc(g.comentarios)}">${esc(g.comentarios)||'—'}</td>
+      <td>${esc(g.contacto)||''}</td>
+      <td class="gm-obs" title="${esc(g.comentarios)}">${esc(g.comentarios)||''}</td>
       <td><button class="row-del" onclick="deleteGrupo(${g.id})">✕</button></td>
     </tr>`).join('')
     : '<tr><td colspan="7" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
@@ -5028,7 +5082,12 @@ function openGrupoModal(id){
         <div class="modal-body">
           <div class="field"><label>Grupo</label><input id="gmf-grupo" value="${esc(g.grupo)||''}"></div>
           <div class="field-row">
-            <div class="field"><label>Tipo</label><input id="gmf-tipo" placeholder="Escuela, Hotel, Asociación…" value="${esc(g.tipo)||''}"></div>
+            <div class="field"><label>Tipo</label>
+              <select id="gmf-tipo">
+                <option value="">— Selecciona —</option>
+                ${TIPOS_GRUPO.map(t=>`<option${t===g.tipo?' selected':''}>${t}</option>`).join('')}
+              </select>
+            </div>
             <div class="field"><label>Contacto</label><input id="gmf-contacto" value="${esc(g.contacto)||''}"></div>
           </div>
           <div class="field"><label>Email</label><input id="gmf-email" value="${esc(g.email)||''}"></div>
@@ -5036,7 +5095,6 @@ function openGrupoModal(id){
             <div class="field"><label>Teléfono 1</label><input id="gmf-tel1" value="${esc(g.tel1)||''}"></div>
             <div class="field"><label>Teléfono 2</label><input id="gmf-tel2" value="${esc(g.tel2)||''}"></div>
           </div>
-          <div class="field"><label>Teléfono 3</label><input id="gmf-tel3" value="${esc(g.tel3)||''}"></div>
           <div class="field"><label>Comentarios</label><textarea id="gmf-com" rows="3">${esc(g.comentarios)||''}</textarea></div>
         </div>
         <div class="modal-foot">
@@ -5050,7 +5108,7 @@ function openGrupoModal(id){
 async function saveGrupo(id){
   const v = k => document.getElementById('gmf-'+k).value.trim();
   const payload = {grupo:v('grupo'), tipo:v('tipo'), email:v('email'),
-                   tel1:v('tel1'), tel2:v('tel2'), tel3:v('tel3'),
+                   tel1:v('tel1'), tel2:v('tel2'),
                    contacto:v('contacto'), comentarios:v('com')};
   if(!payload.grupo){ alert('Ponle nombre al grupo.'); return; }
   if(id) await sb.from('grupos_maestro').update(payload).eq('id', id);
@@ -5067,16 +5125,46 @@ async function deleteGrupo(id){
 }
 
 /* ---------------- LEADS (inbound / outbound) ---------------- */
+function clearLeadFilters(canal){
+  const pre = canal==='inbound' ? 'in' : 'out';
+  ['search','status','tipo','year','month','hora','from','to']
+    .forEach(k=>{ const el=document.getElementById(pre+'-'+k); if(el) el.value=''; });
+  renderLeads(canal);
+}
+
 function renderLeads(canal){
   const pre = canal==='inbound' ? 'in' : 'out';
-  const q = (document.getElementById(pre+'-search')?.value||'').toLowerCase().trim();
-  const st = document.getElementById(pre+'-status')?.value || '';
+  const val = k => document.getElementById(pre+'-'+k)?.value || '';
+  const q = val('search').toLowerCase().trim();
+  const st = val('status'), tp = val('tipo'), yr = val('year'),
+        mo = val('month'), ho = val('hora').toLowerCase().trim(),
+        from = val('from'), to = val('to');
+
+  // rellenar los desplegables de filtro una sola vez
+  const fill = (k, opts)=>{
+    const el = document.getElementById(pre+'-'+k);
+    if(!el || el.dataset.filled) return;
+    const label = el.querySelector('option')?.textContent || '';
+    el.innerHTML = `<option value="">${label}</option>` + opts;
+    el.dataset.filled = '1';
+  };
+  fill('status', STATUS_OPTS.map(o=>`<option>${o}</option>`).join(''));
+  fill('tipo',   TIPOS_GRUPO.map(o=>`<option>${o}</option>`).join(''));
+  fill('year',   ANYOS.map(y=>`<option>${y}</option>`).join(''));
+  fill('month',  MESES_N.slice(1).map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''));
 
   const list = GL_CACHE.filter(l=>{
     if(l.canal !== canal) return false;
     if(st && l.status !== st) return false;
+    if(tp && l.tipo_grupo !== tp) return false;
+    if(yr && String(l.travel_year) !== yr) return false;
+    if(mo && String(l.travel_month) !== mo) return false;
+    if(ho && !(l.hora||'').toLowerCase().includes(ho)) return false;
+    if(from && (!l.travel_date || l.travel_date < from)) return false;
+    if(to   && (!l.travel_date || l.travel_date > to)) return false;
     if(!q) return true;
-    return [l.grupo_nombre,l.email,l.contacto,l.seguimiento].some(v=>(v||'').toLowerCase().includes(q));
+    return [l.grupo_nombre,l.email,l.contacto,l.seguimiento,l.tipo_grupo]
+      .some(v=>(v||'').toString().toLowerCase().includes(q));
   });
 
   const cnt = document.getElementById(pre+'-count');
@@ -5090,22 +5178,43 @@ function renderLeads(canal){
     const notas = l.notas || {};
     const tds = LEAD_COLS.map(c=>{
       const nota = notas[c.k] || '';
-      const val  = l[c.k] ?? '';
+      let val = l[c.k] ?? '';
+      if(typeof val === 'string' && /^#(REF|N\/A|VALUE|NAME)/i.test(val.trim())) val = '';
       const cls  = ['lead-cell', c.left?'ta-left':'', nota?'has-note':''].filter(Boolean).join(' ');
       const tip  = nota ? ` data-note="${esc(nota)}"` : '';
       let inner;
-      if(c.type==='select'){
-        inner = `<select class="lc-in" data-id="${l.id}" data-k="${c.k}">
-          ${c.opts.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
+      const dk = `data-id="${l.id}" data-k="${c.k}"`;
+      if(c.type==='status'){
+        const cls = STATUS_COLOR[val] || 'st-off';
+        inner = `<select class="lc-in lc-status ${cls}" ${dk}>
+          ${STATUS_OPTS.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
+      } else if(c.type==='tipo'){
+        const cc = TIPO_COLOR[val] || TIPO_COLOR['Otro'];
+        const st = val ? `background:${cc.bg};color:${cc.fg};` : '';
+        inner = `<select class="lc-in lc-tipo" style="${st}" ${dk}>
+          <option value=""></option>
+          ${TIPOS_GRUPO.map(o=>`<option${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
+      } else if(c.type==='metodo'){
+        const cc = METODO_COLOR[val];
+        const st = cc ? `background:${cc.bg};color:${cc.fg};` : '';
+        inner = `<select class="lc-in lc-metodo" style="${st}" ${dk}>
+          ${METODOS_PAGO.map(o=>`<option value="${o}"${o===val?' selected':''}>${o}</option>`).join('')}</select>`;
+      } else if(c.type==='year'){
+        inner = `<select class="lc-in" ${dk}>
+          <option value=""></option>
+          ${ANYOS.map(y=>`<option${String(y)===String(val)?' selected':''}>${y}</option>`).join('')}</select>`;
+      } else if(c.type==='month'){
+        inner = `<select class="lc-in" ${dk}>
+          <option value=""></option>
+          ${MESES_N.slice(1).map((mn,i)=>`<option value="${i+1}"${String(i+1)===String(val)?' selected':''}>${mn}</option>`).join('')}</select>`;
       } else if(c.type==='textarea'){
-        inner = `<textarea class="lc-in lc-ta" data-id="${l.id}" data-k="${c.k}" rows="1">${esc(val)}</textarea>`;
+        inner = `<textarea class="lc-in lc-ta" ${dk} rows="1">${esc(val)}</textarea>`;
       } else {
-        inner = `<input class="lc-in" type="${c.type}" data-id="${l.id}" data-k="${c.k}" value="${esc(val)}">`;
+        inner = `<input class="lc-in" type="${c.type}" ${dk} value="${esc(val)}">`;
       }
       return `<td class="${cls}"${tip} oncontextmenu="editLeadNote(event,${l.id},'${c.k}')">${inner}</td>`;
     }).join('');
-    const stCls = {'Confirmado':'st-ok','Realizado':'st-ok','Rechazado':'st-bad',
-                   'En conversación':'st-wait','Nuevo':'st-off'}[l.status] || '';
+    const stCls = STATUS_COLOR[l.status] || 'st-off';
     return `<tr class="lead-row ${stCls}">${tds}<td><button class="row-del" onclick="deleteLead(${l.id})">✕</button></td></tr>`;
   }).join('') : `<tr><td colspan="${LEAD_COLS.length+1}" style="text-align:center;color:var(--text-soft);padding:20px;">Sin leads. Usa "+ Añadir lead".</td></tr>`) + '</tbody>';
 
@@ -5194,7 +5303,9 @@ async function addLeadFromPicker(canal){
   const hoy = new Date().toISOString().slice(0,10);
   const { error } = await sb.from('grupos_leads').insert({
     canal, grupo_id:g.id, grupo_nombre:g.grupo, email:g.email,
-    contacto:g.contacto, tipo_grupo:g.tipo, request_date:hoy, status:'Nuevo'
+    contacto:(g.contacto && !/^#(REF|N\/A)/i.test(g.contacto)) ? g.contacto : null,
+    tipo_grupo:g.tipo, request_date:hoy, status:'Pending',
+    travel_year:new Date().getFullYear()
   });
   if(error){ alert('No se pudo añadir: '+error.message); return; }
   closeModal();
@@ -5224,8 +5335,7 @@ function renderGruposCalendar(){
   if(lbl) lbl.textContent = `${MES[m]} ${y}`;
 
   // grupos confirmados con fecha
-  const confirmados = GL_CACHE.filter(l=>
-    ['Confirmado','Realizado'].includes(l.status) && l.travel_date);
+  const confirmados = GL_CACHE.filter(l=> l.status==='Confirmed' && l.travel_date);
 
   const porDia = {};
   confirmados.forEach(l=>{ (porDia[l.travel_date] = porDia[l.travel_date]||[]).push(l); });
