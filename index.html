@@ -452,10 +452,10 @@
   #spv-grid-table{font-size:11px;border-collapse:separate;border-spacing:0;}
   #spv-grid-table th{padding:5px 4px!important;font-size:9px;letter-spacing:.3px;
     position:sticky;z-index:3;background:#3A3D42!important;color:#D8DADC!important;}
-  /* columnas de visitantes en gris oscuro */
-  #spv-grid-table .grp-visit{background:#3A3D42!important;color:#D8DADC!important;}
-  #spv-grid-table td.col-visit{background:#4A4D52!important;}
-  #spv-grid-table td.col-visit.total-cell{background:#45484D!important;font-weight:800;}
+  /* columnas de visitantes en gris (más claro, ya no tan oscuro) */
+  #spv-grid-table .grp-visit{background:#6E7279!important;color:#F5F6F7!important;}
+  #spv-grid-table td.col-visit{background:#7C8087!important;}
+  #spv-grid-table td.col-visit.total-cell{background:#71757C!important;font-weight:800;}
   #spv-grid-table thead tr:first-child th{top:0;z-index:5;}
   #spv-grid-table thead tr:nth-child(2) th{top:23px;z-index:5;}
   #spv-grid-table td{padding:2px 3px!important;height:26px;}
@@ -781,7 +781,8 @@
   .lead-box{max-height:calc(100vh - 210px);}
   .lead-table td{padding:2px 3px;}
   .lead-table td:first-child{position:sticky;left:0;z-index:2;
-    background:var(--surface);border-right:2px solid var(--line-strong);}
+    background:var(--surface)!important;border-right:2px solid var(--line-strong);}
+  .lead-table tbody tr:hover td:first-child{background:var(--surface)!important;}
   .lead-col-row th:first-child{position:sticky;left:0;z-index:5;
     background:var(--panel);border-right:2px solid var(--line-strong);}
   /* la fila de bloques NO se fija, así no se superpone al desplazarse */
@@ -918,7 +919,7 @@
   .gcal-row:last-child{border-bottom:none;}
   .gcal-date{font-weight:800;color:var(--accent);min-width:96px;font-size:11.5px;text-transform:capitalize;}
   /* ── Resumen: saludo integrado en la topbar, pequeño y sobrio ── */
-  .topbar-greeting{font-size:11.5px;font-weight:600;color:var(--text-dim);
+  .topbar-greeting{font-size:16px;font-weight:800;color:#111318;
     flex:1;text-align:center;padding:0 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   /* ── LOOMIS ──────────────────────────────────────────────── */
   .lq-topbar{font-size:11px;font-style:italic;color:var(--text-soft);
@@ -954,6 +955,9 @@
   /* fila subtotal: gris más oscurito, texto oscuro negrita */
   .lm-sub .lm-c-fever,
   .lm-sub .lm-c-sumup{background:#D0D0D0;color:#1A1A1A;font-weight:800;font-size:12px;}
+  /* subtotal en 0.0: amarillo pastel */
+  .lm-sub .lm-c-fever.lm-subt-zero,
+  .lm-sub .lm-c-sumup.lm-subt-zero{background:#FCF0DC;color:#8A6D0F;}
   /* separador entre días: franja gris clarita */
   .lm-sep td{background:#DCDCDC;border:none;height:5px;padding:0;}
   /* inputs */
@@ -1025,6 +1029,8 @@
   td.col-subtotal,th.grp-subtotal{background:var(--panel);font-weight:800;}
   td.spv-neto-cell{font-weight:800;}
   td.spv-neto-cell.qualify{background:var(--success-soft) !important;color:var(--success);}
+  /* la celda NETO va dentro de .col-visit (gris), que gana por especificidad de ID: forzamos el verde aquí */
+  #spv-grid-table td.col-visit.spv-neto-cell.qualify{background:var(--success-soft) !important;color:var(--success) !important;}
   td.spv-amount-qualify{background:#DCF3E7 !important;}
   #spv-grid-table td.spv-amount-qualify{border-color:#A9DFC0 !important;}
   #spv-grid-table td.spv-amount-qualify .cell-input{color:#0E6B45;font-weight:800;}
@@ -1170,7 +1176,7 @@
   .pct-down{font-size:11px;font-weight:800;color:var(--danger);background:var(--danger-soft);padding:1px 6px;border-radius:5px;}
   .day-col .group-chip{background:var(--accent-soft);border:1px solid #123B4D;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent-dark);margin-bottom:5px;line-height:1.4;}
   .day-col .no-groups{font-size:11px;color:var(--line-strong);padding:3px 0;}
-  .bday-chip{background:var(--panel);border:1px solid var(--line-strong);border-radius:6px;margin-top:4px;padding:2px 6px;}
+  .bday-chip{background:#FBE4F0;border:1px solid #F2A9CE;color:#A1276B;font-weight:800;border-radius:6px;margin-top:4px;padding:2px 6px;}
 
   /* Resumen — tareas PDA de solo lectura */
   .dash-pda-readonly{display:flex;flex-direction:column;gap:0;}
@@ -1533,20 +1539,22 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="grid grid-7" id="week-calendar" style="gap:10px;"></div>
         </div>
 
-        <div class="card" style="margin-top:14px;">
-          <div class="section-title" style="margin-bottom:10px;">Tareas pendientes · PDA <span class="hint">Solo lectura — para editar, ve a PDA</span></div>
-          <div id="dash-pda-tasks-list" class="dash-pda-readonly"></div>
-        </div>
+        <div class="grid" style="margin-top:14px;grid-template-columns:repeat(3,1fr);gap:14px;align-items:stretch;">
+          <div class="card" style="margin:0;">
+            <div class="section-title" style="margin-bottom:10px;">Tareas pendientes · PDA <span class="hint">Solo lectura — para editar, ve a PDA</span></div>
+            <div id="dash-pda-tasks-list" class="dash-pda-readonly"></div>
+          </div>
 
-        <div class="card" style="margin-top:14px;">
-          <div class="section-title" style="margin-bottom:10px;">Hoy en el equipo <span class="hint">Vacaciones, recuperación y cambios de turno</span></div>
-          <div id="dash-team-today" class="dash-pda-readonly"></div>
-        </div>
+          <div class="card" style="margin:0;">
+            <div class="section-title" style="margin-bottom:10px;">Hoy en el equipo <span class="hint">Vacaciones, recuperación y cambios de turno</span></div>
+            <div id="dash-team-today" class="dash-pda-readonly"></div>
+          </div>
 
-        <div class="card" style="margin-top:14px;">
-          <div class="section-title" style="margin:0;">Grupos confirmados</div>
-          <div class="value" style="font-size:30px;font-weight:800;color:var(--accent);margin-top:8px;" id="dash-grupos-confirmados-count">–</div>
-          <div style="font-size:11.5px;color:var(--text-soft);margin-top:2px;">reservas de grupo confirmadas</div>
+          <div class="card" style="margin:0;">
+            <div class="section-title" style="margin:0;">Grupos confirmados</div>
+            <div class="value" style="font-size:30px;font-weight:800;color:var(--accent);margin-top:8px;" id="dash-grupos-confirmados-count">–</div>
+            <div style="font-size:11.5px;color:var(--text-soft);margin-top:2px;">reservas de grupo confirmadas</div>
+          </div>
         </div>
 
         <div class="card" style="margin-top:14px;">
@@ -6493,9 +6501,9 @@ function recalcLoomis(){
     const tot=fe+su;
     wFe+=fe; wSu+=su; wTot+=tot;
     const sf=document.getElementById('lm-sf-'+iso);
-    if(sf) sf.textContent=fe.toFixed(2);
+    if(sf){ sf.textContent=fe.toFixed(2); sf.classList.toggle('lm-subt-zero', fe===0); }
     const ss=document.getElementById('lm-ss-'+iso);
-    if(ss) ss.textContent=su.toFixed(2);
+    if(ss){ ss.textContent=su.toFixed(2); ss.classList.toggle('lm-subt-zero', su===0); }
     const tc=document.getElementById('lm-total-'+iso);
     if(tc) tc.textContent=tot.toFixed(2);
   }
