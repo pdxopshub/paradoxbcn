@@ -4890,82 +4890,92 @@ async function loadRecapData(){
   const myToken = ++recapLoadToken;
   const myDate = recapDate;
   recapLoading = true;
-  // Limpiar todos los campos antes de cargar (evita ver datos del día anterior)
-  ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos',
-   'rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews',
-   'rc-observaciones'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.value='';
-  });
-  document.getElementById('rc-visitantes-ly').textContent='–';
-  RECAP_TIENDA_STAFF.forEach(s=>{ const el=document.getElementById(`rc-btq-${s}`); if(el) el.value=''; });
-  updateBoutiqueTotal();
+  try{
+    // Limpiar todos los campos antes de cargar (evita ver datos del día anterior)
+    ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos',
+     'rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews',
+     'rc-observaciones'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el) el.value='';
+    });
+    document.getElementById('rc-visitantes-ly').textContent='–';
+    RECAP_TIENDA_STAFF.forEach(s=>{ const el=document.getElementById(`rc-btq-${s}`); if(el) el.value=''; });
+    updateBoutiqueTotal();
 
-  // Fetch del recap guardado
-  const { data: rec } = await sb.from('recap').select('*').eq('fecha', myDate).maybeSingle();
-  if(myToken !== recapLoadToken) return; // ya hay una navegación más reciente en curso
-  recapData = rec || {};
+    // Fetch del recap guardado
+    const { data: rec } = await sb.from('recap').select('*').eq('fecha', myDate).maybeSingle();
+    if(myToken !== recapLoadToken) return; // ya hay una navegación más reciente en curso
+    recapData = rec || {};
 
-  // LY desde spv_days — mismo DÍA DE LA SEMANA del año pasado (no el mismo número)
-  const ly = lyIsoDow(myDate);
-  const { data: lyRow } = await sb.from('spv_days').select('visitantes').eq('fecha', ly).single().catch(()=>({data:null}));
-  const { data: todayRow } = await sb.from('spv_days').select('visitantes').eq('fecha', myDate).single().catch(()=>({data:null}));
-  if(myToken !== recapLoadToken) return;
-
-  // Info general
-  setValue('rc-visitantes', recapData.visitantes ?? todayRow?.visitantes ?? '');
-  document.getElementById('rc-visitantes-ly').textContent = lyRow?.visitantes?.toLocaleString('es-ES') ?? '–';
-  setValue('rc-box-office', recapData.e_box_office ?? '');
-  setValue('rc-fever', recapData.e_fever ?? '');
-  setValue('rc-api', recapData.e_api ?? '');
-  setValue('rc-grupos', recapData.e_grupos ?? '');
-  setValue('rc-horas-planday', recapData.horas_planday ?? '');
-  setValue('rc-ta-reviews', recapData.ta_reviews ?? '');
-  setValue('rc-google-reviews', recapData.google_reviews ?? '');
-  setValue('rc-gyg-reviews', recapData.gyg_reviews ?? '');
-
-  // Auto-fetch boutique de spv_entries si no hay dato guardado
-  const boutique = recapData.boutique || {};
-  let spvEntries = {};
-  if(Object.keys(boutique).length === 0){
-    const { data: entries } = await sb.from('spv_entries').select('staff_nombre,importe').eq('fecha', myDate);
+    // LY desde spv_days — mismo DÍA DE LA SEMANA del año pasado (no el mismo número)
+    const ly = lyIsoDow(myDate);
+    const { data: lyRow } = await sb.from('spv_days').select('visitantes').eq('fecha', ly).single().catch(()=>({data:null}));
+    const { data: todayRow } = await sb.from('spv_days').select('visitantes').eq('fecha', myDate).single().catch(()=>({data:null}));
     if(myToken !== recapLoadToken) return;
-    (entries||[]).forEach(e=>spvEntries[e.staff_nombre]=e.importe);
+
+    // Info general
+    setValue('rc-visitantes', recapData.visitantes ?? todayRow?.visitantes ?? '');
+    document.getElementById('rc-visitantes-ly').textContent = lyRow?.visitantes?.toLocaleString('es-ES') ?? '–';
+    setValue('rc-box-office', recapData.e_box_office ?? '');
+    setValue('rc-fever', recapData.e_fever ?? '');
+    setValue('rc-api', recapData.e_api ?? '');
+    setValue('rc-grupos', recapData.e_grupos ?? '');
+    setValue('rc-horas-planday', recapData.horas_planday ?? '');
+    setValue('rc-ta-reviews', recapData.ta_reviews ?? '');
+    setValue('rc-google-reviews', recapData.google_reviews ?? '');
+    setValue('rc-gyg-reviews', recapData.gyg_reviews ?? '');
+
+    // Auto-fetch boutique de spv_entries si no hay dato guardado
+    const boutique = recapData.boutique || {};
+    let spvEntries = {};
+    if(Object.keys(boutique).length === 0){
+      const { data: entries } = await sb.from('spv_entries').select('staff_nombre,importe').eq('fecha', myDate);
+      if(myToken !== recapLoadToken) return;
+      (entries||[]).forEach(e=>spvEntries[e.staff_nombre]=e.importe);
+    }
+    RECAP_TIENDA_STAFF.forEach(s=>setValue(`rc-btq-${s}`, boutique[s] ?? spvEntries[s] ?? ''));
+    updateBoutiqueTotal();
+
+    // Cerrado por
+    const cpEl = document.getElementById('recap-cerrado-por');
+    if(cpEl) cpEl.value = recapData.cerrado_por || '';
+
+    // Rutinas
+    const rutinasSi = recapData.rutinas || [];
+    [...RUTINAS_MAÑANA,...RUTINAS_TARDE].forEach(r=>{
+      const btn = document.getElementById('toggle-'+r.id);
+      if(btn){ const on = rutinasSi.includes(r.id); btn.className = 'toggle-btn '+(on?'si':''); btn.textContent = on?'Sí':'No'; }
+    });
+
+    // Tasks
+    const tasksDone = recapData.tasks_done || [];
+    document.querySelectorAll('.task-item').forEach(el=>{
+      el.classList.toggle('done', tasksDone.includes(el.id));
+    });
+
+    // Lluvia
+    const lluvia = recapData.lluvia || false;
+    const llBtn = document.getElementById('rc-lluvia-toggle');
+    if(llBtn){ llBtn.className='toggle-btn '+(lluvia?'si':''); llBtn.textContent=lluvia?'Sí':'No'; }
+    const llTasks = document.getElementById('rc-lluvia-tasks');
+    if(llTasks) llTasks.style.display = lluvia?'block':'none';
+    const llTask = document.getElementById('task-lluvia-0');
+    if(llTask) llTask.classList.toggle('done', (recapData.tasks_done||[]).includes('lluvia-0'));
+
+    // Observaciones
+    const obs = document.getElementById('rc-observaciones');
+    if(obs) obs.value = recapData.observaciones || '';
+  }catch(e){
+    // Un fallo de red a mitad de carga NO debe dejar recapLoading atascado en true:
+    // eso bloqueaba silenciosamente TODOS los guardados (el botón "Guardar Recap"
+    // también comprueba recapLoading) durante el resto de la sesión, sin avisar
+    // — este era el motivo real de que los recaps "se borraran" al volver.
+    console.error('[RECAP] Error cargando datos del día:', e);
+  }finally{
+    // Solo la llamada más reciente libera el bloqueo; si ya empezó una carga
+    // más nueva, es ella quien decide cuándo queda libre.
+    if(myToken === recapLoadToken) recapLoading = false;
   }
-  RECAP_TIENDA_STAFF.forEach(s=>setValue(`rc-btq-${s}`, boutique[s] ?? spvEntries[s] ?? ''));
-  updateBoutiqueTotal();
-
-  // Cerrado por
-  const cpEl = document.getElementById('recap-cerrado-por');
-  if(cpEl) cpEl.value = recapData.cerrado_por || '';
-
-  // Rutinas
-  const rutinasSi = recapData.rutinas || [];
-  [...RUTINAS_MAÑANA,...RUTINAS_TARDE].forEach(r=>{
-    const btn = document.getElementById('toggle-'+r.id);
-    if(btn){ const on = rutinasSi.includes(r.id); btn.className = 'toggle-btn '+(on?'si':''); btn.textContent = on?'Sí':'No'; }
-  });
-
-  // Tasks
-  const tasksDone = recapData.tasks_done || [];
-  document.querySelectorAll('.task-item').forEach(el=>{
-    el.classList.toggle('done', tasksDone.includes(el.id));
-  });
-
-  // Lluvia
-  const lluvia = recapData.lluvia || false;
-  const llBtn = document.getElementById('rc-lluvia-toggle');
-  if(llBtn){ llBtn.className='toggle-btn '+(lluvia?'si':''); llBtn.textContent=lluvia?'Sí':'No'; }
-  const llTasks = document.getElementById('rc-lluvia-tasks');
-  if(llTasks) llTasks.style.display = lluvia?'block':'none';
-  const llTask = document.getElementById('task-lluvia-0');
-  if(llTask) llTask.classList.toggle('done', (recapData.tasks_done||[]).includes('lluvia-0'));
-
-  // Observaciones
-  const obs = document.getElementById('rc-observaciones');
-  if(obs) obs.value = recapData.observaciones || '';
-
-  recapLoading = false;
 }
 
 function setValue(id, val){
@@ -5000,7 +5010,11 @@ function getRecapPayload(){
 }
 
 async function saveRecap(silent=false){
-  if(recapLoading) return;   // nunca guardar mientras se cargan los campos
+  // El autoguardado silencioso se salta mientras se están cargando los campos
+  // (evitaría guardar valores a medio rellenar). El botón "Guardar Recap" es una
+  // acción explícita del usuario y SIEMPRE debe intentar guardar, aunque
+  // recapLoading se hubiera quedado atascado por algún fallo de red anterior.
+  if(recapLoading && silent) return;
   const payload = getRecapPayload();
   const me = currentProfile?.nombre || '';
   if(!silent){
