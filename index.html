@@ -814,7 +814,7 @@
   .hp-foot .btn{width:100%;justify-content:center;}
   .lc-in optgroup{background:#20242E;color:#8D91A3;}
   /* icono de estado junto al grupo */
-  .grupo-cell{display:flex;align-items:center;gap:6px;min-width:0;}
+  .grupo-cell{display:flex;align-items:center;gap:8px;min-width:0;padding-left:8px;}
   .grupo-cell .lc-in{flex:1;min-width:0;}
   .st-ico{flex-shrink:0;width:16px;height:16px;border-radius:50%;display:inline-flex;
     align-items:center;justify-content:center;font-size:10px;font-weight:900;line-height:1;}
@@ -855,11 +855,16 @@
   /* tabla de precios */
   #precios-table td{padding:5px 8px;}
   #precios-table tr.pr-extra td{background:rgba(255,255,255,.02);font-size:12px;}
+  #precios-table tr.pr-section td{padding-top:14px;padding-bottom:4px;font-size:11px;
+    font-weight:800;letter-spacing:.6px;text-transform:uppercase;}
+  #precios-table tr.pr-section:first-child td{padding-top:5px;}
   .pr-plus{color:var(--accent);font-weight:900;margin-right:4px;}
   .pr-in{width:90px;text-align:center;background:#10233A;border:1.5px solid #2E4C6E;
     border-radius:6px;color:#EAF1FB;padding:4px 6px;font-weight:700;font-size:12.5px;}
   .pr-in:focus{outline:none;border-color:var(--accent);background:#173A63;}
-  .pr-dif{font-weight:800;color:var(--ok);}
+  .pr-dif{font-weight:800;color:var(--text-soft);}
+  .pr-eur{display:inline-flex;align-items:center;gap:5px;}
+  .pr-eur-sym{color:var(--text-soft);font-size:13px;}
   .lead-toolbar{gap:7px;}
   .lead-toolbar select{min-width:0;width:auto;padding:6px 9px;font-size:11.5px;}
   .lead-toolbar input{padding:6px 9px;font-size:11.5px;}
@@ -2018,12 +2023,12 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="gv-tablebox">
             <table id="gm-table" class="gv-table no-filter">
               <thead><tr>
-                <th style="width:230px;text-align:left;">Grupo</th>
-                <th style="width:120px;">Tipo</th>
-                <th style="width:210px;">Email</th>
-                <th style="width:120px;">Teléfonos</th>
-                <th style="width:150px;">Contacto</th>
-                <th style="text-align:left;">Comentarios</th>
+                <th style="width:230px;text-align:center;">Grupo</th>
+                <th style="width:120px;text-align:center;">Tipo</th>
+                <th style="width:210px;text-align:center;">Email</th>
+                <th style="width:120px;text-align:center;">Teléfonos</th>
+                <th style="width:150px;text-align:center;">Contacto</th>
+                <th style="text-align:center;">Comentarios</th>
                 <th style="width:40px;"></th>
               </tr></thead>
               <tbody></tbody>
@@ -2095,10 +2100,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <div class="table-wrap">
               <table id="precios-table" class="no-filter">
                 <thead><tr>
-                  <th style="text-align:left;">Tipo</th>
-                  <th style="width:130px;">Precio original</th>
-                  <th style="width:130px;">Precio grupo</th>
-                  <th style="width:110px;">Diferencia</th>
+                  <th style="text-align:center;">Tipo</th>
+                  <th style="width:130px;text-align:center;">Precio original</th>
+                  <th style="width:130px;text-align:center;">Precio grupo</th>
+                  <th style="width:110px;text-align:center;">Diferencia</th>
                 </tr></thead>
                 <tbody></tbody>
               </table>
@@ -5398,7 +5403,7 @@ function renderLeads(canal){
 
   const colRow = '<tr class="lead-col-row">' + LEAD_COLS.map((c,i)=>{
     const last = LEAD_COLS[i+1] && LEAD_COLS[i+1].g !== c.g;
-    return `<th style="min-width:${c.w}px;text-align:${c.left?'left':'center'};" class="${last?'grp-edge':''}">${c.t}</th>`;
+    return `<th style="min-width:${c.w}px;text-align:center;" class="${last?'grp-edge':''}">${c.t}</th>`;
   }).join('') + '<th style="min-width:38px;"></th></tr>';
 
   const head = '<thead>' + grpRow + colRow + '</thead>';
@@ -5853,22 +5858,38 @@ async function renderDashGrupos(){
 }
 
 /* ---------------- PRECIOS ---------------- */
+/* Agrupación visual de la tabla de precios. taller/monitor van con
+   School Kid porque son los suplementos propios de Escuela/Casal. */
+const PRECIOS_SECCIONES = [
+  {label:'ONG',         claves:['ong'],                                        color:'#5FD8E0'},
+  {label:'CORPORATIVO', claves:['corporativo','corp_tb','corp_catering'],      color:'#F2606A'},
+  {label:'SCHOOL KID',  claves:['school_4_12','school_13','taller','monitor'], color:'#7FB2FF'},
+  {label:'GROUPS',      claves:['uni','adult','senior'],                       color:'#33C98B'},
+];
 function renderPrecios(){
   const tb = document.querySelector('#precios-table tbody');
   if(!tb) return;
-  tb.innerHTML = GP_CACHE.map(p=>{
-    const dif = (p.precio_original!=null && p.precio_grupo!=null)
-      ? (parseFloat(p.precio_original)-parseFloat(p.precio_grupo)) : null;
-    return `<tr class="${p.extra?'pr-extra':''}">
-      <td style="text-align:left;font-weight:${p.extra?'600':'700'};">
-        ${p.extra?'<span class="pr-plus">+</span>':''}${esc(p.etiqueta)}
-      </td>
-      <td><input class="pr-in" type="number" step="0.5" min="0" data-id="${p.id}" data-k="precio_original"
-                 value="${p.precio_original ?? ''}" placeholder="—"></td>
-      <td><input class="pr-in" type="number" step="0.5" min="0" data-id="${p.id}" data-k="precio_grupo"
-                 value="${p.precio_grupo ?? ''}" placeholder="—"></td>
-      <td class="pr-dif">${dif!==null ? dif.toFixed(2)+'€' : '—'}</td>
-    </tr>`;
+  const porClave = {};
+  GP_CACHE.forEach(p=>{ porClave[p.clave] = p; });
+  tb.innerHTML = PRECIOS_SECCIONES.map(sec=>{
+    const items = sec.claves.map(k=>porClave[k]).filter(Boolean);
+    if(!items.length) return '';
+    const head = `<tr class="pr-section"><td colspan="4" style="color:${sec.color};border-left:3px solid ${sec.color};">${sec.label}</td></tr>`;
+    const body = items.map(p=>{
+      const dif = (p.precio_original!=null && p.precio_grupo!=null)
+        ? (parseFloat(p.precio_original)-parseFloat(p.precio_grupo)) : null;
+      return `<tr class="${p.extra?'pr-extra':''}">
+        <td style="text-align:left;font-weight:${p.extra?'600':'700'};border-left:3px solid ${sec.color};">
+          ${p.extra?'<span class="pr-plus">+</span>':''}${esc(p.etiqueta)}
+        </td>
+        <td><input class="pr-in" type="number" step="0.5" min="0" data-id="${p.id}" data-k="precio_original"
+                   value="${p.precio_original ?? ''}" placeholder="—"></td>
+        <td><span class="pr-eur"><input class="pr-in" type="number" step="0.5" min="0" data-id="${p.id}" data-k="precio_grupo"
+                   value="${p.precio_grupo ?? ''}" placeholder="—"><b class="pr-eur-sym">€</b></span></td>
+        <td class="pr-dif">${dif!==null ? dif.toFixed(2)+'€' : '—'}</td>
+      </tr>`;
+    }).join('');
+    return head + body;
   }).join('');
   tb.querySelectorAll('.pr-in').forEach(el=> el.addEventListener('change', savePrecio));
 }
