@@ -1072,6 +1072,7 @@
   .btn{font-family:var(--font);font-weight:700;font-size:12.5px;border:1px solid transparent;border-radius:8px;padding:9px 15px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
   .btn-primary{background:var(--accent);color:#fff;}
   .btn-primary:hover{background:#0691C1;}
+  .btn:disabled{opacity:.5;cursor:wait;}
   .btn-ghost{background:var(--panel);color:var(--text);border:1px solid var(--line-strong);}
   .btn-ghost:hover{background:#D6D6D6;}
   .btn-sm{padding:6px 10px;font-size:11.5px;}
@@ -1789,7 +1790,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             </div>
             <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
               <div class="recap-saved-banner" id="recap-saved-banner">✓ Guardado</div>
-              <button class="btn btn-primary" onclick="saveRecap()" style="min-width:150px;justify-content:center;">
+              <button id="recap-save-btn" class="btn btn-primary" onclick="saveRecap()" style="min-width:150px;justify-content:center;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0B0E14" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
                 Guardar Recap
               </button>
@@ -4795,75 +4796,85 @@ function updateBoutiqueTotal(){
 }
 
 async function renderRecap(){
-  await loadRecapConfig();
-  // Poner la fecha en el input
-  document.getElementById('recap-date').value = recapDate;
-  updateRecapDateLabel();
+  // Bloquea "Guardar Recap" mientras se cargan/limpian los campos: si el botón
+  // seguía activo durante ese hueco, un clic en ese instante guardaba los campos
+  // ya vaciados (a medio recargar) y pisaba el dato bueno que se acababa de
+  // guardar justo antes — esto era lo que realmente borraba el recap.
+  const saveBtn = document.getElementById('recap-save-btn');
+  if(saveBtn) saveBtn.disabled = true;
+  try{
+    await loadRecapConfig();
+    // Poner la fecha en el input
+    document.getElementById('recap-date').value = recapDate;
+    updateRecapDateLabel();
 
-  // Staff real desde la tabla staff
-  await loadRecapStaffNames();
+    // Staff real desde la tabla staff
+    await loadRecapStaffNames();
 
-  // Generar campos de boutique
-  const btq = document.getElementById('rc-boutique-fields');
-  btq.innerHTML = RECAP_TIENDA_STAFF.map(s=>`
-    <div>
-      <div title="${s}">${s}</div>
-      <input type="number" class="cell-input rc-btq-in" id="rc-btq-${s}" placeholder="0" step="0.01" style="text-align:right;width:100%;">
-    </div>`).join('');
-  btq.querySelectorAll('.rc-btq-in').forEach(inp=>inp.addEventListener('input', updateBoutiqueTotal));
+    // Generar campos de boutique
+    const btq = document.getElementById('rc-boutique-fields');
+    btq.innerHTML = RECAP_TIENDA_STAFF.map(s=>`
+      <div>
+        <div title="${s}">${s}</div>
+        <input type="number" class="cell-input rc-btq-in" id="rc-btq-${s}" placeholder="0" step="0.01" style="text-align:right;width:100%;">
+      </div>`).join('');
+    btq.querySelectorAll('.rc-btq-in').forEach(inp=>inp.addEventListener('input', updateBoutiqueTotal));
 
-  // Generar rutinas mañana
-  document.getElementById('rutinas-mañana').innerHTML = RUTINAS_MAÑANA.map(r=>`
-    <div class="recap-field">
-      <label>${r.label}</label>
-      <button class="toggle-btn" id="toggle-${r.id}" onclick="toggleRutina('${r.id}')">No</button>
-    </div>`).join('');
+    // Generar rutinas mañana
+    document.getElementById('rutinas-mañana').innerHTML = RUTINAS_MAÑANA.map(r=>`
+      <div class="recap-field">
+        <label>${r.label}</label>
+        <button class="toggle-btn" id="toggle-${r.id}" onclick="toggleRutina('${r.id}')">No</button>
+      </div>`).join('');
 
-  // Generar rutinas tarde
-  document.getElementById('rutinas-tarde').innerHTML = RUTINAS_TARDE.map(r=>`
-    <div class="recap-field">
-      <label>${r.label}</label>
-      <button class="toggle-btn" id="toggle-${r.id}" onclick="toggleRutina('${r.id}')">No</button>
-    </div>`).join('');
+    // Generar rutinas tarde
+    document.getElementById('rutinas-tarde').innerHTML = RUTINAS_TARDE.map(r=>`
+      <div class="recap-field">
+        <label>${r.label}</label>
+        <button class="toggle-btn" id="toggle-${r.id}" onclick="toggleRutina('${r.id}')">No</button>
+      </div>`).join('');
 
-  // Generar tasks semanales
-  const todayDate = new Date(recapDate+'T12:00:00');
-  const todayDow = todayDate.getDay(); // 0=dom,1=lun...
-  const taskContainer = document.getElementById('recap-weekly-tasks');
-  taskContainer.innerHTML = [1,2,3,4,5,6].map(dow=>{
-    const wt = WEEKLY_TASKS[dow];
-    const isToday = dow === todayDow || (dow===6 && (todayDow===6||todayDow===0));
-    const allTasks = [
-      ...wt.mañana.map((t,i)=>({id:`task-${dow}-m-${i}`, txt:t})),
-      ...wt.tarde.map((t,i)=>({id:`task-${dow}-t-${i}`, txt:t})),
-    ];
-    return `<div class="day-block ${isToday?'today':'other'}">
-      <div class="day-block-label">${wt.label}${isToday?' ← hoy':''}</div>
-      ${allTasks.map(tk=>`
-        <div class="task-item" id="${tk.id}" onclick="toggleTask('${tk.id}')">
-          <div class="task-check"></div>
-          <div class="task-txt">${tk.txt}</div>
-        </div>`).join('')}
-    </div>`;
-  }).join('');
+    // Generar tasks semanales
+    const todayDate = new Date(recapDate+'T12:00:00');
+    const todayDow = todayDate.getDay(); // 0=dom,1=lun...
+    const taskContainer = document.getElementById('recap-weekly-tasks');
+    taskContainer.innerHTML = [1,2,3,4,5,6].map(dow=>{
+      const wt = WEEKLY_TASKS[dow];
+      const isToday = dow === todayDow || (dow===6 && (todayDow===6||todayDow===0));
+      const allTasks = [
+        ...wt.mañana.map((t,i)=>({id:`task-${dow}-m-${i}`, txt:t})),
+        ...wt.tarde.map((t,i)=>({id:`task-${dow}-t-${i}`, txt:t})),
+      ];
+      return `<div class="day-block ${isToday?'today':'other'}">
+        <div class="day-block-label">${wt.label}${isToday?' ← hoy':''}</div>
+        ${allTasks.map(tk=>`
+          <div class="task-item" id="${tk.id}" onclick="toggleTask('${tk.id}')">
+            <div class="task-check"></div>
+            <div class="task-txt">${tk.txt}</div>
+          </div>`).join('')}
+      </div>`;
+    }).join('');
 
-  // Cargar datos de Supabase para esta fecha
-  await loadRecapData();
+    // Cargar datos de Supabase para esta fecha
+    await loadRecapData();
 
-  // Listeners de auto-guardado (marcados para no duplicarse al renderizar de nuevo)
-  const bindSave = (el, evt, fn)=>{
-    if(!el || el.dataset.rcBound === evt) return;
-    el.dataset.rcBound = evt;
-    el.addEventListener(evt, fn);
-  };
-  const onChange = () => { if(!recapLoading) saveRecap(true); };
-  ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews']
-    .forEach(id=> bindSave(document.getElementById(id), 'change', onChange));
-  RECAP_TIENDA_STAFF.forEach(s=> bindSave(document.getElementById(`rc-btq-${s}`), 'change', onChange));
-  bindSave(document.getElementById('recap-cerrado-por'), 'change', onChange);
-  bindSave(document.getElementById('rc-observaciones'), 'input', debounceRecapSave);
+    // Listeners de auto-guardado (marcados para no duplicarse al renderizar de nuevo)
+    const bindSave = (el, evt, fn)=>{
+      if(!el || el.dataset.rcBound === evt) return;
+      el.dataset.rcBound = evt;
+      el.addEventListener(evt, fn);
+    };
+    const onChange = () => { if(!recapLoading) saveRecap(true); };
+    ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews']
+      .forEach(id=> bindSave(document.getElementById(id), 'change', onChange));
+    RECAP_TIENDA_STAFF.forEach(s=> bindSave(document.getElementById(`rc-btq-${s}`), 'change', onChange));
+    bindSave(document.getElementById('recap-cerrado-por'), 'change', onChange);
+    bindSave(document.getElementById('rc-observaciones'), 'input', debounceRecapSave);
 
-  renderRecapCapsules();
+    renderRecapCapsules();
+  } finally {
+    if(saveBtn) saveBtn.disabled = false;
+  }
 }
 
 function updateRecapDateLabel(){
@@ -5093,10 +5104,12 @@ async function recapGoDate(iso){
   }
 }
 
-// Cambio de fecha manual desde el input
+// Cambio de fecha manual desde el input — usa recapGoDate() para que también
+// guarde el día actual antes de saltar y bloquee los botones mientras carga,
+// igual que Anterior/Siguiente/Hoy.
 document.addEventListener('DOMContentLoaded', ()=>{
   const datePicker = document.getElementById('recap-date');
-  if(datePicker) datePicker.addEventListener('change', e=>{ recapDate=e.target.value; updateRecapDateLabel(); loadRecapData(); });
+  if(datePicker) datePicker.addEventListener('change', e=>{ recapGoDate(e.target.value); });
 });
 
 /* --- Panel lateral: cápsulas de recaps anteriores + notificaciones --- */
