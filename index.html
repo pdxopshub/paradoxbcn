@@ -408,7 +408,7 @@
     text-align:center;border-bottom:none;}
   #staff-table .grp-row .grp-none{background:var(--surface);}
   #staff-table .grp-row .grp-fever{background:#DCE7FF;color:#12294D;}
-  #staff-table .grp-row .grp-sumup{background:#E7E9EE;color:#1B1F27;}
+  #staff-table .grp-row .grp-sumup{background:#111318;color:#fff;}
   #staff-table .grp-row .grp-nfc{background:#DDF3E7;color:#0E6B49;}
   #staff-table th.c-fever{background:#EAF1FF;color:#12294D;}
   #staff-table th.c-sumup{background:#EFF0F3;color:#1B1F27;}
@@ -566,10 +566,10 @@
   .tcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
   .tcal-dow{font-size:9.5px;text-align:center;color:var(--text-dim);font-weight:700;padding-bottom:3px;}
   .tcal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:11px;
-    border-radius:5px;color:var(--text-soft);position:relative;
+    border-radius:5px;color:#1B1F27;font-weight:700;position:relative;
     background:var(--panel);border:1px solid var(--line);}
   .tcal-day.pad{visibility:hidden;}
-  .tcal-day.wknd{color:#5A6070;}
+  .tcal-day.wknd{color:#1B1F27;}
   .tcal-day.today{box-shadow:inset 0 0 0 1.5px var(--accent);color:var(--accent);font-weight:900;}
   .tcal-day.has{background:#245C40;color:#C6F3DC;font-weight:800;cursor:help;}
   .tcal-day.has:hover{filter:brightness(1.25);}
@@ -633,15 +633,38 @@
   .chat-daysep{align-self:center;background:var(--panel);border:1px solid var(--line);color:var(--text-dim);
     font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin:14px 0 8px;}
   .msg{max-width:74%;padding:8px 12px;border-radius:12px;position:relative;word-wrap:break-word;
-    background:#007BA7;border:1px solid #005E80;align-self:flex-start;margin-top:2px;color:#fff;}
-  .msg.mine{align-self:flex-end;background:#045572;border-color:#033F54;}
-  .msg .m-who{font-size:11.5px;font-weight:800;margin-bottom:3px;color:#fff;}
-  .msg .m-txt{font-size:13.5px;line-height:1.45;white-space:pre-wrap;color:#fff;}
-  .msg .m-time{font-size:10px;color:rgba(255,255,255,.75);text-align:right;margin-top:3px;}
-  .msg .m-del{position:absolute;top:4px;right:6px;background:none;border:none;color:rgba(255,255,255,.75);
+    background:#DCEAFF;border:1px solid #B7D3FF;align-self:flex-start;margin-top:2px;color:#123A73;}
+  .msg.mine{align-self:flex-end;background:#DCF3E7;border-color:#A9DFC0;color:#0E6B45;}
+  .msg .m-who{font-size:11.5px;font-weight:800;margin-bottom:3px;color:#123A73;}
+  .msg.mine .m-who{color:#0E6B45;}
+  .msg .m-txt{font-size:13.5px;font-weight:700;line-height:1.45;white-space:pre-wrap;color:#123A73;}
+  .msg.mine .m-txt{color:#0E6B45;}
+  .msg .m-time{font-size:10px;color:rgba(18,58,115,.65);text-align:right;margin-top:3px;}
+  .msg.mine .m-time{color:rgba(14,107,69,.65);}
+  .msg .m-del{position:absolute;top:4px;right:6px;background:none;border:none;color:rgba(18,58,115,.55);
     cursor:pointer;font-size:13px;line-height:1;opacity:0;transition:opacity .12s;padding:2px;}
+  .msg.mine .m-del{color:rgba(14,107,69,.55);}
   .msg:hover .m-del{opacity:1;}
-  .msg .m-del:hover{color:#FFD2D6;}
+  .msg .m-del:hover{color:var(--danger);}
+  /* ---- Reacciones con emoji ---- */
+  .m-react-bar{display:flex;gap:3px;margin-top:5px;flex-wrap:wrap;align-items:center;}
+  .m-react-pill{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.65);
+    border:1px solid rgba(18,58,115,.18);border-radius:20px;padding:1px 7px;font-size:12px;cursor:pointer;
+    transition:transform .1s, background .12s;}
+  .m-react-pill:hover{background:#fff;transform:scale(1.08);}
+  .m-react-pill.mine-reacted{border-color:var(--accent);background:#fff;}
+  .m-react-pill .cnt{font-size:10.5px;font-weight:800;color:#123A73;}
+  .m-react-add{position:relative;display:inline-flex;}
+  .m-react-add-btn{background:none;border:none;cursor:pointer;font-size:13px;opacity:0;transition:opacity .12s;
+    padding:2px 4px;color:rgba(18,58,115,.6);}
+  .msg:hover .m-react-add-btn{opacity:1;}
+  .m-react-menu{display:none;position:absolute;bottom:100%;left:0;margin-bottom:4px;background:#fff;
+    border:1px solid var(--line-strong);border-radius:20px;padding:4px 6px;box-shadow:var(--shadow);
+    gap:2px;z-index:20;white-space:nowrap;}
+  .m-react-menu.open{display:flex;}
+  .m-react-menu button{background:none;border:none;cursor:pointer;font-size:16px;padding:3px;border-radius:50%;
+    transition:transform .1s, background .12s;}
+  .m-react-menu button:hover{background:var(--panel);transform:scale(1.2);}
   .chat-foot{padding:12px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:flex-end;background:var(--panel);}
   .chat-foot textarea{flex:1;resize:none;min-height:42px;max-height:130px;padding:11px 13px;border-radius:10px;
     background:var(--surface);border:1px solid var(--line-strong);color:var(--text);font-family:inherit;font-size:13.5px;}
@@ -872,8 +895,15 @@
     border:1px solid var(--line);border-radius:4px;color:var(--text);
     font-size:11px;padding:2px 4px;text-align:center;}
   .dsg-in:focus{outline:none;border-color:var(--accent);background:rgba(0,123,167,.14);}
+  .dsg-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;
+    border-top:1px solid var(--line);padding-top:3px;margin-top:1px;}
   .dsg-total{font-family:var(--font);font-weight:800;font-size:12.5px;color:var(--ok);
-    text-align:right;padding-right:3px;border-top:1px solid var(--line);padding-top:2px;}
+    text-align:right;padding-right:3px;}
+  .promo-badge{background:#F2E9FF;border:1.5px solid #D9C2FA;border-radius:20px;color:#6B3FA0;
+    font-size:10px;font-weight:800;padding:2px 8px;cursor:pointer;text-transform:uppercase;
+    letter-spacing:.3px;max-width:110px;}
+  .promo-badge.active{background:#E3CFFA;border-color:#B27CE8;color:#4E2278;}
+  .promo-badge:focus{outline:none;border-color:#9B4FDB;}
   /* tabla de precios */
   #precios-table td{padding:5px 8px;}
   #precios-table tr.pr-extra td{background:rgba(0,0,0,.03);font-size:12px;}
@@ -887,6 +917,14 @@
   .pr-dif{font-weight:800;color:var(--text-soft);}
   .pr-eur{display:inline-flex;align-items:center;gap:5px;}
   .pr-eur-sym{color:var(--text-soft);font-size:13px;}
+  .pr-label-in{width:170px;text-align:left;background:#FCF0DC;border:1.5px solid #F0D9A6;
+    border-radius:6px;color:#8A6D0F;padding:4px 6px;font-weight:700;font-size:12.5px;}
+  .pr-label-in:focus{outline:none;border-color:#D9A400;background:#FBE6BC;}
+  .pr-promo-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;
+    margin-left:6px;vertical-align:middle;}
+  .pr-promo-del:hover{color:var(--danger);}
+  .pr-promo-hint{font-size:11px;color:var(--text-soft);font-weight:400;text-transform:none;
+    letter-spacing:0;margin-left:8px;}
   .lead-toolbar{gap:7px;}
   .lead-toolbar select{min-width:0;width:auto;padding:6px 9px;font-size:11.5px;}
   .lead-toolbar input{padding:6px 9px;font-size:11.5px;}
@@ -1085,6 +1123,9 @@
   input,select,textarea{font-family:var(--font);border:1px solid var(--line-strong);border-radius:7px;padding:7px 9px;font-size:13px;background:var(--panel);color:var(--text);width:100%;}
   input:focus,select:focus,textarea:focus{outline:2px solid rgba(0,123,167,.35);border-color:var(--accent);}
   label.field-label{font-size:11.5px;font-weight:700;color:var(--text-soft);margin-bottom:5px;display:block;}
+  /* Cambios de turno: los campos (Staff/Hora/Min/Día/Mes/Año) en blanco para que
+     se distingan del fondo gris de la cápsula */
+  .turno-form-block select,.turno-form-block input{background:#FFFFFF;}
   input.cell-input{border:1px solid transparent;background:transparent;padding:5px 6px;text-align:right;border-radius:5px;}
   input.cell-input::placeholder{color:#4A4F60;}
   input.cell-input:hover{border-color:var(--line-strong);}
@@ -4243,7 +4284,7 @@ const TURNO_MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','
 
 function buildTurnoBlock(prefix, label, staffNames){
   return `
-    <div style="border:1px solid var(--line);border-radius:9px;padding:12px;background:var(--panel);">
+    <div class="turno-form-block" style="border:1px solid var(--line);border-radius:9px;padding:12px;background:var(--panel);">
       <div style="font-size:11.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">${label}</div>
       <div style="display:grid;grid-template-columns:1.6fr 1fr 1.15fr 0.55fr;gap:10px;align-items:end;">
         <div><label class="field-label">Staff</label><select id="${prefix}-staff">${staffNames.map(n=>`<option value="${n}">${n}</option>`).join('') || '<option value="">Añade staff primero</option>'}</select></div>
@@ -4363,13 +4404,13 @@ function renderTurnosCalendar(list){
       if(movs){
         cls.push('has');
         const c = movs[0].color;
-        style = `background:${c}22;border-color:${c};color:${c};`;
+        style = `background:${c}22;border-color:${c};color:#1B1F27;font-weight:700;`;
         if(movs.length>1){
           // varios cambios el mismo día: franjas con los colores
           const cols = movs.map(x=>x.color);
           const step = 100/cols.length;
           const stops = cols.map((c,i)=>`${c}22 ${i*step}%, ${c}22 ${(i+1)*step}%`).join(',');
-          style = `background:linear-gradient(135deg, ${stops});border-color:${cols[0]};color:#EDEEF3;`;
+          style = `background:linear-gradient(135deg, ${stops});border-color:${cols[0]};color:#1B1F27;font-weight:700;`;
         }
       }
       const tip = movs ? movs.map(x=>`${x.cede} → ${x.coge}${x.hora?' ('+x.hora+')':''}`).join(' | ').replace(/"/g,'&quot;') : iso;
@@ -5364,16 +5405,48 @@ function precioDe(clave){
   const p = GP_CACHE.find(x=>x.clave===clave);
   return p ? (parseFloat(p.precio_grupo)||0) : 0;
 }
+/* Campos de "niño" a los que se les aplica el precio de PROMO cuando hay una activa */
+const DSG_CAMPOS_NINO = ['ninos412','ninos13','ninos','nino'];
+
 function calcTotalLead(l){
   const campos = desgloseDe(l.tipo_grupo);
   if(!campos) return null;
   const d = l.desglose || {};
+  const promo = d.promo_clave ? GP_CACHE.find(x=>x.clave===d.promo_clave) : null;
+  const promoPrecio = (promo && promo.precio_grupo!=null) ? parseFloat(promo.precio_grupo)||0 : null;
+  // Regla del museo: 1 monitor gratis por cada 10 niños de la reserva.
+  const ninosTotal = DSG_CAMPOS_NINO.reduce((s,k)=> s + (parseFloat(d[k])||0), 0);
+  const monitoresGratis = Math.floor(ninosTotal/10);
   let total = 0;
   campos.forEach(c=>{
     const v = parseFloat(d[c.k]) || 0;
-    total += c.libre ? v : v * precioDe(c.precio);
+    if(c.libre){ total += v; return; }
+    let precioUnit = precioDe(c.precio);
+    if(promoPrecio!==null && DSG_CAMPOS_NINO.includes(c.k)) precioUnit = promoPrecio;
+    if(c.k === 'monitor'){
+      const facturables = Math.max(0, v - monitoresGratis);
+      total += facturables * precioUnit;
+      return;
+    }
+    total += v * precioUnit;
   });
   return total;
+}
+
+async function setLeadPromo(sel){
+  const id = parseInt(sel.dataset.id,10);
+  const clave = sel.value || null;
+  const lead = GL_CACHE.find(x=>x.id===id);
+  if(!lead) return;
+  const d = Object.assign({}, lead.desglose||{});
+  if(clave) d.promo_clave = clave; else delete d.promo_clave;
+  lead.desglose = d;
+  const total = calcTotalLead(lead);
+  lead.total_eur = total;
+  const { error } = await sb.from('grupos_leads')
+    .update({desglose:d, total_eur:total, updated_at:new Date().toISOString()}).eq('id', id);
+  if(error){ console.error(error); alert('No se pudo guardar la promo: '+error.message); return; }
+  renderLeads(lead.canal);
 }
 function vaAlMaestro(tipo){ return !!tipo && !TIPOS_SIN_MAESTRO.includes(tipo); }
 
@@ -5691,6 +5764,7 @@ function renderLeads(canal){
           inner = `<input class="lc-in" type="number" ${dk} value="${esc(val)}">`;
         } else {
           const total = calcTotalLead(l);
+          const promos = GP_CACHE.filter(p=>p.clave && p.clave.startsWith('promo_'));
           inner = `<div class="dsg">
             <div class="dsg-campos" style="grid-template-columns:repeat(${Math.min(campos.length,2)},1fr);">
               ${campos.map(f=>`
@@ -5700,7 +5774,13 @@ function renderLeads(canal){
                          data-id="${l.id}" data-dk="${f.k}" value="${d[f.k] ?? ''}">
                 </div>`).join('')}
             </div>
-            <div class="dsg-total">${total ? total.toFixed(2)+'€' : '—'}</div>
+            <div class="dsg-foot">
+              <select class="promo-badge${d.promo_clave?' active':''}" data-id="${l.id}" onchange="setLeadPromo(this)" title="Marcar esta reserva como PROMO">
+                <option value="">🏷 PROMO</option>
+                ${promos.map(p=>`<option value="${p.clave}"${d.promo_clave===p.clave?' selected':''}>${esc(p.etiqueta)}${p.precio_grupo!=null?' · '+p.precio_grupo+'€':''}</option>`).join('')}
+              </select>
+              <div class="dsg-total">${total ? total.toFixed(2)+'€' : '—'}</div>
+            </div>
           </div>`;
         }
       } else if(c.type==='hora'){
@@ -6112,6 +6192,7 @@ const PRECIOS_SECCIONES = [
   {label:'CORPORATIVO', claves:['corporativo','corp_tb','corp_catering'],      color:'var(--text-soft)'},
   {label:'ESCUELAS',    claves:['school_4_12','school_13','taller','monitor'], color:'var(--text-soft)'},
   {label:'GRUPOS',      claves:['uni','adult','senior'],                       color:'var(--text-soft)'},
+  {label:'PROMOS',      claves:null, promo:true,                               color:'var(--text-soft)'},
 ];
 function renderPrecios(){
   const tb = document.querySelector('#precios-table tbody');
@@ -6119,15 +6200,21 @@ function renderPrecios(){
   const porClave = {};
   GP_CACHE.forEach(p=>{ porClave[p.clave] = p; });
   tb.innerHTML = PRECIOS_SECCIONES.map(sec=>{
-    const items = sec.claves.map(k=>porClave[k]).filter(Boolean);
-    if(!items.length) return '';
-    const head = `<tr class="pr-section"><td colspan="4" style="color:${sec.color};border-left:3px solid ${sec.color};">${sec.label}</td></tr>`;
+    const items = sec.promo
+      ? GP_CACHE.filter(p=>p.clave && p.clave.startsWith('promo_')).sort((a,b)=>(a.orden||0)-(b.orden||0))
+      : sec.claves.map(k=>porClave[k]).filter(Boolean);
+    if(!items.length && !sec.promo) return '';
+    const head = `<tr class="pr-section"><td colspan="4" style="color:${sec.color};border-left:3px solid ${sec.color};">${sec.label}${sec.promo?'<span class="pr-promo-hint">Precio especial · se aplica marcando “PROMO” en la celda Total € de Grupos</span>':''}</td></tr>`;
     const body = items.map(p=>{
       const dif = (p.precio_original!=null && p.precio_grupo!=null)
         ? (parseFloat(p.precio_original)-parseFloat(p.precio_grupo)) : null;
-      return `<tr class="${p.extra?'pr-extra':''}">
+      const labelCell = sec.promo
+        ? `<input class="pr-in pr-label-in" type="text" data-id="${p.id}" data-k="etiqueta" value="${esc(p.etiqueta||'')}" placeholder="Nombre de la promo">
+           <button class="pr-promo-del" title="Eliminar promo" onclick="deletePromoPrecio(${p.id})">×</button>`
+        : `${p.extra?'<span class="pr-plus">+</span>':''}${esc(p.etiqueta)}`;
+      return `<tr class="${p.extra?'pr-extra':''}${sec.promo?' pr-promo':''}">
         <td style="text-align:left;font-weight:${p.extra?'600':'700'};border-left:3px solid ${sec.color};">
-          ${p.extra?'<span class="pr-plus">+</span>':''}${esc(p.etiqueta)}
+          ${labelCell}
         </td>
         <td><input class="pr-in" type="number" step="0.5" min="0" data-id="${p.id}" data-k="precio_original"
                    value="${p.precio_original ?? ''}" placeholder="—"></td>
@@ -6136,7 +6223,10 @@ function renderPrecios(){
         <td class="pr-dif">${dif!==null ? dif.toFixed(2)+'€' : '—'}</td>
       </tr>`;
     }).join('');
-    return head + body;
+    const addRow = sec.promo ? `<tr><td colspan="4" style="padding-top:8px;">
+      <button class="btn btn-ghost btn-sm" onclick="addPromoPrecio()">+ Añadir promo</button>
+    </td></tr>` : '';
+    return head + body + addRow;
   }).join('');
   tb.querySelectorAll('.pr-in').forEach(el=> el.addEventListener('change', savePrecio));
 }
@@ -6144,7 +6234,7 @@ function renderPrecios(){
 async function savePrecio(e){
   const id = parseInt(e.target.dataset.id,10);
   const k  = e.target.dataset.k;
-  const v  = e.target.value==='' ? null : parseFloat(e.target.value);
+  const v  = k==='etiqueta' ? (e.target.value.trim() || null) : (e.target.value==='' ? null : parseFloat(e.target.value));
   const { error } = await sb.from('grupos_precios').update({[k]:v}).eq('id', id);
   if(error){ console.error(error); return; }
   const row = GP_CACHE.find(x=>x.id===id);
@@ -6152,6 +6242,25 @@ async function savePrecio(e){
   renderPrecios();
   const b = document.getElementById('precios-saved');
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2000); }
+}
+
+async function addPromoPrecio(){
+  const clave = 'promo_' + Date.now();
+  const maxOrden = GP_CACHE.reduce((m,p)=>Math.max(m, p.orden||0), 0);
+  const { data, error } = await sb.from('grupos_precios')
+    .insert({ clave, etiqueta:'Nueva promo', precio_grupo:null, orden:maxOrden+1 })
+    .select().single();
+  if(error){ console.error(error); alert('No se pudo crear la promo: '+error.message); return; }
+  GP_CACHE.push(data);
+  renderPrecios();
+}
+
+async function deletePromoPrecio(id){
+  if(!confirm('¿Eliminar esta promo? Los grupos que la tuvieran marcada dejarán de aplicarla.')) return;
+  const { error } = await sb.from('grupos_precios').delete().eq('id', id);
+  if(error){ console.error(error); alert('No se pudo eliminar: '+error.message); return; }
+  GP_CACHE = GP_CACHE.filter(p=>p.id!==id);
+  renderPrecios();
 }
 
 /* ---------------- CALENDARIO ---------------- */
@@ -8127,6 +8236,8 @@ async function loadChat(scroll){
   if(scroll || changed) body.scrollTop = body.scrollHeight;
 }
 
+const CHAT_REACT_EMOJIS = ['👍','❤️','😂','😮','😢','🙏'];
+
 function renderChat(){
   const body = document.getElementById('chat-body');
   if(!body) return;
@@ -8143,15 +8254,57 @@ function renderChat(){
     const mine = m.autor === me;
     const color = roleColors[m.autor] || 'var(--accent)';
     const hora = d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    const reacciones = m.reacciones || {};
+    const pills = CHAT_REACT_EMOJIS.map(em=>{
+      const who = reacciones[em] || [];
+      if(!who.length) return '';
+      const iReacted = who.includes(me);
+      return `<span class="m-react-pill${iReacted?' mine-reacted':''}" title="${esc(who.join(', '))}" onclick="toggleReaction(${m.id},'${em}')">${em}<span class="cnt">${who.length}</span></span>`;
+    }).join('');
+    const menu = CHAT_REACT_EMOJIS.map(em=>`<button onclick="toggleReaction(${m.id},'${em}');closeReactMenus();">${em}</button>`).join('');
     html += `<div class="msg ${mine?'mine':''}">
       ${mine ? `<button class="m-del" title="Eliminar" onclick="deleteChat(${m.id})">×</button>` : ''}
       <div class="m-who" style="color:${color}">${esc(m.autor||'?')}</div>
       ${m.texto ? `<div class="m-txt">${esc(m.texto)}</div>` : ''}
       ${m.imagen ? `<img src="${m.imagen}" onclick="openLightbox('${m.imagen.replace(/'/g,"\\'")}')" alt="imagen">` : ''}
       <div class="m-time">${hora}</div>
+      <div class="m-react-bar">
+        ${pills}
+        <span class="m-react-add">
+          <button class="m-react-add-btn" title="Reaccionar" onclick="event.stopPropagation();openReactMenu(this)">😊+</button>
+          <div class="m-react-menu">${menu}</div>
+        </span>
+      </div>
     </div>`;
   });
   body.innerHTML = html;
+}
+
+function closeReactMenus(){
+  document.querySelectorAll('.m-react-menu.open').forEach(el=>el.classList.remove('open'));
+}
+function openReactMenu(btn){
+  const menu = btn.nextElementSibling;
+  const wasOpen = menu.classList.contains('open');
+  closeReactMenus();
+  if(!wasOpen) menu.classList.add('open');
+}
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.m-react-add')) closeReactMenus();
+});
+
+async function toggleReaction(id, emoji){
+  const me = currentProfile?.nombre || 'Equipo';
+  const m = chatCache.find(x=>x.id===id);
+  if(!m) return;
+  const reacciones = JSON.parse(JSON.stringify(m.reacciones || {}));
+  const list = reacciones[emoji] || [];
+  const idx = list.indexOf(me);
+  if(idx>-1) list.splice(idx,1); else list.push(me);
+  if(list.length) reacciones[emoji] = list; else delete reacciones[emoji];
+  m.reacciones = reacciones;
+  renderChat();
+  await sb.from('chat_mensajes').update({ reacciones }).eq('id', id);
 }
 
 let chatPendingImg = null;   // dataURL de la imagen pegada/seleccionada
