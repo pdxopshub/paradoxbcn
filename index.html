@@ -456,6 +456,11 @@
   #spv-grid-table .grp-visit{background:#6E7279!important;color:#F5F6F7!important;}
   #spv-grid-table td.col-visit{background:#7C8087!important;}
   #spv-grid-table td.col-visit.total-cell{background:#71757C!important;font-weight:800;}
+  /* columna "Total" (visitantes): más oscura y en negrita */
+  #spv-grid-table td.col-visit.grp-start{background:#52565C!important;}
+  #spv-grid-table td.col-visit.grp-start .cell-input{font-weight:800!important;}
+  /* columna "Grupos": texto más en negrita */
+  #spv-grid-table .cell-input[data-role="groupVisitors"]{font-weight:800!important;}
   #spv-grid-table thead tr:first-child th{top:0;z-index:5;}
   #spv-grid-table thead tr:nth-child(2) th{top:23px;z-index:5;}
   #spv-grid-table td{padding:2px 3px!important;height:26px;}
@@ -1167,6 +1172,9 @@
   .day-col .dname{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--text-soft);letter-spacing:.9px;}
   .day-col.today .dname{color:#fff;}
   .day-col.weekend .dname{color:#6C7593;}
+  /* Sábado/Domingo cuando además son "hoy": el gris de fin de semana ganaba
+     sobre el blanco y quedaba ilegible sobre el fondo azul oscuro del día actual */
+  .day-col.today.weekend .dname{color:var(--accent-dark);}
   .day-col .ddate{font-family:var(--font);font-weight:800;font-size:17px;margin:3px 0 12px;color:var(--text);
     padding-bottom:8px;border-bottom:1px solid var(--line);}
   .day-col.today .ddate{color:#fff;border-bottom-color:rgba(255,255,255,.3);}
@@ -2683,6 +2691,14 @@ function lyIso(isoStr){ const d=new Date(isoStr+'T12:00:00'); d.setFullYear(d.ge
 /* LY por mismo día de la semana: resta 364 días (52 semanas exactas → mismo weekday) */
 function lyIsoDow(isoStr){ const d=new Date(isoStr+'T12:00:00'); d.setDate(d.getDate()-364); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function isoToLabel(isoStr){ const [y,m,dd]=isoStr.split('-'); return `${parseInt(dd)} ${['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][parseInt(m)-1]} ${y}`; }
+/* Igual que isoToLabel pero con el día de la semana delante, ej: "SÁB 26 Jul 2025" */
+function isoToLabelWithDow(isoStr){
+  const d = new Date(isoStr+'T12:00:00');
+  const dow = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'][d.getDay()];
+  const [y,m,dd] = isoStr.split('-');
+  const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${dow} ${parseInt(dd)} ${meses[parseInt(m)-1]} ${y}`;
+}
 
 async function refreshDashboard(){
   const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA(), renderDashTeamToday()]);
@@ -2775,7 +2791,7 @@ async function fetchDashboardVisits(){
   }catch(e){}
   if(todayEl) todayEl.textContent = todayV !== null ? todayV.toLocaleString('es-ES') : '–';
   if(lyEl) lyEl.textContent = lyV !== null ? lyV.toLocaleString('es-ES') : '–';
-  if(lyDateEl) lyDateEl.textContent = isoToLabel(ly);
+  if(lyDateEl) lyDateEl.textContent = isoToLabelWithDow(ly);
   if(deltaEl && todayV !== null && lyV !== null && lyV > 0){
     const pct = Math.round((todayV - lyV) / lyV * 100);
     deltaEl.textContent = `${pct>=0?'↑':'↓'} ${Math.abs(pct)}% vs. año pasado`;
