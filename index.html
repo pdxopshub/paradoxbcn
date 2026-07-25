@@ -1844,7 +1844,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="rc-block" style="margin-bottom:10px;">
             <div class="rc-cap-title">Visitantes</div>
             <div class="rc-fields c2">
-              <div class="rc-f"><label>Hoy</label><input type="number" id="rc-visitantes" placeholder="0"></div>
+              <div class="rc-f"><label>Hoy</label><input type="number" id="rc-visitantes" min="0" placeholder="0"></div>
               <div class="rc-f"><label>Año pasado</label><div class="rc-ly-box" id="rc-visitantes-ly">–</div></div>
             </div>
             <div class="rc-cap-title" style="margin-top:12px;">Horas PD</div>
@@ -1859,10 +1859,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="rc-block" style="margin-bottom:10px;">
             <div class="rc-cap-title">Tipo de entrada</div>
             <div class="rc-fields c2">
-              <div class="rc-f"><label>Box Office</label><input type="number" id="rc-box-office" placeholder="0"></div>
-              <div class="rc-f"><label>Fever</label><input type="number" id="rc-fever" placeholder="0"></div>
-              <div class="rc-f"><label>API</label><input type="number" id="rc-api" placeholder="0"></div>
-              <div class="rc-f"><label>Grupos</label><input type="number" id="rc-grupos" placeholder="0"></div>
+              <div class="rc-f"><label>Box Office</label><input type="number" id="rc-box-office" min="0" placeholder="0"></div>
+              <div class="rc-f"><label>Fever</label><input type="number" id="rc-fever" min="0" placeholder="0"></div>
+              <div class="rc-f"><label>API</label><input type="number" id="rc-api" min="0" placeholder="0"></div>
+              <div class="rc-f"><label>Grupos</label><input type="number" id="rc-grupos" min="0" placeholder="0"></div>
             </div>
           </div>
 
@@ -2413,8 +2413,30 @@ function showSaveToast(msg, type){
   clearTimeout(el._t);
   el._t = setTimeout(()=>{ el.className = 'save-toast ' + (type||'ok'); }, type==='err' ? 8000 : 1800);
 }
+/* Registro de cambios: cada escritura que tenga éxito se anota en audit_log
+   (tabla, operación, quién, un resumen del payload). Es "fire and forget":
+   nunca bloquea ni retrasa el guardado real, y si falla el propio log
+   (sin conexión, etc.) solo se avisa por consola, nunca rompe nada. */
+function logAuditEntry(table, operacion, payload){
+  if(table === 'audit_log') return; // evita bucle infinito
+  try{
+    let resumen = payload;
+    try{
+      const str = JSON.stringify(payload);
+      if(str && str.length > 4000) resumen = { _truncado: true, preview: str.slice(0, 4000) };
+    }catch(e){ resumen = null; }
+    origSbFrom('audit_log').insert({
+      tabla: table,
+      operacion,
+      usuario: currentProfile?.nombre || '',
+      resumen
+    }).then(()=>{}, e=>console.error('[AUDIT LOG]', e));
+  }catch(e){ console.error('[AUDIT LOG]', e); }
+}
+let origSbFrom;
 (function wrapSupabaseWrites(){
   const origFrom = sb.from.bind(sb);
+  origSbFrom = origFrom;
   sb.from = function(table){
     const q = origFrom(table);
     ['insert','update','upsert','delete'].forEach(m=>{
@@ -2431,6 +2453,7 @@ function showSaveToast(msg, type){
                 showSaveToast('No se pudo guardar en "'+table+'": '+(res.error.message||'error desconocido'), 'err');
               } else {
                 showSaveToast('Guardado', 'ok');
+                logAuditEntry(table, m, args[0]);
               }
               return onOk ? onOk(res) : res;
             }, err=>{
@@ -5119,6 +5142,27 @@ async function recapGoDate(iso){
     if(nav) nav.querySelectorAll('button').forEach(b=>b.disabled = false);
   }
 }
+
+/* ============================================================
+   VALIDACIÓN LIGERA — aviso (no bloqueante) si un número parece
+   tener un dígito de más (fat-finger). No conoce el aforo real del
+   museo, solo detecta cifras con un orden de magnitud absurdo.
+   ============================================================ */
+function warnIfOutlier(el, maxDigits, label){
+  const v = parseFloat(el.value);
+  if(!isNaN(v) && Math.abs(v) >= Math.pow(10, maxDigits)){
+    showSaveToast(`Revisa "${label}": ${el.value} parece tener algún dígito de más.`, 'err');
+  }
+}
+document.addEventListener('change', (e)=>{
+  const el = e.target;
+  if(!el || el.tagName !== 'INPUT' || el.type !== 'number') return;
+  if(el.id === 'rc-visitantes') warnIfOutlier(el, 4, 'Visitantes');
+  else if(el.dataset.role === 'visitors') warnIfOutlier(el, 4, 'Total visitantes');
+  else if(el.dataset.role === 'groupVisitors') warnIfOutlier(el, 4, 'Grupos');
+  else if(['rc-box-office','rc-fever','rc-api','rc-grupos'].includes(el.id)) warnIfOutlier(el, 4, 'entradas');
+  else if(el.classList.contains('rc-btq-in')) warnIfOutlier(el, 5, 'importe boutique');
+});
 
 // Cambio de fecha manual desde el input — usa recapGoDate() para que también
 // guarde el día actual antes de saltar y bloquee los botones mientras carga,
