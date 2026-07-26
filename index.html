@@ -86,7 +86,7 @@
   .topbar{height:60px;flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10;}
   .topbar-title{font-family:var(--font);font-weight:800;font-size:17.5px;}
   .topbar-sub{font-size:12px;color:var(--text-soft);margin-top:1px;}
-  .proto-badge{font-size:10.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:var(--warning-soft);color:var(--warning);padding:5px 10px;border-radius:20px;border:1px solid var(--wait-br);}
+  .proto-badge{font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;background:var(--warning-soft);color:var(--warning);padding:3px 8px;border-radius:20px;border:1px solid var(--wait-br);opacity:.85;}
 
   .content{padding:22px 34px 60px;width:100%;}
   .content > .view{max-width:1500px;margin:0 auto;}
@@ -352,6 +352,18 @@
   #view-recap .rc-ly-box{width:100%;box-sizing:border-box;text-align:right;padding:6px 9px;
     border-radius:6px;background:transparent;border:1.5px dashed var(--line-strong);color:var(--text-soft);
     font-size:13px;font-weight:800;}
+  /* --- Botón "marcar todas" de las rutinas --- */
+  .rc-checkall{display:flex;justify-content:flex-end;margin-top:8px;padding-top:6px;border-top:1px dashed var(--line);}
+  .rc-checkall button{background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;
+    color:var(--text-soft);font-size:10.5px;font-weight:800;padding:3px 10px;cursor:pointer;}
+  .rc-checkall button:hover{background:#DCF3E7;border-color:#A9DFC0;color:#0E6B45;}
+  /* --- Observaciones: 10 celdas --- */
+  .rc-obs-list{display:flex;flex-direction:column;gap:6px;}
+  .rc-obs-row{display:flex;align-items:center;gap:8px;}
+  .rc-obs-n{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--panel);
+    border:1px solid var(--line-strong);color:var(--text-soft);font-size:10px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;}
+  .rc-obs-in{flex:1;min-width:0;}
   /* --- Desglose de grupos (pax por grupo) --- */
   .rc-grp-desglose{margin-top:10px;padding:10px;border:1px dashed var(--line-strong);border-radius:8px;background:var(--panel);}
   .rc-grp-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text-soft);margin-bottom:8px;}
@@ -462,7 +474,8 @@
     position:sticky;z-index:3;background:#3A3D42!important;color:#D8DADC!important;}
   /* columnas de Visitantes con los mismos colores que Tienda/Supervisores/Staff */
   #spv-grid-table .grp-visit{background:var(--panel)!important;color:var(--text-soft)!important;}
-  #spv-grid-table th.grp-visit.grp-start{color:#fff!important;}
+  /* fila de sub-cabecera (Total/Grupos/Rev. Bruto/SPV Neto): oscura como la columna del Día */
+  #spv-grid-table thead tr:nth-child(2) th.grp-visit{background:#3A3D42!important;color:#fff!important;font-weight:800;}
   #spv-grid-table thead tr:first-child th{top:0;z-index:5;}
   #spv-grid-table thead tr:nth-child(2) th{top:23px;z-index:5;}
   #spv-grid-table td{padding:2px 3px!important;height:26px;}
@@ -1986,7 +1999,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
             Observaciones del día
           </div>
-          <textarea id="rc-observaciones" rows="14" placeholder="Cualquier incidencia, nota o aviso relevante del día…" style="width:100%;"></textarea>
+          <div id="rc-obs-list" class="rc-obs-list"></div>
         </div>
         </div>
 
@@ -4920,19 +4933,32 @@ async function renderRecap(){
       </div>`).join('');
     btq.querySelectorAll('.rc-btq-in').forEach(inp=>inp.addEventListener('input', updateBoutiqueTotal));
 
-    // Generar rutinas mañana
+    // Generar rutinas mañana (+ botón "marcar todo" en la esquina de abajo)
     document.getElementById('rutinas-mañana').innerHTML = RUTINAS_MAÑANA.map(r=>`
       <div class="recap-field">
         <label>${r.label}</label>
         <button class="toggle-btn" id="toggle-${r.id}" onclick="toggleRutina('${r.id}')">No</button>
-      </div>`).join('');
+      </div>`).join('') +
+      `<div class="rc-checkall"><button onclick="toggleAllRutinas('m')" title="Marcar/desmarcar todas">✓ Todas</button></div>`;
 
-    // Generar rutinas tarde
+    // Generar rutinas tarde (+ botón "marcar todo")
     document.getElementById('rutinas-tarde').innerHTML = RUTINAS_TARDE.map(r=>`
       <div class="recap-field">
         <label>${r.label}</label>
         <button class="toggle-btn" id="toggle-${r.id}" onclick="toggleRutina('${r.id}')">No</button>
-      </div>`).join('');
+      </div>`).join('') +
+      `<div class="rc-checkall"><button onclick="toggleAllRutinas('t')" title="Marcar/desmarcar todas">✓ Todas</button></div>`;
+
+    // Generar las 10 celdas de observaciones
+    const obsList = document.getElementById('rc-obs-list');
+    if(obsList && !obsList.dataset.built){
+      obsList.dataset.built = '1';
+      obsList.innerHTML = Array.from({length:10},(_,i)=>`
+        <div class="rc-obs-row">
+          <span class="rc-obs-n">${i+1}</span>
+          <input type="text" class="rc-obs-in" id="rc-obs-${i}" placeholder="Observación…">
+        </div>`).join('');
+    }
 
     // Generar tasks semanales
     const todayDate = new Date(recapDate+'T12:00:00');
@@ -4985,7 +5011,7 @@ async function renderRecap(){
       if(recapLoading) return;
       saveRecapField({cerrado_por: document.getElementById('recap-cerrado-por')?.value || ''});
     });
-    bindSave(document.getElementById('rc-observaciones'), 'input', debounceRecapSave);
+    document.querySelectorAll('.rc-obs-in').forEach(el=> bindSave(el, 'input', debounceRecapSave));
 
     renderRecapCapsules();
   } finally {
@@ -5009,17 +5035,28 @@ function debounceRecapSave(){
   clearTimeout(recapDebounceTimer);
   recapDebounceTimer = setTimeout(()=>{
     recapDebounceTimer = null;
-    saveRecapField({observaciones: document.getElementById('rc-observaciones')?.value || ''});
+    saveRecapField({observaciones: collectObservaciones()});
   }, 800);
+}
+
+/* Observaciones: 10 celdas → se guardan como texto multi-línea (compatible con
+   el historial de recaps y las cápsulas existentes) */
+function collectObservaciones(){
+  return Array.from(document.querySelectorAll('.rc-obs-in'))
+    .map(el=>el.value.trim()).filter(Boolean).join('\n');
+}
+function setObservaciones(text){
+  const lineas = (text||'').split('\n');
+  document.querySelectorAll('.rc-obs-in').forEach((el,i)=>{ el.value = lineas[i] || ''; });
 }
 
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.07.26-recap2';
+const HUB_VERSION = 'v26.07.26-recap3';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
-  if(b) b.textContent = HUB_VERSION;
+  if(b){ b.textContent = 'V.2'; b.title = 'Versión del HUB: ' + HUB_VERSION; }
   console.log('[HUB] Versión:', HUB_VERSION);
 });
 
@@ -5115,11 +5152,11 @@ async function loadRecapData(){
   try{
     // Limpiar todos los campos antes de cargar (evita ver datos del día anterior)
     ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos',
-     'rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews',
-     'rc-observaciones'].forEach(id=>{
+     'rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews'].forEach(id=>{
       const el=document.getElementById(id);
       if(el) el.value='';
     });
+    setObservaciones('');
     document.getElementById('rc-visitantes-ly').textContent='–';
     RECAP_TIENDA_STAFF.forEach(s=>{ const el=document.getElementById(`rc-btq-${s}`); if(el) el.value=''; });
     updateBoutiqueTotal();
@@ -5175,8 +5212,24 @@ async function loadRecapData(){
       if(btn){ const on = rutinasSi.includes(r.id); btn.className = 'toggle-btn '+(on?'si':''); btn.textContent = on?'Sí':'No'; }
     });
 
-    // Tasks
-    const tasksDone = recapData.tasks_done || [];
+    // Tasks — los checks de la semana se HEREDAN de los días anteriores de la
+    // misma semana (lunes→domingo): lo marcado el lunes sigue marcado el martes,
+    // etc. El lunes empieza la semana de cero. 'lluvia-0' NO se hereda (es del día).
+    let tasksDone = (recapData.tasks_done || []).slice();
+    try{
+      const dRef = new Date(myDate+'T12:00:00');
+      const lunes = new Date(dRef);
+      lunes.setDate(dRef.getDate() - ((dRef.getDay()+6)%7));
+      const lunesIso = `${lunes.getFullYear()}-${String(lunes.getMonth()+1).padStart(2,'0')}-${String(lunes.getDate()).padStart(2,'0')}`;
+      if(lunesIso < myDate){
+        const { data: semana } = await sb.from('recap').select('tasks_done')
+          .gte('fecha', lunesIso).lt('fecha', myDate);
+        if(myToken !== recapLoadToken) return;
+        (semana||[]).forEach(r=>(r.tasks_done||[]).forEach(t=>{
+          if(t !== 'lluvia-0' && !tasksDone.includes(t)) tasksDone.push(t);
+        }));
+      }
+    }catch(e){ console.error('[RECAP] herencia semanal de tasks', e); }
     document.querySelectorAll('.task-item').forEach(el=>{
       el.classList.toggle('done', tasksDone.includes(el.id));
     });
@@ -5190,9 +5243,8 @@ async function loadRecapData(){
     const llTask = document.getElementById('task-lluvia-0');
     if(llTask) llTask.classList.toggle('done', (recapData.tasks_done||[]).includes('lluvia-0'));
 
-    // Observaciones
-    const obs = document.getElementById('rc-observaciones');
-    if(obs) obs.value = recapData.observaciones || '';
+    // Observaciones (10 celdas)
+    setObservaciones(recapData.observaciones || '');
   }catch(e){
     // Un fallo de red a mitad de carga NO debe dejar recapLoading atascado en true:
     // eso bloqueaba silenciosamente TODOS los guardados (el botón "Guardar Recap"
@@ -5231,7 +5283,7 @@ function getRecapPayload(){
     rutinas: rutinasSi,
     tasks_done: tasksDone,
     lluvia: document.getElementById('rc-lluvia-toggle')?.classList.contains('si') || false,
-    observaciones: document.getElementById('rc-observaciones')?.value || '',
+    observaciones: collectObservaciones(),
     cerrado_por: document.getElementById('recap-cerrado-por')?.value || '',
     grupos_desglose: collectGruposDesglose(),
     updated_at: new Date().toISOString(),
@@ -5289,6 +5341,19 @@ function toggleRutina(id){
   const rutinasSi = [...RUTINAS_MAÑANA,...RUTINAS_TARDE].filter(r=>document.getElementById('toggle-'+r.id)?.classList.contains('si')).map(r=>r.id);
   saveRecapField({rutinas: rutinasSi});
 }
+/* Marcar/desmarcar TODAS las rutinas de un bloque ('m'=mañana, 't'=tarde) */
+function toggleAllRutinas(bloque){
+  const lista = bloque==='m' ? RUTINAS_MAÑANA : RUTINAS_TARDE;
+  const todasSi = lista.every(r=>document.getElementById('toggle-'+r.id)?.classList.contains('si'));
+  lista.forEach(r=>{
+    const btn = document.getElementById('toggle-'+r.id);
+    if(!btn) return;
+    btn.className = 'toggle-btn '+(todasSi?'':'si');
+    btn.textContent = todasSi?'No':'Sí';
+  });
+  const rutinasSi = [...RUTINAS_MAÑANA,...RUTINAS_TARDE].filter(r=>document.getElementById('toggle-'+r.id)?.classList.contains('si')).map(r=>r.id);
+  saveRecapField({rutinas: rutinasSi});
+}
 function toggleTask(id){
   const el = document.getElementById(id);
   if(!el) return;
@@ -5315,7 +5380,7 @@ async function recapGoDate(iso){
   if(recapDebounceTimer){
     clearTimeout(recapDebounceTimer);
     recapDebounceTimer = null;
-    try{ await saveRecapField({observaciones: document.getElementById('rc-observaciones')?.value || ''}); }
+    try{ await saveRecapField({observaciones: collectObservaciones()}); }
     catch(e){ console.error('[RECAP] flush observaciones', e); }
   }
   // Bloquea los botones de navegación mientras carga, para no solapar cargas.
