@@ -1048,6 +1048,12 @@
   .vac-day.apro{background:#DCF3E7;color:#0E6B45;font-weight:700;}
   .vac-day.pend{background:#FCF0DC;color:#8A6D0F;font-weight:700;}
   .vac-day.recu{background:#DCEBFF;color:#0B5FA8;font-weight:700;}
+  .vd-bloq{background:#1C1C1C;color:#fff;font-weight:700;font-size:12.5px;padding:8px 10px;
+    border-radius:8px;margin-bottom:10px;}
+  .vd-list{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;}
+  .vd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:8px 10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;}
+  .vd-persona{font-weight:700;font-size:13px;}
   .vac-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;}
   .vac-card{background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:14px;}
   .vac-card .vc-n{font-size:26px;font-weight:800;line-height:1;}
@@ -8490,7 +8496,7 @@ function renderVacCalendar(){
       if(map[f]) cls.push(map[f].cls);
       if(f===hoy) cls.push('today');
       const tip = map[f] ? map[f].txt.replace(/"/g,'&quot;') : f;
-      html += `<div class="${cls.join(' ')}" title="${tip}" onclick="openVacRequest('${f}')">${d}</div>`;
+      html += `<div class="${cls.join(' ')}" title="${tip}" onclick="showVacDayInfo('${f}')">${d}</div>`;
     }
     html += '</div></div>';
   }
@@ -8509,6 +8515,38 @@ function renderVacHoy(){
       <div class="vr-main"><div class="vr-who">${esc(s.persona)}</div>
       <div class="vr-meta">${VAC_TIPOS[s.tipo]?.label||s.tipo} · hasta ${esc(s.fecha_fin)}</div></div>
     </div>`).join('');
+}
+
+function showVacDayInfo(fecha){
+  const d = new Date(fecha+'T12:00:00');
+  const label = d.toLocaleDateString('es-ES',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+  const bloqueo = vacBloqueos.find(b=>b.fecha===fecha);
+  const dia = vacSolicitudes.filter(s => s.estado!=='rechazado' && vacDaysBetween(s.fecha_inicio, s.fecha_fin).includes(fecha));
+  const rows = dia.map(s=>{
+    const tipoLbl = VAC_TIPOS[s.tipo]?.label || s.tipo;
+    const badge = s.estado==='aprobado' ? 'st-ok' : (s.estado==='rechazado' ? 'st-bad' : 'st-wait');
+    return `<div class="vd-row">
+      <span class="vd-persona">${esc(s.persona)}</span>
+      <span class="st ${badge}">${esc(tipoLbl)}${s.estado==='pendiente'?' · pendiente':''}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
+      <div class="modal">
+        <div class="modal-head"><h2 style="text-transform:capitalize;">${esc(label)}</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          ${bloqueo ? `<div class="vd-bloq">🔒 Día bloqueado para todo el equipo${bloqueo.motivo?' · '+esc(bloqueo.motivo):''}</div>` : ''}
+          <div class="vd-list">
+            ${rows || `<div style="color:var(--text-soft);font-size:13px;padding:8px 0;">Nadie tiene vacaciones ni recuperación este día.</div>`}
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal()">Cerrar</button>
+          <button class="btn btn-primary" onclick="closeModal();openVacRequest('${fecha}')">+ Nueva solicitud</button>
+        </div>
+      </div>
+    </div>`;
 }
 
 function openVacRequest(fecha){
