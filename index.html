@@ -352,6 +352,14 @@
   #view-recap .rc-ly-box{width:100%;box-sizing:border-box;text-align:right;padding:6px 9px;
     border-radius:6px;background:transparent;border:1.5px dashed var(--line-strong);color:var(--text-soft);
     font-size:13px;font-weight:800;}
+  /* --- Desglose de grupos (pax por grupo) --- */
+  .rc-grp-desglose{margin-top:10px;padding:10px;border:1px dashed var(--line-strong);border-radius:8px;background:var(--panel);}
+  .rc-grp-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text-soft);margin-bottom:8px;}
+  .rc-grp-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;}
+  .rc-grp-f label{display:block;font-size:10.5px;font-weight:700;color:var(--text-dim);margin-bottom:3px;}
+  .rc-grp-f input{width:100%;box-sizing:border-box;text-align:center;font-weight:700;}
+  .rc-grp-sum{margin-top:8px;font-size:12px;color:var(--text-soft);text-align:right;}
+  .rc-grp-sum b{color:var(--ok);font-size:13.5px;}
   /* --- Info General del recap: cápsulas, filas y campos --- */
   #view-recap .rc-block{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 13px;box-sizing:border-box;min-width:0;}
   #view-recap .rc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid var(--line);}
@@ -1901,6 +1909,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <div class="rc-f"><label>API</label><input type="number" id="rc-api" min="0" placeholder="0"></div>
               <div class="rc-f"><label>Grupos</label><input type="number" id="rc-grupos" min="0" placeholder="0"></div>
             </div>
+            <div id="rc-grupos-desglose"></div>
           </div>
 
           <div class="rc-block">
@@ -4948,17 +4957,33 @@ async function renderRecap(){
     // Cargar datos de Supabase para esta fecha
     await loadRecapData();
 
-    // Listeners de auto-guardado (marcados para no duplicarse al renderizar de nuevo)
+    // Listeners de auto-guardado POR CAMPO (estilo SPV): cada cambio guarda SOLO
+    // su columna con un upsert parcial. Así un guardado nunca puede pisar el resto
+    // de campos del día, pase lo que pase con el estado del formulario.
     const bindSave = (el, evt, fn)=>{
       if(!el || el.dataset.rcBound === evt) return;
       el.dataset.rcBound = evt;
       el.addEventListener(evt, fn);
     };
-    const onChange = () => { if(!recapLoading) saveRecap(true); };
-    ['rc-visitantes','rc-box-office','rc-fever','rc-api','rc-grupos','rc-horas-planday','rc-ta-reviews','rc-google-reviews','rc-gyg-reviews']
-      .forEach(id=> bindSave(document.getElementById(id), 'change', onChange));
-    RECAP_TIENDA_STAFF.forEach(s=> bindSave(document.getElementById(`rc-btq-${s}`), 'change', onChange));
-    bindSave(document.getElementById('recap-cerrado-por'), 'change', onChange);
+    Object.entries(RECAP_FIELD_MAP).forEach(([id, col])=>{
+      bindSave(document.getElementById(id), 'change', (e)=>{
+        if(recapLoading) return;
+        const v = e.target.value==='' ? null : (parseFloat(e.target.value)||0);
+        saveRecapField({[col]: v});
+        if(id==='rc-visitantes') syncRecapVisitantesToSpv(v);
+        if(id==='rc-grupos'){ renderGruposDesglose(); saveGruposDesglose(); }
+      });
+    });
+    RECAP_TIENDA_STAFF.forEach(s=> bindSave(document.getElementById(`rc-btq-${s}`), 'change', ()=>{
+      if(recapLoading) return;
+      const boutique = collectBoutique();
+      saveRecapField({boutique});
+      syncRecapBoutiqueToSpv(recapDate, boutique);
+    }));
+    bindSave(document.getElementById('recap-cerrado-por'), 'change', ()=>{
+      if(recapLoading) return;
+      saveRecapField({cerrado_por: document.getElementById('recap-cerrado-por')?.value || ''});
+    });
     bindSave(document.getElementById('rc-observaciones'), 'input', debounceRecapSave);
 
     renderRecapCapsules();
@@ -4978,7 +5003,92 @@ function updateRecapDateLabel(){
 }
 
 let recapDebounceTimer = null;
-function debounceRecapSave(){ if(recapLoading) return; clearTimeout(recapDebounceTimer); recapDebounceTimer = setTimeout(()=>saveRecap(true), 800); }
+function debounceRecapSave(){
+  if(recapLoading) return;
+  clearTimeout(recapDebounceTimer);
+  recapDebounceTimer = setTimeout(()=>{
+    recapDebounceTimer = null;
+    saveRecapField({observaciones: document.getElementById('rc-observaciones')?.value || ''});
+  }, 800);
+}
+
+/* Mapa input → columna de la tabla recap (guardado por campo) */
+const RECAP_FIELD_MAP = {
+  'rc-visitantes':'visitantes',
+  'rc-box-office':'e_box_office',
+  'rc-fever':'e_fever',
+  'rc-api':'e_api',
+  'rc-grupos':'e_grupos',
+  'rc-horas-planday':'horas_planday',
+  'rc-ta-reviews':'ta_reviews',
+  'rc-google-reviews':'google_reviews',
+  'rc-gyg-reviews':'gyg_reviews',
+};
+
+/* Upsert PARCIAL: guarda solo los campos indicados de la fecha actual.
+   Nunca puede borrar el resto de columnas del día (a diferencia del
+   guardado de payload completo, que escribía TODAS las columnas). */
+async function saveRecapField(campos){
+  const payload = { fecha: recapDate, ...campos, updated_at: new Date().toISOString() };
+  if(!recapData || !recapData.autor) payload.autor = currentProfile?.nombre || '';
+  const { error } = await sb.from('recap').upsert(payload, {onConflict:'fecha'});
+  if(error) console.error('[RECAP] Error guardando campo:', campos, error);
+  else recapData = { ...recapData, ...payload };
+}
+
+function collectBoutique(){
+  const boutique = {};
+  RECAP_TIENDA_STAFF.forEach(s=>{ const v=parseFloat(document.getElementById(`rc-btq-${s}`)?.value||0); if(v) boutique[s]=v; });
+  return boutique;
+}
+
+/* Sincroniza los visitantes del recap con el SPV del día (spv_days.visitantes) */
+async function syncRecapVisitantesToSpv(v){
+  if(v===null || v===undefined || isNaN(v)) return;   // no pisar SPV con vacío
+  const { error } = await sb.from('spv_days').upsert({fecha: recapDate, visitantes: Math.round(v)}, {onConflict:'fecha'});
+  if(error) console.error('[RECAP→SPV] visitantes', error);
+}
+
+/* ---- Desglose de grupos: N grupos → N campos de pax, suma → SPV ---- */
+function renderGruposDesglose(){
+  const cont = document.getElementById('rc-grupos-desglose');
+  if(!cont) return;
+  const n = parseInt(document.getElementById('rc-grupos')?.value,10) || 0;
+  if(n <= 0){ cont.innerHTML=''; return; }
+  const valores = (recapData?.grupos_desglose || []);
+  cont.innerHTML = `<div class="rc-grp-desglose">
+    <div class="rc-grp-title">Personas por grupo</div>
+    <div class="rc-grp-fields">
+      ${Array.from({length:n},(_,i)=>`
+        <div class="rc-grp-f">
+          <label>Grupo ${i+1}</label>
+          <input type="number" class="rc-grp-in" data-idx="${i}" min="0" placeholder="0" value="${valores[i] ?? ''}">
+        </div>`).join('')}
+    </div>
+    <div class="rc-grp-sum">Total grupos: <b id="rc-grp-sum-n">${valores.slice(0,n).reduce((a,b)=>a+(parseFloat(b)||0),0)}</b> pax</div>
+  </div>`;
+  cont.querySelectorAll('.rc-grp-in').forEach(inp=>{
+    inp.addEventListener('change', ()=>{ if(!recapLoading) saveGruposDesglose(); });
+    inp.addEventListener('input', ()=>{
+      const el = document.getElementById('rc-grp-sum-n');
+      if(el) el.textContent = collectGruposDesglose().reduce((a,b)=>a+(parseFloat(b)||0),0);
+    });
+  });
+}
+function collectGruposDesglose(){
+  return Array.from(document.querySelectorAll('#rc-grupos-desglose .rc-grp-in'))
+    .map(el=> el.value==='' ? null : (parseFloat(el.value)||0));
+}
+async function saveGruposDesglose(){
+  const desglose = collectGruposDesglose();
+  const suma = desglose.reduce((a,b)=>a+(parseFloat(b)||0),0);
+  const sumEl = document.getElementById('rc-grp-sum-n');
+  if(sumEl) sumEl.textContent = suma;
+  await saveRecapField({grupos_desglose: desglose});
+  // La suma de pax de grupos va directa al SPV (columna Grupos del día)
+  const { error } = await sb.from('spv_days').upsert({fecha: recapDate, visitantes_grupo: Math.round(suma)}, {onConflict:'fecha'});
+  if(error) console.error('[RECAP→SPV] grupos', error);
+}
 
 let recapLoading = false;
 let recapLoadToken = 0;
@@ -5008,10 +5118,15 @@ async function loadRecapData(){
     if(myToken !== recapLoadToken) return; // ya hay una navegación más reciente en curso
     recapData = rec || {};
 
-    // LY desde spv_days — mismo DÍA DE LA SEMANA del año pasado (no el mismo número)
+    // LY desde spv_days — mismo DÍA DE LA SEMANA del año pasado (no el mismo número).
+    // OJO: .maybeSingle(), nunca .single().catch(): el query builder de Supabase NO
+    // tiene método .catch (solo .then), y esa llamada lanzaba un TypeError que
+    // abortaba TODA la carga → el formulario quedaba vacío aunque el dato SÍ
+    // estuviera guardado, y el siguiente autoguardado escribía los campos vacíos
+    // encima del dato real. Este era el verdadero motivo de "el recap no se guarda".
     const ly = lyIsoDow(myDate);
-    const { data: lyRow } = await sb.from('spv_days').select('visitantes').eq('fecha', ly).single().catch(()=>({data:null}));
-    const { data: todayRow } = await sb.from('spv_days').select('visitantes').eq('fecha', myDate).single().catch(()=>({data:null}));
+    const { data: lyRow } = await sb.from('spv_days').select('visitantes').eq('fecha', ly).maybeSingle();
+    const { data: todayRow } = await sb.from('spv_days').select('visitantes').eq('fecha', myDate).maybeSingle();
     if(myToken !== recapLoadToken) return;
 
     // Info general
@@ -5021,6 +5136,7 @@ async function loadRecapData(){
     setValue('rc-fever', recapData.e_fever ?? '');
     setValue('rc-api', recapData.e_api ?? '');
     setValue('rc-grupos', recapData.e_grupos ?? '');
+    renderGruposDesglose();
     setValue('rc-horas-planday', recapData.horas_planday ?? '');
     setValue('rc-ta-reviews', recapData.ta_reviews ?? '');
     setValue('rc-google-reviews', recapData.google_reviews ?? '');
@@ -5106,15 +5222,15 @@ function getRecapPayload(){
     lluvia: document.getElementById('rc-lluvia-toggle')?.classList.contains('si') || false,
     observaciones: document.getElementById('rc-observaciones')?.value || '',
     cerrado_por: document.getElementById('recap-cerrado-por')?.value || '',
+    grupos_desglose: collectGruposDesglose(),
     updated_at: new Date().toISOString(),
   };
 }
 
 async function saveRecap(silent=false){
-  // El autoguardado silencioso se salta mientras se están cargando los campos
-  // (evitaría guardar valores a medio rellenar). El botón "Guardar Recap" es una
-  // acción explícita del usuario y SIEMPRE debe intentar guardar, aunque
-  // recapLoading se hubiera quedado atascado por algún fallo de red anterior.
+  // Con el guardado por campo, cada cambio ya está persistido al instante.
+  // Este guardado de payload completo solo lo ejecuta el botón "Guardar Recap"
+  // (acción explícita: el usuario ve el formulario y confirma su contenido).
   if(recapLoading && silent) return;
   const payload = getRecapPayload();
   const me = currentProfile?.nombre || '';
@@ -5129,7 +5245,14 @@ async function saveRecap(silent=false){
   }
   const { error: saveError } = await sb.from('recap').upsert(payload, {onConflict:'fecha'});
   if(saveError) console.error('[RECAP] Error guardando:', saveError);
+  // Sincronizar TODO al SPV del día: visitantes, suma de grupos y tienda
   await syncRecapBoutiqueToSpv(payload.fecha, payload.boutique);
+  if(payload.visitantes !== null) await syncRecapVisitantesToSpv(payload.visitantes);
+  const sumaGrupos = (payload.grupos_desglose||[]).reduce((a,b)=>a+(parseFloat(b)||0),0);
+  if(sumaGrupos > 0){
+    const { error } = await sb.from('spv_days').upsert({fecha: payload.fecha, visitantes_grupo: Math.round(sumaGrupos)}, {onConflict:'fecha'});
+    if(error) console.error('[RECAP→SPV] grupos', error);
+  }
   recapData = { ...recapData, ...payload };
   if(!silent){
     const banner = document.getElementById('recap-saved-banner');
@@ -5152,13 +5275,15 @@ function toggleRutina(id){
   const on = btn.classList.contains('si');
   btn.className = 'toggle-btn '+(on?'':'si');
   btn.textContent = on?'No':'Sí';
-  saveRecap(true);
+  const rutinasSi = [...RUTINAS_MAÑANA,...RUTINAS_TARDE].filter(r=>document.getElementById('toggle-'+r.id)?.classList.contains('si')).map(r=>r.id);
+  saveRecapField({rutinas: rutinasSi});
 }
 function toggleTask(id){
   const el = document.getElementById(id);
   if(!el) return;
   el.classList.toggle('done');
-  saveRecap(true);
+  const tasksDone = Array.from(document.querySelectorAll('.task-item.done')).map(x=>x.id);
+  saveRecapField({tasks_done: tasksDone});
 }
 function toggleLluvia(){
   const btn = document.getElementById('rc-lluvia-toggle');
@@ -5166,7 +5291,7 @@ function toggleLluvia(){
   if(btn){ btn.className='toggle-btn '+(on?'':'si'); btn.textContent=on?'No':'Sí'; }
   const tasks = document.getElementById('rc-lluvia-tasks');
   if(tasks) tasks.style.display = on?'none':'block';
-  saveRecap(true);
+  saveRecapField({lluvia: !on});
 }
 
 function recapPrevDay(){ recapGoDate(offsetDate(recapDate,-1)); }
@@ -5174,19 +5299,18 @@ function recapNextDay(){ recapGoDate(offsetDate(recapDate,+1)); }
 function recapGoToday(){ recapGoDate(todayIso()); }
 function offsetDate(iso, days){ const d=new Date(iso+'T12:00:00'); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
 async function recapGoDate(iso){
-  // Cancelar cualquier autoguardado en cola (evitaría escribir en la fecha nueva)
-  clearTimeout(recapDebounceTimer);
-  recapDebounceTimer = null;
-  // Bloquea los botones de navegación mientras se guarda/carga: evita que un
-  // Anterior/Siguiente rápido solape dos cargas y una respuesta tardía borre
-  // los datos recién mostrados de la fecha correcta.
+  // Con el guardado por campo, todo lo escrito ya está persistido. Solo queda
+  // vaciar la cola del debounce de observaciones antes de cambiar de fecha.
+  if(recapDebounceTimer){
+    clearTimeout(recapDebounceTimer);
+    recapDebounceTimer = null;
+    try{ await saveRecapField({observaciones: document.getElementById('rc-observaciones')?.value || ''}); }
+    catch(e){ console.error('[RECAP] flush observaciones', e); }
+  }
+  // Bloquea los botones de navegación mientras carga, para no solapar cargas.
   const nav = document.getElementById('recap-nav-btns');
   if(nav) nav.querySelectorAll('button').forEach(b=>b.disabled = true);
   try{
-    // Guardar el día actual antes de movernos, si hay algo que guardar
-    if(!recapLoading && recapDate && recapDate !== iso){
-      try{ await saveRecap(true); }catch(e){ console.error('[RECAP] guardado previo', e); }
-    }
     recapDate = iso;
     await renderRecap();
   } finally {
@@ -5290,7 +5414,7 @@ async function renderRecapCapsules(){
 }
 let recapModalFecha = null;
 async function openRecapCapsule(fecha){
-  const { data: r } = await sb.from('recap').select('*').eq('fecha', fecha).single().catch(()=>({data:null}));
+  const { data: r } = await sb.from('recap').select('*').eq('fecha', fecha).maybeSingle();
   if(!r) return;
   recapModalFecha = fecha;
   const d = new Date(fecha+'T12:00:00');
