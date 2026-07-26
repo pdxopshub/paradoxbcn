@@ -1592,6 +1592,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <div id="loomis-quote-topbar" class="lq-topbar" style="display:none;"></div>
       <span class="proto-badge" style="background:var(--success-soft);color:var(--success);border-color:#1E5039;">● Conectado a Supabase</span>
       <span class="proto-badge" id="hub-version-badge" title="Versión del HUB que estás usando ahora mismo" style="background:#EAF2FF;color:#0B5FA8;border-color:#B7D3FF;"></span>
+      <button class="proto-badge" id="hub-backup-btn" onclick="descargarBackupHub()" title="Descargar copia de seguridad completa de todos los datos del HUB" style="background:var(--panel);color:var(--text-soft);border-color:var(--line-strong);cursor:pointer;">⬇ Backup</button>
     </div>
 
     <div class="content">
@@ -5099,12 +5100,53 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.07.26-recap4';
+const HUB_VERSION = 'v26.07.26-recap5';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = 'V.2'; b.title = 'Versión del HUB: ' + HUB_VERSION; }
   console.log('[HUB] Versión:', HUB_VERSION);
 });
+
+/* ============================================================
+   COPIA DE SEGURIDAD COMPLETA — descarga TODOS los datos del HUB
+   (todas las tablas de Supabase) en un único archivo JSON.
+   ============================================================ */
+const BACKUP_TABLAS = ['profiles','spv_days','spv_entries','spv_commission_history','staff',
+  'staff_entradas','evaluaciones','entrevistas','turnos','pda_tasks','diego_tasks',
+  'clmant_items','nfcards','reviews_cache','recap','reviews_history','pdxspot_kv',
+  'chat_mensajes','vac_solicitudes','vac_bloqueos','vac_saldos','loomis_semanas',
+  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log'];
+
+async function descargarBackupHub(){
+  const btn = document.getElementById('hub-backup-btn');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Backup…'; }
+  try{
+    const backup = { app:'PDX Ops Hub', version: HUB_VERSION, exportado: new Date().toISOString(), tablas:{} };
+    for(const tabla of BACKUP_TABLAS){
+      const filas = [];
+      // paginado de 1000 en 1000 para saltar el límite por petición de Supabase
+      for(let desde=0;;desde+=1000){
+        const { data, error } = await sb.from(tabla).select('*').range(desde, desde+999);
+        if(error){ backup.tablas[tabla] = {error: error.message}; break; }
+        filas.push(...(data||[]));
+        if(!data || data.length < 1000){ backup.tablas[tabla] = filas; break; }
+      }
+    }
+    const fecha = new Date().toISOString().slice(0,10);
+    const blob = new Blob([JSON.stringify(backup)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `PDX_HUB_backup_${fecha}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(a.href);
+    if(typeof showSaveToast==='function') showSaveToast('Copia de seguridad descargada ✓');
+  }catch(e){
+    console.error('[BACKUP]', e);
+    if(typeof showSaveToast==='function') showSaveToast('Error creando el backup: '+e.message, 'err');
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = '⬇ Backup'; }
+  }
+}
 
 /* Mapa input → columna de la tabla recap (guardado por campo) */
 const RECAP_FIELD_MAP = {
