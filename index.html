@@ -351,7 +351,7 @@
     color:var(--text-soft);pointer-events:none;}
   #view-recap .rc-ly-box{width:100%;box-sizing:border-box;text-align:right;padding:6px 9px;
     border-radius:6px;background:transparent;border:1.5px dashed var(--line-strong);color:var(--text-soft);
-    font-size:13px;font-weight:800;}
+    font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   /* --- Botón "marcar todas" de las rutinas --- */
   .rc-checkall{display:flex;justify-content:flex-end;margin-top:8px;padding-top:6px;border-top:1px dashed var(--line);}
   .rc-checkall button{background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;
@@ -4915,7 +4915,8 @@ function updateBoutiqueTotal(){
   document.querySelectorAll('#rc-boutique-fields .rc-btq-in').forEach(i=>{
     total += parseFloat(i.value) || 0;
   });
-  el.textContent = total.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
+  //   = espacio de no separación: evita que el € salte a otra línea
+  el.textContent = total.toLocaleString('es-ES',{minimumFractionDigits:2, maximumFractionDigits:2}) + ' €';
 }
 
 async function renderRecap(){
