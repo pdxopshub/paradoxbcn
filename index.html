@@ -357,13 +357,18 @@
   .rc-checkall button{background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;
     color:var(--text-soft);font-size:10.5px;font-weight:800;padding:3px 10px;cursor:pointer;}
   .rc-checkall button:hover{background:#DCF3E7;border-color:#A9DFC0;color:#0E6B45;}
-  /* --- Observaciones: 10 celdas --- */
+  /* --- Observaciones: celdas dinámicas con texto completo visible --- */
   .rc-obs-list{display:flex;flex-direction:column;gap:6px;}
-  .rc-obs-row{display:flex;align-items:center;gap:8px;}
+  .rc-obs-row{display:flex;align-items:flex-start;gap:8px;}
   .rc-obs-n{flex-shrink:0;width:18px;height:18px;border-radius:50%;background:var(--panel);
     border:1px solid var(--line-strong);color:var(--text-soft);font-size:10px;font-weight:800;
-    display:flex;align-items:center;justify-content:center;}
-  .rc-obs-in{flex:1;min-width:0;}
+    display:flex;align-items:center;justify-content:center;margin-top:7px;}
+  .rc-obs-in{flex:1;min-width:0;resize:none;overflow:hidden;min-height:34px;
+    line-height:1.45;font-family:inherit;font-size:13px;}
+  .rc-obs-add{align-self:flex-start;margin-top:4px;background:var(--panel);
+    border:1px dashed var(--line-strong);border-radius:14px;color:var(--text-soft);
+    font-size:11px;font-weight:800;padding:4px 12px;cursor:pointer;}
+  .rc-obs-add:hover{background:#DCEAFF;border-color:var(--accent);color:var(--accent-dark);}
   /* --- Desglose de grupos (pax por grupo) --- */
   .rc-grp-desglose{margin-top:10px;padding:10px;border:1px dashed var(--line-strong);border-radius:8px;background:var(--panel);}
   .rc-grp-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--text-soft);margin-bottom:8px;}
@@ -476,6 +481,9 @@
   #spv-grid-table .grp-visit{background:var(--panel)!important;color:var(--text-soft)!important;}
   /* fila de sub-cabecera (Total/Grupos/Rev. Bruto/SPV Neto): oscura como la columna del Día */
   #spv-grid-table thead tr:nth-child(2) th.grp-visit{background:#3A3D42!important;color:#fff!important;font-weight:800;}
+  /* nombres de Tienda y Supervisores: mismo gris oscuro que los nombres del staff */
+  #spv-grid-table thead tr:nth-child(2) th.grp-tienda,
+  #spv-grid-table thead tr:nth-child(2) th.grp-superv{background:#3A3D42!important;color:#D8DADC!important;}
   #spv-grid-table thead tr:first-child th{top:0;z-index:5;}
   #spv-grid-table thead tr:nth-child(2) th{top:23px;z-index:5;}
   #spv-grid-table td{padding:2px 3px!important;height:26px;}
@@ -3255,12 +3263,13 @@ function openSpvComisiones(){
   if(!d){ alert('Todavía no hay datos de este mes.'); return; }
   const puedeVerPaula = spvPuedeVerComision();
 
+  // Todo se calcula y se muestra sobre el REV NETO (sin el 21% de IVA)
   const filas = SPV_STAFF.filter(s=>d.qualTotals[s]>0)
     .sort((a,b)=>d.qualTotals[b]-d.qualTotals[a])
     .map(s=>`<tr>
       <td style="text-align:left;"><b>${spvNombreCorto(s)}</b></td>
       <td class="mono">${d.qualDays[s]}</td>
-      <td class="mono">${d.qualTotals[s].toFixed(2)}€</td>
+      <td class="mono">${(d.qualTotals[s]/1.21).toFixed(2)}€</td>
       <td class="mono" style="color:var(--ok);font-weight:800;">${(d.qualTotals[s]/1.21*d.rate/100).toFixed(2)}€</td>
     </tr>`).join('')
     || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado al umbral de comisión.</td></tr>';
@@ -3278,7 +3287,7 @@ function openSpvComisiones(){
             <div class="spv-kpi"><span class="k-l">% aplicado</span><span class="k-v">${d.rate}%</span></div>
           </div>
           <div class="table-wrap">
-            <table><thead><tr><th>Persona</th><th>Días</th><th>Generado (bruto)</th><th>Comisión (s/neto)</th></tr></thead>
+            <table><thead><tr><th>Persona</th><th>Días</th><th>Generado (neto)</th><th>Comisión (s/neto)</th></tr></thead>
             <tbody>${filas}</tbody></table>
           </div>
           ${puedeVerPaula ? `
@@ -3287,7 +3296,7 @@ function openSpvComisiones(){
                       align-items:center;justify-content:space-between;gap:12px;">
             <div>
               <div style="font-size:12.5px;font-weight:800;">Comisión tienda · Paula</div>
-              <div style="font-size:10.5px;color:var(--text-dim);margin-top:2px;">${d.rate}% del rev. bruto de los días con comisión</div>
+              <div style="font-size:10.5px;color:var(--text-dim);margin-top:2px;">${d.rate}% del rev. NETO de los días con comisión</div>
             </div>
             <div style="font-family:var(--font);font-size:19px;font-weight:800;color:var(--ok);">${d.paulaCommission.toFixed(2)}€</div>
           </div>` : ''}
@@ -3326,7 +3335,7 @@ function computeSpvSummary(data){
     <tr>
       <td style="text-align:left;"><b>${s}</b></td>
       <td class="mono">${qualDays[s]} día${qualDays[s]!==1?'s':''}</td>
-      <td class="mono">${qualTotals[s].toFixed(2)}€</td>
+      <td class="mono">${(qualTotals[s]/1.21).toFixed(2)}€</td>
       <td class="mono" style="color:var(--success);font-weight:700;">${(qualTotals[s]/1.21*rate/100).toFixed(2)}€</td>
     </tr>`).join('')
     || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado todavía al umbral de comisión (SPV Neto ≥ 1€).</td></tr>';
@@ -4949,16 +4958,7 @@ async function renderRecap(){
       </div>`).join('') +
       `<div class="rc-checkall"><button onclick="toggleAllRutinas('t')" title="Marcar/desmarcar todas">✓ Todas</button></div>`;
 
-    // Generar las 10 celdas de observaciones
-    const obsList = document.getElementById('rc-obs-list');
-    if(obsList && !obsList.dataset.built){
-      obsList.dataset.built = '1';
-      obsList.innerHTML = Array.from({length:10},(_,i)=>`
-        <div class="rc-obs-row">
-          <span class="rc-obs-n">${i+1}</span>
-          <input type="text" class="rc-obs-in" id="rc-obs-${i}" placeholder="Observación…">
-        </div>`).join('');
-    }
+    // Las celdas de observaciones se generan en setObservaciones() (dinámicas)
 
     // Generar tasks semanales
     const todayDate = new Date(recapDate+'T12:00:00');
@@ -5011,7 +5011,7 @@ async function renderRecap(){
       if(recapLoading) return;
       saveRecapField({cerrado_por: document.getElementById('recap-cerrado-por')?.value || ''});
     });
-    document.querySelectorAll('.rc-obs-in').forEach(el=> bindSave(el, 'input', debounceRecapSave));
+    // (los listeners de observaciones se enganchan al crear cada celda en setObservaciones)
 
     renderRecapCapsules();
   } finally {
@@ -5039,21 +5039,67 @@ function debounceRecapSave(){
   }, 800);
 }
 
-/* Observaciones: 10 celdas → se guardan como texto multi-línea (compatible con
-   el historial de recaps y las cápsulas existentes) */
+/* Observaciones: celdas dinámicas (2 por defecto, botón + para añadir).
+   Cada celda es un textarea auto-ajustable que muestra el texto COMPLETO.
+   Se guardan como texto multi-línea (una línea por celda), compatible con
+   el historial de recaps y las cápsulas existentes. */
 function collectObservaciones(){
   return Array.from(document.querySelectorAll('.rc-obs-in'))
-    .map(el=>el.value.trim()).filter(Boolean).join('\n');
+    .map(el=>el.value.replace(/\n/g,' ').trim()).filter(Boolean).join('\n');
+}
+function autoGrowObs(el){
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight) + 'px';
+}
+function buildObsRow(idx, valor){
+  const row = document.createElement('div');
+  row.className = 'rc-obs-row';
+  row.innerHTML = `<span class="rc-obs-n">${idx+1}</span>`;
+  const ta = document.createElement('textarea');
+  ta.className = 'rc-obs-in';
+  ta.rows = 1;
+  ta.placeholder = 'Observación…';
+  ta.value = valor || '';
+  ta.addEventListener('input', ()=>{ autoGrowObs(ta); debounceRecapSave(); });
+  ta.addEventListener('keydown', e=>{ if(e.key==='Enter') e.preventDefault(); });
+  row.appendChild(ta);
+  return {row, ta};
 }
 function setObservaciones(text){
-  const lineas = (text||'').split('\n');
-  document.querySelectorAll('.rc-obs-in').forEach((el,i)=>{ el.value = lineas[i] || ''; });
+  const cont = document.getElementById('rc-obs-list');
+  if(!cont) return;
+  const lineas = (text||'').split('\n').filter(Boolean);
+  const n = Math.max(2, lineas.length);
+  cont.innerHTML = '';
+  const tas = [];
+  for(let i=0;i<n;i++){
+    const {row, ta} = buildObsRow(i, lineas[i]);
+    cont.appendChild(row);
+    tas.push(ta);
+  }
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'rc-obs-add';
+  addBtn.textContent = '+ Añadir observación';
+  addBtn.onclick = addObsRow;
+  cont.appendChild(addBtn);
+  // ajustar alturas cuando ya están en el DOM
+  requestAnimationFrame(()=> tas.forEach(autoGrowObs));
+}
+function addObsRow(){
+  const cont = document.getElementById('rc-obs-list');
+  if(!cont) return;
+  const addBtn = cont.querySelector('.rc-obs-add');
+  const idx = cont.querySelectorAll('.rc-obs-row').length;
+  const {row, ta} = buildObsRow(idx, '');
+  cont.insertBefore(row, addBtn);
+  ta.focus();
 }
 
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.07.26-recap3';
+const HUB_VERSION = 'v26.07.26-recap4';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = 'V.2'; b.title = 'Versión del HUB: ' + HUB_VERSION; }
