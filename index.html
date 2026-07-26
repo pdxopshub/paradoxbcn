@@ -353,6 +353,17 @@
     border-radius:6px;background:transparent;border:1.5px dashed var(--line-strong);color:var(--text-soft);
     font-size:11.5px;font-weight:800;white-space:nowrap;overflow:visible;letter-spacing:-.2px;
     display:flex;align-items:center;justify-content:flex-end;}
+  /* --- Checklists: mantenimiento y materiales --- */
+  .clmant-chk{width:26px;height:26px;border-radius:7px;border:1.5px solid var(--line-strong);
+    background:var(--surface);cursor:pointer;font-size:14px;font-weight:900;color:#0E6B45;
+    display:inline-flex;align-items:center;justify-content:center;transition:all .12s;}
+  .clmant-chk:hover{border-color:#0E6B45;}
+  .clmant-chk.on{background:#8FD1A8;border-color:#0E6B45;}
+  tr.clmant-ok td{background:#EAF7EF!important;}
+  .mat-head{width:100%;box-sizing:border-box;background:transparent;border:none;
+    font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;
+    color:var(--text-soft);text-align:left;padding:2px 4px;}
+  .mat-head:focus{outline:none;background:#DCEAFF;border-radius:4px;color:#123A73;}
   /* --- Botón "marcar todas" de las rutinas --- */
   .rc-checkall{display:flex;justify-content:flex-end;margin-top:8px;padding-top:6px;border-top:1px dashed var(--line);}
   .rc-checkall button{background:var(--panel);border:1px solid var(--line-strong);border-radius:14px;
@@ -1568,7 +1579,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </button>
           <button class="navitem" data-view="clmant">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 18 2 18 6 6 6Z"/><path d="M6 6v14a2 2 0 002 2h8a2 2 0 002-2V6"/><path d="M10 11h4"/></svg>
-          CL Mantenimiento
+          Checklists
         </button>
         </div>
       </nav>
@@ -2397,21 +2408,39 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ CL MANTENIMIENTO ============ -->
       <div class="view" id="view-clmant">
-        <div class="card">
-          <div class="flex-between" style="margin-bottom:14px;">
-            <div class="section-title" style="margin:0;">Lista de la compra</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <input id="clmant-new-item" placeholder="Material…" style="width:200px;">
-              <select id="clmant-new-cat" style="width:120px;">
-                <option value="Museo">Museo</option>
-                <option value="Oficina">Oficina</option>
-              </select>
-              <button class="btn btn-primary btn-sm" onclick="addClMantItem()">Añadir</button>
+        <div class="tab-strip" style="margin-bottom:14px;">
+          <button class="tab-btn active" data-cltab="mant" onclick="switchClTab('mant')">Mantenimiento</button>
+          <button class="tab-btn" data-cltab="materiales" onclick="switchClTab('materiales')">Materiales</button>
+        </div>
+
+        <!-- ---- Checklist de Mantenimiento (exhibiciones) ---- -->
+        <div id="cl-sub-mant">
+          <div class="card">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Checklist de mantenimiento <span class="hint">Cajas y exhibiciones del museo</span></div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span id="clmant-progreso" class="pill grey"></span>
+                <button class="btn btn-ghost btn-sm" onclick="resetChecklistMant()" title="Desmarcar todo para empezar una nueva ronda">↺ Reiniciar</button>
+              </div>
             </div>
+            <div class="table-wrap"><table id="clmant-table" class="no-filter"><thead>
+              <tr><th style="width:44px;">✓</th><th style="text-align:left;">Exhibición</th><th style="text-align:left;">Nota</th></tr>
+            </thead><tbody></tbody></table></div>
           </div>
-          <div class="table-wrap"><table id="clmant-table"><thead>
-            <tr><th style="width:36%;">Material</th><th>Categoría</th><th>Estado</th><th></th></tr>
-          </thead><tbody></tbody></table></div>
+        </div>
+
+        <!-- ---- Tabla libre de Materiales ---- -->
+        <div id="cl-sub-materiales" style="display:none;">
+          <div class="card">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Materiales <span class="hint">Tabla libre · edita celdas y cabeceras</span></div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-ghost btn-sm" onclick="matAddCol()">+ Columna</button>
+                <button class="btn btn-ghost btn-sm" onclick="matAddRow()">+ Fila</button>
+              </div>
+            </div>
+            <div class="table-wrap"><table id="materiales-table" class="no-filter"><thead></thead><tbody></tbody></table></div>
+          </div>
         </div>
       </div>
 
@@ -2688,7 +2717,7 @@ const titles = {
   marketing:['Marketing','Campañas, influencers y calendario'],
   chat:['Chat','Conversación del equipo'],
   diego:['Mantenimiento','Tareas semanales de Diego'],
-  clmant:['CL Mantenimiento','Lista de material a comprar'],
+  clmant:['Checklists','Mantenimiento de exhibiciones y materiales'],
   recap:['Recap del día','Cierre diario: info general, rutinas y observaciones'],
   loomis:['Loomis','Gestión semanal del lunes']
 };
@@ -5102,7 +5131,7 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.07.26-recap5';
+const HUB_VERSION = 'v26.07.26-checklists';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = 'V.2'; b.title = 'Versión del HUB: ' + HUB_VERSION; }
@@ -5117,7 +5146,7 @@ const BACKUP_TABLAS = ['profiles','spv_days','spv_entries','spv_commission_histo
   'staff_entradas','evaluaciones','entrevistas','turnos','pda_tasks','diego_tasks',
   'clmant_items','nfcards','reviews_cache','recap','reviews_history','pdxspot_kv',
   'chat_mensajes','vac_solicitudes','vac_bloqueos','vac_saldos','loomis_semanas',
-  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log'];
+  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant'];
 
 async function descargarBackupHub(){
   const btn = document.getElementById('hub-backup-btn');
@@ -7091,45 +7120,87 @@ async function addDiegoTask(){
 }
 
 /* ============================================================
-   CL MANTENIMIENTO — tabla clmant_items
+   CHECKLISTS — Mantenimiento (tabla checklist_mant) y
+   Materiales (tabla libre guardada en pdxspot_kv)
    ============================================================ */
-async function fetchClMantItems(){
-  const { data, error } = await sb.from('clmant_items').select('*').order('created_at');
-  if(error){ console.error(error); return []; }
-  return data;
+function switchClTab(tab){
+  document.querySelectorAll('[data-cltab]').forEach(b=>b.classList.toggle('active', b.dataset.cltab===tab));
+  document.getElementById('cl-sub-mant').style.display = tab==='mant' ? 'block':'none';
+  document.getElementById('cl-sub-materiales').style.display = tab==='materiales' ? 'block':'none';
 }
 async function renderClMant(){
-  const items = await fetchClMantItems();
+  await Promise.all([renderChecklistMant(), renderMateriales()]);
+}
+
+/* ---- Checklist de mantenimiento (cajas + exhibiciones) ---- */
+let CLMANT_CACHE = [];
+async function renderChecklistMant(){
+  const { data, error } = await sb.from('checklist_mant').select('*').order('orden');
   const tbody = document.querySelector('#clmant-table tbody');
-  tbody.innerHTML = items.length ? items.map(it=>`
-    <tr>
-      <td><b>${it.title}</b></td>
-      <td><span class="pill ${it.categoria==='Museo'?'violet':'grey'}">${it.categoria}</span></td>
-      <td>
-        <select onchange="setClMantStatus(${it.id}, this.value)" style="width:130px;">
-          <option value="Pendiente" ${it.estado==='Pendiente'?'selected':''}>Pendiente</option>
-          <option value="Comprado" ${it.estado==='Comprado'?'selected':''}>Comprado</option>
-        </select>
+  if(!tbody) return;
+  if(error){ tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
+  CLMANT_CACHE = data || [];
+  tbody.innerHTML = CLMANT_CACHE.map(it=>`
+    <tr class="${it.checked?'clmant-ok':''}">
+      <td style="text-align:center;">
+        <button class="clmant-chk ${it.checked?'on':''}" onclick="toggleChecklistMant(${it.id})" title="Marcar/desmarcar">${it.checked?'✓':''}</button>
       </td>
-      <td><button class="btn btn-ghost btn-sm" onclick="deleteClMantItem(${it.id})">✕</button></td>
-    </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Todavía no hay material en la lista. Añade el primero arriba.</td></tr>';
+      <td style="text-align:left;font-weight:${it.item.startsWith('CAJA')?'800':'600'};">${esc(it.item)}</td>
+      <td><input class="cell-input txt clmant-nota" value="${(it.nota||'').replace(/"/g,'&quot;')}" placeholder="—"
+                 onchange="saveChecklistNota(${it.id}, this.value)" style="width:100%;text-align:left;"></td>
+    </tr>`).join('');
+  const hechos = CLMANT_CACHE.filter(x=>x.checked).length;
+  const prog = document.getElementById('clmant-progreso');
+  if(prog) prog.textContent = `${hechos} / ${CLMANT_CACHE.length}`;
 }
-async function addClMantItem(){
-  const input = document.getElementById('clmant-new-item');
-  const cat = document.getElementById('clmant-new-cat').value;
-  const title = input.value.trim();
-  if(!title) return;
-  await sb.from('clmant_items').insert({title, categoria:cat, estado:'Pendiente'});
-  input.value='';
-  renderClMant();
+async function toggleChecklistMant(id){
+  const it = CLMANT_CACHE.find(x=>x.id===id);
+  if(!it) return;
+  await sb.from('checklist_mant').update({checked: !it.checked, updated_at: new Date().toISOString()}).eq('id', id);
+  renderChecklistMant();
 }
-async function setClMantStatus(id, status){
-  await sb.from('clmant_items').update({estado:status}).eq('id', id);
-  renderClMant();
+async function saveChecklistNota(id, nota){
+  await sb.from('checklist_mant').update({nota, updated_at: new Date().toISOString()}).eq('id', id);
 }
-async function deleteClMantItem(id){
-  await sb.from('clmant_items').delete().eq('id', id);
-  renderClMant();
+async function resetChecklistMant(){
+  if(!confirm('¿Desmarcar TODAS las casillas de la checklist de mantenimiento?')) return;
+  await sb.from('checklist_mant').update({checked:false, updated_at: new Date().toISOString()}).gte('id', 0);
+  renderChecklistMant();
+}
+
+/* ---- Materiales: tabla libre (filas x columnas editables) ---- */
+let MAT_GRID = null;
+const MAT_DEFAULT = { cols:['','','',''], rows:[['','','',''],['','','',''],['','','',''],['','','',''],['','','',''],['','','','']] };
+let matSaveTimer = null;
+function matScheduleSave(){
+  clearTimeout(matSaveTimer);
+  matSaveTimer = setTimeout(()=> kvSet('checklist-materiales', JSON.stringify(MAT_GRID)), 600);
+}
+async function renderMateriales(){
+  if(MAT_GRID === null){
+    const kv = await kvGet('checklist-materiales');
+    try{ MAT_GRID = kv?.value ? JSON.parse(kv.value) : JSON.parse(JSON.stringify(MAT_DEFAULT)); }
+    catch(e){ MAT_GRID = JSON.parse(JSON.stringify(MAT_DEFAULT)); }
+  }
+  const table = document.getElementById('materiales-table');
+  if(!table) return;
+  const nCols = MAT_GRID.cols.length;
+  table.querySelector('thead').innerHTML = '<tr>' +
+    MAT_GRID.cols.map((c,ci)=>`<th><input class="mat-head" value="${(c||'').replace(/"/g,'&quot;')}" placeholder="Título…"
+      onchange="MAT_GRID.cols[${ci}]=this.value;matScheduleSave();"></th>`).join('') +
+    `<th style="width:40px;"></th></tr>`;
+  table.querySelector('tbody').innerHTML = MAT_GRID.rows.map((fila,ri)=>'<tr>' +
+    fila.map((celda,ci)=>`<td><input class="cell-input txt mat-cell" value="${(celda||'').replace(/"/g,'&quot;')}"
+      onchange="MAT_GRID.rows[${ri}][${ci}]=this.value;matScheduleSave();" style="width:100%;text-align:left;"></td>`).join('') +
+    `<td style="text-align:center;"><button class="btn btn-ghost btn-sm" onclick="matDelRow(${ri})" title="Eliminar fila">✕</button></td></tr>`).join('');
+}
+function matAddRow(){ MAT_GRID.rows.push(Array(MAT_GRID.cols.length).fill('')); matScheduleSave(); renderMateriales(); }
+function matAddCol(){ MAT_GRID.cols.push(''); MAT_GRID.rows.forEach(f=>f.push('')); matScheduleSave(); renderMateriales(); }
+function matDelRow(ri){
+  const fila = MAT_GRID.rows[ri]||[];
+  if(fila.some(c=>c && c.trim()) && !confirm('Esta fila tiene contenido. ¿Eliminarla?')) return;
+  MAT_GRID.rows.splice(ri,1);
+  matScheduleSave(); renderMateriales();
 }
 
 /* ============================================================
