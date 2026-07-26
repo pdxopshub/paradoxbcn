@@ -454,8 +454,7 @@
     position:sticky;z-index:3;background:#3A3D42!important;color:#D8DADC!important;}
   /* columnas de Visitantes con los mismos colores que Tienda/Supervisores/Staff */
   #spv-grid-table .grp-visit{background:var(--panel)!important;color:var(--text-soft)!important;}
-  #spv-grid-table td.col-visit{background:transparent!important;}
-  #spv-grid-table td.col-visit.total-cell{background:var(--panel)!important;font-weight:800;}
+  #spv-grid-table th.grp-visit.grp-start{color:#fff!important;}
   #spv-grid-table thead tr:first-child th{top:0;z-index:5;}
   #spv-grid-table thead tr:nth-child(2) th{top:23px;z-index:5;}
   #spv-grid-table td{padding:2px 3px!important;height:26px;}
@@ -474,7 +473,8 @@
     box-shadow:inset 0 0 0 1.5px var(--accent)!important;}
   /* Visitantes, Tienda y Supervisores con el mismo fondo que el staff */
   #spv-grid-table .grp-tienda,#spv-grid-table .grp-superv,#spv-grid-table .grp-visit{background:var(--panel)!important;color:var(--text-soft)!important;}
-  #spv-grid-table .col-tienda,#spv-grid-table .col-superv,#spv-grid-table td.col-visit{background:transparent!important;}
+  /* las celdas del cuerpo (col-tienda/col-superv/col-visit) NO llevan fondo propio:
+     así heredan el mismo cebrado blanco/gris y el hover azul que las columnas de Staff */
   /* separación general entre celdas */
   #spv-grid-table td,#spv-grid-table th{border:1px solid var(--line);}
   /* líneas gruesas: Tienda | Supervisores | Staff */
