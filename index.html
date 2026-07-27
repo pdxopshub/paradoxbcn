@@ -369,6 +369,14 @@
   .roster-btn.si.on{background:#8FD1A8;border-color:#0E6B45;color:#0E4A2A;}
   .roster-btn.no.on{background:#F0AFAF;border-color:#8F2A2A;color:#5A1414;}
   tr.mat-sec-row td{background:#3A3D42!important;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.4px;padding:7px 10px;}
+  /* Materiales: tabla compacta, centrada, con columnas ajustadas al contenido (no ocupa todo el ancho) */
+  #cl-sub-materiales .table-wrap{overflow:auto;display:flex;justify-content:center;border:none;background:transparent;}
+  #materiales-table{width:auto;table-layout:auto;margin:0 auto;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;}
+  #materiales-table th{text-align:center;padding:8px 16px;font-size:10px;white-space:nowrap;}
+  #materiales-table td{text-align:center;padding:6px 16px;white-space:nowrap;}
+  #materiales-table td.mat-item{font-weight:700;text-align:center;white-space:normal;}
+  #materiales-table tbody tr:not(.mat-sec-row):hover td{background:rgba(0,0,0,.035);}
+  #materiales-table tr.mat-sec-row td{padding:7px 16px;}
   .clmant-chk.on{background:#8FD1A8;border-color:#0E6B45;}
   .clmant-chk.rep{color:#B8542A;}
   .clmant-chk.rep:hover{border-color:#B8542A;}
@@ -1312,6 +1320,7 @@
   .day-col .group-chip{background:var(--accent-soft);border:1px solid #123B4D;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent-dark);margin-bottom:5px;line-height:1.4;}
   .day-col .no-groups{font-size:11px;color:var(--line-strong);padding:3px 0;}
   .bday-chip{background:#FBE4F0;border:1px solid #F2A9CE;color:#A1276B;font-weight:800;border-radius:6px;margin-top:4px;padding:2px 6px;}
+  .influencer-chip{background:#E9F0FF;border:1px solid #B7D3FF;color:#1E3A6E;font-weight:800;border-radius:6px;margin-top:4px;padding:2px 6px;display:flex;align-items:center;gap:3px;font-size:9px;}
 
   /* Resumen — tareas PDA de solo lectura */
   .dash-pda-readonly{display:flex;flex-direction:column;gap:0;}
@@ -2567,7 +2576,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <button class="btn btn-ghost btn-sm" onclick="matAddItem()">+ Añadir material</button>
             </div>
             <div class="table-wrap"><table id="materiales-table" class="no-filter"><thead>
-              <tr><th style="text-align:left;">Material</th><th style="text-align:left;">Valor</th><th style="width:110px;">🛒 Comprar</th><th style="width:36px;"></th></tr>
+              <tr><th>Material</th><th>Valor</th><th>🛒 Comprar</th><th></th></tr>
             </thead><tbody></tbody></table></div>
           </div>
         </div>
@@ -3182,6 +3191,13 @@ async function renderWeekCalendar(){
     });
   }catch(e){ /* si falla, el calendario sigue funcionando */ }
 
+  // influencers programados en esta semana (por fecha exacta, no recurrente)
+  const infMap = {};   // iso -> [nombres]
+  try{
+    const { data: infData } = await sb.from('mkt_influencers').select('fecha,nombre_creator').in('fecha', weekDates.map(d=>d.iso));
+    (infData||[]).forEach(r=>{ (infMap[r.fecha] = infMap[r.fecha] || []).push(r.nombre_creator || 'Influencer'); });
+  }catch(e){ /* si falla, el calendario sigue funcionando */ }
+
   const hint = document.querySelector('#week-range-label');
   if(hint) hint.textContent = weekLabel;
 
@@ -3211,7 +3227,8 @@ async function renderWeekCalendar(){
         ${pctHtml}
       </div>
       <div class="day-extras">${(cumples[d.iso.slice(5)]||[]).map(n=>
-        `<div class="bday-chip" title="Cumpleaños de ${esc(n)}">🎂 ${esc(n)}</div>`).join('')}</div>
+        `<div class="bday-chip" title="Cumpleaños de ${esc(n)}">🎂 ${esc(n)}</div>`).join('')}${(infMap[d.iso]||[]).map(n=>
+        `<div class="influencer-chip" title="Influencer: ${esc(n)}">📸 ${esc(n)}</div>`).join('')}</div>
     </div>`;
   }).join('');
 }
@@ -7600,31 +7617,20 @@ async function renderDashFuGrupos(){
 
 /* ---- Materiales: checklist real (tabla checklist_materiales), agrupada por sección ---- */
 let MATCL_CACHE = [];
-const MAT_MONTON_UDS = 500; // unidades por montón (flyers)
 function matValorCellHtml(it){
   const val = (it.nota||'').replace(/"/g,'&quot;');
   if(it.tipo === 'numero'){
     return `<input type="number" class="cell-input mat-nota" min="0" step="1" placeholder="0" value="${val}"
-      onchange="saveMatNota(${it.id}, this.value)" style="width:90px;text-align:center;">`;
-  }
-  if(it.tipo === 'montones'){
-    const n = parseFloat(it.nota)||0;
-    return `<div style="display:flex;align-items:center;gap:8px;">
-      <input type="number" class="cell-input mat-nota" min="0" step="1" placeholder="0" value="${val}"
-        oninput="document.getElementById('mat-total-${it.id}').textContent='= '+((parseFloat(this.value)||0)*${MAT_MONTON_UDS})+' uds'"
-        onchange="saveMatNota(${it.id}, this.value)" style="width:70px;text-align:center;">
-      <span>montones</span>
-      <span id="mat-total-${it.id}" style="font-size:11px;color:var(--text-soft);">= ${n*MAT_MONTON_UDS} uds</span>
-    </div>`;
+      onchange="saveMatNota(${it.id}, this.value)" style="width:70px;text-align:center;">`;
   }
   if(it.tipo === 'sino'){
-    return `<div class="roster-cell">
+    return `<div class="roster-cell" style="justify-content:center;">
       <button class="roster-btn si ${it.nota==='Sí'?'on':''}" onclick="setMatSiNo(${it.id}, 'Sí')">Sí</button>
       <button class="roster-btn no ${it.nota==='No'?'on':''}" onclick="setMatSiNo(${it.id}, 'No')">No</button>
     </div>`;
   }
-  return `<input class="cell-input txt mat-nota" value="${val}" placeholder="Estado / cantidad…"
-    onchange="saveMatNota(${it.id}, this.value)" style="width:100%;text-align:left;">`;
+  return `<input class="cell-input mat-nota" value="${val}" placeholder="Estado / cantidad…"
+    onchange="saveMatNota(${it.id}, this.value)" style="width:150px;text-align:center;">`;
 }
 async function renderMateriales(){
   const { data, error } = await sb.from('checklist_materiales').select('*').order('orden');
@@ -7640,12 +7646,12 @@ async function renderMateriales(){
       html += `<tr class="mat-sec-row"><td colspan="4">${esc(seccionActual)}</td></tr>`;
     }
     html += `<tr>
-      <td style="text-align:left;">${esc(it.item)}</td>
+      <td class="mat-item">${esc(it.item)}</td>
       <td>${matValorCellHtml(it)}</td>
-      <td style="text-align:center;">
+      <td>
         <button class="clmant-chk rep ${it.comprar?'on':''}" onclick="toggleMatComprar(${it.id})" title="Marcar si hay que comprarlo">${it.comprar?'🛒':''}</button>
       </td>
-      <td style="text-align:center;"><button class="btn btn-ghost btn-sm" onclick="matDelItem(${it.id})" title="Eliminar material">✕</button></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="matDelItem(${it.id})" title="Eliminar material">✕</button></td>
     </tr>`;
   });
   tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Sin materiales todavía.</td></tr>';
@@ -7671,8 +7677,8 @@ async function matAddItem(){
   if(seccion===null) return;
   const item = prompt('Nombre del material');
   if(!item || !item.trim()) return;
-  let tipo = (prompt('Tipo de valor: "numero", "sino", "montones" o "texto"', 'sino') || 'sino').trim().toLowerCase();
-  if(!['numero','sino','montones','texto'].includes(tipo)) tipo = 'texto';
+  let tipo = (prompt('Tipo de valor: "numero", "sino" o "texto"', 'sino') || 'sino').trim().toLowerCase();
+  if(!['numero','sino','texto'].includes(tipo)) tipo = 'texto';
   const maxOrden = MATCL_CACHE.reduce((m,x)=>Math.max(m, x.orden||0), 0);
   await sb.from('checklist_materiales').insert({seccion: (seccion||'OTROS').trim().toUpperCase() || 'OTROS', item: item.trim(), orden: maxOrden+1, tipo});
   renderMateriales();
