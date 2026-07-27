@@ -6914,7 +6914,7 @@ function gcalRowHtml(l, hoy){
   const cuando = dias===0 ? 'Hoy' : dias===1 ? 'Mañana' : `En ${dias} días`;
   return `<div class="gcal-row">
     <span class="gcal-date">${d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'})}</span>
-    <b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.grupo_nombre)}</b>
+    <b title="${esc(l.grupo_nombre)}" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.grupo_nombre)}</b>
     <span class="pill grey">${esc(l.hora)||'—'}</span>
     <span class="pill blue">${l.pax||'?'} pax</span>
     <span class="pill ${dias<=1?'green':'grey'}">${cuando}</span>
