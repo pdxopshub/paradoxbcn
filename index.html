@@ -369,6 +369,10 @@
   .roster-btn.si.on{background:#8FD1A8;border-color:#0E6B45;color:#0E4A2A;}
   .roster-btn.no.on{background:#F0AFAF;border-color:#8F2A2A;color:#5A1414;}
   tr.mat-sec-row td{background:#3A3D42!important;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.4px;padding:7px 10px;}
+  /* Materiales: tabla a la izquierda (algo más de la mitad) + lista de la compra a la derecha */
+  #cl-sub-materiales .mat-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start;}
+  @media(max-width:1100px){#cl-sub-materiales .mat-layout{grid-template-columns:1fr;}}
+  #cl-sub-materiales .mat-layout-lista{position:sticky;top:14px;}
   /* Materiales: tabla compacta, centrada, con columnas ajustadas al contenido (no ocupa todo el ancho) */
   #cl-sub-materiales .table-wrap{overflow:auto;display:flex;justify-content:center;border:none;background:transparent;}
   #materiales-table{width:auto;table-layout:auto;margin:0 auto;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;}
@@ -752,6 +756,8 @@
   .rv-kpis > div{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:6px 5px;text-align:center;}
   .rv-k{font-family:var(--font);font-weight:800;font-size:16px;line-height:1;color:var(--accent);}
   .rv-k small{font-size:11px;color:var(--text-soft);font-weight:600;}
+  .rv-k-rank{font-family:var(--font);font-weight:800;font-size:11px;line-height:1.2;color:var(--accent);
+    white-space:normal;word-break:break-word;overflow-wrap:anywhere;}
   .rv-l{font-size:9.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;margin-top:5px;}
   .rv-form{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;}
   .rv-form-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;}
@@ -1320,6 +1326,8 @@
   .day-col .group-chip{background:var(--accent-soft);border:1px solid #123B4D;border-radius:7px;padding:6px 8px;font-size:11px;font-weight:700;color:var(--accent-dark);margin-bottom:5px;line-height:1.4;}
   .day-col .no-groups{font-size:11px;color:var(--line-strong);padding:3px 0;}
   .bday-chip{background:#FBE4F0;border:1px solid #F2A9CE;color:#A1276B;font-weight:800;border-radius:6px;margin-top:4px;padding:2px 6px;}
+  .dash-cap-label{display:inline-flex;align-items:center;gap:6px;}
+  .dash-cap-icon{flex-shrink:0;color:var(--text-soft);}
   .influencer-chip{background:#E9F0FF;border:1px solid #B7D3FF;color:#1E3A6E;font-weight:800;border-radius:6px;margin-top:4px;padding:2px 6px;display:flex;align-items:center;gap:3px;font-size:9px;}
 
   /* Resumen — tareas PDA de solo lectura */
@@ -1671,14 +1679,9 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <!-- ============ DASHBOARD ============ -->
       <div class="view active" id="view-dashboard">
 
-        <div class="grid grid-2" style="margin-bottom:14px;grid-template-columns:repeat(2,1fr);">
-          <div class="card kpi"><div class="label">Visitantes LY</div><div class="value" id="dash-ly-visits" style="color:#B0B8C8;font-weight:800;">–</div><div class="delta" id="dash-ly-date" style="color:var(--text-soft);">–</div></div>
-          <div class="card kpi"><div class="label">Tus tareas PDA</div><div class="value" id="dash-my-tasks">–</div><div class="delta" style="color:var(--text-soft);" id="dash-my-tasks-sub">pendientes esta semana</div></div>
-        </div>
-
         <div class="card dash-week-card">
           <div class="section-title" style="margin-bottom:14px;">
-            <span>Calendario de la semana <span class="hint">Visitantes vs año pasado (mismo día de la semana)</span></span>
+            <span>Calendario de la semana</span>
             <div style="display:flex;align-items:center;gap:8px;">
               <button class="btn btn-ghost btn-sm" onclick="weekNav(-1)">← Anterior</button>
               <button class="btn btn-ghost btn-sm" onclick="weekNav(0)" id="week-today-btn" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);">Esta semana</button>
@@ -1700,27 +1703,27 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
 
           <div class="card" style="margin:0;">
-            <div class="section-title" style="margin:0;">Grupos confirmados</div>
-            <div class="value" style="font-size:30px;font-weight:800;color:var(--accent);margin-top:8px;" id="dash-grupos-confirmados-count">–</div>
-            <div style="font-size:11.5px;color:var(--text-soft);margin-top:2px;">reservas de grupo confirmadas</div>
+            <div class="section-title" style="margin:0;">Próximas visitas</div>
+            <div class="value" style="font-size:30px;font-weight:800;color:var(--accent);margin-top:8px;" id="dash-proximas-visitas-count">–</div>
+            <div style="font-size:11.5px;color:var(--text-soft);margin-top:2px;">visitas de grupo confirmadas y por llegar</div>
           </div>
         </div>
 
-        <div class="grid" style="margin-top:14px;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;align-items:stretch;">
+        <div class="grid" id="dash-caps-row" style="margin-top:14px;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;align-items:stretch;">
           <div class="card" style="margin:0;">
-            <div class="section-title" style="margin-bottom:10px;">⚠ A reparar <span class="hint">Marcado en Checklists · Mantenimiento</span></div>
+            <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>A reparar</span> <span class="hint">CL Mantenimiento</span></div>
             <div id="dash-reparaciones-list" class="dash-warn-list"></div>
           </div>
           <div class="card" style="margin:0;">
-            <div class="section-title" style="margin-bottom:10px;">🛒 A comprar <span class="hint">Marcado en Checklists · Materiales</span></div>
+            <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 002 1.58h9.78a2 2 0 002-1.58l1.65-7.42H5.12"/></svg>A comprar</span> <span class="hint">CL Materiales</span></div>
             <div id="dash-compras-list" class="dash-warn-list"></div>
           </div>
           <div class="card" style="margin:0;">
             <div class="section-title" style="margin-bottom:10px;">📸 Influencers hoy <span class="hint">Marketing · Influencers</span></div>
             <div id="dash-influencers-list" class="dash-warn-list"></div>
           </div>
-          <div class="card" style="margin:0;">
-            <div class="section-title" style="margin-bottom:10px;">📞 FU grupos <span class="hint">Grupos · Contacto</span></div>
+          <div class="card" id="dash-fugrupos-card" style="margin:0;">
+            <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>FU grupos</span> <span class="hint">Grupos · Contacto</span></div>
             <div id="dash-fugrupos-list" class="dash-warn-list"></div>
           </div>
         </div>
@@ -2570,14 +2573,20 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
         <!-- ---- Checklist de Materiales ---- -->
         <div id="cl-sub-materiales" style="display:none;">
-          <div class="card">
-            <div class="flex-between" style="margin-bottom:12px;">
-              <div class="section-title" style="margin:0;">Materiales</div>
-              <button class="btn btn-ghost btn-sm" onclick="matAddItem()">+ Añadir material</button>
+          <div class="mat-layout">
+            <div class="card mat-layout-table">
+              <div class="flex-between" style="margin-bottom:12px;">
+                <div class="section-title" style="margin:0;">Materiales</div>
+                <button class="btn btn-ghost btn-sm" onclick="matAddItem()">+ Añadir material</button>
+              </div>
+              <div class="table-wrap"><table id="materiales-table" class="no-filter"><thead>
+                <tr><th>Material</th><th>Valor</th><th>🛒 Comprar</th><th></th></tr>
+              </thead><tbody></tbody></table></div>
             </div>
-            <div class="table-wrap"><table id="materiales-table" class="no-filter"><thead>
-              <tr><th>Material</th><th>Valor</th><th>🛒 Comprar</th><th></th></tr>
-            </thead><tbody></tbody></table></div>
+            <div class="card mat-layout-lista">
+              <div class="section-title" style="margin-bottom:12px;">Lista de la compra</div>
+              <div id="mat-lista-compra" class="dash-warn-list"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -3747,7 +3756,7 @@ async function renderResenas(){
       <div class="rv-kpis${f.id==='tripadvisor'?'':' k2'}">
         <div><div class="rv-k">${cache?.rating ?? '–'}<small>/5</small></div><div class="rv-l">Puntuación</div></div>
         <div><div class="rv-k">${cache?.review_count?.toLocaleString('es-ES') ?? '–'}</div><div class="rv-l">Reseñas</div></div>
-        ${f.id==='tripadvisor' ? `<div><div class="rv-k" style="font-size:14px;">${cache?.ranking ?? '–'}</div><div class="rv-l">Ranking</div></div>` : ''}
+        ${f.id==='tripadvisor' ? `<div><div class="rv-k-rank">${cache?.ranking ?? '–'}</div><div class="rv-l">Ranking</div></div>` : ''}
       </div>
       <div style="font-size:10.5px;color:var(--text-dim);margin-bottom:12px;">Actualizado: ${updated}</div>
 
@@ -6789,11 +6798,12 @@ async function renderDashGrupos(){
   }
   const hoy = new Date().toISOString().slice(0,10);
   const confirmados = GL_CACHE.filter(l=> l.status==='Confirmed');
-  const countEl = document.getElementById('dash-grupos-confirmados-count');
-  if(countEl) countEl.textContent = confirmados.length;
+  const proximosTodos = confirmados.filter(l=> l.travel_date && l.travel_date>=hoy);
+  const countEl = document.getElementById('dash-proximas-visitas-count');
+  if(countEl) countEl.textContent = proximosTodos.length;
 
-  const prox = confirmados
-    .filter(l=> l.travel_date && l.travel_date>=hoy)
+  const prox = proximosTodos
+    .slice()
     .sort((a,b)=>a.travel_date.localeCompare(b.travel_date))
     .slice(0,8);
 
@@ -7604,7 +7614,20 @@ async function renderDashInfluencers(){
     ? lista.map(f=>`<div class="dash-warn-row info"><span class="dash-warn-tag">Hoy</span><b>${esc(f.nombre_creator||'Influencer')}</b>${f.hora?' · '+esc(f.hora):''}${f.num_personas?' · '+f.num_personas+' pax':''}</div>`).join('')
     : '<div class="empty-state" style="padding:10px 0;">No hay influencers programados para hoy.</div>';
 }
+const FU_GRUPOS_VISIBLE_PARA = ['Laia','Mireia','Ignacio'];
+function puedeVerFuGrupos(){
+  return FU_GRUPOS_VISIBLE_PARA.includes(currentProfile?.nombre || '');
+}
 async function renderDashFuGrupos(){
+  const card = document.getElementById('dash-fugrupos-card');
+  const row = document.getElementById('dash-caps-row');
+  if(!puedeVerFuGrupos()){
+    if(card) card.style.display = 'none';
+    if(row) row.style.gridTemplateColumns = '1fr 1fr 1fr';
+    return;
+  }
+  if(card) card.style.display = '';
+  if(row) row.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
   const el = document.getElementById('dash-fugrupos-list');
   if(!el) return;
   const hoy = todayIso();
@@ -7656,6 +7679,17 @@ async function renderMateriales(){
   });
   tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Sin materiales todavía.</td></tr>';
   renderDashCompras();
+  renderMatListaCompra();
+}
+function renderMatListaCompra(){
+  const el = document.getElementById('mat-lista-compra');
+  if(!el) return;
+  const pend = MATCL_CACHE.filter(it=>it.comprar);
+  el.innerHTML = pend.length
+    ? pend.map(it=>`<div class="dash-warn-row" style="cursor:pointer;" onclick="toggleMatComprar(${it.id})" title="Clic para quitar de la lista">
+        <span class="dash-warn-tag">Comprar</span><b>${esc(it.item)}</b> <span class="hint">${esc(it.seccion)}</span>
+      </div>`).join('')
+    : '<div class="empty-state" style="padding:10px 0;">Nada marcado para comprar todavía. Márcalo en la tabla de la izquierda.</div>';
 }
 async function setMatSiNo(id, valor){
   const it = MATCL_CACHE.find(x=>x.id===id);
