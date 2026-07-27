@@ -370,17 +370,29 @@
   .roster-btn.no.on{background:#F0AFAF;border-color:#8F2A2A;color:#5A1414;}
   tr.mat-sec-row td{background:#3A3D42!important;color:#fff;font-weight:800;font-size:11.5px;letter-spacing:.4px;padding:7px 10px;}
   /* Materiales: tabla a la izquierda (algo más de la mitad) + lista de la compra a la derecha */
-  #cl-sub-materiales .mat-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start;}
-  @media(max-width:1100px){#cl-sub-materiales .mat-layout{grid-template-columns:1fr;}}
-  #cl-sub-materiales .mat-layout-lista{position:sticky;top:14px;}
-  /* Materiales: tabla compacta, centrada, con columnas ajustadas al contenido (no ocupa todo el ancho) */
-  #cl-sub-materiales .table-wrap{overflow:auto;display:flex;justify-content:center;border:none;background:transparent;}
-  #materiales-table{width:auto;table-layout:auto;margin:0 auto;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;}
-  #materiales-table th{text-align:center;padding:8px 16px;font-size:10px;white-space:nowrap;}
+  #cl-sub-materiales .mat-layout, #cl-sub-mant .mat-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start;}
+  @media(max-width:1100px){#cl-sub-materiales .mat-layout, #cl-sub-mant .mat-layout{grid-template-columns:1fr;}}
+  #cl-sub-materiales .mat-layout-lista, #cl-sub-mant .mat-layout-lista{position:sticky;top:14px;}
+  /* Materiales: tabla compacta, centrada, con columnas ajustadas al contenido (no ocupa todo el ancho),
+     con scroll interno propio para que no empuje hacia abajo el resto del HUB */
+  #cl-sub-materiales .table-wrap{overflow:auto;display:flex;justify-content:center;border:none;background:transparent;
+    max-height:calc(100vh - 260px);}
+  #materiales-table{width:auto;table-layout:auto;margin:0 auto;border:1px solid var(--line-strong);border-radius:8px;border-collapse:separate;border-spacing:0;}
+  #materiales-table th{text-align:center;padding:8px 16px;font-size:10px;white-space:nowrap;
+    position:sticky;top:0;z-index:3;background:var(--panel);}
   #materiales-table td{text-align:center;padding:6px 16px;white-space:nowrap;}
   #materiales-table td.mat-item{font-weight:700;text-align:center;white-space:normal;}
   #materiales-table tbody tr:not(.mat-sec-row):hover td{background:rgba(0,0,0,.035);}
   #materiales-table tr.mat-sec-row td{padding:7px 16px;}
+  /* Mantenimiento: misma idea — tabla compacta con scroll propio, sin empujar el HUB hacia abajo */
+  #cl-sub-mant .table-wrap{overflow:auto;display:flex;justify-content:center;border:none;background:transparent;
+    max-height:calc(100vh - 260px);}
+  #clmant-table{width:auto;table-layout:auto;margin:0 auto;border:1px solid var(--line-strong);border-radius:8px;border-collapse:separate;border-spacing:0;}
+  #clmant-table th{text-align:center;padding:8px 14px;font-size:10px;white-space:nowrap;
+    position:sticky;top:0;z-index:3;background:var(--panel);}
+  #clmant-table td{text-align:center;padding:6px 14px;white-space:nowrap;}
+  #clmant-table td.clmant-item{white-space:normal;}
+  #clmant-table tbody tr:hover td{background:rgba(0,0,0,.035);}
   .clmant-chk.on{background:#8FD1A8;border-color:#0E6B45;}
   .clmant-chk.rep{color:#B8542A;}
   .clmant-chk.rep:hover{border-color:#B8542A;}
@@ -762,6 +774,8 @@
   .rv-form{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;}
   .rv-form-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;}
   .rv-form-row label{font-size:12px;color:var(--text-soft);font-weight:600;}
+  .rv-form-row-rank{flex-direction:column;align-items:stretch;gap:5px;}
+  .rv-form-row-rank label{margin-bottom:0;}
   .rv-form-row input{text-align:center;font-weight:700;}
   .numstep{display:inline-flex;align-items:center;gap:0;border:1.5px solid #B7D3FF;
     border-radius:8px;overflow:hidden;background:#EAF2FF;}
@@ -776,13 +790,35 @@
   .rv-hist th{padding:6px 5px;}
   .rv-hist td{padding:5px 5px;}
   /* ---- MARKETING: calendario semanal ---- */
-  .mk-week{display:flex;gap:14px;align-items:stretch;border-bottom:1px solid var(--line);padding:10px 0;}
-  .mk-week:last-child{border-bottom:none;}
-  .mk-week-label{width:130px;flex-shrink:0;font-size:12px;font-weight:800;color:var(--text-soft);}
-  .mk-week-label small{font-weight:600;color:var(--text-dim);font-size:10.5px;}
-  .mk-week-bars{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
-  .mk-bar{background:var(--panel);border-radius:5px;padding:5px 10px;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* Calendario de Marketing: filas = semanas ISO del año, columnas = días L-D, con leyenda de campañas a la derecha */
+  .mkt-cal-layout{display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start;}
+  @media(max-width:1000px){.mkt-cal-layout{grid-template-columns:1fr;}}
+  .mk-week-row{display:flex;gap:10px;align-items:stretch;border-bottom:1px solid var(--line);padding:8px 0;}
+  .mk-week-row:last-child{border-bottom:none;}
+  .mk-week-row.mk-week-head{border-bottom:2px solid var(--line-strong);padding:0 0 6px;}
+  .mk-week-label{width:80px;flex-shrink:0;font-size:12px;font-weight:800;color:var(--text-soft);}
+  .mk-week-label small{display:block;font-weight:600;color:var(--text-dim);font-size:9.5px;margin-top:2px;}
+  .mk-week-days{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;min-width:0;}
+  .mk-day-h{text-align:center;font-size:9.5px;font-weight:800;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;}
+  .mk-day{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:5px 4px;min-height:52px;
+    display:flex;flex-direction:column;gap:3px;}
+  .mk-day.mk-day-today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+  .mk-day.mk-day-out{opacity:.35;}
+  .mk-day-num{font-size:9.5px;font-weight:800;color:var(--text-soft);text-align:center;}
+  .mk-day-bars{display:flex;flex-direction:column;gap:2px;flex:1;}
+  .mk-day-bar{height:6px;border-radius:3px;opacity:.9;transition:opacity .12s,transform .12s;}
+  .mk-day-bar.mk-hl{opacity:1;transform:scaleY(1.5);box-shadow:0 0 0 1px rgba(0,0,0,.3);}
+  .mk-day-bar.mk-dim{opacity:.12;}
   .mk-empty{color:var(--text-dim);font-size:12px;padding:3px 0;}
+  .mk-cal-legend{border:1px solid var(--line-strong);border-radius:9px;padding:8px;background:var(--surface);
+    max-height:520px;overflow:auto;}
+  .mk-legend-title{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--text-soft);padding:4px 8px 8px;}
+  .mk-legend-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;font-size:12px;transition:background .12s;}
+  .mk-legend-item:hover{background:var(--panel);}
+  .mk-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+  .mk-legend-txt{flex:1;min-width:0;}
+  .mk-legend-name{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .mk-legend-dates{font-size:10px;color:var(--text-dim);white-space:nowrap;}
   .mk-sub{max-width:1000px;}
   /* ---- SPV: columnas personalizadas + resumen estrecho ---- */
   #spv-grid-table th.spv-custom-col{cursor:pointer;color:#C3CAD9;}
@@ -1305,12 +1341,12 @@
   .day-col{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 13px;min-height:168px;
     display:flex;flex-direction:column;transition:transform .12s ease,box-shadow .12s ease;box-shadow:0 1px 2px rgba(0,0,0,.15);}
   .day-col:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.22);}
-  .day-col.weekend{background:#E8EAEF;border-color:#D7DBE3;}
+  .day-col.weekend{background:#FBEBD8;border-color:#EFCC98;box-shadow:0 1px 2px rgba(0,0,0,.15),inset 0 0 0 1px rgba(217,140,20,.12);}
   .day-col.today{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent),0 4px 12px rgba(0,123,167,.18);
     background:linear-gradient(180deg,var(--accent-soft) 0%,var(--panel) 55%);}
   .day-col .dname{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--text-soft);letter-spacing:.9px;}
   .day-col.today .dname{color:#fff;}
-  .day-col.weekend .dname{color:#6C7593;}
+  .day-col.weekend .dname{color:#A85F00;font-weight:900;}
   /* Sábado/Domingo cuando además son "hoy": el gris de fin de semana ganaba
      sobre el blanco y quedaba ilegible sobre el fondo azul oscuro del día actual */
   .day-col.today.weekend .dname{color:var(--accent-dark);}
@@ -1703,9 +1739,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
 
           <div class="card" style="margin:0;">
-            <div class="section-title" style="margin:0;">Próximas visitas</div>
-            <div class="value" style="font-size:30px;font-weight:800;color:var(--accent);margin-top:8px;" id="dash-proximas-visitas-count">–</div>
-            <div style="font-size:11.5px;color:var(--text-soft);margin-top:2px;">visitas de grupo confirmadas y por llegar</div>
+            <div class="section-title" style="margin-bottom:10px;">Próximas visitas <span class="hint">Grupos confirmados por llegar</span></div>
+            <div id="dash-proximas-visitas-mini" class="dash-pda-readonly"></div>
           </div>
         </div>
 
@@ -1719,7 +1754,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <div id="dash-compras-list" class="dash-warn-list"></div>
           </div>
           <div class="card" style="margin:0;">
-            <div class="section-title" style="margin-bottom:10px;">📸 Influencers hoy <span class="hint">Marketing · Influencers</span></div>
+            <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>Influencers hoy</span></div>
             <div id="dash-influencers-list" class="dash-warn-list"></div>
           </div>
           <div class="card" id="dash-fugrupos-card" style="margin:0;">
@@ -2162,14 +2197,26 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div class="mk-sub" id="mk-sub-calendario" style="display:none;">
           <div class="card">
             <div class="flex-between" style="margin-bottom:12px;">
-              <div class="section-title" style="margin:0;">Calendario de campañas por semana</div>
+              <div class="section-title" style="margin:0;">Calendario de campañas <span class="hint">Semanas del año</span></div>
               <div style="display:flex;align-items:center;gap:8px;">
                 <button class="btn btn-ghost btn-sm" onclick="mktCalMonth(-1)">‹</button>
                 <div class="section-title" style="margin:0;min-width:130px;text-align:center;" id="mk-cal-label"></div>
                 <button class="btn btn-ghost btn-sm" onclick="mktCalMonth(1)">›</button>
               </div>
             </div>
-            <div id="mk-calendar"></div>
+            <div class="mkt-cal-layout">
+              <div>
+                <div class="mk-week-row mk-week-head">
+                  <div class="mk-week-label"></div>
+                  <div class="mk-week-days">
+                    <div class="mk-day-h">Lun</div><div class="mk-day-h">Mar</div><div class="mk-day-h">Mié</div>
+                    <div class="mk-day-h">Jue</div><div class="mk-day-h">Vie</div><div class="mk-day-h">Sáb</div><div class="mk-day-h">Dom</div>
+                  </div>
+                </div>
+                <div id="mk-calendar"></div>
+              </div>
+              <div class="mk-cal-legend" id="mk-cal-legend"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -2555,19 +2602,28 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <button class="tab-btn" data-cltab="materiales" onclick="switchClTab('materiales')">Materiales</button>
         </div>
 
-        <!-- ---- Checklist de Mantenimiento (exhibiciones) ---- -->
+        <!-- ---- Checklist de Mantenimiento (exhibiciones), semanal ---- -->
         <div id="cl-sub-mant">
-          <div class="card">
-            <div class="flex-between" style="margin-bottom:12px;">
-              <div class="section-title" style="margin:0;">Checklist de mantenimiento</div>
-              <div style="display:flex;gap:8px;align-items:center;">
-                <span id="clmant-progreso" class="pill grey"></span>
-                <button class="btn btn-ghost btn-sm" onclick="resetChecklistMant()" title="Desmarcar todo para empezar una nueva ronda">↺ Reiniciar</button>
+          <div class="mat-layout">
+            <div class="card mat-layout-table">
+              <div class="flex-between" style="margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+                <div class="section-title" style="margin:0;">Checklist de mantenimiento</div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <button class="btn btn-ghost btn-sm" onclick="clmantWeek(-1)">‹</button>
+                  <div class="section-title" style="margin:0;min-width:150px;text-align:center;font-size:12.5px;" id="clmant-week-label">Esta semana</div>
+                  <button class="btn btn-ghost btn-sm" onclick="clmantWeek(1)">›</button>
+                  <button class="btn btn-ghost btn-sm" onclick="clmantWeek(0)">Hoy</button>
+                  <span id="clmant-progreso" class="pill grey"></span>
+                </div>
               </div>
+              <div class="table-wrap"><table id="clmant-table" class="no-filter"><thead>
+                <tr><th style="width:40px;">✓</th><th>Exhibición</th><th>Nota</th><th style="width:70px;">Reparar</th></tr>
+              </thead><tbody></tbody></table></div>
             </div>
-            <div class="table-wrap"><table id="clmant-table" class="no-filter"><thead>
-              <tr><th style="width:44px;">✓</th><th style="text-align:left;">Exhibición</th><th style="text-align:left;">Nota</th><th style="width:110px;">⚠ Reparar</th></tr>
-            </thead><tbody></tbody></table></div>
+            <div class="card mat-layout-lista">
+              <div class="section-title" style="margin-bottom:12px;">A reparar esta semana</div>
+              <div id="clmant-lista-reparar" class="dash-warn-list"></div>
+            </div>
           </div>
         </div>
 
@@ -3769,12 +3825,12 @@ async function renderResenas(){
           <label>Nº reseñas</label>
           ${numStepper('rv-count-'+f.id, cache?.review_count ?? 0, 1, 0, null, 72)}
         </div>
-        ${f.id==='tripadvisor' ? `<div class="rv-form-row">
+        ${f.id==='tripadvisor' ? `<div class="rv-form-row rv-form-row-rank">
           <label>Ranking</label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            ${numStepper('rv-rank-pos-'+f.id, rk.pos, 1, 1, null, 48)}
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+            ${numStepper('rv-rank-pos-'+f.id, rk.pos, 1, 1, null, 42)}
             <span style="color:var(--text-dim);font-size:11px;">de</span>
-            ${numStepper('rv-rank-total-'+f.id, rk.total, 1, 1, null, 58)}
+            ${numStepper('rv-rank-total-'+f.id, rk.total, 1, 1, null, 50)}
           </div>
         </div>` : ''}
         <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveResenaUpdate('${f.id}')">Guardar ${f.label}</button>
@@ -5355,7 +5411,7 @@ const BACKUP_TABLAS = ['profiles','spv_days','spv_entries','spv_commission_histo
   'staff_entradas','evaluaciones','entrevistas','turnos','pda_tasks','diego_tasks',
   'clmant_items','nfcards','reviews_cache','recap','reviews_history','pdxspot_kv',
   'chat_mensajes','vac_solicitudes','vac_bloqueos','vac_saldos','loomis_semanas',
-  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant','vac_bajas','checklist_materiales','grupos_contacto'];
+  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant','vac_bajas','checklist_materiales','grupos_contacto','checklist_mant_semana'];
 
 async function descargarBackupHub(){
   const btn = document.getElementById('hub-backup-btn');
@@ -6786,10 +6842,24 @@ async function deleteLead(id){
   renderLeads(lead?.canal || 'inbound');
 }
 
+/* Fila de una visita próxima: nombre, fecha, hora y pax (misma pinta en la mini-cápsula y en el listado completo) */
+function gcalRowHtml(l, hoy){
+  const d = new Date(l.travel_date+'T12:00:00');
+  const dias = Math.round((d - new Date(hoy+'T12:00:00'))/86400000);
+  const cuando = dias===0 ? 'Hoy' : dias===1 ? 'Mañana' : `En ${dias} días`;
+  return `<div class="gcal-row">
+    <span class="gcal-date">${d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'})}</span>
+    <b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.grupo_nombre)}</b>
+    <span class="pill grey">${esc(l.hora)||'—'}</span>
+    <span class="pill blue">${l.pax||'?'} pax</span>
+    <span class="pill ${dias<=1?'green':'grey'}">${cuando}</span>
+  </div>`;
+}
 /* Calendario resumido de grupos para el Dashboard */
 async function renderDashGrupos(){
   const el = document.getElementById('dash-grupos-cal');
-  if(!el) return;
+  const miniEl = document.getElementById('dash-proximas-visitas-mini');
+  if(!el && !miniEl) return;
   if(!GL_CACHE.length){
     try{
       const {data} = await sb.from('grupos_leads').select('*');
@@ -6798,27 +6868,15 @@ async function renderDashGrupos(){
   }
   const hoy = new Date().toISOString().slice(0,10);
   const confirmados = GL_CACHE.filter(l=> l.status==='Confirmed');
-  const proximosTodos = confirmados.filter(l=> l.travel_date && l.travel_date>=hoy);
-  const countEl = document.getElementById('dash-proximas-visitas-count');
-  if(countEl) countEl.textContent = proximosTodos.length;
+  const proximosTodos = confirmados
+    .filter(l=> l.travel_date && l.travel_date>=hoy)
+    .sort((a,b)=>a.travel_date.localeCompare(b.travel_date));
 
-  const prox = proximosTodos
-    .slice()
-    .sort((a,b)=>a.travel_date.localeCompare(b.travel_date))
-    .slice(0,8);
+  const prox = proximosTodos.slice(0,8);
+  const vacio = '<div style="color:var(--text-soft);font-size:12.5px;">No hay grupos confirmados próximamente.</div>';
 
-  el.innerHTML = prox.length ? prox.map(l=>{
-    const d = new Date(l.travel_date+'T12:00:00');
-    const dias = Math.round((d - new Date(hoy+'T12:00:00'))/86400000);
-    const cuando = dias===0 ? 'Hoy' : dias===1 ? 'Mañana' : `En ${dias} días`;
-    return `<div class="gcal-row">
-      <span class="gcal-date">${d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'})}</span>
-      <b style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.grupo_nombre)}</b>
-      <span class="pill grey">${esc(l.hora)||'—'}</span>
-      <span class="pill blue">${l.pax||'?'} pax</span>
-      <span class="pill ${dias<=1?'green':'grey'}">${cuando}</span>
-    </div>`;
-  }).join('') : '<div style="color:var(--text-soft);font-size:12.5px;">No hay grupos confirmados próximamente.</div>';
+  if(el) el.innerHTML = prox.length ? prox.map(l=>gcalRowHtml(l,hoy)).join('') : vacio;
+  if(miniEl) miniEl.innerHTML = proximosTodos.length ? proximosTodos.slice(0,5).map(l=>gcalRowHtml(l,hoy)).join('') : vacio;
 }
 
 /* ---------------- PRECIOS ---------------- */
@@ -7186,18 +7244,43 @@ async function deleteMktInfluencer(id){
   renderMarketing();
 }
 
-/* ---------- Calendario de campañas por semana ---------- */
+/* ---------- Calendario de campañas por semana (semanas ISO del año) ---------- */
 function mktCalMonth(delta){
   mktCalDate.setMonth(mktCalDate.getMonth()+delta);
   renderMktCalendar();
 }
+/* Nº de semana ISO-8601 (lunes=inicio, la semana que contiene el primer jueves del año es la nº1) */
+function isoWeekNumber(d){
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = (date.getUTCDay() + 6) % 7; // 0=lunes
+  date.setUTCDate(date.getUTCDate() - dayNum + 3);
+  const firstThursday = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
+  const diff = (date - firstThursday) / 86400000;
+  return 1 + Math.round(diff / 7);
+}
+function mktHighlightCampaign(id, on){
+  document.querySelectorAll('.mk-day-bar').forEach(b=>{
+    const match = String(b.dataset.camp) === String(id);
+    b.classList.toggle('mk-hl', on && match);
+    b.classList.toggle('mk-dim', on && !match);
+  });
+}
+const MKT_CAMP_COLORS = ['#33C98B','#E0A32E','#0B7BA7','#B8542A','#7A5FD1','#D1478F','#4FA3D1','#6E9E3A'];
+function mktCampColor(c, idx){
+  if(c.estado==='finalizada') return '#9AA1AE';
+  return MKT_CAMP_COLORS[idx % MKT_CAMP_COLORS.length];
+}
 function renderMktCalendar(){
   const el = document.getElementById('mk-calendar');
   const lbl = document.getElementById('mk-cal-label');
+  const legendEl = document.getElementById('mk-cal-legend');
   if(!el) return;
   const year = mktCalDate.getFullYear(), month = mktCalDate.getMonth();
   const MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
   if(lbl) lbl.textContent = `${MES[month]} ${year}`;
+
+  const campColorMap = {};
+  mktCampanas.forEach((c,idx)=>{ campColorMap[c.id] = mktCampColor(c, idx); });
 
   // semanas del mes (lunes-domingo) que tocan este mes
   const first = new Date(year, month, 1);
@@ -7207,34 +7290,49 @@ function renderMktCalendar(){
   const semanas = [];
   while(cur <= last){
     const ini = new Date(cur);
-    const fin = new Date(cur); fin.setDate(fin.getDate()+6);
-    semanas.push({ini:new Date(ini), fin:new Date(fin)});
+    const dias = [];
+    for(let i=0;i<7;i++){ const d=new Date(cur); d.setDate(d.getDate()+i); dias.push(d); }
+    semanas.push({ini:new Date(ini), dias});
     cur.setDate(cur.getDate()+7);
   }
   const iso = d=> d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-  const fmt = d=> d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  const hoyIso = todayIso();
 
-  el.innerHTML = semanas.map((w,idx)=>{
-    const wIni = iso(w.ini), wFin = iso(w.fin);
-    // campañas que se solapan con esta semana
-    const activas = mktCampanas.filter(c=>{
-      const ci = c.fecha_inicio || '0000', cf = c.fecha_fin || '9999';
-      return ci <= wFin && cf >= wIni;
-    });
-    const barras = activas.map(c=>{
-      const est = MKT_ESTADOS[c.estado] || MKT_ESTADOS.planificada;
-      const empieza = (c.fecha_inicio||'') >= wIni && (c.fecha_inicio||'') <= wFin;
-      const acaba = (c.fecha_fin||'') >= wIni && (c.fecha_fin||'') <= wFin;
-      const color = c.estado==='activa'?'#33C98B':c.estado==='finalizada'?'#6E7688':'#E0A32E';
-      return `<div class="mk-bar" style="border-left:3px solid ${color};" title="${esc(c.nombre)} (${fmtFechaHub(c.fecha_inicio)||'?'} → ${fmtFechaHub(c.fecha_fin)||'?'})">
-        ${empieza?'▶ ':''}${esc(c.nombre)}${acaba?' ⏹':''}
+  el.innerHTML = semanas.map(w=>{
+    const wLabel = isoWeekNumber(w.ini);
+    const diasHtml = w.dias.map(d=>{
+      const dIso = iso(d);
+      const fueraDeMes = d.getMonth() !== month;
+      const activas = mktCampanas.filter(c=>{
+        const ci = c.fecha_inicio || '0000-00-00', cf = c.fecha_fin || '9999-99-99';
+        return ci <= dIso && cf >= dIso;
+      });
+      const barras = activas.map(c=>
+        `<div class="mk-day-bar" data-camp="${c.id}" style="background:${campColorMap[c.id]};" title="${esc(c.nombre)}"></div>`
+      ).join('');
+      return `<div class="mk-day ${dIso===hoyIso?'mk-day-today':''} ${fueraDeMes?'mk-day-out':''}">
+        <div class="mk-day-num">${d.getDate()}</div>
+        <div class="mk-day-bars">${barras}</div>
       </div>`;
-    }).join('') || '<div class="mk-empty">—</div>';
-    return `<div class="mk-week">
-      <div class="mk-week-label">Semana ${idx+1}<br><small>${fmt(w.ini)} – ${fmt(w.fin)}</small></div>
-      <div class="mk-week-bars">${barras}</div>
+    }).join('');
+    return `<div class="mk-week-row">
+      <div class="mk-week-label">S${wLabel}<small>Semana ${wLabel}</small></div>
+      <div class="mk-week-days">${diasHtml}</div>
     </div>`;
   }).join('');
+
+  if(legendEl){
+    legendEl.innerHTML = `<div class="mk-legend-title">Campañas</div>` + (mktCampanas.length
+      ? mktCampanas.map((c,idx)=>`
+        <div class="mk-legend-item" onmouseenter="mktHighlightCampaign(${c.id},true)" onmouseleave="mktHighlightCampaign(${c.id},false)">
+          <span class="mk-legend-dot" style="background:${campColorMap[c.id]};"></span>
+          <div class="mk-legend-txt">
+            <div class="mk-legend-name">${esc(c.nombre)}</div>
+            <div class="mk-legend-dates">${fmtFechaHub(c.fecha_inicio)||'?'} → ${fmtFechaHub(c.fecha_fin)||'?'}</div>
+          </div>
+        </div>`).join('')
+      : '<div class="mk-empty" style="padding:6px 8px;">No hay campañas creadas.</div>');
+  }
 }
 
 /* ============================================================
@@ -7539,22 +7637,52 @@ async function renderClMant(){
   await Promise.all([renderChecklistMant(), renderMateriales()]);
 }
 
-/* ---- Checklist de mantenimiento (cajas + exhibiciones) ---- */
-let CLMANT_CACHE = [];
+/* ---- Checklist de mantenimiento (cajas + exhibiciones), semanal ----
+   checklist_mant = lista maestra de items (item, orden), fija.
+   checklist_mant_semana = una fila por item y por semana (checked, nota, necesita_reparacion). */
+let CLMANT_ITEMS = [];      // lista maestra (fija)
+let CLMANT_CACHE = [];      // items fusionados con el estado de la semana mostrada
+let clmantWeekOffset = 0;
+function clmantWeekRange(offset){
+  const m=new Date(); m.setDate(m.getDate()-((m.getDay()+6)%7)+offset*7);
+  const s=new Date(m); s.setDate(s.getDate()+6);
+  const fmt=d=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  return {lunes:m.toISOString().slice(0,10), label:`${fmt(m)} – ${fmt(s)}`};
+}
+function clmantWeek(delta){
+  if(delta===0) clmantWeekOffset=0; else clmantWeekOffset+=delta;
+  renderChecklistMant();
+}
 async function renderChecklistMant(){
-  const { data, error } = await sb.from('checklist_mant').select('*').order('orden');
+  const {lunes,label} = clmantWeekRange(clmantWeekOffset);
+  const lbl = document.getElementById('clmant-week-label');
+  if(lbl) lbl.textContent = clmantWeekOffset===0 ? `Esta semana (${label})` : label;
+
   const tbody = document.querySelector('#clmant-table tbody');
   if(!tbody) return;
-  if(error){ tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
-  CLMANT_CACHE = data || [];
+  if(!CLMANT_ITEMS.length){
+    const { data, error } = await sb.from('checklist_mant').select('id,item,orden').order('orden');
+    if(error){ tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
+    CLMANT_ITEMS = data || [];
+  }
+  const { data: semanaData, error: semanaErr } = await sb.from('checklist_mant_semana').select('*').eq('week', lunes);
+  if(semanaErr){ tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger);">Error: ${semanaErr.message}</td></tr>`; return; }
+  const semanaMap = {};
+  (semanaData||[]).forEach(r=>{ semanaMap[r.item_id]=r; });
+
+  CLMANT_CACHE = CLMANT_ITEMS.map(it=>{
+    const s = semanaMap[it.id] || {};
+    return { id: it.id, item: it.item, checked: !!s.checked, nota: s.nota||'', necesita_reparacion: !!s.necesita_reparacion, week: lunes };
+  });
+
   tbody.innerHTML = CLMANT_CACHE.map(it=>`
     <tr class="${it.checked?'clmant-ok':''}">
       <td style="text-align:center;">
         <button class="clmant-chk ${it.checked?'on':''}" onclick="toggleChecklistMant(${it.id})" title="Marcar/desmarcar">${it.checked?'✓':''}</button>
       </td>
-      <td style="text-align:left;font-weight:${it.item.startsWith('CAJA')?'800':'600'};">${esc(it.item)}</td>
-      <td><input class="cell-input txt clmant-nota" value="${(it.nota||'').replace(/"/g,'&quot;')}" placeholder="—"
-                 onchange="saveChecklistNota(${it.id}, this.value)" style="width:100%;text-align:left;"></td>
+      <td class="clmant-item" style="font-weight:${it.item.startsWith('CAJA')?'800':'600'};">${esc(it.item)}</td>
+      <td><input class="cell-input clmant-nota" value="${(it.nota||'').replace(/"/g,'&quot;')}" placeholder="—"
+                 onchange="saveChecklistNota(${it.id}, this.value)" style="width:140px;text-align:center;"></td>
       <td style="text-align:center;">
         <button class="clmant-chk rep ${it.necesita_reparacion?'on':''}" onclick="toggleNecesitaReparacion(${it.id})" title="Marcar si necesita reparación">${it.necesita_reparacion?'⚠':''}</button>
       </td>
@@ -7562,37 +7690,57 @@ async function renderChecklistMant(){
   const hechos = CLMANT_CACHE.filter(x=>x.checked).length;
   const prog = document.getElementById('clmant-progreso');
   if(prog) prog.textContent = `${hechos} / ${CLMANT_CACHE.length}`;
+  renderClmantListaReparar();
   renderDashReparaciones();
+}
+async function upsertClmantSemana(id, patch){
+  const {lunes} = clmantWeekRange(clmantWeekOffset);
+  const payload = Object.assign({ item_id:id, week:lunes, updated_at:new Date().toISOString() }, patch);
+  const { data, error } = await sb.from('checklist_mant_semana')
+    .upsert(payload, {onConflict:'item_id,week'}).select().single();
+  if(error){ console.error(error); alert('No se pudo guardar: '+error.message); return null; }
+  return data;
 }
 async function toggleChecklistMant(id){
   const it = CLMANT_CACHE.find(x=>x.id===id);
   if(!it) return;
-  await sb.from('checklist_mant').update({checked: !it.checked, updated_at: new Date().toISOString()}).eq('id', id);
+  await upsertClmantSemana(id, { checked: !it.checked, nota: it.nota, necesita_reparacion: it.necesita_reparacion });
   renderChecklistMant();
 }
 async function toggleNecesitaReparacion(id){
   const it = CLMANT_CACHE.find(x=>x.id===id);
   if(!it) return;
-  await sb.from('checklist_mant').update({necesita_reparacion: !it.necesita_reparacion, updated_at: new Date().toISOString()}).eq('id', id);
+  await upsertClmantSemana(id, { checked: it.checked, nota: it.nota, necesita_reparacion: !it.necesita_reparacion });
   renderChecklistMant();
 }
 async function saveChecklistNota(id, nota){
-  await sb.from('checklist_mant').update({nota, updated_at: new Date().toISOString()}).eq('id', id);
+  const it = CLMANT_CACHE.find(x=>x.id===id);
+  if(!it) return;
+  await upsertClmantSemana(id, { checked: it.checked, nota, necesita_reparacion: it.necesita_reparacion });
+  it.nota = nota;
 }
-async function resetChecklistMant(){
-  if(!confirm('¿Desmarcar TODAS las casillas de la checklist de mantenimiento?')) return;
-  await sb.from('checklist_mant').update({checked:false, updated_at: new Date().toISOString()}).gte('id', 0);
-  renderChecklistMant();
+function renderClmantListaReparar(){
+  const el = document.getElementById('clmant-lista-reparar');
+  if(!el) return;
+  const pend = CLMANT_CACHE.filter(it=>it.necesita_reparacion);
+  el.innerHTML = pend.length
+    ? pend.map(it=>`<div class="dash-warn-row" style="cursor:pointer;" onclick="toggleNecesitaReparacion(${it.id})" title="Clic para quitar de la lista">
+        <span class="dash-warn-tag">Reparar</span><b>${esc(it.item)}</b>${it.nota?' — '+esc(it.nota):''}
+      </div>`).join('')
+    : '<div class="empty-state" style="padding:10px 0;">Nada marcado para reparar esta semana.</div>';
 }
 
-/* ---- Resumen: cosas a reparar / a comprar (leídas de checklist_mant y checklist_materiales) ---- */
+/* ---- Resumen: cosas a reparar / a comprar (leídas de checklist_mant_semana y checklist_materiales) ---- */
 async function renderDashReparaciones(){
   const el = document.getElementById('dash-reparaciones-list');
   if(!el) return;
-  const { data } = await sb.from('checklist_mant').select('item,necesita_reparacion').eq('necesita_reparacion', true).order('orden');
+  const {lunes} = clmantWeekRange(0); // semana actual real, independiente de la que se esté viendo en CL Mantenimiento
+  const { data } = await sb.from('checklist_mant_semana')
+    .select('nota,necesita_reparacion,checklist_mant(item)')
+    .eq('week', lunes).eq('necesita_reparacion', true);
   const pend = data || [];
   el.innerHTML = pend.length
-    ? pend.map(it=>`<div class="dash-warn-row"><span class="dash-warn-tag">Reparar</span><b>${esc(it.item)}</b></div>`).join('')
+    ? pend.map(it=>`<div class="dash-warn-row"><span class="dash-warn-tag">Reparar</span><b>${esc(it.checklist_mant?.item || 'Item')}</b></div>`).join('')
     : '<div class="empty-state" style="padding:10px 0;">Nada marcado para reparar ahora mismo.</div>';
 }
 async function renderDashCompras(){
