@@ -88,7 +88,7 @@
   .topbar-sub{font-size:12px;color:var(--text-soft);margin-top:1px;}
   .proto-badge{font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;background:var(--warning-soft);color:var(--warning);padding:3px 8px;border-radius:20px;border:1px solid var(--wait-br);opacity:.85;}
 
-  .content{padding:22px 34px 60px;width:100%;}
+  .content{padding:22px 34px 60px;width:100%;overflow-x:hidden;}
   .content > .view{max-width:1500px;margin:0 auto;}
   .view{display:none;}
   .view.active{display:block;}
@@ -98,6 +98,7 @@
   .page-head p{margin:0;color:var(--text-soft);font-size:13.5px;}
 
   .grid{display:grid;gap:14px;}
+  .grid > .card{min-width:0;}
   .grid-4{grid-template-columns:repeat(4,1fr);}
   /* cápsula pequeña para ratings */
   .kpi.kpi-sm{padding:5px 10px;}
@@ -105,8 +106,8 @@
   .kpi.kpi-sm .value{font-size:16px;margin-top:0;}
   .grid-3{grid-template-columns:repeat(3,1fr);}
   .grid-2{grid-template-columns:1.3fr .9fr;}
-  .grid-7{grid-template-columns:repeat(7,1fr);}
-  @media(max-width:980px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr 1fr;} .grid-7{grid-template-columns:repeat(4,1fr);}}
+  .grid-7{grid-template-columns:repeat(7,minmax(0,1fr));}
+  @media(max-width:980px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr 1fr;} .grid-7{grid-template-columns:repeat(4,minmax(0,1fr));}}
 
   .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px;box-shadow:var(--shadow);}
   .kpi .label{font-size:11.5px;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.4px;}
@@ -900,8 +901,14 @@
   .gv-table td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:center;}
   .gv-table tbody tr:hover td{background:rgba(0,0,0,.035);}
   /* Columna "Grupo" fija a la izquierda al hacer scroll horizontal */
-  #gm-table{table-layout:fixed;width:880px;}
-  #gc-table{table-layout:fixed;width:1020px;}
+  #gm-table{table-layout:fixed;width:940px;}
+  #gc-table{table-layout:fixed;width:1135px;}
+  .gc-fu-cell{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .gc-fu-date{font-weight:700;}
+  .gc-fu-date.vencido{color:#B8302A;font-weight:800;}
+  .gc-fu-days{font-size:9.5px;color:var(--text-dim);margin-top:2px;}
+  .gc-fu-edit{background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:11px;padding:2px;line-height:1;}
+  .gc-fu-edit:hover{color:var(--accent);}
   #gm-table th:first-child, #gm-table td:first-child,
   #gc-table th:first-child, #gc-table td:first-child{
     position:sticky;left:0;background:var(--surface);box-shadow:2px 0 4px rgba(0,0,0,.10);
@@ -1341,12 +1348,12 @@
   .day-col{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 13px;min-height:168px;
     display:flex;flex-direction:column;transition:transform .12s ease,box-shadow .12s ease;box-shadow:0 1px 2px rgba(0,0,0,.15);}
   .day-col:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.22);}
-  .day-col.weekend{background:#FBEBD8;border-color:#EFCC98;box-shadow:0 1px 2px rgba(0,0,0,.15),inset 0 0 0 1px rgba(217,140,20,.12);}
+  .day-col.weekend{background:#D9E4F5;border-color:#A9C0E8;box-shadow:0 1px 2px rgba(0,0,0,.15),inset 0 0 0 1px rgba(20,70,150,.12);}
   .day-col.today{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent),0 4px 12px rgba(0,123,167,.18);
     background:linear-gradient(180deg,var(--accent-soft) 0%,var(--panel) 55%);}
   .day-col .dname{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--text-soft);letter-spacing:.9px;}
   .day-col.today .dname{color:#fff;}
-  .day-col.weekend .dname{color:#A85F00;font-weight:900;}
+  .day-col.weekend .dname{color:#173F80;font-weight:900;}
   /* Sábado/Domingo cuando además son "hoy": el gris de fin de semana ganaba
      sobre el blanco y quedaba ilegible sobre el fondo azul oscuro del día actual */
   .day-col.today.weekend .dname{color:var(--accent-dark);}
@@ -1727,8 +1734,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="grid grid-7" id="week-calendar" style="gap:10px;"></div>
         </div>
 
-        <div class="grid" style="margin-top:14px;grid-template-columns:repeat(3,1fr);gap:14px;align-items:stretch;">
-          <div class="card" style="margin:0;">
+        <div class="grid" style="margin-top:14px;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch;">
+          <div class="card" style="margin:0;min-width:0;">
             <div class="section-title" style="margin-bottom:10px;">Tareas pendientes · PDA <span class="hint">Solo lectura — para editar, ve a PDA</span></div>
             <div id="dash-pda-tasks-list" class="dash-pda-readonly"></div>
           </div>
@@ -1744,7 +1751,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
         </div>
 
-        <div class="grid" id="dash-caps-row" style="margin-top:14px;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;align-items:stretch;">
+        <div class="grid" id="dash-caps-row" style="margin-top:14px;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch;">
           <div class="card" style="margin:0;">
             <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>A reparar</span> <span class="hint">CL Mantenimiento</span></div>
             <div id="dash-reparaciones-list" class="dash-warn-list"></div>
@@ -1758,17 +1765,9 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <div id="dash-influencers-list" class="dash-warn-list"></div>
           </div>
           <div class="card" id="dash-fugrupos-card" style="margin:0;">
-            <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>FU grupos</span> <span class="hint">Grupos · Contacto</span></div>
+            <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>FU grupos</span></div>
             <div id="dash-fugrupos-list" class="dash-warn-list"></div>
           </div>
-        </div>
-
-        <div class="card" style="margin-top:14px;">
-          <div class="flex-between" style="margin-bottom:12px;">
-            <div class="section-title" style="margin:0;">Próximas visitas</div>
-            <button class="btn btn-ghost btn-sm" onclick="goView('grupos')">Ver todos →</button>
-          </div>
-          <div id="dash-grupos-cal"></div>
         </div>
       </div>
 
@@ -2313,7 +2312,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <th style="width:85px;text-align:center;">Tipo</th>
                 <th style="width:165px;text-align:center;">Email</th>
                 <th style="width:95px;text-align:center;">Teléfonos</th>
-                <th style="width:110px;text-align:center;">Contacto</th>
+                <th style="width:170px;text-align:center;">Contacto</th>
                 <th style="width:220px;text-align:center;">Comentarios</th>
                 <th style="width:32px;"></th>
               </tr></thead>
@@ -2326,25 +2325,29 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div class="gv-pane" id="gv-contacto" style="display:none;">
           <div class="gv-toolbar">
             <input id="gc-search" placeholder="Buscar grupo…" oninput="renderGruposContacto()">
+            <select id="gc-tipo" onchange="renderGruposContacto()"><option value="">Todos los tipos</option></select>
             <select id="gc-filtro" onchange="renderGruposContacto()">
-              <option value="">Todos</option>
+              <option value="">Todos los estados</option>
               <option value="pendiente">FU pendiente / vencido</option>
               <option value="al_dia">FU al día</option>
               <option value="sin_contacto">Sin contacto todavía</option>
             </select>
+            <input id="gc-desde" type="date" title="Primer contacto desde" onchange="renderGruposContacto()" style="width:132px;">
+            <input id="gc-hasta" type="date" title="Primer contacto hasta" onchange="renderGruposContacto()" style="width:132px;">
+            <button class="btn btn-ghost btn-sm" onclick="clearGcFilters()">Limpiar</button>
             <span class="gv-count" id="gc-count"></span>
           </div>
           <div class="gv-tablebox gv-tablebox-full">
             <table id="gc-table" class="gv-table no-filter">
               <thead><tr>
-                <th style="width:160px;text-align:center;">Grupo</th>
-                <th style="width:85px;text-align:center;">Tipo</th>
-                <th style="width:110px;text-align:center;">Contacto</th>
-                <th style="width:130px;text-align:center;">Último contacto</th>
-                <th style="width:90px;text-align:center;">FU (días)</th>
-                <th style="width:130px;text-align:center;">Próximo FU</th>
-                <th style="width:200px;text-align:center;">Nota de seguimiento</th>
-                <th style="width:110px;text-align:center;"></th>
+                <th style="width:160px;">Grupo</th>
+                <th style="width:85px;">Tipo</th>
+                <th style="width:170px;">Contacto</th>
+                <th style="width:100px;">Primer contacto</th>
+                <th style="width:120px;">Fecha Primer contacto</th>
+                <th style="width:130px;">Follow Up (10 días)</th>
+                <th style="width:130px;">Follow Up 2</th>
+                <th style="width:220px;">Seguimiento</th>
               </tr></thead>
               <tbody></tbody>
             </table>
@@ -6277,17 +6280,33 @@ function fuAddDias(fechaIso, dias){
 function gcRowFor(grupoId){
   return GC_CACHE.find(c=>c.grupo_id===grupoId) || null;
 }
+function clearGcFilters(){
+  ['gc-search','gc-tipo','gc-filtro','gc-desde','gc-hasta'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  renderGruposContacto();
+}
 function renderGruposContacto(){
+  const sel = document.getElementById('gc-tipo');
+  if(sel && !sel.dataset.filled){
+    sel.innerHTML = '<option value="">Todos los tipos</option>' + TIPOS_GRUPO.map(t=>`<option>${t}</option>`).join('');
+    sel.dataset.filled = '1';
+  }
   const q      = (document.getElementById('gc-search')?.value||'').toLowerCase().trim();
+  const tipo   = document.getElementById('gc-tipo')?.value || '';
   const filtro = document.getElementById('gc-filtro')?.value || '';
+  const desde  = document.getElementById('gc-desde')?.value || '';
+  const hasta  = document.getElementById('gc-hasta')?.value || '';
   const hoy    = todayIso();
 
   const list = GM_CACHE.filter(g=>{
+    if(tipo && g.tipo !== tipo) return false;
     if(q && !(g.grupo||'').toLowerCase().includes(q)) return false;
     const c = gcRowFor(g.id);
-    if(filtro==='sin_contacto') return !c || !c.ultimo_contacto;
-    if(filtro==='pendiente')    return !!(c && c.fu_fecha && c.fu_fecha <= hoy);
-    if(filtro==='al_dia')       return !!(c && c.fu_fecha && c.fu_fecha > hoy);
+    const fuDue = !!(c && ((c.fu1_fecha && c.fu1_fecha<=hoy) || (c.fu2_fecha && c.fu2_fecha<=hoy)));
+    if(filtro==='sin_contacto' && !(!c || !c.primer_contacto)) return false;
+    if(filtro==='pendiente' && !fuDue) return false;
+    if(filtro==='al_dia' && !(c && c.primer_contacto && !fuDue)) return false;
+    if(desde && !(c && c.fecha_primer_contacto && c.fecha_primer_contacto >= desde)) return false;
+    if(hasta && !(c && c.fecha_primer_contacto && c.fecha_primer_contacto <= hasta)) return false;
     return true;
   });
 
@@ -6297,31 +6316,42 @@ function renderGruposContacto(){
   const tbody = document.querySelector('#gc-table tbody');
   tbody.innerHTML = list.length ? list.map(g=>{
     const c = gcRowFor(g.id) || {};
-    const vencido = !!(c.fu_fecha && c.fu_fecha <= hoy);
+    const vencido1 = !!(c.fu1_fecha && c.fu1_fecha <= hoy);
+    const vencido2 = !!(c.fu2_fecha && c.fu2_fecha <= hoy);
     return `
     <tr>
       <td class="gm-name">${esc(limpiaRef(g.grupo))}</td>
       <td>${tipoPill(g.tipo)}</td>
       <td>${esc(limpiaRef(g.contacto))}</td>
-      <td><input type="date" class="cell-input" value="${c.ultimo_contacto||''}" onchange="saveGcField(${g.id}, 'ultimo_contacto', this.value)" style="width:120px;"></td>
-      <td><input type="number" class="cell-input" min="1" step="1" value="${c.fu_dias ?? 10}" onchange="saveGcField(${g.id}, 'fu_dias', this.value)" style="width:56px;text-align:center;"></td>
-      <td><input type="date" class="cell-input" value="${c.fu_fecha||''}" onchange="saveGcField(${g.id}, 'fu_fecha', this.value)" style="width:120px;${vencido?'font-weight:800;color:var(--danger, #C0392B);':''}"></td>
-      <td><input type="text" class="cell-input" value="${esc(c.nota||'')}" placeholder="Nota…" onchange="saveGcField(${g.id}, 'nota', this.value)" style="width:100%;"></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="marcarContactadoHoy(${g.id})" title="Registra hoy como último contacto y recalcula el próximo FU">Contactado hoy</button></td>
+      <td>
+        <div class="roster-cell" style="justify-content:center;">
+          <button class="roster-btn si ${c.primer_contacto?'on':''}" onclick="setPrimerContacto(${g.id}, true)">Sí</button>
+          <button class="roster-btn no ${!c.primer_contacto?'on':''}" onclick="setPrimerContacto(${g.id}, false)">No</button>
+        </div>
+      </td>
+      <td><input type="date" class="cell-input" value="${c.fecha_primer_contacto||''}" onchange="saveGcField(${g.id}, 'fecha_primer_contacto', this.value)" style="width:118px;"></td>
+      <td>
+        <div class="gc-fu-cell">
+          <span class="gc-fu-date ${vencido1?'vencido':''}">${c.fu1_fecha ? (fmtFechaHub(c.fu1_fecha)||c.fu1_fecha) : '—'}</span>
+          <button class="gc-fu-edit" onclick="editFuDias(${g.id},1)" title="Editar días del Follow Up">✎</button>
+        </div>
+        <div class="gc-fu-days">${c.fu1_dias ?? 10} días</div>
+      </td>
+      <td>
+        <div class="gc-fu-cell">
+          <span class="gc-fu-date ${vencido2?'vencido':''}">${c.fu2_fecha ? (fmtFechaHub(c.fu2_fecha)||c.fu2_fecha) : '—'}</span>
+          <button class="gc-fu-edit" onclick="editFuDias(${g.id},2)" title="Editar días del Follow Up 2">✎</button>
+        </div>
+        <div class="gc-fu-days">${c.fu2_dias ?? 10} días</div>
+      </td>
+      <td><input type="text" class="cell-input" value="${esc(c.seguimiento||'')}" placeholder="Observaciones…" onchange="saveGcField(${g.id}, 'seguimiento', this.value)" style="width:100%;"></td>
     </tr>`;
   }).join('')
     : '<tr><td colspan="8" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
 }
 
-async function saveGcField(grupoId, field, value){
-  let c = gcRowFor(grupoId);
-  const payload = { grupo_id: grupoId, updated_at: new Date().toISOString() };
-  payload[field] = field==='fu_dias' ? (parseInt(value)||10) : (value || null);
-  // si se edita el último contacto y no hay fu_fecha manual todavía, recalculamos el FU
-  if(field==='ultimo_contacto' && value){
-    const dias = c?.fu_dias ?? 10;
-    payload.fu_fecha = fuAddDias(value, dias);
-  }
+async function gcUpsert(payload){
+  const c = gcRowFor(payload.grupo_id);
   const { data, error } = await sb.from('grupos_contacto')
     .upsert(payload, {onConflict:'grupo_id'}).select().single();
   if(error){ console.error(error); alert('No se pudo guardar: '+error.message); return; }
@@ -6330,17 +6360,59 @@ async function saveGcField(grupoId, field, value){
   renderDashFuGrupos();
 }
 
-async function marcarContactadoHoy(grupoId){
-  const hoy = todayIso();
-  const c = gcRowFor(grupoId);
-  const dias = c?.fu_dias ?? 10;
-  const payload = { grupo_id: grupoId, ultimo_contacto: hoy, fu_dias: dias, fu_fecha: fuAddDias(hoy, dias), updated_at: new Date().toISOString() };
-  const { data, error } = await sb.from('grupos_contacto')
-    .upsert(payload, {onConflict:'grupo_id'}).select().single();
-  if(error){ console.error(error); alert('No se pudo guardar: '+error.message); return; }
-  if(c) Object.assign(c, data); else GC_CACHE.push(data);
-  renderGruposContacto();
-  renderDashFuGrupos();
+async function setPrimerContacto(grupoId, val){
+  const c = gcRowFor(grupoId) || {};
+  const payload = { grupo_id: grupoId, primer_contacto: val, updated_at: new Date().toISOString() };
+  if(val && !c.fecha_primer_contacto){
+    const hoy = todayIso();
+    const dias1 = c.fu1_dias ?? 10;
+    const dias2 = c.fu2_dias ?? 10;
+    payload.fecha_primer_contacto = hoy;
+    payload.fu1_dias = dias1;
+    payload.fu1_fecha = fuAddDias(hoy, dias1);
+    payload.fu2_dias = dias2;
+    payload.fu2_fecha = fuAddDias(payload.fu1_fecha, dias2);
+  }
+  await gcUpsert(payload);
+}
+
+async function saveGcField(grupoId, field, value){
+  const c = gcRowFor(grupoId) || {};
+  const payload = { grupo_id: grupoId, updated_at: new Date().toISOString() };
+  payload[field] = value || null;
+  // si se edita la fecha de primer contacto, recalculamos ambos follow-ups en cadena
+  if(field==='fecha_primer_contacto'){
+    const dias1 = c.fu1_dias ?? 10;
+    const dias2 = c.fu2_dias ?? 10;
+    payload.fu1_dias = dias1;
+    payload.fu1_fecha = value ? fuAddDias(value, dias1) : null;
+    payload.fu2_dias = dias2;
+    payload.fu2_fecha = payload.fu1_fecha ? fuAddDias(payload.fu1_fecha, dias2) : null;
+  }
+  await gcUpsert(payload);
+}
+
+async function editFuDias(grupoId, which){
+  const c = gcRowFor(grupoId) || {};
+  const campoDias = which===1 ? 'fu1_dias' : 'fu2_dias';
+  const actual = c[campoDias] ?? 10;
+  const base = which===1 ? 'el primer contacto' : 'el Follow Up 1';
+  const input = prompt(`¿Cada cuántos días quieres el Follow Up ${which===1?'1':'2'} (desde ${base})?`, actual);
+  if(input===null) return;
+  const dias = parseInt(input,10);
+  if(!dias || dias<1){ alert('Pon un número de días válido.'); return; }
+  const payload = { grupo_id: grupoId, updated_at: new Date().toISOString() };
+  if(which===1){
+    payload.fu1_dias = dias;
+    payload.fu1_fecha = c.fecha_primer_contacto ? fuAddDias(c.fecha_primer_contacto, dias) : null;
+    const dias2 = c.fu2_dias ?? 10;
+    payload.fu2_dias = dias2;
+    payload.fu2_fecha = payload.fu1_fecha ? fuAddDias(payload.fu1_fecha, dias2) : null;
+  } else {
+    payload.fu2_dias = dias;
+    payload.fu2_fecha = c.fu1_fecha ? fuAddDias(c.fu1_fecha, dias) : null;
+  }
+  await gcUpsert(payload);
 }
 
 /* ---------------- LEADS (inbound / outbound) ---------------- */
@@ -7771,18 +7843,23 @@ async function renderDashFuGrupos(){
   const row = document.getElementById('dash-caps-row');
   if(!puedeVerFuGrupos()){
     if(card) card.style.display = 'none';
-    if(row) row.style.gridTemplateColumns = '1fr 1fr 1fr';
+    if(row) row.style.gridTemplateColumns = 'repeat(3,minmax(0,1fr))';
     return;
   }
   if(card) card.style.display = '';
-  if(row) row.style.gridTemplateColumns = '1fr 1fr 1fr 1fr';
+  if(row) row.style.gridTemplateColumns = 'repeat(4,minmax(0,1fr))';
   const el = document.getElementById('dash-fugrupos-list');
   if(!el) return;
   const hoy = todayIso();
-  const { data } = await sb.from('grupos_contacto').select('grupo_id,fu_fecha,grupos_maestro(grupo)').lte('fu_fecha', hoy).order('fu_fecha');
-  const lista = data || [];
+  const { data } = await sb.from('grupos_contacto')
+    .select('grupo_id,fu1_fecha,fu2_fecha,grupos_maestro(grupo)')
+    .or(`fu1_fecha.lte.${hoy},fu2_fecha.lte.${hoy}`);
+  const lista = (data||[]).map(c=>{
+    const dueDate = [c.fu1_fecha, c.fu2_fecha].filter(d=> d && d<=hoy).sort()[0];
+    return { nombre: c.grupos_maestro?.grupo || 'Grupo', fecha: dueDate };
+  }).sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||''));
   el.innerHTML = lista.length
-    ? lista.map(c=>`<div class="dash-warn-row"><span class="dash-warn-tag">FU</span><b>${esc(c.grupos_maestro?.grupo || 'Grupo')}</b> — desde ${c.fu_fecha}</div>`).join('')
+    ? lista.map(it=>`<div class="dash-warn-row"><span class="dash-warn-tag">FU</span><b>${esc(it.nombre)}</b> — desde ${it.fecha}</div>`).join('')
     : '<div class="empty-state" style="padding:10px 0;">Ningún grupo con follow-up pendiente.</div>';
 }
 
