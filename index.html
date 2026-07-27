@@ -1639,10 +1639,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       </div>
       <div id="dash-greeting-topbar" class="topbar-greeting">Buenos días 👋 · Esto es lo que está pasando hoy en el museo</div>
       <div id="loomis-quote-topbar" class="lq-topbar" style="display:none;"></div>
-      <div id="hub-badges-group" style="display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;">
-        <span class="proto-badge" style="background:var(--success-soft);color:var(--success);border-color:#1E5039;font-size:8px;">● Conectado a Supabase</span>
-        <span class="proto-badge" id="hub-version-badge" title="Versión del HUB que estás usando ahora mismo" style="background:#EAF2FF;color:#0B5FA8;border-color:#B7D3FF;font-size:8px;"></span>
-        <button class="proto-badge" id="hub-backup-btn" onclick="descargarBackupHub()" title="Descargar copia de seguridad completa de todos los datos del HUB" style="background:var(--panel);color:var(--text-soft);border-color:var(--line-strong);cursor:pointer;font-size:8px;">⬇ Backup</button>
+      <div id="hub-badges-group" style="position:fixed;top:8px;right:14px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:3px;">
+        <span class="proto-badge" style="background:var(--success-soft);color:var(--success);border-color:#1E5039;font-size:7px;padding:2px 6px;">● Conectado a Supabase</span>
+        <span class="proto-badge" id="hub-version-badge" title="Versión del HUB que estás usando ahora mismo" style="background:#EAF2FF;color:#0B5FA8;border-color:#B7D3FF;font-size:7px;padding:2px 6px;"></span>
+        <button class="proto-badge" id="hub-backup-btn" onclick="descargarBackupHub()" title="Descargar copia de seguridad completa de todos los datos del HUB" style="background:var(--panel);color:var(--text-soft);border-color:var(--line-strong);cursor:pointer;font-size:7px;padding:2px 6px;">⬇ Backup</button>
       </div>
     </div>
 
@@ -1956,6 +1956,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <option value="DUTY - Carol">DUTY - Carol</option>
                 <option value="DUTY - Melisa">DUTY - Melisa</option>
                 <option value="DUTY - Alma">DUTY - Alma</option>
+                <option value="Laia">Laia</option>
               </select>
             </div>
           </div>
@@ -2470,12 +2471,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <div class="view" id="view-diego">
         <div class="card" style="max-width:760px;">
           <div class="flex-between" style="margin-bottom:14px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <button class="btn btn-ghost btn-sm" onclick="diegoWeek(-1)">‹ Anterior</button>
-              <div class="section-title" style="margin:0;min-width:180px;text-align:center;" id="diego-week-label">Esta semana</div>
-              <button class="btn btn-ghost btn-sm" onclick="diegoWeek(1)">Siguiente ›</button>
-              <button class="btn btn-ghost btn-sm" onclick="diegoWeek(0)">Hoy</button>
-            </div>
+            <div class="section-title" style="margin:0;">Tareas de mantenimiento</div>
             <div style="display:flex;gap:8px;">
               <input id="diego-new-task" placeholder="Añadir tarea de mantenimiento…" style="width:260px;"
                      onkeydown="if(event.key==='Enter') addDiegoTask()">
@@ -4910,19 +4906,19 @@ function updateDashboardMyTasks(tasks){
 /* ============================================================
    RECAP — cierre diario
    ============================================================ */
-const RECAP_TIENDA_STAFF_FALLBACK = ['Laura','Mario','Melisa','Ana','Constanza','Neus','Emma','Marina','Ary','Otro'];
+const RECAP_TIENDA_STAFF_FALLBACK = ['Laura','Mario','Melisa','Ana','Constanza','Neus','Emma','Marina','Ary','Otro','Laia'];
 let RECAP_TIENDA_STAFF = RECAP_TIENDA_STAFF_FALLBACK;
 async function loadRecapStaffNames(){
   const list = await fetchStaff();
   const activos = list.filter(s=>s.activo !== false).map(s=>s.nombre).filter(Boolean);
   if(!activos.length){ RECAP_TIENDA_STAFF = RECAP_TIENDA_STAFF_FALLBACK; return; }
-  // mismo orden que SPV: Tienda -> Supervisores -> resto (alfabético).
+  // mismo orden que SPV: Tienda -> Supervisores -> resto (alfabético) -> Laia siempre la última.
   // Tienda y supervisores salen SIEMPRE, aunque no estén en la tabla de staff.
   const tienda  = [...SPV_GROUP_TIENDA];
   const superv  = [...SPV_GROUP_SUPERV];
-  const usados  = [...tienda, ...superv];
+  const usados  = [...tienda, ...superv, 'Laia'];
   const resto   = activos.filter(n=>!usados.includes(n)).sort((a,b)=>a.localeCompare(b,'es'));
-  RECAP_TIENDA_STAFF = [...tienda, ...superv, ...resto];
+  RECAP_TIENDA_STAFF = [...tienda, ...superv, ...resto, 'Laia'];
 }
 
 let RUTINAS_MAÑANA = [
@@ -5265,10 +5261,10 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.07.26-checklists';
+const HUB_VERSION = 'v26.07.27-diego';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
-  if(b){ b.textContent = 'V.2'; b.title = 'Versión del HUB: ' + HUB_VERSION; }
+  if(b){ b.textContent = HUB_VERSION; b.title = 'Versión del HUB que estás usando ahora mismo'; }
   console.log('[HUB] Versión:', HUB_VERSION);
 });
 
@@ -5788,10 +5784,8 @@ async function refreshDashboardRecapBadge(){
 /* ============================================================
    DIEGO — tabla diego_tasks
    ============================================================ */
-async function fetchDiegoTasks(weekIso){
-  let q=sb.from('diego_tasks').select('*').order('created_at');
-  if(weekIso) q=q.eq('week',weekIso);
-  const {data,error}=await q;
+async function fetchDiegoTasks(){
+  const {data,error}=await sb.from('diego_tasks').select('*').order('created_at');
   if(error){ console.error(error); return []; }
   return data;
 }
@@ -7327,33 +7321,15 @@ async function saveLoomis(){
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2500); }
 }
 
-let diegoWeekOffset=0;
-function diegoMondayIso(offset){
-  const d=new Date(); d.setDate(d.getDate()-((d.getDay()+6)%7)+offset*7);
-  return d.toISOString().slice(0,10);
-}
-function diegoWeekRange(offset){
-  const m=new Date(); m.setDate(m.getDate()-((m.getDay()+6)%7)+offset*7);
-  const s=new Date(m); s.setDate(s.getDate()+6);
-  const fmt=d=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
-  return {lunes:m.toISOString().slice(0,10), label:`${fmt(m)} – ${fmt(s)}`};
-}
-function diegoWeek(delta){
-  if(delta===0) diegoWeekOffset=0; else diegoWeekOffset+=delta;
-  renderDiego();
-}
 async function renderDiego(){
-  const {lunes,label}=diegoWeekRange(diegoWeekOffset);
-  const lbl=document.getElementById('diego-week-label');
-  if(lbl) lbl.textContent=diegoWeekOffset===0?`Esta semana (${label})`:label;
-  const tasks = await fetchDiegoTasks(lunes);
+  const tasks = await fetchDiegoTasks();
   const list = document.getElementById('diego-list');
   list.innerHTML = tasks.length ? tasks.map(t=>`
     <div class="checkbox-row ${t.done?'done':''}" style="display:flex;align-items:center;gap:8px;">
       <input type="checkbox" ${t.done?'checked':''} onchange="toggleDiegoTask(${t.id}, this.checked)">
-      <div class="txt ${t.done?'done':''}" style="flex:1;">${t.title}</div>
+      <div class="txt ${t.done?'done':''}" style="flex:1;">${esc(t.title)}</div>
       <button class="btn btn-ghost btn-sm" title="Eliminar tarea" onclick="deleteDiegoTask(${t.id})">✕</button>
-    </div>`).join('') : '<div class="empty-state">Sin tareas de mantenimiento esta semana.</div>';
+    </div>`).join('') : '<div class="empty-state">Sin tareas de mantenimiento todavía. Añade la primera arriba.</div>';
 }
 async function toggleDiegoTask(id, done){
   await sb.from('diego_tasks').update({done}).eq('id', id);
@@ -7367,8 +7343,8 @@ async function addDiegoTask(){
   const input = document.getElementById('diego-new-task');
   const title = input.value.trim();
   if(!title) return;
-  const {lunes}=diegoWeekRange(diegoWeekOffset);
-  await sb.from('diego_tasks').insert({title, done:false, week:lunes});
+  const { error } = await sb.from('diego_tasks').insert({title, done:false});
+  if(error){ alert('No se pudo añadir la tarea: '+error.message); return; }
   input.value='';
   renderDiego();
 }
