@@ -795,9 +795,15 @@
   /* Calendario de Marketing: filas = semanas ISO del año, columnas = días L-D, con leyenda de campañas a la derecha */
   .mkt-cal-layout{display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start;}
   @media(max-width:1000px){.mkt-cal-layout{grid-template-columns:1fr;}}
+  /* Meses apilados verticalmente con scroll propio; la cabecera de días (L-D) queda fija arriba */
+  .mk-cal-scroll{max-height:calc(100vh - 260px);overflow-y:auto;overflow-x:hidden;}
   .mk-week-row{display:flex;gap:10px;align-items:stretch;border-bottom:1px solid var(--line);padding:8px 0;}
   .mk-week-row:last-child{border-bottom:none;}
-  .mk-week-row.mk-week-head{border-bottom:2px solid var(--line-strong);padding:0 0 6px;}
+  .mk-week-row.mk-week-head{border-bottom:2px solid var(--line-strong);padding:6px 0;position:sticky;top:0;
+    background:var(--surface);z-index:5;}
+  .mk-month-sep{font-family:var(--font);font-weight:800;font-size:13.5px;color:var(--text);
+    padding:14px 0 8px;text-transform:capitalize;}
+  .mk-month-sep:first-child{padding-top:4px;}
   .mk-week-label{width:80px;flex-shrink:0;font-size:12px;font-weight:800;color:var(--text-soft);}
   .mk-week-label small{display:block;font-weight:600;color:var(--text-dim);font-size:9.5px;margin-top:2px;}
   .mk-week-days{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;min-width:0;}
@@ -903,8 +909,13 @@
   .gv-table tbody tr:hover td{background:rgba(0,0,0,.035);}
   /* Columna "Grupo" fija a la izquierda al hacer scroll horizontal */
   #gm-table{table-layout:fixed;width:940px;}
-  #gc-table{table-layout:fixed;width:1135px;}
-  .gc-fu-cell{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;}
+  #gc-table{table-layout:fixed;width:1365px;}
+  /* Cabecera más alta, con títulos en dos líneas (ej. "Primer" / "contacto") */
+  #gc-table th{padding:12px 8px;line-height:1.35;white-space:normal;vertical-align:middle;}
+  /* Ninguna celda debe pintarse sobre la de al lado: recorte estricto al ancho de columna */
+  #gc-table td{overflow:hidden;vertical-align:middle;}
+  #gc-table td input, #gc-table td select{width:100%;box-sizing:border-box;max-width:100%;}
+  .gc-fu-cell{position:relative;display:flex;align-items:center;justify-content:center;gap:5px;max-width:100%;}
   .gc-fu-date{font-weight:700;}
   .gc-fu-date.vencido{color:#B8302A;font-weight:800;}
   .gc-fu-days{font-size:9.5px;color:var(--text-dim);margin-top:2px;}
@@ -2205,7 +2216,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               </div>
             </div>
             <div class="mkt-cal-layout">
-              <div>
+              <div class="mk-cal-scroll">
                 <div class="mk-week-row mk-week-head">
                   <div class="mk-week-label"></div>
                   <div class="mk-week-days">
@@ -2344,10 +2355,11 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <th style="width:160px;">Grupo</th>
                 <th style="width:85px;">Tipo</th>
                 <th style="width:170px;">Contacto</th>
-                <th style="width:100px;">Primer contacto</th>
-                <th style="width:120px;">Fecha Primer contacto</th>
-                <th style="width:130px;">Follow Up (10 días)</th>
-                <th style="width:130px;">Follow Up 2</th>
+                <th style="width:160px;">Primer<br>contacto</th>
+                <th style="width:130px;">Fecha<br>Primer contacto</th>
+                <th style="width:140px;">Follow Up<br>(10 días)</th>
+                <th style="width:160px;">Segundo<br>Contacto</th>
+                <th style="width:140px;">Follow<br>Up 2</th>
                 <th style="width:220px;">Seguimiento</th>
               </tr></thead>
               <tbody></tbody>
@@ -6303,9 +6315,9 @@ function renderGruposContacto(){
     if(q && !(g.grupo||'').toLowerCase().includes(q)) return false;
     const c = gcRowFor(g.id);
     const fuDue = !!(c && ((c.fu1_fecha && c.fu1_fecha<=hoy) || (c.fu2_fecha && c.fu2_fecha<=hoy)));
-    if(filtro==='sin_contacto' && !(!c || !c.primer_contacto)) return false;
+    if(filtro==='sin_contacto' && !(!c || !c.fecha_primer_contacto)) return false;
     if(filtro==='pendiente' && !fuDue) return false;
-    if(filtro==='al_dia' && !(c && c.primer_contacto && !fuDue)) return false;
+    if(filtro==='al_dia' && !(c && c.fecha_primer_contacto && !fuDue)) return false;
     if(desde && !(c && c.fecha_primer_contacto && c.fecha_primer_contacto >= desde)) return false;
     if(hasta && !(c && c.fecha_primer_contacto && c.fecha_primer_contacto <= hasta)) return false;
     return true;
@@ -6324,13 +6336,8 @@ function renderGruposContacto(){
       <td class="gm-name">${esc(limpiaRef(g.grupo))}</td>
       <td>${tipoPill(g.tipo)}</td>
       <td>${esc(limpiaRef(g.contacto))}</td>
-      <td>
-        <div class="roster-cell" style="justify-content:center;">
-          <button class="roster-btn si ${c.primer_contacto?'on':''}" onclick="setPrimerContacto(${g.id}, true)">Sí</button>
-          <button class="roster-btn no ${!c.primer_contacto?'on':''}" onclick="setPrimerContacto(${g.id}, false)">No</button>
-        </div>
-      </td>
-      <td><input type="date" class="cell-input" value="${c.fecha_primer_contacto||''}" onchange="saveGcField(${g.id}, 'fecha_primer_contacto', this.value)" style="width:118px;"></td>
+      <td><input type="text" class="cell-input" value="${esc(c.primer_contacto||'')}" placeholder="Tipo de email, campaña…" onchange="saveGcField(${g.id}, 'primer_contacto', this.value)"></td>
+      <td><input type="date" class="cell-input" value="${c.fecha_primer_contacto||''}" onchange="saveGcField(${g.id}, 'fecha_primer_contacto', this.value)"></td>
       <td>
         <div class="gc-fu-cell">
           <span class="gc-fu-date ${vencido1?'vencido':''}">${c.fu1_fecha ? (fmtFechaHub(c.fu1_fecha)||c.fu1_fecha) : '—'}</span>
@@ -6338,6 +6345,7 @@ function renderGruposContacto(){
         </div>
         <div class="gc-fu-days">${c.fu1_dias ?? 10} días</div>
       </td>
+      <td><input type="text" class="cell-input" value="${esc(c.segundo_contacto||'')}" placeholder="Tipo de email, campaña…" onchange="saveGcField(${g.id}, 'segundo_contacto', this.value)"></td>
       <td>
         <div class="gc-fu-cell">
           <span class="gc-fu-date ${vencido2?'vencido':''}">${c.fu2_fecha ? (fmtFechaHub(c.fu2_fecha)||c.fu2_fecha) : '—'}</span>
@@ -6345,10 +6353,10 @@ function renderGruposContacto(){
         </div>
         <div class="gc-fu-days">${c.fu2_dias ?? 10} días</div>
       </td>
-      <td><input type="text" class="cell-input" value="${esc(c.seguimiento||'')}" placeholder="Observaciones…" onchange="saveGcField(${g.id}, 'seguimiento', this.value)" style="width:100%;"></td>
+      <td><input type="text" class="cell-input" value="${esc(c.seguimiento||'')}" placeholder="Observaciones…" onchange="saveGcField(${g.id}, 'seguimiento', this.value)"></td>
     </tr>`;
   }).join('')
-    : '<tr><td colspan="8" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
+    : '<tr><td colspan="9" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
 }
 
 async function gcUpsert(payload){
@@ -6359,22 +6367,6 @@ async function gcUpsert(payload){
   if(c) Object.assign(c, data); else GC_CACHE.push(data);
   renderGruposContacto();
   renderDashFuGrupos();
-}
-
-async function setPrimerContacto(grupoId, val){
-  const c = gcRowFor(grupoId) || {};
-  const payload = { grupo_id: grupoId, primer_contacto: val, updated_at: new Date().toISOString() };
-  if(val && !c.fecha_primer_contacto){
-    const hoy = todayIso();
-    const dias1 = c.fu1_dias ?? 10;
-    const dias2 = c.fu2_dias ?? 10;
-    payload.fecha_primer_contacto = hoy;
-    payload.fu1_dias = dias1;
-    payload.fu1_fecha = fuAddDias(hoy, dias1);
-    payload.fu2_dias = dias2;
-    payload.fu2_fecha = fuAddDias(payload.fu1_fecha, dias2);
-  }
-  await gcUpsert(payload);
 }
 
 async function saveGcField(grupoId, field, value){
@@ -7343,56 +7335,66 @@ function mktCampColor(c, idx){
   if(c.estado==='finalizada') return '#9AA1AE';
   return MKT_CAMP_COLORS[idx % MKT_CAMP_COLORS.length];
 }
+const MKT_CAL_MESES_VISIBLES = 4; // meses apilados en el scroll (empezando por mktCalDate)
 function renderMktCalendar(){
   const el = document.getElementById('mk-calendar');
   const lbl = document.getElementById('mk-cal-label');
   const legendEl = document.getElementById('mk-cal-legend');
   if(!el) return;
-  const year = mktCalDate.getFullYear(), month = mktCalDate.getMonth();
   const MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  if(lbl) lbl.textContent = `${MES[month]} ${year}`;
+  const startYear = mktCalDate.getFullYear(), startMonth = mktCalDate.getMonth();
+  const endDate = new Date(startYear, startMonth + MKT_CAL_MESES_VISIBLES - 1, 1);
+  if(lbl) lbl.textContent = `${MES[startMonth]} ${startYear} – ${MES[endDate.getMonth()]} ${endDate.getFullYear()}`;
 
   const campColorMap = {};
   mktCampanas.forEach((c,idx)=>{ campColorMap[c.id] = mktCampColor(c, idx); });
-
-  // semanas del mes (lunes-domingo) que tocan este mes
-  const first = new Date(year, month, 1);
-  const last = new Date(year, month+1, 0);
-  let cur = new Date(first);
-  cur.setDate(cur.getDate() - ((cur.getDay()+6)%7)); // retroceder al lunes
-  const semanas = [];
-  while(cur <= last){
-    const ini = new Date(cur);
-    const dias = [];
-    for(let i=0;i<7;i++){ const d=new Date(cur); d.setDate(d.getDate()+i); dias.push(d); }
-    semanas.push({ini:new Date(ini), dias});
-    cur.setDate(cur.getDate()+7);
-  }
   const iso = d=> d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const hoyIso = todayIso();
 
-  el.innerHTML = semanas.map(w=>{
-    const wLabel = isoWeekNumber(w.ini);
-    const diasHtml = w.dias.map(d=>{
-      const dIso = iso(d);
-      const fueraDeMes = d.getMonth() !== month;
-      const activas = mktCampanas.filter(c=>{
-        const ci = c.fecha_inicio || '0000-00-00', cf = c.fecha_fin || '9999-99-99';
-        return ci <= dIso && cf >= dIso;
-      });
-      const barras = activas.map(c=>
-        `<div class="mk-day-bar" data-camp="${c.id}" style="background:${campColorMap[c.id]};" title="${esc(c.nombre)}"></div>`
-      ).join('');
-      return `<div class="mk-day ${dIso===hoyIso?'mk-day-today':''} ${fueraDeMes?'mk-day-out':''}">
-        <div class="mk-day-num">${d.getDate()}</div>
-        <div class="mk-day-bars">${barras}</div>
+  let html = '';
+  for(let m=0; m<MKT_CAL_MESES_VISIBLES; m++){
+    const year = new Date(startYear, startMonth+m, 1).getFullYear();
+    const month = new Date(startYear, startMonth+m, 1).getMonth();
+
+    // semanas del mes (lunes-domingo) que tocan este mes
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month+1, 0);
+    let cur = new Date(first);
+    cur.setDate(cur.getDate() - ((cur.getDay()+6)%7)); // retroceder al lunes
+    const semanas = [];
+    while(cur <= last){
+      const ini = new Date(cur);
+      const dias = [];
+      for(let i=0;i<7;i++){ const d=new Date(cur); d.setDate(d.getDate()+i); dias.push(d); }
+      semanas.push({ini:new Date(ini), dias});
+      cur.setDate(cur.getDate()+7);
+    }
+
+    html += `<div class="mk-month-sep">${MES[month]} ${year}</div>`;
+    html += semanas.map(w=>{
+      const wLabel = isoWeekNumber(w.ini);
+      const diasHtml = w.dias.map(d=>{
+        const dIso = iso(d);
+        const fueraDeMes = d.getMonth() !== month;
+        const activas = mktCampanas.filter(c=>{
+          const ci = c.fecha_inicio || '0000-00-00', cf = c.fecha_fin || '9999-99-99';
+          return ci <= dIso && cf >= dIso;
+        });
+        const barras = activas.map(c=>
+          `<div class="mk-day-bar" data-camp="${c.id}" style="background:${campColorMap[c.id]};" title="${esc(c.nombre)}"></div>`
+        ).join('');
+        return `<div class="mk-day ${dIso===hoyIso?'mk-day-today':''} ${fueraDeMes?'mk-day-out':''}">
+          <div class="mk-day-num">${d.getDate()}</div>
+          <div class="mk-day-bars">${barras}</div>
+        </div>`;
+      }).join('');
+      return `<div class="mk-week-row">
+        <div class="mk-week-label">S${wLabel}<small>Semana ${wLabel}</small></div>
+        <div class="mk-week-days">${diasHtml}</div>
       </div>`;
     }).join('');
-    return `<div class="mk-week-row">
-      <div class="mk-week-label">S${wLabel}<small>Semana ${wLabel}</small></div>
-      <div class="mk-week-days">${diasHtml}</div>
-    </div>`;
-  }).join('');
+  }
+  el.innerHTML = html;
 
   if(legendEl){
     legendEl.innerHTML = `<div class="mk-legend-title">Campañas</div>` + (mktCampanas.length
