@@ -925,11 +925,21 @@
   .gc-fu-edit{background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:11px;padding:2px;line-height:1;}
   .gc-fu-edit:hover{color:var(--accent);}
   #gm-table th:first-child, #gm-table td:first-child,
-  #gc-table th:first-child, #gc-table td:first-child{
+  #gc-table th:nth-child(2), #gc-table td:nth-child(2){
     position:sticky;left:0;background:var(--surface);box-shadow:2px 0 4px rgba(0,0,0,.10);
   }
-  #gm-table th:first-child, #gc-table th:first-child{z-index:4;background:var(--panel);}
-  #gm-table td:first-child, #gc-table td:first-child{z-index:2;}
+  /* Columna de checkbox (selección en bloque): también fija, a la izquierda de "Grupo" */
+  #gc-table th:first-child, #gc-table td:first-child{
+    position:sticky;left:0;background:var(--surface);z-index:3;
+  }
+  #gc-table th:nth-child(2), #gc-table td:nth-child(2){ left:34px; }
+  #gm-table th:first-child, #gc-table th:first-child, #gc-table th:nth-child(2){z-index:4;background:var(--panel);}
+  #gm-table td:first-child, #gc-table td:nth-child(2){z-index:2;}
+  .gc-bulk-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    background:var(--accent-soft);border:1px solid var(--accent);border-radius:9px;
+    padding:8px 12px;margin:8px 0;}
+  .gc-bulk-count{font-weight:800;font-size:12.5px;color:var(--accent-dark);white-space:nowrap;}
+  .gc-bulk-bar select, .gc-bulk-bar input{height:30px;}
   .gm-name{text-align:left!important;font-weight:700;cursor:pointer;color:var(--text);}
   .gm-name:hover{color:var(--accent);text-decoration:underline;}
   .gm-mail{font-size:11px;color:var(--text-soft);}
@@ -2399,9 +2409,21 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <button class="btn btn-ghost btn-sm" onclick="clearGcFilters()">Limpiar</button>
             <span class="gv-count" id="gc-count"></span>
           </div>
+          <div class="gc-bulk-bar" id="gc-bulk-bar" style="display:none;">
+            <span id="gc-bulk-count" class="gc-bulk-count"></span>
+            <select id="gc-bulk-campo" onchange="onGcBulkCampoChange()">
+              <option value="primer">Primer contacto</option>
+              <option value="segundo">Segundo Contacto</option>
+            </select>
+            <input id="gc-bulk-texto" type="text" placeholder="Tipo de email, campaña…" style="width:220px;">
+            <input id="gc-bulk-fecha" type="date" style="width:140px;">
+            <button class="btn btn-primary btn-sm" onclick="applyGcBulk()">Aplicar a los seleccionados</button>
+            <button class="btn btn-ghost btn-sm" onclick="clearGcSelection()">Cancelar selección</button>
+          </div>
           <div class="gv-tablebox gv-tablebox-full">
             <table id="gc-table" class="gv-table no-filter">
               <thead><tr>
+                <th style="width:34px;"><input type="checkbox" id="gc-select-all" onchange="toggleGcSelectAll(this)" title="Seleccionar todo"></th>
                 <th style="width:160px;">Grupo</th>
                 <th style="width:85px;">Tipo</th>
                 <th style="width:170px;">Contacto</th>
@@ -6541,6 +6563,10 @@ function renderGruposContacto(){
   const cnt = document.getElementById('gc-count');
   if(cnt) cnt.textContent = `${list.length} grupos`;
 
+  // Si algún grupo seleccionado ha quedado fuera del filtro actual, lo soltamos de la selección.
+  const visibleIds = new Set(list.map(g=>g.id));
+  [...GC_SELECTED].forEach(id=>{ if(!visibleIds.has(id)) GC_SELECTED.delete(id); });
+
   const tbody = document.querySelector('#gc-table tbody');
   tbody.innerHTML = list.length ? list.map(g=>{
     const c = gcRowFor(g.id) || {};
@@ -6548,6 +6574,7 @@ function renderGruposContacto(){
     const vencido2 = !!(c.fu2_fecha && c.fu2_fecha <= hoy);
     return `
     <tr>
+      <td style="text-align:center;"><input type="checkbox" class="gc-row-check" data-id="${g.id}" onchange="onGcRowCheck(this)" ${GC_SELECTED.has(g.id)?'checked':''}></td>
       <td class="gm-name">${esc(limpiaRef(g.grupo))}</td>
       <td>${tipoPill(g.tipo)}</td>
       <td>${esc(limpiaRef(g.contacto))}</td>
@@ -6571,7 +6598,8 @@ function renderGruposContacto(){
       <td><input type="text" class="cell-input" value="${esc(c.seguimiento||'')}" placeholder="Observaciones…" onchange="saveGcField(${g.id}, 'seguimiento', this.value)"></td>
     </tr>`;
   }).join('')
-    : '<tr><td colspan="9" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
+    : '<tr><td colspan="10" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
+  updateGcBulkBar();
 }
 
 async function gcUpsert(payload){
@@ -6598,6 +6626,81 @@ async function saveGcField(grupoId, field, value){
     payload.fu2_fecha = payload.fu1_fecha ? fuAddDias(payload.fu1_fecha, dias2) : null;
   }
   await gcUpsert(payload);
+}
+
+/* ---- Selección múltiple + acción en bloque (ej. "he mandado este email a todos") ---- */
+let GC_SELECTED = new Set();
+function toggleGcSelectAll(el){
+  document.querySelectorAll('#gc-table tbody .gc-row-check').forEach(cb=>{
+    const id = parseInt(cb.dataset.id,10);
+    cb.checked = el.checked;
+    if(el.checked) GC_SELECTED.add(id); else GC_SELECTED.delete(id);
+  });
+  updateGcBulkBar();
+}
+function onGcRowCheck(el){
+  const id = parseInt(el.dataset.id,10);
+  if(el.checked) GC_SELECTED.add(id); else GC_SELECTED.delete(id);
+  updateGcBulkBar();
+}
+function clearGcSelection(){
+  GC_SELECTED.clear();
+  document.querySelectorAll('#gc-table tbody .gc-row-check').forEach(cb=>cb.checked=false);
+  updateGcBulkBar();
+}
+function updateGcBulkBar(){
+  const bar = document.getElementById('gc-bulk-bar');
+  const cntEl = document.getElementById('gc-bulk-count');
+  if(!bar) return;
+  bar.style.display = GC_SELECTED.size ? 'flex' : 'none';
+  if(cntEl) cntEl.textContent = GC_SELECTED.size + ' seleccionado' + (GC_SELECTED.size===1?'':'s');
+  const checks = document.querySelectorAll('#gc-table tbody .gc-row-check');
+  const selectAll = document.getElementById('gc-select-all');
+  if(selectAll) selectAll.checked = checks.length>0 && GC_SELECTED.size===checks.length;
+  const fechaEl = document.getElementById('gc-bulk-fecha');
+  if(fechaEl && !fechaEl.value) fechaEl.value = todayIso();
+}
+function onGcBulkCampoChange(){
+  const campo = document.getElementById('gc-bulk-campo')?.value;
+  const fechaEl = document.getElementById('gc-bulk-fecha');
+  if(fechaEl) fechaEl.style.display = campo==='primer' ? 'inline-block' : 'none';
+}
+async function applyGcBulk(){
+  if(!GC_SELECTED.size){ alert('No has seleccionado ningún grupo.'); return; }
+  const campo = document.getElementById('gc-bulk-campo')?.value || 'primer';
+  const texto = (document.getElementById('gc-bulk-texto')?.value || '').trim();
+  const fecha = document.getElementById('gc-bulk-fecha')?.value || todayIso();
+  if(campo==='primer' && !fecha){ alert('Indica la fecha de contacto.'); return; }
+  const n = GC_SELECTED.size;
+  if(!confirm(`¿Aplicar "${campo==='primer'?'Primer contacto':'Segundo Contacto'}" a los ${n} grupo${n===1?'':'s'} seleccionado${n===1?'':'s'}?`)) return;
+
+  const rows = [...GC_SELECTED].map(id=>{
+    const c = gcRowFor(id) || {};
+    const payload = { grupo_id: id, updated_at: new Date().toISOString() };
+    if(campo==='primer'){
+      payload.primer_contacto = texto || null;
+      payload.fecha_primer_contacto = fecha;
+      const dias1 = c.fu1_dias ?? 10;
+      const dias2 = c.fu2_dias ?? 10;
+      payload.fu1_dias = dias1;
+      payload.fu1_fecha = fuAddDias(fecha, dias1);
+      payload.fu2_dias = dias2;
+      payload.fu2_fecha = fuAddDias(payload.fu1_fecha, dias2);
+    } else {
+      payload.segundo_contacto = texto || null;
+    }
+    return payload;
+  });
+
+  const { data, error } = await sb.from('grupos_contacto').upsert(rows, {onConflict:'grupo_id'}).select();
+  if(error){ console.error(error); alert('No se pudo aplicar a todos: '+error.message); return; }
+  (data||[]).forEach(d=>{
+    const c = gcRowFor(d.grupo_id);
+    if(c) Object.assign(c, d); else GC_CACHE.push(d);
+  });
+  clearGcSelection();
+  renderGruposContacto();
+  renderDashFuGrupos();
 }
 
 async function editFuDias(grupoId, which){
