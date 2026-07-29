@@ -8487,7 +8487,7 @@ async function renderDashInfluencers(){
     ? lista.map(f=>`<div class="dash-warn-row info"><span class="dash-warn-tag">Hoy</span><b>${esc(f.nombre_creator||'Influencer')}</b>${f.hora?' · '+esc(f.hora):''}${f.num_personas?' · '+f.num_personas+' pax':''}</div>`).join('')
     : '<div class="empty-state" style="padding:10px 0;">No hay influencers programados para hoy.</div>';
 }
-const FU_GRUPOS_VISIBLE_PARA = ['Laia','Mireia','Ignacio'];
+const FU_GRUPOS_VISIBLE_PARA = ['Laia','Mireia','Ignacio','Paula'];
 function puedeVerFuGrupos(){
   return FU_GRUPOS_VISIBLE_PARA.includes(currentProfile?.nombre || '');
 }
