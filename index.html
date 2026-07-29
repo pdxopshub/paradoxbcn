@@ -1028,6 +1028,10 @@
     border:1px solid var(--line);border-radius:4px;color:var(--text);
     font-size:11px;padding:2px 4px;text-align:center;}
   .dsg-in:focus{outline:none;border-color:var(--accent);background:rgba(0,123,167,.14);}
+  .dsg-f-toggle{justify-content:center;}
+  .dsg-f-toggle label{display:flex;align-items:center;gap:4px;font-size:8.5px;white-space:normal;
+    line-height:1.15;cursor:pointer;}
+  .dsg-f-toggle input[type="checkbox"]{width:12px;height:12px;flex:none;margin:0;cursor:pointer;}
   .dsg-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;
     border-top:1px solid var(--line);padding-top:3px;margin-top:1px;}
   .dsg-total{font-family:var(--font);font-weight:800;font-size:12.5px;color:var(--ok);
@@ -6177,14 +6181,36 @@ const DESGLOSE = {
             {k:'joven',    t:'Joven',      precio:'uni'},
             {k:'adulto',   t:'Adulto',     precio:'adult'},
             {k:'senior',   t:'Senior',     precio:'senior'}]},
-  cumple: {tipos:TIPOS_CUMPLE,
-    campos:[{k:'ninos',    t:'Niños',      precio:'school_4_12'},
-            {k:'adultos',  t:'Adultos',    precio:'adult'},
-            {k:'extras',   t:'Extras €',   precio:null, libre:true}]},
+  /* Cumpleaños: cada paquete tiene su propia tabla de precios (ver Grupos › Precios ›
+     Precios de cumpleaños). El Regalo Paradox es un extra opcional que solo se cobra
+     por los niños (no por los adultos que acompañan), y el suplemento de acondicionamiento
+     y limpieza se añade UNA sola vez por reserva (no por persona) vía "setupClave". */
+  cumple_enigma: {tipos:['Cumpleaños Enigma'],
+    campos:[{k:'ninos412',   t:'Niños 4-12',    cumplePrecio:'cumple_enigma_ninos'},
+            {k:'jovenes1319',t:'Jóvenes 13-19', cumplePrecio:'cumple_enigma_jovenes'},
+            {k:'adultos',    t:'Adultos',       cumplePrecio:'cumple_enigma_adultos'},
+            {k:'senior',     t:'Senior',        cumplePrecio:'cumple_enigma_senior'}]},
+  cumple_ilusion: {tipos:['Cumpleaños Ilusión','Cumpleaños Ilusión + Merch.'],
+    setupClave:'cumple_ilusion_acond',
+    campos:[{k:'ninos',   t:'Niños',   cumplePrecio:'cumple_ilusion_base'},
+            {k:'adultos', t:'Adultos', cumplePrecio:'cumple_ilusion_base'},
+            {k:'regalo_paradox', t:'Regalo Paradox (opcional, solo niños)', toggle:true, soloNinos:true, cumplePrecio:'cumple_ilusion_regalo'}]},
+  cumple_paradox: {tipos:['Cumpleaños Paradox'],
+    setupClave:'cumple_paradox_acond',
+    campos:[{k:'ninos',   t:'Niños',   cumplePrecio:'cumple_paradox_base'},
+            {k:'adultos', t:'Adultos', cumplePrecio:'cumple_paradox_base'}]},
+  /* "Cumpleaños" genérico (sin paquete definido): no tiene tarifa propia, se deja como
+     importe manual para no aplicar por error el precio de otro paquete. */
+  cumple_generico: {tipos:['Cumpleaños'],
+    campos:[{k:'extras', t:'Total manual €', precio:null, libre:true}]},
 };
-function desgloseDe(tipo){
-  for(const g of Object.values(DESGLOSE)) if(g.tipos.includes(tipo)) return g.campos;
+function desgloseGrupoDe(tipo){
+  for(const g of Object.values(DESGLOSE)) if(g.tipos.includes(tipo)) return g;
   return null;
+}
+function desgloseDe(tipo){
+  const g = desgloseGrupoDe(tipo);
+  return g ? g.campos : null;
 }
 
 let GP_CACHE = [];   // precios
@@ -6196,28 +6222,42 @@ function precioDe(clave){
 const DSG_CAMPOS_NINO = ['ninos412','ninos13','ninos','nino'];
 
 function calcTotalLead(l){
-  const campos = desgloseDe(l.tipo_grupo);
-  if(!campos) return null;
+  const grupo = desgloseGrupoDe(l.tipo_grupo);
+  if(!grupo) return null;
+  const campos = grupo.campos;
   const d = l.desglose || {};
   const promo = d.promo_clave ? GP_CACHE.find(x=>x.clave===d.promo_clave) : null;
   const promoPrecio = (promo && promo.precio_grupo!=null) ? parseFloat(promo.precio_grupo)||0 : null;
   // Monitores gratis: se indican a mano (campo "Monitores gratis"), ya no se calculan automáticamente.
   const monitoresGratis = parseFloat(d.monitor_gratis) || 0;
   let total = 0;
+  let pax = 0;
   campos.forEach(c=>{
     if(c.noSuma) return; // el campo "Monitores gratis" es solo un contador, no suma € directamente
+    if(c.toggle){
+      // Extra opcional tipo checkbox (ej. Regalo Paradox): solo suma si está marcado.
+      if(!d[c.k]) return;
+      const cantidad = c.soloNinos ? (parseFloat(d.ninos) || 0) : pax;
+      total += cantidad * precioCumpleDe(c.cumplePrecio);
+      return;
+    }
     const v = parseFloat(d[c.k]) || 0;
     if(c.libre){ total += v; return; }
-    let precioUnit = precioDe(c.precio);
+    let precioUnit = c.cumplePrecio ? precioCumpleDe(c.cumplePrecio) : precioDe(c.precio);
     if(promoPrecio!==null && DSG_CAMPOS_NINO.includes(c.k)) precioUnit = promoPrecio;
     if(c.k === 'monitor'){
       // Los monitores que no son gratis pagan siempre el mismo precio que un niño más.
       const facturables = Math.max(0, v - monitoresGratis);
       total += facturables * precioUnit;
+      pax += facturables;
       return;
     }
     total += v * precioUnit;
+    pax += v;
   });
+  // Suplemento fijo (ej. acondicionamiento y limpieza): se añade UNA sola vez, no por persona,
+  // y solo si la reserva tiene al menos un asistente indicado.
+  if(grupo.setupClave && pax>0) total += precioCumpleDe(grupo.setupClave);
   return total;
 }
 
@@ -6322,7 +6362,7 @@ async function initGruposV2(){
   setGruposView(gvView);
 }
 
-function setGruposView(v){
+async function setGruposView(v){
   gvView = v;
   document.querySelectorAll('[data-gv]').forEach(b=>b.classList.toggle('active', b.dataset.gv===v));
   document.querySelectorAll('.gv-pane').forEach(p=>p.style.display='none');
@@ -6332,9 +6372,9 @@ function setGruposView(v){
   if(v==='contacto')   renderGruposContacto();
   if(v==='inbound')    renderLeads('inbound');
   if(v==='outbound')   renderLeads('outbound');
-  if(v==='cumples')    renderLeads('cumples');
+  if(v==='cumples'){   await loadCumplesPrecios(); renderLeads('cumples'); }
   if(v==='calendario') renderGruposCalendar();
-  if(v==='precios'){   renderPrecios(); loadCumplesPrecios(); }
+  if(v==='precios'){   await loadCumplesPrecios(); renderPrecios(); renderCumplesPrecios(); }
 }
 
 async function fetchAllRows(table, orderCol, orderOpts){
@@ -6685,12 +6725,24 @@ function renderLeads(canal){
           const promos = GP_CACHE.filter(p=>p.clave && p.clave.startsWith('promo_'));
           inner = `<div class="dsg">
             <div class="dsg-campos" style="grid-template-columns:repeat(${Math.min(campos.length,2)},1fr);">
-              ${campos.map(f=>`
+              ${campos.map(f=>{
+                const precioHint = f.cumplePrecio ? precioCumpleDe(f.cumplePrecio) : (f.precio ? precioDe(f.precio) : null);
+                if(f.toggle){
+                  const checked = !!d[f.k];
+                  return `<div class="dsg-f dsg-f-toggle">
+                    <label title="${f.t}${precioHint!=null?' · '+precioHint+'€':''}">
+                      <input type="checkbox" class="dsg-in" data-id="${l.id}" data-dk="${f.k}" data-toggle="1" ${checked?'checked':''}>
+                      ${f.t}
+                    </label>
+                  </div>`;
+                }
+                return `
                 <div class="dsg-f">
-                  <label title="${f.t}${f.precio?' · '+precioDe(f.precio)+'€':''}">${f.t}</label>
+                  <label title="${f.t}${precioHint!=null?' · '+precioHint+'€':''}">${f.t}</label>
                   <input class="dsg-in" type="number" step="${f.libre?'0.01':'1'}" min="0"
                          data-id="${l.id}" data-dk="${f.k}" value="${d[f.k] ?? ''}">
-                </div>`).join('')}
+                </div>`;
+              }).join('')}
             </div>
             <div class="dsg-foot">
               <select class="promo-badge${d.promo_clave?' active':''}" data-id="${l.id}" onchange="setLeadPromo(this)" title="Marcar esta reserva como PROMO">
@@ -6822,8 +6874,12 @@ async function saveDesglose(e){
   const lead = GL_CACHE.find(x=>x.id===id);
   if(!lead) return;
   const d = Object.assign({}, lead.desglose||{});
-  const v = e.target.value;
-  if(v==='') delete d[k]; else d[k] = parseFloat(v)||0;
+  if(e.target.dataset.toggle){
+    if(e.target.checked) d[k] = true; else delete d[k];
+  } else {
+    const v = e.target.value;
+    if(v==='') delete d[k]; else d[k] = parseFloat(v)||0;
+  }
   lead.desglose = d;
   const total = calcTotalLead(lead);
   lead.total_eur = total;
@@ -7198,26 +7254,50 @@ async function deletePromoPrecio(id){
   renderPrecios();
 }
 
-/* ---------------- PRECIOS DE CUMPLEAÑOS (tabla de referencia, guardada en pdxspot_kv) ---------------- */
+/* ---------------- PRECIOS DE CUMPLEAÑOS (tabla de referencia, guardada en pdxspot_kv) ----------------
+   Cada fila tiene una "clave" estable para que el cálculo del TOTAL € de los leads de
+   Cumpleaños (ver DESGLOSE / calcTotalLead) pueda referenciar el precio correcto aunque
+   se edite el texto o el orden desde la tabla. */
 const CUMPLES_PRECIOS_DEFAULT = [
-  {sec:'Paquete Enigma',  concepto:'Niños (4–12 años)',  precio:11,    unidad:'persona'},
-  {sec:'Paquete Enigma',  concepto:'Jóvenes (13-19 años)', precio:14,  unidad:'persona'},
-  {sec:'Paquete Enigma',  concepto:'Adultos',            precio:15,    unidad:'persona'},
-  {sec:'Paquete Enigma',  concepto:'Senior',             precio:11,    unidad:'persona'},
-  {sec:'Paquete Ilusión', concepto:'Paquete Ilusión',    precio:17.5,  unidad:'persona'},
-  {sec:'Paquete Ilusión', concepto:'Regalo Paradox (opcional)', precio:2.5, unidad:'asistente', extra:true},
-  {sec:'Paquete Ilusión', concepto:'Acondicionamiento y limpieza del espacio', precio:7.5, unidad:'grupo', extra:true},
-  {sec:'Paquete Paradox', concepto:'Paquete Paradox',    precio:25,    unidad:'persona'},
-  {sec:'Paquete Paradox', concepto:'Acondicionamiento y limpieza del espacio', precio:7.5, unidad:'grupo', extra:true},
+  {clave:'cumple_enigma_ninos',    sec:'Paquete Enigma',  concepto:'Niños (4–12 años)',  precio:11,    unidad:'persona'},
+  {clave:'cumple_enigma_jovenes',  sec:'Paquete Enigma',  concepto:'Jóvenes (13-19 años)', precio:14,  unidad:'persona'},
+  {clave:'cumple_enigma_adultos',  sec:'Paquete Enigma',  concepto:'Adultos',            precio:15,    unidad:'persona'},
+  {clave:'cumple_enigma_senior',   sec:'Paquete Enigma',  concepto:'Senior',             precio:11,    unidad:'persona'},
+  {clave:'cumple_ilusion_base',    sec:'Paquete Ilusión', concepto:'Paquete Ilusión',    precio:17.5,  unidad:'persona'},
+  {clave:'cumple_ilusion_regalo',  sec:'Paquete Ilusión', concepto:'Regalo Paradox (opcional)', precio:2.5, unidad:'asistente', extra:true},
+  {clave:'cumple_ilusion_acond',   sec:'Paquete Ilusión', concepto:'Acondicionamiento y limpieza del espacio', precio:7.5, unidad:'grupo', extra:true},
+  {clave:'cumple_paradox_base',    sec:'Paquete Paradox', concepto:'Paquete Paradox',    precio:25,    unidad:'persona'},
+  {clave:'cumple_paradox_acond',   sec:'Paquete Paradox', concepto:'Acondicionamiento y limpieza del espacio', precio:7.5, unidad:'grupo', extra:true},
 ];
 let CUMPLES_PRECIOS = [];
 let _cumplesSaveTimer = null;
-async function loadCumplesPrecios(){
+let _cumplesPreciosLoaded = false;
+async function loadCumplesPrecios(force){
+  if(_cumplesPreciosLoaded && !force) return;
   try{
     const kv = await kvGet('precios-cumples');
-    CUMPLES_PRECIOS = kv?.value ? JSON.parse(kv.value) : JSON.parse(JSON.stringify(CUMPLES_PRECIOS_DEFAULT));
+    const saved = kv?.value ? JSON.parse(kv.value) : null;
+    if(saved && Array.isArray(saved) && saved.length){
+      // Migración: si el dato guardado es de antes de tener "clave", la añadimos
+      // emparejando por posición (mismo orden de filas) sin perder precios ya editados.
+      CUMPLES_PRECIOS = CUMPLES_PRECIOS_DEFAULT.map((def,i)=>{
+        const old = saved[i];
+        if(old && old.concepto===def.concepto) return {...def, precio: old.precio};
+        return {...def};
+      });
+    } else {
+      CUMPLES_PRECIOS = JSON.parse(JSON.stringify(CUMPLES_PRECIOS_DEFAULT));
+    }
   }catch(e){ CUMPLES_PRECIOS = JSON.parse(JSON.stringify(CUMPLES_PRECIOS_DEFAULT)); }
+  _cumplesPreciosLoaded = true;
   renderCumplesPrecios();
+}
+function precioCumpleDe(clave){
+  // Si todavía no se han cargado los precios (p.ej. se calcula un total antes de que
+  // termine loadCumplesPrecios), usamos los valores por defecto en vez de devolver 0.
+  const fuente = CUMPLES_PRECIOS.length ? CUMPLES_PRECIOS : CUMPLES_PRECIOS_DEFAULT;
+  const p = fuente.find(x=>x.clave===clave);
+  return p && p.precio!=null ? (parseFloat(p.precio)||0) : 0;
 }
 function renderCumplesPrecios(){
   const tb = document.querySelector('#precios-cumples-table tbody');
