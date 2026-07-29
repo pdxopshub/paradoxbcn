@@ -6786,22 +6786,28 @@ function renderLeads(canal){
   const pre = canal==='inbound' ? 'in' : canal==='cumples' ? 'cum' : 'out';
   const val = k => document.getElementById(pre+'-'+k)?.value || '';
   const q = val('search').toLowerCase().trim();
-  const st = val('status'), tp = val('tipo'), yr = val('year'),
-        mo = val('month'), ho = val('hora').toLowerCase().trim(),
+  const st = val('status'), tp = val('tipo');
+  let yr = val('year'), mo = val('month');
+  const ho = val('hora').toLowerCase().trim(),
         from = val('from'), to = val('to');
 
   // rellenar los desplegables de filtro una sola vez
-  const fill = (k, opts)=>{
+  // (year/month se inicializan además con el año y mes actuales por defecto)
+  const fill = (k, opts, def)=>{
     const el = document.getElementById(pre+'-'+k);
     if(!el || el.dataset.filled) return;
     const label = el.querySelector('option')?.textContent || '';
     el.innerHTML = `<option value="">${label}</option>` + opts;
     el.dataset.filled = '1';
+    if(def!=null) el.value = String(def);
   };
+  const hoy = new Date();
   fill('status', STATUS_OPTS.map(o=>`<option>${o}</option>`).join(''));
   fill('tipo',   tiposDe(canal).map(o=>`<option>${o}</option>`).join(''));
-  fill('year',   ANYOS.map(y=>`<option>${y}</option>`).join(''));
-  fill('month',  MESES_N.slice(1).map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''));
+  fill('year',   ANYOS.map(y=>`<option>${y}</option>`).join(''), hoy.getFullYear());
+  fill('month',  MESES_N.slice(1).map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''), hoy.getMonth()+1);
+  // releer por si se acaban de fijar los valores por defecto arriba
+  yr = val('year'); mo = val('month');
 
   const list = GL_CACHE.filter(l=>{
     if(l.canal !== canal) return false;
