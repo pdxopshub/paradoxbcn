@@ -912,7 +912,7 @@
   .gv-table tbody tr:hover td{background:rgba(0,0,0,.035);}
   /* Columna "Grupo" fija a la izquierda al hacer scroll horizontal */
   #gm-table{table-layout:fixed;width:940px;}
-  #gc-table{table-layout:fixed;width:1365px;}
+  #gc-table{table-layout:fixed;width:1529px;}
   /* Cabecera más alta, con títulos en dos líneas (ej. "Primer" / "contacto") */
   #gc-table th{padding:12px 8px;line-height:1.35;white-space:normal;vertical-align:middle;}
   /* Ninguna celda debe pintarse sobre la de al lado: recorte estricto al ancho de columna */
@@ -1028,6 +1028,9 @@
   .lead-table th{white-space:nowrap;padding:6px 8px!important;}
   .lead-table td{white-space:nowrap;}
   .lead-table td.lead-cell{padding:2px 4px;}
+  /* Seguimiento (Observaciones): ocupa el ancho sobrante y el texto se ajusta en varias líneas */
+  .lead-table td.col-seguimiento{white-space:normal;}
+  .lead-table td.col-seguimiento .lc-ta{white-space:pre-wrap;word-break:break-word;}
   /* desglose del total */
   .dsg{display:flex;flex-direction:column;gap:3px;padding:3px 2px;}
   .dsg-campos{display:grid;gap:3px;}
@@ -1143,10 +1146,10 @@
   .precios-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
   @media(max-width:1000px){.precios-layout{grid-template-columns:1fr;}}
   /* ---- Cambio Banco ---- */
-  .cb-layout{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start;}
-  @media(max-width:850px){.cb-layout{grid-template-columns:1fr;}}
+  .cb-layout{display:grid;grid-template-columns:360px 1fr;gap:16px;align-items:start;}
+  @media(max-width:870px){.cb-layout{grid-template-columns:1fr;}}
   .cb-layout-table{width:fit-content;max-width:100%;}
-  #cb-table{table-layout:fixed;width:314px;max-width:100%;}
+  #cb-table{table-layout:fixed;width:334px;max-width:100%;}
   #cb-table th{padding:6px 4px;font-size:10.5px;line-height:1.25;}
   #cb-table td{border:1px solid var(--line);padding:0;text-align:center;vertical-align:middle;}
   #cb-table .cb-denom{background:var(--panel);font-weight:700;font-size:12px;padding:5px 4px;text-align:right;}
@@ -2431,6 +2434,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <th style="width:130px;">Fecha<br>Primer contacto</th>
                 <th style="width:140px;">Follow Up<br>(10 días)</th>
                 <th style="width:160px;">Segundo<br>Contacto</th>
+                <th style="width:130px;">Fecha<br>Segundo contacto</th>
                 <th style="width:140px;">Follow<br>Up 2</th>
                 <th style="width:220px;">Seguimiento</th>
               </tr></thead>
@@ -2716,7 +2720,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                   <th style="width:96px;">Moneda/<br>Billete</th>
                   <th style="width:68px;">Cantidad</th>
                   <th style="width:88px;">Importe</th>
-                  <th style="width:62px;">Rulos</th>
+                  <th style="width:82px;">Rulos</th>
                 </tr></thead>
                 <tbody id="cb-body"></tbody>
                 <tfoot id="cb-foot"></tfoot>
@@ -6369,7 +6373,7 @@ const LEAD_COLS = [
   {g:'fact',  k:'pago2_fecha',    t:'FECHA SEGUNDO PAGO', w:150, type:'date'},
   {g:'fact',  k:'pago2_metodo',   t:'MÉTODO SEGUNDO PAGO',w:150, type:'metodo'},
   {g:'fact',  k:'datos_fiscales', t:'Datos fiscales', w:230, type:'textarea', left:true},
-  {g:'obs',   k:'seguimiento',    t:'Seguimiento',    w:230, type:'textarea', left:true},
+  {g:'obs',   k:'seguimiento',    t:'Seguimiento',    w:460, type:'textarea', left:true, fill:true},
   {g:'obs',   k:'next_contact',   t:'Next contact',   w:128, type:'date'},
   {g:'obs',   k:'motivo_reject',  t:'Motivo reject',  w:190, type:'textarea', left:true},
 ];
@@ -6588,6 +6592,7 @@ function renderGruposContacto(){
         <div class="gc-fu-days">${c.fu1_dias ?? 10} días</div>
       </td>
       <td><input type="text" class="cell-input" value="${esc(c.segundo_contacto||'')}" placeholder="Tipo de email, campaña…" onchange="saveGcField(${g.id}, 'segundo_contacto', this.value)"></td>
+      <td><input type="date" class="cell-input" value="${c.fecha_segundo_contacto||''}" onchange="saveGcField(${g.id}, 'fecha_segundo_contacto', this.value)"></td>
       <td>
         <div class="gc-fu-cell">
           <span class="gc-fu-date ${vencido2?'vencido':''}">${c.fu2_fecha ? (fmtFechaHub(c.fu2_fecha)||c.fu2_fecha) : '—'}</span>
@@ -6598,7 +6603,7 @@ function renderGruposContacto(){
       <td><input type="text" class="cell-input" value="${esc(c.seguimiento||'')}" placeholder="Observaciones…" onchange="saveGcField(${g.id}, 'seguimiento', this.value)"></td>
     </tr>`;
   }).join('')
-    : '<tr><td colspan="10" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
+    : '<tr><td colspan="11" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
   updateGcBulkBar();
 }
 
@@ -6661,16 +6666,16 @@ function updateGcBulkBar(){
   if(fechaEl && !fechaEl.value) fechaEl.value = todayIso();
 }
 function onGcBulkCampoChange(){
-  const campo = document.getElementById('gc-bulk-campo')?.value;
+  // La fecha se aplica en los dos casos (primer contacto o segundo contacto).
   const fechaEl = document.getElementById('gc-bulk-fecha');
-  if(fechaEl) fechaEl.style.display = campo==='primer' ? 'inline-block' : 'none';
+  if(fechaEl) fechaEl.style.display = 'inline-block';
 }
 async function applyGcBulk(){
   if(!GC_SELECTED.size){ alert('No has seleccionado ningún grupo.'); return; }
   const campo = document.getElementById('gc-bulk-campo')?.value || 'primer';
   const texto = (document.getElementById('gc-bulk-texto')?.value || '').trim();
   const fecha = document.getElementById('gc-bulk-fecha')?.value || todayIso();
-  if(campo==='primer' && !fecha){ alert('Indica la fecha de contacto.'); return; }
+  if(!fecha){ alert('Indica la fecha de contacto.'); return; }
   const n = GC_SELECTED.size;
   if(!confirm(`¿Aplicar "${campo==='primer'?'Primer contacto':'Segundo Contacto'}" a los ${n} grupo${n===1?'':'s'} seleccionado${n===1?'':'s'}?`)) return;
 
@@ -6688,6 +6693,7 @@ async function applyGcBulk(){
       payload.fu2_fecha = fuAddDias(payload.fu1_fecha, dias2);
     } else {
       payload.segundo_contacto = texto || null;
+      payload.fecha_segundo_contacto = fecha;
     }
     return payload;
   });
@@ -6780,7 +6786,9 @@ function renderLeads(canal){
 
   const colRow = '<tr class="lead-col-row">' + LEAD_COLS.map((c,i)=>{
     const last = LEAD_COLS[i+1] && LEAD_COLS[i+1].g !== c.g;
-    return `<th style="min-width:${c.w}px;text-align:center;" class="${last?'grp-edge':''}">${c.t}</th>`;
+    // c.fill: la columna absorbe todo el ancho sobrante de la pantalla
+    const fill = c.fill ? 'width:100%;' : '';
+    return `<th style="min-width:${c.w}px;${fill}text-align:center;" class="${last?'grp-edge':''}">${c.t}</th>`;
   }).join('') + '<th style="min-width:38px;"></th></tr>';
 
   const head = '<thead>' + grpRow + colRow + '</thead>';
@@ -6792,7 +6800,7 @@ function renderLeads(canal){
       let val = l[c.k] ?? '';
       if(typeof val === 'string' && /^#(REF|N\/A|VALUE|NAME)/i.test(val.trim())) val = '';
       const edge = LEAD_COLS[ci+1] && LEAD_COLS[ci+1].g !== c.g;
-      const cls  = ['lead-cell', c.left?'ta-left':'', nota?'has-note':'', edge?'grp-edge':''].filter(Boolean).join(' ');
+      const cls  = ['lead-cell', 'col-'+c.k, c.left?'ta-left':'', nota?'has-note':'', edge?'grp-edge':''].filter(Boolean).join(' ');
       const tip  = nota ? ` data-note="${esc(nota)}"` : '';
       let inner;
       const dk = `data-id="${l.id}" data-k="${c.k}"`;
