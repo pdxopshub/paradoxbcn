@@ -8424,6 +8424,20 @@ const FU_GRUPOS_VISIBLE_PARA = ['Laia','Mireia','Ignacio'];
 function puedeVerFuGrupos(){
   return FU_GRUPOS_VISIBLE_PARA.includes(currentProfile?.nombre || '');
 }
+const DASH_FU_TIPO_PLURAL = {
+  'Escuela':'Escuelas', 'Summer School':'Summer Schools', 'Casal':'Casals',
+  'Asociación':'Asociaciones', 'Hotel':'Hoteles', 'Agencia':'Agencias',
+  'Crucero':'Cruceros', 'Empresa':'Empresas', 'Otro':'Otros'
+};
+function dashFuSemanaActual(){
+  const hoy = new Date();
+  const lunes = new Date(hoy);
+  lunes.setDate(hoy.getDate() - ((hoy.getDay()+6)%7));
+  const domingo = new Date(lunes);
+  domingo.setDate(lunes.getDate()+6);
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return { desde: iso(lunes), hasta: iso(domingo) };
+}
 async function renderDashFuGrupos(){
   const card = document.getElementById('dash-fugrupos-card');
   const row = document.getElementById('dash-caps-row');
@@ -8436,17 +8450,27 @@ async function renderDashFuGrupos(){
   if(row) row.style.gridTemplateColumns = 'repeat(4,minmax(0,1fr))';
   const el = document.getElementById('dash-fugrupos-list');
   if(!el) return;
-  const hoy = todayIso();
+  const { desde, hasta } = dashFuSemanaActual();
   const { data } = await sb.from('grupos_contacto')
-    .select('grupo_id,fu1_fecha,fu2_fecha,grupos_maestro(grupo)')
-    .or(`fu1_fecha.lte.${hoy},fu2_fecha.lte.${hoy}`);
-  const lista = (data||[]).map(c=>{
-    const dueDate = [c.fu1_fecha, c.fu2_fecha].filter(d=> d && d<=hoy).sort()[0];
-    return { nombre: c.grupos_maestro?.grupo || 'Grupo', fecha: dueDate };
-  }).sort((a,b)=> (a.fecha||'').localeCompare(b.fecha||''));
+    .select('grupo_id,fu1_fecha,fu2_fecha,grupos_maestro(tipo)')
+    .or(`and(fu1_fecha.gte.${desde},fu1_fecha.lte.${hasta}),and(fu2_fecha.gte.${desde},fu2_fecha.lte.${hasta})`);
+
+  // Agrupamos por Tipo de grupo + fecha del FU (no por grupo individual, para no listar
+  // cientos de nombres): "FU - Escuelas - 18-07-2026".
+  const porTipoFecha = {};
+  (data||[]).forEach(c=>{
+    const tipo = c.grupos_maestro?.tipo || 'Sin tipo';
+    [c.fu1_fecha, c.fu2_fecha].forEach(f=>{
+      if(!f || f<desde || f>hasta) return;
+      const key = tipo+'|'+f;
+      porTipoFecha[key] = porTipoFecha[key] || { tipo, fecha:f, n:0 };
+      porTipoFecha[key].n++;
+    });
+  });
+  const lista = Object.values(porTipoFecha).sort((a,b)=> a.fecha.localeCompare(b.fecha) || a.tipo.localeCompare(b.tipo,'es'));
   el.innerHTML = lista.length
-    ? lista.map(it=>`<div class="dash-warn-row"><span class="dash-warn-tag">FU</span><b>${esc(it.nombre)}</b> — desde ${it.fecha}</div>`).join('')
-    : '<div class="empty-state" style="padding:10px 0;">Ningún grupo con follow-up pendiente.</div>';
+    ? lista.map(it=>`<div class="dash-warn-row"><span class="dash-warn-tag">FU</span><b>${esc(DASH_FU_TIPO_PLURAL[it.tipo]||it.tipo)}</b> - ${fmtFechaHub(it.fecha)}${it.n>1?` <span class="hint">(${it.n})</span>`:''}</div>`).join('')
+    : '<div class="empty-state" style="padding:10px 0;">Ningún follow-up de grupos esta semana.</div>';
 }
 
 /* ---- Materiales: checklist real (tabla checklist_materiales), agrupada por sección ---- */
