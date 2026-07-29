@@ -336,6 +336,8 @@
   #view-recap #rc-info-visitantes, #view-recap #rc-info-entrada{min-width:0;box-sizing:border-box;padding:11px 12px;}
   .rc-cap-title{font-size:10.5px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
   /* campos compactos: etiqueta arriba, hueco debajo */
+  #view-recap .rc-review-link{color:var(--accent);text-decoration:none;font-weight:800;margin-left:3px;}
+  #view-recap .rc-review-link:hover{text-decoration:underline;}
   #view-recap .rc-fields{display:grid;gap:8px;}
   #view-recap .rc-fields.c2{grid-template-columns:1fr 1fr;}
   #view-recap .rc-fields.c3{grid-template-columns:1fr 1fr 1fr;}
@@ -1122,6 +1124,32 @@
   .caja-sobre-row{background:#8FD1A8;}
   .caja-sobre-row div:first-child{color:#0E4A2A;}
   .caja-sobre-row div:last-child{padding:6px 8px;font-size:12px;font-weight:800;text-align:right;color:#0E4A2A;}
+  /* ---- Cambio Banco ---- */
+  .cb-layout{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;align-items:start;}
+  @media(max-width:1000px){.cb-layout{grid-template-columns:1fr;}}
+  #cb-table{table-layout:fixed;}
+  #cb-table td{border:1px solid var(--line);padding:0;text-align:center;vertical-align:middle;}
+  #cb-table .cb-denom{background:var(--panel);font-weight:700;font-size:12.5px;padding:6px 5px;text-align:right;}
+  #cb-table .cb-sep td{background:#DCDCDC;border:none;height:5px;padding:0;}
+  #cb-table input.cb-in{width:100%;height:30px;text-align:center;background:transparent;border:none;
+    color:var(--text);font-size:12.5px;-moz-appearance:textfield;}
+  #cb-table input.cb-in::-webkit-outer-spin-button,#cb-table input.cb-in::-webkit-inner-spin-button{-webkit-appearance:none;}
+  #cb-table input.cb-in:focus{outline:none;background:rgba(0,123,167,.12);}
+  #cb-table .cb-importe{font-size:12.5px;font-weight:600;background:#FFFFFF;}
+  #cb-table .cb-rulos{font-size:12.5px;font-weight:700;background:#FFFFFF;color:var(--text-soft);}
+  #cb-foot .cb-total-row td{border:1px solid var(--line-strong);padding:7px 5px;font-size:13px;font-weight:800;
+    text-align:right;background:#8FD1A8;color:#0E4A2A;}
+  .cb-texto-area{width:100%;min-height:260px;resize:vertical;font-family:var(--font);font-size:13px;
+    line-height:1.5;padding:12px;border-radius:10px;border:1px solid var(--line-strong);
+    background:var(--panel);color:var(--text);box-sizing:border-box;}
+  /* ---- Stock de uniformes ---- */
+  .unif-section-title{font-size:12.5px;font-weight:800;letter-spacing:.3px;color:var(--text-soft);
+    text-transform:uppercase;margin-bottom:8px;}
+  .unif-row{display:grid;grid-template-columns:70px 1fr;gap:12px;align-items:center;
+    padding:6px 0;border-bottom:1px solid var(--line);}
+  .unif-row:last-child{border-bottom:none;}
+  .unif-talla{font-weight:700;font-size:13px;}
+  .unif-in{width:90px;height:32px;text-align:center;font-size:13px;}
   .lm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;margin-bottom:10px;}
   .loomis-table{border-collapse:collapse;width:100%;table-layout:fixed;}
   /* cabecera */
@@ -1698,9 +1726,17 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a4 4 0 015 5L11 20l-5.5 1.5L7 16 15.3 7.7"/><path d="M9 11l4 4"/></svg>
           Tareas Diego
         </button>
+          <button class="navitem" data-view="cambiobanco">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 6V4h12v2"/></svg>
+          Cambio Banco
+        </button>
           <button class="navitem" data-view="clmant">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 18 2 18 6 6 6Z"/><path d="M6 6v14a2 2 0 002 2h8a2 2 0 002-2V6"/><path d="M10 11h4"/></svg>
           Checklists
+        </button>
+          <button class="navitem" data-view="uniformes">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3l4 2 4-2 3 4-3 2v12H5V9L2 7z"/></svg>
+          Stock de uniformes
         </button>
         </div>
       </nav>
@@ -2078,9 +2114,9 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="rc-block">
             <div class="rc-cap-title">Reseñas hoy</div>
             <div class="rc-fields c3">
-              <div class="rc-f"><label>Tripadvisor</label><input type="number" id="rc-ta-reviews" placeholder="0"></div>
-              <div class="rc-f"><label>Google</label><input type="number" id="rc-google-reviews" placeholder="0"></div>
-              <div class="rc-f"><label title="GetYourGuide">GetYourGuide</label><input type="number" id="rc-gyg-reviews" placeholder="0"></div>
+              <div class="rc-f"><label>Tripadvisor <a class="rc-review-link" href="https://www.tripadvisor.com/Attraction_Review-g187497-d25410922-Reviews-Paradox_Museum_Barcelona-Barcelona_Catalonia.html" target="_blank" rel="noopener" title="Abrir página de reseñas de Tripadvisor">↗</a></label><input type="number" id="rc-ta-reviews" placeholder="0"></div>
+              <div class="rc-f"><label>Google <a class="rc-review-link" href="https://share.google/K0i8JLtwgsoqSMSKe" target="_blank" rel="noopener" title="Abrir página de reseñas de Google">↗</a></label><input type="number" id="rc-google-reviews" placeholder="0"></div>
+              <div class="rc-f"><label title="GetYourGuide">GetYourGuide <a class="rc-review-link" href="#" target="_blank" rel="noopener" title="Enlace de GetYourGuide sin configurar aún (ver pestaña Reseñas)">↗</a></label><input type="number" id="rc-gyg-reviews" placeholder="0"></div>
             </div>
           </div>
         </div>
@@ -2440,6 +2476,23 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               </table>
             </div>
           </div>
+
+          <div class="card" style="max-width:760px;margin-top:16px;">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Precios de cumpleaños <span class="hint">Editable · el TOTAL € depende del paquete que se elija</span></div>
+              <span id="precios-cumples-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓ Guardado</span>
+            </div>
+            <div class="table-wrap">
+              <table id="precios-cumples-table" class="no-filter">
+                <thead><tr>
+                  <th style="text-align:center;">Concepto</th>
+                  <th style="width:130px;text-align:center;">Precio</th>
+                  <th style="width:110px;text-align:center;">Unidad</th>
+                </tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <!-- ---------- CALENDARIO ---------- -->
@@ -2611,6 +2664,36 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
       </div>
 
+      <!-- ============ CAMBIO BANCO ============ -->
+      <div class="view" id="view-cambiobanco">
+        <div class="cb-layout">
+          <div class="card cb-layout-table">
+            <div class="flex-between" style="margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+              <div class="section-title" style="margin:0;">Cambio de caja para el banco <span class="hint">Billetes, monedas y rulos necesarios para el pedido</span></div>
+              <span id="cb-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓ Guardado</span>
+            </div>
+            <div class="table-wrap">
+              <table id="cb-table" class="loomis-table no-filter">
+                <thead><tr>
+                  <th style="width:110px;">Moneda/Billete</th>
+                  <th style="width:90px;">Cantidad</th>
+                  <th style="width:100px;">Importe</th>
+                  <th style="width:80px;">Rulos</th>
+                </tr></thead>
+                <tbody id="cb-body"></tbody>
+                <tfoot id="cb-foot"></tfoot>
+              </table>
+            </div>
+          </div>
+          <div class="card cb-layout-text">
+            <div class="section-title" style="margin-bottom:10px;">Texto para el banco <span class="hint">Editable y listo para copiar</span></div>
+            <textarea id="cb-texto" class="cb-texto-area" spellcheck="false" oninput="onCbTextoInput()"></textarea>
+            <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="copyCambioBancoTexto()">Copiar texto</button>
+            <span id="cb-copiado" style="display:none;font-size:12px;font-weight:700;color:var(--ok);margin-left:8px;">✓ Copiado</span>
+          </div>
+        </div>
+      </div>
+
       <!-- ============ CL MANTENIMIENTO ============ -->
       <div class="view" id="view-clmant">
         <div class="tab-strip" style="margin-bottom:14px;">
@@ -2660,6 +2743,18 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <div id="mat-lista-compra" class="dash-warn-list"></div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- ============ STOCK DE UNIFORMES ============ -->
+      <div class="view" id="view-uniformes">
+        <div class="card" style="max-width:640px;">
+          <div class="flex-between" style="margin-bottom:12px;">
+            <div class="section-title" style="margin:0;">Stock de uniformes</div>
+            <span id="unif-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓ Guardado</span>
+          </div>
+          <div id="unif-mono" class="unif-section"></div>
+          <div id="unif-camiseta" class="unif-section" style="margin-top:18px;"></div>
         </div>
       </div>
 
@@ -2936,7 +3031,9 @@ const titles = {
   marketing:['Marketing','Campañas, influencers y calendario'],
   chat:['Chat','Conversación del equipo'],
   diego:['Mantenimiento','Tareas semanales de Diego'],
+  cambiobanco:['Cambio Banco','Billetes y rulos de monedas para el pedido al banco'],
   clmant:['Checklists','Mantenimiento de exhibiciones y materiales'],
+  uniformes:['Stock de uniformes','Monos y camisetas por talla'],
   recap:['Recap del día','Cierre diario: info general, rutinas y observaciones'],
   loomis:['Loomis','Gestión semanal del lunes']
 };
@@ -2959,6 +3056,8 @@ function goView(v){
   if(v==='turnos') renderTurnos();
   if(v==='ev') renderEvTimeline();
   if(v==='diego') renderDiego();
+  if(v==='cambiobanco') renderCambioBanco();
+  if(v==='uniformes') renderUniformes();
   if(v==='dashboard'){ refreshDashboard(); renderDashGrupos(); }
   if(v==='recap') renderRecap();
   if(v==='resenas') renderResenas();
@@ -5427,7 +5526,7 @@ const BACKUP_TABLAS = ['profiles','spv_days','spv_entries','spv_commission_histo
   'staff_entradas','evaluaciones','entrevistas','turnos','pda_tasks','diego_tasks',
   'clmant_items','nfcards','reviews_cache','recap','reviews_history','pdxspot_kv',
   'chat_mensajes','vac_solicitudes','vac_bloqueos','vac_saldos','loomis_semanas',
-  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant','vac_bajas','checklist_materiales','grupos_contacto','checklist_mant_semana'];
+  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant','vac_bajas','checklist_materiales','grupos_contacto','checklist_mant_semana','uniformes_stock'];
 
 async function descargarBackupHub(){
   const btn = document.getElementById('hub-backup-btn');
@@ -6159,7 +6258,7 @@ function setGruposView(v){
   if(v==='outbound')   renderLeads('outbound');
   if(v==='cumples')    renderLeads('cumples');
   if(v==='calendario') renderGruposCalendar();
-  if(v==='precios')    renderPrecios();
+  if(v==='precios'){   renderPrecios(); loadCumplesPrecios(); }
 }
 
 async function fetchAllRows(table, orderCol, orderOpts){
@@ -7023,6 +7122,57 @@ async function deletePromoPrecio(id){
   renderPrecios();
 }
 
+/* ---------------- PRECIOS DE CUMPLEAÑOS (tabla de referencia, guardada en pdxspot_kv) ---------------- */
+const CUMPLES_PRECIOS_DEFAULT = [
+  {sec:'Paquete Enigma',  concepto:'Niños (4–12 años)',  precio:11,    unidad:'persona'},
+  {sec:'Paquete Enigma',  concepto:'Jóvenes (13-19 años)', precio:14,  unidad:'persona'},
+  {sec:'Paquete Enigma',  concepto:'Adultos',            precio:15,    unidad:'persona'},
+  {sec:'Paquete Enigma',  concepto:'Senior',             precio:11,    unidad:'persona'},
+  {sec:'Paquete Ilusión', concepto:'Paquete Ilusión',    precio:17.5,  unidad:'persona'},
+  {sec:'Paquete Ilusión', concepto:'Regalo Paradox (opcional)', precio:2.5, unidad:'asistente', extra:true},
+  {sec:'Paquete Ilusión', concepto:'Acondicionamiento y limpieza del espacio', precio:7.5, unidad:'grupo', extra:true},
+  {sec:'Paquete Paradox', concepto:'Paquete Paradox',    precio:25,    unidad:'persona'},
+  {sec:'Paquete Paradox', concepto:'Acondicionamiento y limpieza del espacio', precio:7.5, unidad:'grupo', extra:true},
+];
+let CUMPLES_PRECIOS = [];
+let _cumplesSaveTimer = null;
+async function loadCumplesPrecios(){
+  try{
+    const kv = await kvGet('precios-cumples');
+    CUMPLES_PRECIOS = kv?.value ? JSON.parse(kv.value) : JSON.parse(JSON.stringify(CUMPLES_PRECIOS_DEFAULT));
+  }catch(e){ CUMPLES_PRECIOS = JSON.parse(JSON.stringify(CUMPLES_PRECIOS_DEFAULT)); }
+  renderCumplesPrecios();
+}
+function renderCumplesPrecios(){
+  const tb = document.querySelector('#precios-cumples-table tbody');
+  if(!tb) return;
+  let lastSec = null;
+  tb.innerHTML = CUMPLES_PRECIOS.map((p,i)=>{
+    let head = '';
+    if(p.sec !== lastSec){
+      head = `<tr class="pr-section"><td colspan="3" style="color:var(--text-soft);border-left:3px solid var(--text-soft);">${esc(p.sec)}</td></tr>`;
+      lastSec = p.sec;
+    }
+    return `${head}<tr class="${p.extra?'pr-extra':''}">
+      <td style="text-align:left;font-weight:${p.extra?'600':'700'};border-left:3px solid var(--text-soft);">${p.extra?'<span class="pr-plus">+</span>':''}${esc(p.concepto)}</td>
+      <td><span class="pr-eur"><input class="pr-in" type="number" step="0.5" min="0" data-i="${i}" value="${p.precio ?? ''}" onchange="saveCumplePrecio(this)"><b class="pr-eur-sym">€</b></span></td>
+      <td style="color:var(--text-soft);font-size:12.5px;">${esc(p.unidad)}</td>
+    </tr>`;
+  }).join('');
+}
+function saveCumplePrecio(el){
+  const i = parseInt(el.dataset.i,10);
+  const v = el.value==='' ? null : parseFloat(el.value);
+  if(!CUMPLES_PRECIOS[i]) return;
+  CUMPLES_PRECIOS[i].precio = v;
+  clearTimeout(_cumplesSaveTimer);
+  _cumplesSaveTimer = setTimeout(async ()=>{
+    await kvSet('precios-cumples', JSON.stringify(CUMPLES_PRECIOS));
+    const b = document.getElementById('precios-cumples-saved');
+    if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2000); }
+  }, 500);
+}
+
 /* ---------------- CALENDARIO ---------------- */
 let gcalDate = new Date();
 function gcalMonth(d){
@@ -7654,6 +7804,149 @@ async function saveLoomis(){
   );
   const b = document.getElementById('loomis-saved');
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2500); }
+}
+
+/* ============================================================
+   CAMBIO BANCO — pedido de billetes y rulos de monedas al banco
+   Se guarda en pdxspot_kv (cantidades + texto de la cápsula).
+   Rulos por denominación de moneda: cuántas unidades caben en cada rulo.
+   ============================================================ */
+const CB_BILLETES = [100,50,20,10,5];
+const CB_MONEDAS  = [2,1,0.5,0.2,0.1,0.05,0.02,0.01];
+const CB_MONEDAS_POR_RULO = {2:25, 1:25, 0.5:40, 0.2:40, 0.1:40, 0.05:50, 0.02:50, 0.01:50};
+const CB_TEXTO_DEFAULT = `Hola, buenos días!
+
+Necesitaríamos para ir a recoger mañana, Jueves, de la cuenta autorizada por el CEO.
+
+Total 250€
+
+
+Les incluyo el CIF: B72395270
+
+Gracias por adelantado,
+Un saludo, 7010@bancsabadell.com`;
+let CB_DATA = {}; // { "100":n, "50":n, ... }
+let CB_TEXTO = CB_TEXTO_DEFAULT;
+let cbSaveTimer = null;
+
+function cbDenomLabel(d){
+  return (d>=1) ? d.toFixed(2).replace(/\.00$/,',00') : d.toFixed(2).replace('.',',');
+}
+function cbRowHtml(d){
+  const key = String(d);
+  const val = CB_DATA[key] ?? '';
+  const esMoneda = d < 5;
+  return `<tr>
+    <td class="cb-denom">${cbDenomLabel(d)} €</td>
+    <td><input type="number" min="0" step="1" class="cb-in" data-denom="${key}" value="${val}" onchange="onCbInput(this)"></td>
+    <td class="cb-importe" id="cb-importe-${key}">0,00 €</td>
+    <td class="cb-rulos" id="cb-rulos-${key}">${esMoneda ? '0' : '—'}</td>
+  </tr>`;
+}
+async function renderCambioBanco(){
+  try{
+    const kv = await kvGet('cambio-banco');
+    const saved = kv?.value ? JSON.parse(kv.value) : null;
+    CB_DATA  = saved?.cantidades || {};
+    CB_TEXTO = (saved && typeof saved.texto === 'string') ? saved.texto : CB_TEXTO_DEFAULT;
+  }catch(e){ CB_DATA = {}; CB_TEXTO = CB_TEXTO_DEFAULT; }
+  const body = document.getElementById('cb-body');
+  if(body){
+    body.innerHTML = CB_BILLETES.map(cbRowHtml).join('')
+      + `<tr class="cb-sep"><td colspan="4"></td></tr>`
+      + CB_MONEDAS.map(cbRowHtml).join('');
+  }
+  const txt = document.getElementById('cb-texto');
+  if(txt) txt.value = CB_TEXTO;
+  recalcCambioBanco();
+}
+function onCbInput(el){
+  const denom = el.dataset.denom;
+  CB_DATA[denom] = el.value;
+  recalcCambioBanco();
+  cbScheduleSave();
+}
+function recalcCambioBanco(){
+  let total = 0;
+  [...CB_BILLETES, ...CB_MONEDAS].forEach(d=>{
+    const key = String(d);
+    const n = parseFloat(CB_DATA[key]) || 0;
+    const importe = n * d;
+    total += importe;
+    const impEl = document.getElementById('cb-importe-'+key);
+    if(impEl) impEl.textContent = importe.toFixed(2).replace('.',',') + ' €';
+    if(d < 5){
+      const porRulo = CB_MONEDAS_POR_RULO[d] || 1;
+      const rulos = n>0 ? Math.ceil(n / porRulo) : 0;
+      const rulosEl = document.getElementById('cb-rulos-'+key);
+      if(rulosEl) rulosEl.textContent = String(rulos);
+    }
+  });
+  const foot = document.getElementById('cb-foot');
+  if(foot) foot.innerHTML = `<tr class="cb-total-row"><td colspan="2">TOTAL</td><td colspan="2">${total.toFixed(2).replace('.',',')} €</td></tr>`;
+}
+function onCbTextoInput(){
+  const el = document.getElementById('cb-texto');
+  if(!el) return;
+  CB_TEXTO = el.value;
+  cbScheduleSave();
+}
+function cbScheduleSave(){
+  clearTimeout(cbSaveTimer);
+  cbSaveTimer = setTimeout(async ()=>{
+    await kvSet('cambio-banco', JSON.stringify({ cantidades: CB_DATA, texto: CB_TEXTO }));
+    const b = document.getElementById('cb-saved');
+    if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2000); }
+  }, 500);
+}
+async function copyCambioBancoTexto(){
+  const el = document.getElementById('cb-texto');
+  if(!el) return;
+  try{
+    await navigator.clipboard.writeText(el.value);
+  }catch(e){
+    el.select();
+    document.execCommand('copy');
+  }
+  const b = document.getElementById('cb-copiado');
+  if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2000); }
+}
+
+/* ============================================================
+   STOCK DE UNIFORMES — mono y camisetas por talla
+   Tabla Supabase: uniformes_stock (id, prenda, talla, cantidad, orden)
+   ============================================================ */
+let UNIF_CACHE = [];
+async function renderUniformes(){
+  const { data, error } = await sb.from('uniformes_stock').select('*').order('orden');
+  if(error){ console.error(error); return; }
+  UNIF_CACHE = data || [];
+  const monoEl = document.getElementById('unif-mono');
+  const camEl  = document.getElementById('unif-camiseta');
+  if(monoEl){
+    monoEl.innerHTML = `<div class="unif-section-title">Mono</div>` +
+      UNIF_CACHE.filter(u=>u.prenda==='Mono').map(unifRowHtml).join('');
+  }
+  if(camEl){
+    camEl.innerHTML = `<div class="unif-section-title">Camiseta</div>` +
+      UNIF_CACHE.filter(u=>u.prenda==='Camiseta').map(unifRowHtml).join('');
+  }
+}
+function unifRowHtml(u){
+  return `<div class="unif-row">
+    <div class="unif-talla">${esc(u.talla)}</div>
+    <input type="number" min="0" step="1" class="cell-input unif-in" value="${u.cantidad ?? 0}"
+           onchange="saveUnifCantidad(${u.id}, this.value)">
+  </div>`;
+}
+async function saveUnifCantidad(id, valor){
+  const cantidad = parseInt(valor,10) || 0;
+  const { error } = await sb.from('uniformes_stock').update({ cantidad, updated_at: new Date().toISOString() }).eq('id', id);
+  if(error){ console.error(error); return; }
+  const row = UNIF_CACHE.find(u=>u.id===id);
+  if(row) row.cantidad = cantidad;
+  const b = document.getElementById('unif-saved');
+  if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2000); }
 }
 
 let diegoWeekOffset=0;
