@@ -6363,6 +6363,7 @@ const LEAD_GRUPOS = [
   {id:'pax',   label:'PAX',           cls:'lg-pax'},
   {id:'fact',  label:'FACTURACIÓN',   cls:'lg-fact'},
   {id:'obs',   label:'OBSERVACIONES', cls:'lg-obs'},
+  {id:'fu',    label:'FOLLOW UP',     cls:'lg-fu'},
 ];
 const HORAS_OPTS = (()=>{
   const out = [''];
@@ -6398,6 +6399,9 @@ const LEAD_COLS = [
   {g:'obs',   k:'seguimiento',    t:'Seguimiento',    w:460, type:'textarea', left:true, fill:true},
   {g:'obs',   k:'next_contact',   t:'Next contact',   w:128, type:'date'},
   {g:'obs',   k:'motivo_reject',  t:'Motivo reject',  w:190, type:'textarea', left:true},
+  {g:'fu',    k:'fu1_fecha',      t:'FU 1',           w:118, type:'date'},
+  {g:'fu',    k:'fu2_fecha',      t:'FU 2',           w:118, type:'date'},
+  {g:'fu',    k:'fu3_fecha',      t:'FU 3',           w:118, type:'date'},
 ];
 
 async function initGruposV2(){
