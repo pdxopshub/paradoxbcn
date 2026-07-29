@@ -409,6 +409,8 @@
   .dash-warn-row.info{background:#E9F0FF;border-color:#C3D6FF;color:#1E3A6E;}
   .dash-warn-row.info b{color:#0B2A5E;}
   .dash-warn-row.info .dash-warn-tag{background:#3B6BD9;}
+  /* La cápsula de FU grupos no debe crecer con el contenido: scroll interno si hay muchos tipos */
+  #dash-fugrupos-list{max-height:150px;overflow-y:auto;padding-right:2px;}
   .mat-head{width:100%;box-sizing:border-box;background:transparent;border:none;
     font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;
     color:var(--text-soft);text-align:left;padding:2px 4px;}
@@ -924,6 +926,10 @@
   .gc-fu-days{font-size:9.5px;color:var(--text-dim);margin-top:2px;}
   .gc-fu-edit{background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:11px;padding:2px;line-height:1;}
   .gc-fu-edit:hover{color:var(--accent);}
+  /* Contorno verde: marca visualmente que ese mensaje/fecha de contacto ya se ha hecho */
+  #gc-table input.gc-done{border:1.5px solid var(--ok)!important;background:rgba(30,168,107,.08);}
+  /* El placeholder de las celdas de mensaje debe ser casi invisible: solo una pista discreta */
+  #gc-table input.cell-input::placeholder{color:var(--text-dim);opacity:.28;}
   #gm-table th:first-child, #gm-table td:first-child,
   #gc-table th:nth-child(2), #gc-table td:nth-child(2){
     position:sticky;left:0;background:var(--surface);box-shadow:2px 0 4px rgba(0,0,0,.10);
@@ -940,6 +946,9 @@
     padding:8px 12px;margin:8px 0;}
   .gc-bulk-count{font-weight:800;font-size:12.5px;color:var(--accent-dark);white-space:nowrap;}
   .gc-bulk-bar select, .gc-bulk-bar input{height:30px;}
+  .gc-fu-banner{display:flex;align-items:center;gap:10px;
+    background:#FBEEE4;border:1px solid #F0D3B8;border-radius:9px;
+    padding:7px 12px;margin:8px 0;font-size:12.5px;font-weight:700;color:#7A4315;}
   .gm-name{text-align:left!important;font-weight:700;cursor:pointer;color:var(--text);}
   .gm-name:hover{color:var(--accent);text-decoration:underline;}
   .gm-mail{font-size:11px;color:var(--text-soft);}
@@ -1045,6 +1054,10 @@
   .dsg-f-toggle label{display:flex;align-items:center;gap:4px;font-size:8.5px;white-space:normal;
     line-height:1.15;cursor:pointer;}
   .dsg-f-toggle input[type="checkbox"]{width:12px;height:12px;flex:none;margin:0;cursor:pointer;}
+  .dsg-breakdown{display:flex;flex-direction:column;gap:0;padding:2px 3px;
+    background:var(--panel);border:1px solid var(--line);border-radius:4px;}
+  .dsg-breakdown div{font-size:8.5px;line-height:1.35;color:var(--text-dim);white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;}
   .dsg-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;
     border-top:1px solid var(--line);padding-top:3px;margin-top:1px;}
   .dsg-total{font-family:var(--font);font-weight:800;font-size:12.5px;color:var(--ok);
@@ -2412,13 +2425,17 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <button class="btn btn-ghost btn-sm" onclick="clearGcFilters()">Limpiar</button>
             <span class="gv-count" id="gc-count"></span>
           </div>
+          <div class="gc-fu-banner" id="gc-fu-banner" style="display:none;">
+            <span>Mostrando FU de esta semana</span>
+            <button class="btn btn-ghost btn-sm" onclick="limpiarFiltroFuSemana()">✕ Quitar filtro</button>
+          </div>
           <div class="gc-bulk-bar" id="gc-bulk-bar" style="display:none;">
             <span id="gc-bulk-count" class="gc-bulk-count"></span>
             <select id="gc-bulk-campo" onchange="onGcBulkCampoChange()">
               <option value="primer">Primer contacto</option>
               <option value="segundo">Segundo Contacto</option>
             </select>
-            <input id="gc-bulk-texto" type="text" placeholder="Tipo de email, campaña…" style="width:220px;">
+            <input id="gc-bulk-texto" type="text" placeholder="Mensaje, email…" style="width:220px;">
             <input id="gc-bulk-fecha" type="date" style="width:140px;">
             <button class="btn btn-primary btn-sm" onclick="applyGcBulk()">Aplicar a los seleccionados</button>
             <button class="btn btn-ghost btn-sm" onclick="clearGcSelection()">Cancelar selección</button>
@@ -6209,22 +6226,23 @@ const DESGLOSE = {
             {k:'senior',   t:'Senior',     precio:'senior'}]},
   /* Cumpleaños: cada paquete tiene su propia tabla de precios (ver Grupos › Precios ›
      Precios de cumpleaños). El Regalo Paradox es un extra opcional que solo se cobra
-     por los niños (no por los adultos que acompañan), y el suplemento de acondicionamiento
-     y limpieza se añade UNA sola vez por reserva (no por persona) vía "setupClave". */
+     por los niños (no por los adultos que acompañan). El Acondicionamiento y limpieza
+     es un extra tipo checkbox marcado por defecto (defaultOn) que se suma UNA sola vez
+     por reserva, no por persona (fixed). */
   cumple_enigma: {tipos:['Cumpleaños Enigma'],
     campos:[{k:'ninos412',   t:'Niños 4-12',    cumplePrecio:'cumple_enigma_ninos'},
             {k:'jovenes1319',t:'Jóvenes 13-19', cumplePrecio:'cumple_enigma_jovenes'},
             {k:'adultos',    t:'Adultos',       cumplePrecio:'cumple_enigma_adultos'},
             {k:'senior',     t:'Senior',        cumplePrecio:'cumple_enigma_senior'}]},
   cumple_ilusion: {tipos:['Cumpleaños Ilusión','Cumpleaños Ilusión + Merch.'],
-    setupClave:'cumple_ilusion_acond',
     campos:[{k:'ninos',   t:'Niños',   cumplePrecio:'cumple_ilusion_base'},
             {k:'adultos', t:'Adultos', cumplePrecio:'cumple_ilusion_base'},
-            {k:'regalo_paradox', t:'Regalo Paradox (opcional, solo niños)', toggle:true, soloNinos:true, cumplePrecio:'cumple_ilusion_regalo'}]},
+            {k:'regalo_paradox', t:'Regalo Paradox (solo niños)', toggle:true, soloNinos:true, cumplePrecio:'cumple_ilusion_regalo'},
+            {k:'acondicionamiento', t:'Acondicionamiento y limpieza', toggle:true, defaultOn:true, fixed:true, cumplePrecio:'cumple_ilusion_acond'}]},
   cumple_paradox: {tipos:['Cumpleaños Paradox'],
-    setupClave:'cumple_paradox_acond',
     campos:[{k:'ninos',   t:'Niños',   cumplePrecio:'cumple_paradox_base'},
-            {k:'adultos', t:'Adultos', cumplePrecio:'cumple_paradox_base'}]},
+            {k:'adultos', t:'Adultos', cumplePrecio:'cumple_paradox_base'},
+            {k:'acondicionamiento', t:'Acondicionamiento y limpieza', toggle:true, defaultOn:true, fixed:true, cumplePrecio:'cumple_paradox_acond'}]},
   /* "Cumpleaños" genérico (sin paquete definido): no tiene tarifa propia, se deja como
      importe manual para no aplicar por error el precio de otro paquete. */
   cumple_generico: {tipos:['Cumpleaños'],
@@ -6261,8 +6279,15 @@ function calcTotalLead(l){
   campos.forEach(c=>{
     if(c.noSuma) return; // el campo "Monitores gratis" es solo un contador, no suma € directamente
     if(c.toggle){
-      // Extra opcional tipo checkbox (ej. Regalo Paradox): solo suma si está marcado.
-      if(!d[c.k]) return;
+      // Extra opcional tipo checkbox (ej. Regalo Paradox, Acondicionamiento).
+      // defaultOn: se considera marcado salvo que se haya desmarcado explícitamente (d[c.k]===false).
+      const marcado = c.defaultOn ? (d[c.k] !== false) : !!d[c.k];
+      if(!marcado) return;
+      if(c.fixed){
+        // Suplemento fijo (ej. acondicionamiento y limpieza): se suma UNA sola vez, no por persona.
+        total += precioCumpleDe(c.cumplePrecio);
+        return;
+      }
       const cantidad = c.soloNinos ? (parseFloat(d.ninos) || 0) : pax;
       total += cantidad * precioCumpleDe(c.cumplePrecio);
       return;
@@ -6281,9 +6306,6 @@ function calcTotalLead(l){
     total += v * precioUnit;
     pax += v;
   });
-  // Suplemento fijo (ej. acondicionamiento y limpieza): se añade UNA sola vez, no por persona,
-  // y solo si la reserva tiene al menos un asistente indicado.
-  if(grupo.setupClave && pax>0) total += precioCumpleDe(grupo.setupClave);
   return total;
 }
 
@@ -6534,8 +6556,16 @@ function fuAddDias(fechaIso, dias){
 function gcRowFor(grupoId){
   return GC_CACHE.find(c=>c.grupo_id===grupoId) || null;
 }
+// Filtro especial activado al hacer clic en la cápsula "FU grupos" del Dashboard:
+// además del tipo, exige que el FU (1º o 2º) caiga dentro de la semana actual.
+let GC_FILTRO_FU_SEMANA = false;
+function limpiarFiltroFuSemana(){
+  GC_FILTRO_FU_SEMANA = false;
+  renderGruposContacto();
+}
 function clearGcFilters(){
   ['gc-search','gc-tipo','gc-filtro','gc-desde','gc-hasta'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  GC_FILTRO_FU_SEMANA = false;
   renderGruposContacto();
 }
 function renderGruposContacto(){
@@ -6550,6 +6580,9 @@ function renderGruposContacto(){
   const desde  = document.getElementById('gc-desde')?.value || '';
   const hasta  = document.getElementById('gc-hasta')?.value || '';
   const hoy    = todayIso();
+  const banner = document.getElementById('gc-fu-banner');
+  if(banner) banner.style.display = GC_FILTRO_FU_SEMANA ? 'flex' : 'none';
+  const semana = GC_FILTRO_FU_SEMANA ? dashFuSemanaActual() : null;
 
   const list = GM_CACHE.filter(g=>{
     if(tipo && g.tipo !== tipo) return false;
@@ -6561,6 +6594,11 @@ function renderGruposContacto(){
     if(filtro==='al_dia' && !(c && c.fecha_primer_contacto && !fuDue)) return false;
     if(desde && !(c && c.fecha_primer_contacto && c.fecha_primer_contacto >= desde)) return false;
     if(hasta && !(c && c.fecha_primer_contacto && c.fecha_primer_contacto <= hasta)) return false;
+    if(semana){
+      const enSemana = !!(c && ((c.fu1_fecha && c.fu1_fecha>=semana.desde && c.fu1_fecha<=semana.hasta) ||
+                                 (c.fu2_fecha && c.fu2_fecha>=semana.desde && c.fu2_fecha<=semana.hasta)));
+      if(!enSemana) return false;
+    }
     return true;
   });
 
@@ -6582,8 +6620,8 @@ function renderGruposContacto(){
       <td class="gm-name">${esc(limpiaRef(g.grupo))}</td>
       <td>${tipoPill(g.tipo)}</td>
       <td>${esc(limpiaRef(g.contacto))}</td>
-      <td><input type="text" class="cell-input" value="${esc(c.primer_contacto||'')}" placeholder="Tipo de email, campaña…" onchange="saveGcField(${g.id}, 'primer_contacto', this.value)"></td>
-      <td><input type="date" class="cell-input" value="${c.fecha_primer_contacto||''}" onchange="saveGcField(${g.id}, 'fecha_primer_contacto', this.value)"></td>
+      <td><input type="text" class="cell-input${c.primer_contacto?' gc-done':''}" value="${esc(c.primer_contacto||'')}" placeholder="Mensaje, email…" onchange="saveGcField(${g.id}, 'primer_contacto', this.value)"></td>
+      <td><input type="date" class="cell-input${c.fecha_primer_contacto?' gc-done':''}" value="${c.fecha_primer_contacto||''}" onchange="saveGcField(${g.id}, 'fecha_primer_contacto', this.value)"></td>
       <td>
         <div class="gc-fu-cell">
           <span class="gc-fu-date ${vencido1?'vencido':''}">${c.fu1_fecha ? (fmtFechaHub(c.fu1_fecha)||c.fu1_fecha) : '—'}</span>
@@ -6591,8 +6629,8 @@ function renderGruposContacto(){
         </div>
         <div class="gc-fu-days">${c.fu1_dias ?? 10} días</div>
       </td>
-      <td><input type="text" class="cell-input" value="${esc(c.segundo_contacto||'')}" placeholder="Tipo de email, campaña…" onchange="saveGcField(${g.id}, 'segundo_contacto', this.value)"></td>
-      <td><input type="date" class="cell-input" value="${c.fecha_segundo_contacto||''}" onchange="saveGcField(${g.id}, 'fecha_segundo_contacto', this.value)"></td>
+      <td><input type="text" class="cell-input${c.segundo_contacto?' gc-done':''}" value="${esc(c.segundo_contacto||'')}" placeholder="Mensaje, email…" onchange="saveGcField(${g.id}, 'segundo_contacto', this.value)"></td>
+      <td><input type="date" class="cell-input${c.fecha_segundo_contacto?' gc-done':''}" value="${c.fecha_segundo_contacto||''}" onchange="saveGcField(${g.id}, 'fecha_segundo_contacto', this.value)"></td>
       <td>
         <div class="gc-fu-cell">
           <span class="gc-fu-date ${vencido2?'vencido':''}">${c.fu2_fecha ? (fmtFechaHub(c.fu2_fecha)||c.fu2_fecha) : '—'}</span>
@@ -6834,15 +6872,42 @@ function renderLeads(canal){
         } else {
           const total = calcTotalLead(l);
           const promos = GP_CACHE.filter(p=>p.clave && p.clave.startsWith('promo_'));
+          const promo = d.promo_clave ? GP_CACHE.find(x=>x.clave===d.promo_clave) : null;
+          const promoPrecio = (promo && promo.precio_grupo!=null) ? parseFloat(promo.precio_grupo)||0 : null;
+          // Desglose de líneas: un subtotal por cada concepto que realmente suma al total.
+          const lineas = [];
+          campos.forEach(f=>{
+            if(f.noSuma) return;
+            if(f.toggle){
+              const marcado = f.defaultOn ? (d[f.k] !== false) : !!d[f.k];
+              if(!marcado) return;
+              if(f.fixed){
+                lineas.push(`${f.t}: ${precioCumpleDe(f.cumplePrecio).toFixed(2)}€`);
+              } else {
+                const cantidad = f.soloNinos ? (parseFloat(d.ninos) || 0) : null;
+                const precioU = precioCumpleDe(f.cumplePrecio);
+                if(cantidad!=null){
+                  if(cantidad>0) lineas.push(`${f.t}: ${cantidad} × ${precioU.toFixed(2)}€ = ${(cantidad*precioU).toFixed(2)}€`);
+                }
+              }
+              return;
+            }
+            const v = parseFloat(d[f.k]) || 0;
+            if(f.libre){ if(v) lineas.push(`${f.t}: ${v.toFixed(2)}€`); return; }
+            if(!v) return;
+            let precioU = f.cumplePrecio ? precioCumpleDe(f.cumplePrecio) : precioDe(f.precio);
+            if(promoPrecio!==null && DSG_CAMPOS_NINO.includes(f.k)) precioU = promoPrecio;
+            lineas.push(`${f.t}: ${v} × ${precioU.toFixed(2)}€ = ${(v*precioU).toFixed(2)}€`);
+          });
           inner = `<div class="dsg">
             <div class="dsg-campos" style="grid-template-columns:repeat(${Math.min(campos.length,2)},1fr);">
               ${campos.map(f=>{
                 const precioHint = f.cumplePrecio ? precioCumpleDe(f.cumplePrecio) : (f.precio ? precioDe(f.precio) : null);
                 if(f.toggle){
-                  const checked = !!d[f.k];
+                  const checked = f.defaultOn ? (d[f.k] !== false) : !!d[f.k];
                   return `<div class="dsg-f dsg-f-toggle">
                     <label title="${f.t}${precioHint!=null?' · '+precioHint+'€':''}">
-                      <input type="checkbox" class="dsg-in" data-id="${l.id}" data-dk="${f.k}" data-toggle="1" ${checked?'checked':''}>
+                      <input type="checkbox" class="dsg-in" data-id="${l.id}" data-dk="${f.k}" data-toggle="1" ${f.defaultOn?'data-defaulton="1"':''} ${checked?'checked':''}>
                       ${f.t}
                     </label>
                   </div>`;
@@ -6855,6 +6920,7 @@ function renderLeads(canal){
                 </div>`;
               }).join('')}
             </div>
+            ${lineas.length ? `<div class="dsg-breakdown">${lineas.map(t=>`<div>${esc(t)}</div>`).join('')}</div>` : ''}
             <div class="dsg-foot">
               <select class="promo-badge${d.promo_clave?' active':''}" data-id="${l.id}" onchange="setLeadPromo(this)" title="Marcar esta reserva como PROMO">
                 <option value="">🏷 PROMO</option>
@@ -6986,7 +7052,9 @@ async function saveDesglose(e){
   if(!lead) return;
   const d = Object.assign({}, lead.desglose||{});
   if(e.target.dataset.toggle){
-    if(e.target.checked) d[k] = true; else delete d[k];
+    if(e.target.checked) d[k] = true;
+    else if(e.target.dataset.defaulton) d[k] = false; // marcado por defecto: hay que recordar que se desmarcó a mano
+    else delete d[k];
   } else {
     const v = e.target.value;
     if(v==='') delete d[k]; else d[k] = parseFloat(v)||0;
@@ -6997,9 +7065,8 @@ async function saveDesglose(e){
   const { error } = await sb.from('grupos_leads')
     .update({desglose:d, total_eur:total, updated_at:new Date().toISOString()}).eq('id', id);
   if(error){ console.error(error); return; }
-  // refrescar solo el total de esa fila
-  const cel = e.target.closest('.dsg')?.querySelector('.dsg-total');
-  if(cel) cel.textContent = total ? total.toFixed(2)+'€' : '—';
+  // re-renderizar la tabla para refrescar tanto el total como el desglose de líneas
+  renderLeads(lead.canal || 'inbound');
 }
 
 async function saveLeadCell(e){
@@ -8438,6 +8505,26 @@ function dashFuSemanaActual(){
   const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   return { desde: iso(lunes), hasta: iso(domingo) };
 }
+const DASH_FU_DIAS = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+function dashFuFechaConDia(iso){
+  const d = new Date(iso+'T00:00:00');
+  const dia = DASH_FU_DIAS[d.getDay()];
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = String(d.getFullYear()).slice(-2);
+  return `${dia} ${dd}/${mm}/${yy}`;
+}
+/* Clic en una fila de la cápsula FU grupos: abre Grupos › Contacto ya filtrado
+   por ese tipo de grupo y limitado a los follow-ups de esta semana. */
+async function goToFuGrupos(tipo){
+  GC_FILTRO_FU_SEMANA = true;
+  goView('grupos');
+  await loadGruposData();
+  setGruposView('contacto');
+  const sel = document.getElementById('gc-tipo');
+  if(sel) sel.value = tipo;
+  renderGruposContacto();
+}
 async function renderDashFuGrupos(){
   const card = document.getElementById('dash-fugrupos-card');
   const row = document.getElementById('dash-caps-row');
@@ -8469,7 +8556,9 @@ async function renderDashFuGrupos(){
   });
   const lista = Object.values(porTipoFecha).sort((a,b)=> a.fecha.localeCompare(b.fecha) || a.tipo.localeCompare(b.tipo,'es'));
   el.innerHTML = lista.length
-    ? lista.map(it=>`<div class="dash-warn-row"><span class="dash-warn-tag">FU</span><b>${esc(DASH_FU_TIPO_PLURAL[it.tipo]||it.tipo)}</b> - ${fmtFechaHub(it.fecha)}${it.n>1?` <span class="hint">(${it.n})</span>`:''}</div>`).join('')
+    ? lista.map(it=>`<div class="dash-warn-row" style="cursor:pointer;" onclick="goToFuGrupos('${esc(it.tipo).replace(/'/g,"\\'")}')" title="Ver estos grupos en Contacto">
+        <span class="dash-warn-tag">FU</span><b>${esc(DASH_FU_TIPO_PLURAL[it.tipo]||it.tipo)}</b> - ${dashFuFechaConDia(it.fecha)}${it.n>1?` <span class="hint">(${it.n})</span>`:''}
+      </div>`).join('')
     : '<div class="empty-state" style="padding:10px 0;">Ningún follow-up de grupos esta semana.</div>';
 }
 
