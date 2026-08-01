@@ -17,6 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
   :root{
     --font:'Plus Jakarta Sans',sans-serif;
@@ -3890,6 +3891,15 @@ async function openSpvComisiones(){
     </tr>`;
   }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Sin datos de acumulado todavía.</td></tr>';
 
+  // "A pagar" del último cierre guardado para este mes (histórico), para que
+  // la lista de quién superó los 10€ no se pierda al resetear el acumulado.
+  const mesLabelActual = spvMonthLabel(spvSelectedMonth);
+  const histEntry = await fetchCommissionHistoryEntryForMonth(mesLabelActual);
+  const aPagar = histEntry?.totales?._a_pagar || [];
+  const filasPagar = aPagar.length
+    ? aPagar.map(p=>`<tr><td style="text-align:left;"><b>${spvNombreCorto(p.persona)}</b></td><td class="mono" style="color:var(--ok);font-weight:800;">${(p.total||0).toFixed(2)}€</td></tr>`).join('')
+    : '<tr><td colspan="2" style="text-align:center;color:var(--text-soft);">Todavía no se ha cerrado este mes.</td></tr>';
+
   document.getElementById('modal-root').innerHTML = `
     <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
       <div class="modal" style="max-width:600px;">
@@ -3924,9 +3934,23 @@ async function openSpvComisiones(){
             <table><thead><tr><th>Persona</th><th>Comisión este mes</th><th>Acumulado</th><th>Estado</th></tr></thead>
             <tbody>${filasAcum}</tbody></table>
           </div>
+
+          <div class="flex-between" style="margin-top:18px;margin-bottom:8px;">
+            <div class="section-title" style="margin:0;font-size:13px;">A pagar <span class="hint">Se guarda al cerrar el mes, para no perder el dato</span></div>
+            ${aPagar.length ? `<button class="btn btn-ghost btn-sm" onclick="descargarImagenBloque('spv-a-pagar-block','a-pagar-${mesLabelActual.replace(/\s+/g,'-')}')">⬇ Descargar imagen</button>` : ''}
+          </div>
+          <div class="table-wrap" id="spv-a-pagar-block">
+            <table><thead><tr><th>Persona</th><th>Importe</th></tr></thead>
+            <tbody>${filasPagar}</tbody></table>
+          </div>
         </div>
       </div>
     </div>`;
+}
+async function fetchCommissionHistoryEntryForMonth(mesLabel){
+  const { data, error } = await sb.from('spv_commission_history').select('*').eq('mes', mesLabel).order('created_at',{ascending:false}).limit(1).maybeSingle();
+  if(error){ console.error(error); return null; }
+  return data;
 }
 
 async function cerrarComisionesMes(){
@@ -3952,14 +3976,27 @@ async function cerrarComisionesMes(){
       { onConflict: 'persona' }
     );
   }
+  pagos.sort((a,b)=>b.total-a.total);
+
+  // Guardar este cierre en el histórico de comisiones (upsert por mes: si ya
+  // se había cerrado este mes antes, se sustituye por el cierre más reciente
+  // en vez de duplicar filas), para que la lista de "a pagar" no se pierda.
+  const mesLabel = spvMonthLabel(spvSelectedMonth);
+  await sb.from('spv_commission_history').delete().eq('mes', mesLabel);
+  await sb.from('spv_commission_history').insert({
+    mes: mesLabel,
+    rate: d.rate,
+    totales: {
+      ...d.qualTotals,
+      '_paula_tienda_commission': d.paulaCommission,
+      '_commission_days': d.dias,
+      '_qual_rev_bruto': d.qualRevBruto,
+      '_a_pagar': pagos
+    }
+  });
+
   await openSpvComisiones();
-  if(pagos.length){
-    const texto = pagos.sort((a,b)=>b.total-a.total)
-      .map(p=>`${spvNombreCorto(p.persona)}: ${p.total.toFixed(2)}€`).join('\n');
-    alert(`A pagar de ${spvMonthLabel(spvSelectedMonth)} (superan los 10€):\n\n${texto}`);
-  } else {
-    alert(`Nadie ha superado los 10€ en ${spvMonthLabel(spvSelectedMonth)}.`);
-  }
+  await renderCommissionHistory();
 }
 
 function computeSpvSummary(data){
@@ -4038,7 +4075,9 @@ async function renderCommissionHistory(){
     const t = entry.totales || {};
     const paulaComm = t['_paula_tienda_commission'] || 0;
     const commDays = t['_commission_days'] || 0;
+    const aPagar = t['_a_pagar'] || [];
     const staffEntries = Object.entries(t).filter(([k,v])=>!k.startsWith('_') && k!=='Paula' && v>0).sort((a,b)=>b[1]-a[1]);
+    const blockId = `hist-a-pagar-${entry.id}`;
     return `
     <div class="card" style="margin-bottom:12px;background:var(--panel);">
       <div class="flex-between" style="margin-bottom:10px;">
@@ -4051,8 +4090,34 @@ async function renderCommissionHistory(){
       ${paulaComm>0?`<div class="note-banner" style="margin-bottom:10px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><div><b>Comisión tienda Paula:</b> ${paulaComm.toFixed(2)}€ (2,5% del Rev. Bruto neto)</div></div>`:''}
       <div class="table-wrap"><table><thead><tr><th>Persona</th><th>Total generado (bruto)</th><th>Comisión (s/neto)</th></tr></thead>
       <tbody>${staffEntries.map(([s,v])=>`<tr><td>${s}</td><td class="mono">${v.toFixed(2)}€</td><td class="mono" style="color:var(--success);font-weight:700;">${(v/1.21*entry.rate/100).toFixed(2)}€</td></tr>`).join('')}</tbody></table></div>
+      ${aPagar.length ? `
+      <div class="flex-between" style="margin-top:12px;margin-bottom:6px;">
+        <div style="font-size:11.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.4px;">A pagar</div>
+        <button class="btn btn-ghost btn-sm" onclick="descargarImagenBloque('${blockId}','a-pagar-${entry.mes.replace(/\s+/g,'-')}')">⬇ Descargar imagen</button>
+      </div>
+      <div class="table-wrap" id="${blockId}"><table><thead><tr><th>Persona</th><th>Importe</th></tr></thead>
+      <tbody>${aPagar.map(p=>`<tr><td>${spvNombreCorto(p.persona)}</td><td class="mono" style="color:var(--ok);font-weight:800;">${(p.total||0).toFixed(2)}€</td></tr>`).join('')}</tbody></table></div>` : ''}
     </div>`;
   }).join('');
+}
+/* Descarga como imagen PNG el bloque HTML indicado (usa html2canvas, cargado
+   por CDN). Se usa tanto en el modal de Comisiones como en el histórico. */
+async function descargarImagenBloque(elId, filename){
+  const el = document.getElementById(elId);
+  if(!el){ return; }
+  if(typeof html2canvas === 'undefined'){ alert('No se pudo generar la imagen (html2canvas no cargó).'); return; }
+  try{
+    const canvas = await html2canvas(el, {backgroundColor:'#ffffff', scale:2});
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = (filename || 'comisiones') + '.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }catch(e){
+    console.error('[descargarImagenBloque]', e);
+    alert('No se pudo generar la imagen: '+e.message);
+  }
 }
 async function saveCommissionSnapshot(){
   const data = await fetchSpvGrid();
