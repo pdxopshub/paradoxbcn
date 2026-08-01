@@ -3687,7 +3687,10 @@ function rowRevBruto(row){ return SPV_STAFF.reduce((a,s)=>a+(row.amounts[s]||0),
 function rowNetVisitors(row){ return Math.max(0, (row.visitors||0) - (row.groupVisitors||0)); }
 function rowSpvBruto(row){ const nv = rowNetVisitors(row); return nv>0 ? rowRevBruto(row)/nv : 0; }
 function rowSpvNeto(row){ return rowSpvBruto(row) / 1.21; }
-function rowQualifies(row){ return rowSpvNeto(row) >= 1; }
+/* Umbral de comisión: 1€ de SPV Neto, con un pequeño margen (0,99) para que
+   un día que redondea a 1 pero en realidad es 0,99 (o muy cerca) también
+   cuente y se ponga en verde. */
+function rowQualifies(row){ return rowSpvNeto(row) >= 0.99; }
 
 const SPV_NOMBRE_CORTO = { Carolina:'Carol', Constanza:'Const.', Cecilia:'Ceci' };
 function spvNombreCorto(n){ return SPV_NOMBRE_CORTO[n] || n; }
@@ -3855,8 +3858,10 @@ async function openSpvComisiones(){
   const puedeVerPaula = spvPuedeVerComision();
   await loadSpvAcumulado();
 
-  // Todo se calcula y se muestra sobre el REV NETO (sin el 21% de IVA)
-  const filas = SPV_STAFF.filter(s=>d.qualTotals[s]>0)
+  // Todo se calcula y se muestra sobre el REV NETO (sin el 21% de IVA).
+  // Paula no entra en el reparto individual: ella ya se lleva su comisión
+  // aparte (% del total de tienda), que se muestra en el bloque de arriba.
+  const filas = SPV_STAFF.filter(s=>s!=='Paula' && d.qualTotals[s]>0)
     .sort((a,b)=>d.qualTotals[b]-d.qualTotals[a])
     .map(s=>`<tr>
       <td style="text-align:left;"><b>${spvNombreCorto(s)}</b></td>
@@ -3868,7 +3873,7 @@ async function openSpvComisiones(){
 
   // Listado de acumulado: verde si supera 10€, si no se muestra la suma arrastrada de meses anteriores.
   // Ignacio no se resetea nunca al llegar a 10€: acumula todo el año hasta diciembre.
-  const personasAcum = [...new Set([...Object.keys(SPV_ACUM_CACHE), ...SPV_STAFF.filter(s=>(d.qualTotals[s]||0)>0)])];
+  const personasAcum = [...new Set([...Object.keys(SPV_ACUM_CACHE), ...SPV_STAFF.filter(s=>(d.qualTotals[s]||0)>0)])].filter(s=>s!=='Paula');
   const filasAcum = personasAcum.map(persona=>{
     const led = SPV_ACUM_CACHE[persona] || {acumulado:0, ultimo_mes_procesado:null};
     const yaCerrado = led.ultimo_mes_procesado === spvSelectedMonth;
@@ -3928,19 +3933,33 @@ async function cerrarComisionesMes(){
   const d = spvComisionesMes;
   if(!d) return;
   if(!confirm('¿Cerrar las comisiones de '+spvMonthLabel(spvSelectedMonth)+'? Se suma la comisión de este mes al acumulado de cada persona y se paga (resetea a 0) a quien llegue o supere 10€. Ignacio no se resetea: sigue acumulando.')) return;
+  // Paula no entra en este reparto individual: su comisión es aparte (% del
+  // total de tienda) y no se acumula persona por persona.
   const personas = new Set([...Object.keys(SPV_ACUM_CACHE), ...SPV_STAFF.filter(s=>(d.qualTotals[s]||0)>0)]);
+  personas.delete('Paula');
+  const pagos = [];
   for(const persona of personas){
     const led = SPV_ACUM_CACHE[persona] || {acumulado:0, ultimo_mes_procesado:null};
     if(led.ultimo_mes_procesado === spvSelectedMonth) continue; // ya cerrado este mes, no duplicar
     const comisionMes = spvComisionMesDe(persona, d);
     let nuevoAcumulado = led.acumulado + comisionMes;
-    if(persona !== 'Ignacio' && nuevoAcumulado >= 10) nuevoAcumulado = 0;
+    if(persona !== 'Ignacio' && nuevoAcumulado >= 10){
+      pagos.push({persona, total: nuevoAcumulado});
+      nuevoAcumulado = 0;
+    }
     await sb.from('spv_comision_acumulado').upsert(
       { persona, acumulado: nuevoAcumulado, ultimo_mes_procesado: spvSelectedMonth, updated_at: new Date().toISOString() },
       { onConflict: 'persona' }
     );
   }
   await openSpvComisiones();
+  if(pagos.length){
+    const texto = pagos.sort((a,b)=>b.total-a.total)
+      .map(p=>`${spvNombreCorto(p.persona)}: ${p.total.toFixed(2)}€`).join('\n');
+    alert(`A pagar de ${spvMonthLabel(spvSelectedMonth)} (superan los 10€):\n\n${texto}`);
+  } else {
+    alert(`Nadie ha superado los 10€ en ${spvMonthLabel(spvSelectedMonth)}.`);
+  }
 }
 
 function computeSpvSummary(data){
@@ -3969,14 +3988,14 @@ function computeSpvSummary(data){
   }));
 
   const tbody = document.querySelector('#spv-summary-table tbody');
-  tbody.innerHTML = SPV_STAFF.filter(s=>qualTotals[s]>0).sort((a,b)=>qualTotals[b]-qualTotals[a]).map(s=>`
+  tbody.innerHTML = SPV_STAFF.filter(s=>s!=='Paula' && qualTotals[s]>0).sort((a,b)=>qualTotals[b]-qualTotals[a]).map(s=>`
     <tr>
       <td style="text-align:left;"><b>${s}</b></td>
       <td class="mono">${qualDays[s]} día${qualDays[s]!==1?'s':''}</td>
       <td class="mono">${(qualTotals[s]/1.21).toFixed(2)}€</td>
       <td class="mono" style="color:var(--success);font-weight:700;">${(qualTotals[s]/1.21*rate/100).toFixed(2)}€</td>
     </tr>`).join('')
-    || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado todavía al umbral de comisión (SPV Neto ≥ 1€).</td></tr>';
+    || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Ningún día ha llegado todavía al umbral de comisión (SPV Neto ≥ 0,99€).</td></tr>';
 
   // comisión de tienda (Paula): 2,5% del NETO (sin el 21%) de los días con comisión
   const qualRevBruto = qualifyingDays.reduce((a,r)=>a+rowRevBruto(r),0);
@@ -4019,7 +4038,7 @@ async function renderCommissionHistory(){
     const t = entry.totales || {};
     const paulaComm = t['_paula_tienda_commission'] || 0;
     const commDays = t['_commission_days'] || 0;
-    const staffEntries = Object.entries(t).filter(([k,v])=>!k.startsWith('_') && v>0).sort((a,b)=>b[1]-a[1]);
+    const staffEntries = Object.entries(t).filter(([k,v])=>!k.startsWith('_') && k!=='Paula' && v>0).sort((a,b)=>b[1]-a[1]);
     return `
     <div class="card" style="margin-bottom:12px;background:var(--panel);">
       <div class="flex-between" style="margin-bottom:10px;">
