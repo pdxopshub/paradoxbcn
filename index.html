@@ -6115,7 +6115,7 @@ async function openRecapHistory(){
         <td class="mono">${r.visitantes ?? '—'}</td>
         <td class="mono">${btq ? btq.toFixed(2)+'€' : '—'}</td>
         <td style="text-align:left;font-size:12px;">${obs ? esc(obs.slice(0,60))+(obs.length>60?'…':'') : '<span style="color:var(--text-dim);">—</span>'}</td>
-        <td><button class="btn btn-ghost btn-sm" onclick="closeModal(); recapGoDate('${r.fecha}')">Abrir</button></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="closeModal(); openRecapCapsule('${r.fecha}')">Abrir</button></td>
       </tr>`;
     }).join('') + '</tbody></table></div>';
 }
