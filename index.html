@@ -1766,6 +1766,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           Entrevistas
         </button>
+          <button class="navitem" data-view="curriculums">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+          Currículums
+        </button>
         </div>
         <div class="navgroup ng-com">
           <div class="navlabel">Comercial</div>
@@ -2036,6 +2040,43 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <tr><th style="width:26%;">Nombre</th><th>Prueba 1</th><th>Prueba 2</th><th>Total</th><th>Observaciones</th><th></th></tr>
           </thead><tbody></tbody></table></div>
         </div>
+      </div>
+
+      <!-- ============ CURRÍCULUMS ============ -->
+      <div class="view" id="view-curriculums">
+        <div class="card" style="margin-bottom:14px;">
+          <div class="flex-between" style="margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+            <div class="section-title" style="margin:0;">Base de datos de CVs</div>
+            <button class="btn btn-primary btn-sm" onclick="addCurriculumRow()">+ Añadir manualmente</button>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+            <div style="flex:1;min-width:200px;">
+              <label class="field-label">Buscar (nombre, email, asunto...)</label>
+              <input type="text" id="cv-search" placeholder="Buscar..." oninput="renderCurriculums()">
+            </div>
+            <div style="flex:0 0 170px;">
+              <label class="field-label">Estado</label>
+              <select id="cv-filter-estado" onchange="renderCurriculums()">
+                <option value="">Todos</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="contactado">Contactado</option>
+                <option value="entrevista">Entrevista</option>
+                <option value="contratado">Contratado</option>
+                <option value="descartado">Descartado</option>
+              </select>
+            </div>
+            <div style="flex:0 0 170px;">
+              <label class="field-label">Fuente</label>
+              <select id="cv-filter-fuente" onchange="renderCurriculums()">
+                <option value="">Todas</option>
+                <option value="formulario_web">Formulario web</option>
+                <option value="email_directo">Email directo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="cv-count" class="meta" style="margin-bottom:8px;color:var(--text-soft);font-size:12px;"></div>
+        <div id="curriculums-lista"></div>
       </div>
 
       <!-- ============ CAMBIOS DE TURNO ============ -->
@@ -3193,6 +3234,7 @@ const titles = {
   staff:['Staff','Equipo, accesos y NFCards'],
   ev:['Evaluaciones','Histórico por persona'],
   entrevistas:['Entrevistas','Candidatos'],
+  curriculums:['Currículums','Base de datos de CVs recibidos por email'],
   turnos:['Cambios de turno','Solicitudes e histórico'],
   pda:['PDA · Tareas semanales','Plan de acción por persona'],
   grupos:['Grupos','Reservas de grupos'],
@@ -3221,6 +3263,7 @@ function goView(v){
   if(v==='pda') renderPDA();
   if(v==='clmant') renderClMant();
   if(v==='entrevistas') renderEntrevistas();
+  if(v==='curriculums') renderCurriculums();
   if(v==='spv'){ renderSpvGrid(); renderCommissionHistory(); }
   if(v==='staff') renderStaffTable();
   if(v==='turnos') renderTurnos();
@@ -5890,7 +5933,7 @@ const BACKUP_TABLAS = ['profiles','spv_days','spv_entries','spv_commission_histo
   'staff_entradas','evaluaciones','entrevistas','turnos','pda_tasks','diego_tasks',
   'clmant_items','nfcards','reviews_cache','recap','reviews_history','pdxspot_kv',
   'chat_mensajes','vac_solicitudes','vac_bloqueos','vac_saldos','loomis_semanas',
-  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant','vac_bajas','checklist_materiales','grupos_contacto','checklist_mant_semana','uniformes_stock','spv_comision_acumulado','sugerencias_staff'];
+  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant','vac_bajas','checklist_materiales','grupos_contacto','checklist_mant_semana','uniformes_stock','spv_comision_acumulado','sugerencias_staff','curriculums'];
 
 async function descargarBackupHub(){
   const btn = document.getElementById('hub-backup-btn');
@@ -8720,6 +8763,96 @@ async function deleteSugerencia(id){
   if(!confirm('¿Eliminar esta sugerencia?')) return;
   await sb.from('sugerencias_staff').delete().eq('id', id);
   renderSugerencias();
+}
+
+/* ============================================================
+   CURRÍCULUMS — tabla curriculums
+   Base de datos de candidatos extraída del buzón de CVs (Outlook)
+   + altas manuales. Cada candidato tiene un estado de seguimiento
+   (pendiente/contactado/entrevista/contratado/descartado).
+   ============================================================ */
+let CV_CACHE = [];
+const CV_ESTADOS = {
+  pendiente:{label:'Pendiente', cls:'grey'},
+  contactado:{label:'Contactado', cls:'blue'},
+  entrevista:{label:'Entrevista', cls:'orange'},
+  contratado:{label:'Contratado', cls:'green'},
+  descartado:{label:'Descartado', cls:'red'}
+};
+async function fetchCurriculums(){
+  const { data, error } = await sb.from('curriculums').select('*').order('fecha',{ascending:false,nullsFirst:false}).order('created_at',{ascending:false});
+  if(error){ console.error(error); return []; }
+  return data || [];
+}
+function cvFmtFecha(f){
+  if(!f) return '—';
+  const dt = new Date(f+'T00:00:00');
+  if(isNaN(dt)) return '—';
+  return `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+async function renderCurriculums(){
+  CV_CACHE = await fetchCurriculums();
+  const cont = document.getElementById('curriculums-lista');
+  const countEl = document.getElementById('cv-count');
+  if(!cont) return;
+  const q = (document.getElementById('cv-search')?.value || '').trim().toLowerCase();
+  const fEstado = document.getElementById('cv-filter-estado')?.value || '';
+  const fFuente = document.getElementById('cv-filter-fuente')?.value || '';
+  let lista = CV_CACHE.slice();
+  if(fEstado) lista = lista.filter(c=>c.estado===fEstado);
+  if(fFuente) lista = lista.filter(c=>c.fuente===fFuente);
+  if(q){
+    lista = lista.filter(c=>{
+      const blob = [c.nombre,c.email,c.telefono,c.asunto,c.resumen,c.notas].filter(Boolean).join(' ').toLowerCase();
+      return blob.includes(q);
+    });
+  }
+  if(countEl) countEl.textContent = `${lista.length} de ${CV_CACHE.length} candidatos`;
+  if(!lista.length){
+    cont.innerHTML = '<div class="empty-state">No hay candidatos que coincidan con el filtro.</div>';
+    return;
+  }
+  cont.innerHTML = lista.map(c=>{
+    const estadoOpts = Object.keys(CV_ESTADOS).map(k=>`<option value="${k}" ${k===c.estado?'selected':''}>${CV_ESTADOS[k].label}</option>`).join('');
+    return `<div class="card" style="margin-bottom:10px;">
+      <div class="flex-between" style="align-items:flex-start;gap:10px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:220px;">
+          <div style="font-weight:700;font-size:14.5px;">${esc(c.nombre||'—')}</div>
+          <div class="meta" style="font-size:12px;color:var(--text-soft);margin-top:2px;">
+            ${c.email?esc(c.email):'sin email'} ${c.telefono?' · '+esc(c.telefono):''} · ${cvFmtFecha(c.fecha)}
+            ${c.fuente?' · <span class="pill grey" style="font-size:10px;">'+(c.fuente==='formulario_web'?'Formulario web':'Email directo')+'</span>':''}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select onchange="updateCurriculumEstado(${c.id}, this.value)" class="pill-select">${estadoOpts}</select>
+          <button class="row-del" title="Eliminar" onclick="deleteCurriculum(${c.id})">✕</button>
+        </div>
+      </div>
+      ${c.asunto?`<div style="font-size:12.5px;margin-top:8px;"><b>Asunto:</b> ${esc(c.asunto)}</div>`:''}
+      ${c.resumen?`<div style="font-size:12.5px;margin-top:4px;">${esc(c.resumen)}</div>`:''}
+      ${c.notas?`<div style="font-size:12px;margin-top:4px;color:var(--text-soft);"><b>Notas:</b> ${esc(c.notas)}</div>`:''}
+      ${c.adjuntos?`<div style="font-size:11.5px;margin-top:4px;color:var(--text-soft);">📎 ${esc(c.adjuntos)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+async function updateCurriculumEstado(id, estado){
+  await sb.from('curriculums').update({ estado, updated_at:new Date().toISOString() }).eq('id', id);
+  renderCurriculums();
+}
+async function deleteCurriculum(id){
+  if(!confirm('¿Eliminar este candidato de la base de datos?')) return;
+  await sb.from('curriculums').delete().eq('id', id);
+  renderCurriculums();
+}
+async function addCurriculumRow(){
+  const nombre = prompt('Nombre del candidato:');
+  if(!nombre || !nombre.trim()) return;
+  const email = prompt('Email (opcional):') || null;
+  const telefono = prompt('Teléfono (opcional):') || null;
+  const notas = prompt('Notas (opcional):') || null;
+  const { error } = await sb.from('curriculums').insert({ nombre: nombre.trim(), email, telefono, notas, fuente:'email_directo', fecha: todayIso() });
+  if(error){ alert('No se pudo añadir: '+error.message); return; }
+  renderCurriculums();
 }
 
 let diegoWeekOffset=0;
