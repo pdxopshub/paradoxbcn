@@ -2074,6 +2074,28 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               </select>
             </div>
           </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-top:10px;">
+            <div style="flex:1;min-width:200px;">
+              <label class="field-label">Idioma (y nivel opcional, ej. "inglés b2")</label>
+              <input type="text" id="cv-filter-idioma" placeholder="Ej: inglés, catalán nativo..." oninput="renderCurriculums()">
+            </div>
+            <div style="flex:0 0 170px;">
+              <label class="field-label">Cara al público</label>
+              <select id="cv-filter-carapublico" onchange="renderCurriculums()">
+                <option value="">Cualquiera</option>
+                <option value="si">Sí</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+            <div style="flex:0 0 100px;">
+              <label class="field-label">Edad mín.</label>
+              <input type="number" id="cv-filter-edad-min" min="0" placeholder="18" oninput="renderCurriculums()">
+            </div>
+            <div style="flex:0 0 100px;">
+              <label class="field-label">Edad máx.</label>
+              <input type="number" id="cv-filter-edad-max" min="0" placeholder="99" oninput="renderCurriculums()">
+            </div>
+          </div>
         </div>
         <div id="cv-count" class="meta" style="margin-bottom:8px;color:var(--text-soft);font-size:12px;"></div>
         <div id="curriculums-lista"></div>
@@ -8798,12 +8820,27 @@ async function renderCurriculums(){
   const q = (document.getElementById('cv-search')?.value || '').trim().toLowerCase();
   const fEstado = document.getElementById('cv-filter-estado')?.value || '';
   const fFuente = document.getElementById('cv-filter-fuente')?.value || '';
+  const fIdioma = (document.getElementById('cv-filter-idioma')?.value || '').trim().toLowerCase();
+  const fCarapub = document.getElementById('cv-filter-carapublico')?.value || '';
+  const fEdadMin = parseInt(document.getElementById('cv-filter-edad-min')?.value, 10);
+  const fEdadMax = parseInt(document.getElementById('cv-filter-edad-max')?.value, 10);
   let lista = CV_CACHE.slice();
   if(fEstado) lista = lista.filter(c=>c.estado===fEstado);
   if(fFuente) lista = lista.filter(c=>c.fuente===fFuente);
+  if(fIdioma) lista = lista.filter(c=>(c.idiomas||'').toLowerCase().includes(fIdioma));
+  if(fCarapub){
+    lista = lista.filter(c=>{
+      const v = (c.cara_publico||'').trim().toLowerCase();
+      if(fCarapub==='si') return v.startsWith('sí') || v.startsWith('si');
+      if(fCarapub==='no') return v.startsWith('no');
+      return true;
+    });
+  }
+  if(!isNaN(fEdadMin)) lista = lista.filter(c=>typeof c.edad==='number' && c.edad>=fEdadMin);
+  if(!isNaN(fEdadMax)) lista = lista.filter(c=>typeof c.edad==='number' && c.edad<=fEdadMax);
   if(q){
     lista = lista.filter(c=>{
-      const blob = [c.nombre,c.email,c.telefono,c.asunto,c.resumen,c.notas].filter(Boolean).join(' ').toLowerCase();
+      const blob = [c.nombre,c.email,c.telefono,c.asunto,c.resumen,c.notas,c.sinopsis,c.idiomas].filter(Boolean).join(' ').toLowerCase();
       return blob.includes(q);
     });
   }
@@ -8817,7 +8854,7 @@ async function renderCurriculums(){
     return `<div class="card" style="margin-bottom:10px;">
       <div class="flex-between" style="align-items:flex-start;gap:10px;flex-wrap:wrap;">
         <div style="flex:1;min-width:220px;">
-          <div style="font-weight:700;font-size:14.5px;">${esc(c.nombre||'—')}</div>
+          <div style="font-weight:700;font-size:14.5px;">${esc(c.nombre||'—')}${(typeof c.edad==='number')?` <span style="font-weight:400;color:var(--text-soft);font-size:12.5px;">(${c.edad} años)</span>`:''}</div>
           <div class="meta" style="font-size:12px;color:var(--text-soft);margin-top:2px;">
             ${c.email?esc(c.email):'sin email'} ${c.telefono?' · '+esc(c.telefono):''} · ${cvFmtFecha(c.fecha)}
             ${c.fuente?' · <span class="pill grey" style="font-size:10px;">'+(c.fuente==='formulario_web'?'Formulario web':'Email directo')+'</span>':''}
@@ -8827,6 +8864,11 @@ async function renderCurriculums(){
           <select onchange="updateCurriculumEstado(${c.id}, this.value)" class="pill-select">${estadoOpts}</select>
           <button class="row-del" title="Eliminar" onclick="deleteCurriculum(${c.id})">✕</button>
         </div>
+      </div>
+      ${c.sinopsis?`<div style="font-size:13px;margin-top:8px;font-style:italic;">${esc(c.sinopsis)}</div>`:''}
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:12px;">
+        ${c.idiomas?`<div><b>Idiomas:</b> ${esc(c.idiomas)}</div>`:''}
+        ${c.cara_publico?`<div><b>Cara al público:</b> ${esc(c.cara_publico)}</div>`:''}
       </div>
       ${c.asunto?`<div style="font-size:12.5px;margin-top:8px;"><b>Asunto:</b> ${esc(c.asunto)}</div>`:''}
       ${c.resumen?`<div style="font-size:12.5px;margin-top:4px;">${esc(c.resumen)}</div>`:''}
