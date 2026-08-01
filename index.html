@@ -4164,9 +4164,42 @@ async function fetchReviewHistory(tab){
   const { data, error } = await sb.from('reviews_history').select('*').eq('source', tab).order('created_at', {ascending:true});
   if(error){ console.error(error); return []; }
   return data.map(r=>({
+    iso: r.created_at,
     d: new Date(r.created_at).toLocaleDateString('es-ES',{day:'numeric',month:'short'}),
     rating: r.rating, count: r.review_count, rank: r.ranking || '—'
   }));
+}
+/* Lunes (00:00 mediodía para evitar líos de huso horario) de la semana a la
+   que pertenece una fecha ISO cualquiera. */
+function reviewWeekMonday(isoStr){
+  const dt = new Date(isoStr);
+  const dow = (dt.getDay()+6)%7; // 0 = lunes
+  dt.setDate(dt.getDate()-dow);
+  dt.setHours(12,0,0,0);
+  return dt;
+}
+/* Agrupa el histórico (ya viene ordenado ascendente por fecha) en semanas
+   lunes-domingo, quedándose con la ÚLTIMA lectura de cada semana como
+   representativa. Devuelve un array ordenado con, además, el % de cambio en
+   nº de reseñas respecto a la semana anterior (null si no hay semana previa). */
+function groupReviewHistoryByWeek(rows){
+  const semanas = {};
+  const orden = [];
+  rows.forEach(r=>{
+    const monday = reviewWeekMonday(r.iso);
+    const key = monday.toISOString().slice(0,10);
+    if(!semanas[key]){ semanas[key] = {monday, row:r}; orden.push(key); }
+    else { semanas[key].row = r; }
+  });
+  const weekly = orden.map(k=>semanas[k]);
+  weekly.forEach((w,i)=>{
+    const prevCount = i>0 ? weekly[i-1].row.count : null;
+    const curCount = w.row.count;
+    w.pctCambio = (prevCount!=null && prevCount>0 && curCount!=null)
+      ? ((curCount-prevCount)/prevCount*100) : null;
+    w.label = w.monday.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+  });
+  return weekly;
 }
 
 /* Campo numérico con botones − / + */
@@ -4209,22 +4242,28 @@ async function renderResenas(){
       const r = await sb.from('reviews_cache').select('*').eq('source', f.id).single();
       cache = r?.data ?? null;
     }catch(e){ cache=null; }
-    let rows = await fetchReviewHistory(f.id);
-    // orden por fecha descendente (más reciente arriba)
-    rows = (rows||[]).slice().sort((a,b)=> (b.iso||'').localeCompare(a.iso||''));
-    return {f, cache, rows};
+    const rows = await fetchReviewHistory(f.id);
+    // agrupado por semana (lunes-domingo), más reciente abajo
+    const weekly = groupReviewHistoryByWeek(rows||[]);
+    return {f, cache, weekly};
   }));
 
-  el.innerHTML = cols.map(({f,cache,rows})=>{
+  el.innerHTML = cols.map(({f,cache,weekly})=>{
     const rk = parseRanking(cache?.ranking);
     const updated = cache?.fetched_at
       ? new Date(cache.fetched_at).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})
       : '—';
-    const hist = rows.length ? `
+    const hist = weekly.length ? `
       <div class="rv-hist">
-        <div class="section-title" style="font-size:12px;margin:14px 0 8px;">Histórico <span class="hint">por fecha</span></div>
-        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Punt.</th><th>Nº</th>${f.id==='tripadvisor'?'<th>Ranking</th>':''}</tr></thead>
-        <tbody>${rows.map(r=>`<tr><td>${r.d}</td><td>${r.rating??'–'}</td><td class="mono">${r.count??'–'}</td>${f.id==='tripadvisor'?`<td class="mono" style="font-size:11px;">${r.rank??'–'}</td>`:''}</tr>`).join('')}</tbody>
+        <div class="section-title" style="font-size:12px;margin:14px 0 8px;">Histórico <span class="hint">por semana (lunes)</span></div>
+        <div class="table-wrap"><table><thead><tr><th>Semana</th><th>Punt.</th><th>Nº</th>${f.id==='tripadvisor'?'<th>Ranking</th>':''}<th>% mejora</th></tr></thead>
+        <tbody>${weekly.map(w=>{
+          const r = w.row;
+          const pct = w.pctCambio;
+          const pctHtml = pct==null ? '<span style="color:var(--text-dim);">—</span>'
+            : `<span class="${pct>=0?'pct-up':'pct-down'}">${pct>=0?'▲':'▼'} ${Math.abs(pct).toFixed(1)}%</span>`;
+          return `<tr><td>${esc(w.label)}</td><td>${r.rating??'–'}</td><td class="mono">${r.count??'–'}</td>${f.id==='tripadvisor'?`<td class="mono" style="font-size:11px;">${r.rank??'–'}</td>`:''}<td>${pctHtml}</td></tr>`;
+        }).join('')}</tbody>
         </table></div>
       </div>` : '<div style="font-size:12px;color:var(--text-dim);margin-top:14px;">Sin histórico todavía.</div>';
 
