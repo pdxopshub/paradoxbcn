@@ -918,7 +918,8 @@
   .gv-table td{padding:4px 5px;border-bottom:1px solid var(--line);text-align:center;}
   .gv-table tbody tr:hover td{background:rgba(0,0,0,.035);}
   /* Columna "Grupo" fija a la izquierda al hacer scroll horizontal */
-  #gm-table{table-layout:fixed;width:940px;}
+  #gm-table{table-layout:fixed;width:100%;}
+  .gv-table td{overflow:hidden;}
   #gc-table{table-layout:fixed;width:1529px;}
   /* Cabecera más alta, con títulos en dos líneas (ej. "Primer" / "contacto") */
   #gc-table th{padding:12px 8px;line-height:1.35;white-space:normal;vertical-align:middle;}
@@ -961,7 +962,7 @@
   .gm-tels div{border-bottom:1px dotted var(--line);padding:1px 0;}
   .gm-tels div:last-child{border-bottom:none;}
   .gm-obs{text-align:left!important;font-size:11.5px;color:var(--text-soft);
-    max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   /* tabla de leads */
   .lead-box{max-height:calc(100vh - 210px);}
   .lead-table td{padding:2px 3px;}
@@ -1125,10 +1126,11 @@
   .gcal-item{font-size:9.5px;font-weight:700;background:#BFE9D2;color:#0E6B45;
     border-radius:4px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .gcal-more{font-size:9px;color:var(--text-dim);font-weight:700;}
-  .gcal-row{display:flex;align-items:center;gap:10px;padding:7px 0;
+  .gcal-row{display:flex;align-items:center;gap:5px;padding:7px 0;
     border-bottom:1px solid var(--line);font-size:12.5px;}
   .gcal-row:last-child{border-bottom:none;}
-  .gcal-date{font-weight:800;color:var(--accent);min-width:96px;font-size:11.5px;text-transform:capitalize;}
+  .gcal-date{font-weight:800;color:var(--accent);min-width:70px;font-size:10.5px;text-transform:capitalize;flex-shrink:0;}
+  .gcal-row .pill{font-size:9.5px;padding:2px 6px;gap:3px;flex-shrink:0;white-space:nowrap;}
   /* ── Resumen: saludo integrado en la topbar, pequeño y sobrio ── */
   .topbar-greeting{font-size:16px;font-weight:800;color:#111318;
     flex:1;text-align:center;padding:0 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2508,13 +2510,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="gv-tablebox gv-tablebox-full">
             <table id="gm-table" class="gv-table no-filter">
               <thead><tr>
-                <th style="width:160px;text-align:center;">Grupo</th>
-                <th style="width:85px;text-align:center;">Tipo</th>
-                <th style="width:165px;text-align:center;">Email</th>
-                <th style="width:95px;text-align:center;">Teléfonos</th>
-                <th style="width:170px;text-align:center;">Contacto</th>
-                <th style="width:220px;text-align:center;">Comentarios</th>
-                <th style="width:32px;"></th>
+                <th style="width:14%;text-align:center;">Grupo</th>
+                <th style="width:11%;text-align:center;">Tipo</th>
+                <th style="width:19%;text-align:center;">Email</th>
+                <th style="width:10%;text-align:center;">Teléfonos</th>
+                <th style="width:18%;text-align:center;">Contacto</th>
+                <th style="width:25%;text-align:center;">Comentarios</th>
+                <th style="width:3%;"></th>
               </tr></thead>
               <tbody></tbody>
             </table>
@@ -2887,18 +2889,17 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <div class="section-title" style="margin:0;">Checklist de mantenimiento</div>
                 <div style="display:flex;gap:8px;align-items:center;">
                   <button class="btn btn-ghost btn-sm" onclick="clmantWeek(-1)">‹</button>
-                  <div class="section-title" style="margin:0;min-width:150px;text-align:center;font-size:12.5px;" id="clmant-week-label">Esta semana</div>
+                  <div class="section-title" style="margin:0;min-width:170px;text-align:center;font-size:12.5px;" id="clmant-week-label">Este periodo</div>
                   <button class="btn btn-ghost btn-sm" onclick="clmantWeek(1)">›</button>
                   <button class="btn btn-ghost btn-sm" onclick="clmantWeek(0)">Hoy</button>
-                  <span id="clmant-progreso" class="pill grey"></span>
                 </div>
               </div>
               <div class="table-wrap"><table id="clmant-table" class="no-filter"><thead>
-                <tr><th style="width:40px;">✓</th><th>Exhibición</th><th style="width:70px;">Reparar</th></tr>
+                <tr><th>Exhibición</th><th style="width:70px;">Reparar</th></tr>
               </thead><tbody></tbody></table></div>
             </div>
             <div class="card mat-layout-lista">
-              <div class="section-title" style="margin-bottom:12px;">A reparar esta semana</div>
+              <div class="section-title" style="margin-bottom:12px;">A reparar este periodo</div>
               <div id="clmant-lista-reparar" class="dash-warn-list"></div>
             </div>
           </div>
@@ -2971,14 +2972,18 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <div class="view" id="view-sugerencias">
         <div class="card" style="max-width:640px;margin-bottom:14px;">
           <div class="section-title" style="margin-bottom:12px;">Nueva sugerencia del buzón</div>
-          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
-            <div style="flex:1;min-width:260px;">
-              <label class="field-label">Texto de la sugerencia</label>
-              <textarea id="sug-texto" rows="2" placeholder="Transcribe aquí lo que ha dejado el staff en el buzón..."></textarea>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="max-width:220px;">
+              <label class="field-label">Mes</label>
+              <select id="sug-mes"></select>
             </div>
-            <div style="flex:0 0 150px;">
-              <label class="field-label">Fecha</label>
-              <input type="date" id="sug-fecha">
+            <div>
+              <label class="field-label">Título</label>
+              <input type="text" id="sug-titulo" placeholder="Título breve de la sugerencia">
+            </div>
+            <div>
+              <label class="field-label">Explicación</label>
+              <textarea id="sug-texto" rows="3" placeholder="Explica con más detalle lo que ha dejado el staff en el buzón..."></textarea>
             </div>
             <div><button class="btn btn-primary" onclick="addSugerencia()">Añadir</button></div>
           </div>
@@ -4695,7 +4700,7 @@ function staffColumns(){
   }
   if(staffView==='operativa'){
     return {
-      grupos: [ {span:4, cls:'grp-none', label:''}, {span:4, cls:'grp-nfc', label:'NFCARDS'}, {span:2, cls:'grp-none', label:''} ],
+      grupos: [ {span:4, cls:'grp-none', label:''}, {span:4, cls:'grp-nfc', label:'NFCARDS <a href="https://track.paradoxmuseum.com/barcelona-nfc-card-statistics/?date_range=all_time" target="_blank" rel="noopener" style="color:#1d5fd6;font-weight:600;text-decoration:underline;margin-left:6px;">Web seguimiento NFCards</a>'}, {span:2, cls:'grp-none', label:''} ],
       cols: [ nombre,
         {key:'horas', th:'Horas', sort:'horas', w:78, cell:s=>
           `<td class="horas-td"><span class="horas-cell"><input class="cell-input" type="number" min="0" value="${s.horas??8}" data-id="${s.id}" data-field="horas"><b>h</b></span></td>`},
@@ -6481,10 +6486,10 @@ async function openRecapCapsule(fecha){
   if(!r) return;
   recapModalFecha = fecha;
   const d = new Date(fecha+'T12:00:00');
-  const cerradoPor = r.cerrado_por ? ` · Cerrado por ${esc(r.cerrado_por)}` : '';
+  const cerradoPorTxt = r.cerrado_por ? `Cerrado por ${esc(r.cerrado_por)}` : (r.autor ? `Cerrado por ${esc(r.autor)}` : 'Recap');
   document.getElementById('rvm-title').innerHTML = `
     <div class="rc-inf-fecha">${d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</div>
-    <div class="rc-inf-sub">${r.autor?`Recap de ${esc(r.autor)}`:'Recap'}${cerradoPor}</div>
+    <div class="rc-inf-sub">${cerradoPorTxt}</div>
   `;
   document.getElementById('rvm-body').innerHTML = await buildRecapInformeHtml(r);
   document.getElementById('recap-view-modal').classList.add('open');
@@ -7709,12 +7714,12 @@ async function deleteLead(id){
 function gcalRowHtml(l, hoy){
   const d = new Date(l.travel_date+'T12:00:00');
   const dias = Math.round((d - new Date(hoy+'T12:00:00'))/86400000);
-  const cuando = dias===0 ? 'Hoy' : dias===1 ? 'Mañana' : `En ${dias} días`;
+  const cuando = dias===0 ? 'Hoy' : dias===1 ? 'Mañana' : `${dias}d`;
   return `<div class="gcal-row">
     <span class="gcal-date">${d.toLocaleDateString('es-ES',{weekday:'short',day:'2-digit',month:'short'})}</span>
     <b title="${esc(l.grupo_nombre)}" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(l.grupo_nombre)}</b>
     <span class="pill grey">${esc(l.hora)||'—'}</span>
-    <span class="pill blue">${l.pax||'?'} pax</span>
+    <span class="pill blue">${l.pax||'?'}p</span>
     <span class="pill ${dias<=1?'green':'grey'}">${cuando}</span>
   </div>`;
 }
@@ -8726,8 +8731,18 @@ async function fetchSugerencias(){
   return data || [];
 }
 async function renderSugerencias(){
-  const fechaEl = document.getElementById('sug-fecha');
-  if(fechaEl && !fechaEl.value) fechaEl.value = todayIso();
+  const mesEl = document.getElementById('sug-mes');
+  if(mesEl && !mesEl.dataset.filled){
+    const hoy = new Date();
+    const opts = [];
+    for(let d=-6; d<=2; d++){
+      const dt = new Date(hoy.getFullYear(), hoy.getMonth()+d, 1);
+      const val = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+      opts.push(`<option value="${val}"${d===0?' selected':''}>${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}</option>`);
+    }
+    mesEl.innerHTML = opts.join('');
+    mesEl.dataset.filled = '1';
+  }
   SUGERENCIAS_CACHE = await fetchSugerencias();
   const cont = document.getElementById('sugerencias-lista');
   if(!cont) return;
@@ -8756,7 +8771,7 @@ async function renderSugerencias(){
         <div class="checkbox-row ${s.mejorado?'done':''}" style="align-items:flex-start;">
           <input type="checkbox" style="margin-top:2px;" ${s.mejorado?'checked':''} onchange="toggleSugerenciaMejorada(${s.id}, this.checked)" title="Marcar como mejorado">
           <div style="flex:1;">
-            <div class="txt ${s.mejorado?'done':''}">${esc(s.texto)}</div>
+            <div class="txt ${s.mejorado?'done':''}">${s.titulo?`<b>${esc(s.titulo)}</b><br>`:''}${esc(s.texto)}</div>
             <div class="meta" style="font-size:11px;color:var(--text-soft);margin-top:2px;">${fmtDateEs(s.fecha)}</div>
           </div>
           <button class="row-del" title="Eliminar" onclick="deleteSugerencia(${s.id})">✕</button>
@@ -8769,12 +8784,15 @@ function fmtDateEs(iso){
   return `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`;
 }
 async function addSugerencia(){
+  const titulo = document.getElementById('sug-titulo').value.trim();
   const texto = document.getElementById('sug-texto').value.trim();
-  if(!texto) return;
-  const fecha = document.getElementById('sug-fecha').value || todayIso();
-  const { error } = await sb.from('sugerencias_staff').insert({ texto, fecha, mejorado:false });
+  if(!titulo && !texto) return;
+  const mesVal = document.getElementById('sug-mes')?.value || `${new Date().getFullYear()}-${String(new Date().getMonth()+1).padStart(2,'0')}`;
+  const fecha = `${mesVal}-01`;
+  const { error } = await sb.from('sugerencias_staff').insert({ texto, titulo: titulo||null, fecha, mejorado:false });
   if(error){ alert('No se pudo añadir la sugerencia: '+error.message); return; }
   document.getElementById('sug-texto').value = '';
+  document.getElementById('sug-titulo').value = '';
   renderSugerencias();
 }
 async function toggleSugerenciaMejorada(id, mejorado){
@@ -9025,10 +9043,19 @@ let CLMANT_ITEMS = [];      // lista maestra (fija)
 let CLMANT_CACHE = [];      // items fusionados con el estado de la semana mostrada
 let clmantWeekOffset = 0;
 function clmantWeekRange(offset){
-  const m=new Date(); m.setDate(m.getDate()-((m.getDay()+6)%7)+offset*7);
-  const s=new Date(m); s.setDate(s.getDate()+6);
+  // Periodo de 15 días (en vez de semanal), anclado a los días 1 y 16 de cada mes.
+  const hoy = new Date();
+  let base = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()<=15 ? 1 : 16);
+  for(let i=0;i<Math.abs(offset);i++){
+    if(offset>0){
+      base = base.getDate()===1 ? new Date(base.getFullYear(), base.getMonth(), 16) : new Date(base.getFullYear(), base.getMonth()+1, 1);
+    } else {
+      base = base.getDate()===16 ? new Date(base.getFullYear(), base.getMonth(), 1) : new Date(base.getFullYear(), base.getMonth()-1, 16);
+    }
+  }
+  const s = base.getDate()===1 ? new Date(base.getFullYear(), base.getMonth(), 15) : new Date(base.getFullYear(), base.getMonth()+1, 0);
   const fmt=d=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
-  return {lunes:m.toISOString().slice(0,10), label:`${fmt(m)} – ${fmt(s)}`};
+  return {lunes:base.toISOString().slice(0,10), label:`${fmt(base)} – ${fmt(s)}`};
 }
 function clmantWeek(delta){
   if(delta===0) clmantWeekOffset=0; else clmantWeekOffset+=delta;
@@ -9037,17 +9064,17 @@ function clmantWeek(delta){
 async function renderChecklistMant(){
   const {lunes,label} = clmantWeekRange(clmantWeekOffset);
   const lbl = document.getElementById('clmant-week-label');
-  if(lbl) lbl.textContent = clmantWeekOffset===0 ? `Esta semana (${label})` : label;
+  if(lbl) lbl.textContent = clmantWeekOffset===0 ? `Este periodo (${label})` : label;
 
   const tbody = document.querySelector('#clmant-table tbody');
   if(!tbody) return;
   if(!CLMANT_ITEMS.length){
     const { data, error } = await sb.from('checklist_mant').select('id,item,orden').order('orden');
-    if(error){ tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
+    if(error){ tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
     CLMANT_ITEMS = data || [];
   }
   const { data: semanaData, error: semanaErr } = await sb.from('checklist_mant_semana').select('*').eq('week', lunes);
-  if(semanaErr){ tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--danger);">Error: ${semanaErr.message}</td></tr>`; return; }
+  if(semanaErr){ tbody.innerHTML = `<tr><td colspan="2" style="text-align:center;color:var(--danger);">Error: ${semanaErr.message}</td></tr>`; return; }
   const semanaMap = {};
   (semanaData||[]).forEach(r=>{ semanaMap[r.item_id]=r; });
 
@@ -9057,18 +9084,12 @@ async function renderChecklistMant(){
   });
 
   tbody.innerHTML = CLMANT_CACHE.map(it=>`
-    <tr class="${it.checked?'clmant-ok':''}">
-      <td style="text-align:center;">
-        <button class="clmant-chk ${it.checked?'on':''}" onclick="toggleChecklistMant(${it.id})" title="Marcar/desmarcar">${it.checked?'✓':''}</button>
-      </td>
+    <tr>
       <td class="clmant-item" style="font-weight:${it.item.startsWith('CAJA')?'800':'600'};">${esc(it.item)}</td>
       <td style="text-align:center;">
         <button class="clmant-chk rep ${it.necesita_reparacion?'on':''}" onclick="onClickReparar(${it.id})" title="${it.necesita_reparacion?(it.nota?esc(it.nota):'Marcado para reparar')+' · clic para quitar':'Marcar si necesita reparación'}">${it.necesita_reparacion?'⚠':''}</button>
       </td>
     </tr>`).join('');
-  const hechos = CLMANT_CACHE.filter(x=>x.checked).length;
-  const prog = document.getElementById('clmant-progreso');
-  if(prog) prog.textContent = `${hechos} / ${CLMANT_CACHE.length}`;
   renderClmantListaReparar();
   renderDashReparaciones();
 }
