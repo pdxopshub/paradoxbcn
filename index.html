@@ -636,6 +636,12 @@
   @media(max-width:1150px){.turnos-layout{grid-template-columns:1fr;}}
   .turnos-left{min-width:0;}
   .turnos-right{min-width:0;position:sticky;top:8px;}
+  /* Cambios por persona y mes: tabla compacta */
+  #turnos-por-mes-table{font-size:11.5px;}
+  #turnos-por-mes-table th,#turnos-por-mes-table td{padding:4px 8px;}
+  #turnos-por-mes-table th.tn-mes-actual{color:var(--accent);}
+  #turnos-por-mes-table td.tn-mes-actual{background:var(--accent-soft);}
+  #turnos-por-mes-table td.tn-alert{background:var(--danger-soft);color:var(--danger);font-weight:800;}
   .tcal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:0;}
   .tcal-wrap .tcal-month:first-child{padding-right:18px;border-right:2px solid var(--line-strong);}
   .tcal-wrap .tcal-month:last-child{padding-left:18px;}
@@ -1369,6 +1375,9 @@
 
   .checkbox-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;margin-bottom:9px;background:var(--panel);}
   .checkbox-row.done{background:var(--success-soft);border-color:#1E5039;}
+  .diego-handle{flex-shrink:0;cursor:grab;color:var(--text-dim);font-size:15px;line-height:1;letter-spacing:-1px;}
+  .diego-row.dragging{opacity:.45;}
+  .diego-row.drag-over{outline:2px dashed var(--accent);outline-offset:-2px;}
   .checkbox-row input[type=checkbox]{width:20px;height:20px;flex-shrink:0;accent-color:var(--success);cursor:pointer;}
   .checkbox-row .txt{flex:1;font-size:14.5px;font-weight:600;}
   .checkbox-row .txt.done{text-decoration:line-through;color:var(--text-soft);}
@@ -2043,14 +2052,14 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <div class="card" style="margin-bottom:14px;">
               <div class="section-title">Solicitudes activas</div>
               <div class="table-wrap"><table id="turnos-active-table"><thead>
-                <tr><th>Staff 1</th><th>Staff 2</th><th>Motivo</th><th>Estado</th><th></th></tr>
+                <tr><th>Staff 1</th><th>Staff 2</th><th>Motivo</th><th>Solicitado el</th><th>Estado</th><th></th></tr>
               </thead><tbody></tbody></table></div>
             </div>
 
             <div class="card" style="margin-bottom:14px;">
               <div class="section-title">Histórico</div>
               <div class="table-wrap"><table id="turnos-history-table"><thead>
-                <tr><th>Staff 1</th><th>Staff 2</th><th>Motivo</th><th>Estado</th><th></th></tr>
+                <tr><th>Staff 1</th><th>Staff 2</th><th>Motivo</th><th>Solicitado el</th><th>Estado</th><th></th></tr>
               </thead><tbody></tbody></table></div>
             </div>
 
@@ -2382,13 +2391,24 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               </a>
             </div>
 
-            <div class="card">
+            <div class="card" style="margin-bottom:12px;">
               <div class="section-title" style="margin-bottom:10px;">Sobre de Loomis</div>
               <ul class="lm-info">
                 <li><span class="lm-arrow">←</span> Black and White Museum S.L</li>
                 <li><span class="lm-arrow">→</span> Paradox Museum Barcelona</li>
                 <li><span class="lm-eur">€</span> Poner cantidad de cash de la semana</li>
                 <li><span class="lm-cal">📅</span> Poner fecha de recogida</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <div class="section-title" style="margin-bottom:10px;">Pantallazo SumUp</div>
+              <ul class="lm-info">
+                <li><span class="lm-arrow">1</span> Categoría de Informes</li>
+                <li><span class="lm-arrow">2</span> Descarga de informes</li>
+                <li><span class="lm-arrow">3</span> Fecha (inicio - fin)</li>
+                <li><span class="lm-arrow">4</span> INGRESOS</li>
+                <li><span class="lm-arrow">5</span> Descargar</li>
               </ul>
             </div>
           </div>
@@ -4889,17 +4909,13 @@ function buildTurnoBlock(prefix, label, staffNames){
   return `
     <div class="turno-form-block" style="border:1px solid var(--line);border-radius:9px;padding:12px;background:var(--panel);">
       <div style="font-size:11.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">${label}</div>
-      <div style="display:grid;grid-template-columns:1.6fr 1fr 1.15fr 0.55fr;gap:10px;align-items:end;">
+      <div style="display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:10px;align-items:end;">
         <div><label class="field-label">Staff</label><select id="${prefix}-staff">${staffNames.map(n=>`<option value="${n}">${n}</option>`).join('') || '<option value="">Añade staff primero</option>'}</select></div>
         <div style="display:flex;gap:5px;">
           <div style="flex:1;min-width:60px;"><label class="field-label">Hora</label><select id="${prefix}-hour" style="padding-right:22px;">${TURNO_HOURS.map(h=>`<option value="${h}">${h}h</option>`).join('')}</select></div>
           <div style="flex:1;min-width:60px;"><label class="field-label">Min.</label><select id="${prefix}-min" style="padding-right:22px;">${TURNO_MINUTES.map(m=>`<option value="${m}">${m}</option>`).join('')}</select></div>
         </div>
-        <div style="display:flex;gap:6px;">
-          <div style="flex:0 0 52px;"><label class="field-label">Día</label><select id="${prefix}-day">${Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}">${d}</option>`).join('')}</select></div>
-          <div style="flex:1;min-width:104px;"><label class="field-label">Mes</label><select id="${prefix}-month">${TURNO_MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('')}</select></div>
-        </div>
-        <div><label class="field-label">Año</label><input id="${prefix}-year" type="number" value="2026" style="width:64px;"></div>
+        <div><label class="field-label">Fecha del turno</label><input type="date" id="${prefix}-fecha" value="${todayIso()}"></div>
       </div>
     </div>`;
 }
@@ -4913,15 +4929,12 @@ function readTurnoBlock(prefix){
   const staff = document.getElementById(prefix+'-staff').value;
   const hour = document.getElementById(prefix+'-hour').value;
   const min = document.getElementById(prefix+'-min').value;
-  const day = document.getElementById(prefix+'-day').value.padStart(2,'0');
-  const monthIdx = parseInt(document.getElementById(prefix+'-month').value,10);
-  const monthName = TURNO_MONTHS[monthIdx-1];
-  const year = document.getElementById(prefix+'-year').value;
+  const fechaIso = document.getElementById(prefix+'-fecha').value;
+  const dt = fechaIso ? new Date(fechaIso+'T00:00:00') : null;
   return {
     staff, hora:`${hour}:${min}`,
-    fechaIso: `${year}-${String(monthIdx).padStart(2,'0')}-${day}`,
-    fechaLabel: `${parseInt(day,10)} ${monthName} ${year}`,
-    month: `${monthName} ${year}`
+    fechaIso,
+    fechaLabel: dt ? `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}` : '—',
   };
 }
 async function renderTurnos(){
@@ -4936,24 +4949,31 @@ async function renderTurnos(){
 
   function fmtDate(d){ const dt = new Date(d+'T00:00:00'); return `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`; }
   function personCell(staff,hora,fecha){ return `<b>${staff}</b><div class="meta" style="font-size:11.5px;color:var(--text-soft);">${hora} · ${fmtDate(fecha)}</div>`; }
+  // Día en que se PIDIÓ el cambio (created_at), no el día del turno en sí
+  function pedidoElCell(t){
+    const dt = t.created_at ? new Date(t.created_at) : null;
+    return (dt && !isNaN(dt)) ? `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}` : '—';
+  }
 
   activeTbody.innerHTML = active.length ? active.map(t=>`
     <tr>
       <td>${personCell(t.p1_staff,t.p1_hora,t.p1_fecha)}</td><td>${personCell(t.p2_staff,t.p2_hora,t.p2_fecha)}</td><td style="color:var(--text-soft);">${t.motivo||'—'}</td>
+      <td style="color:var(--text-soft);">${pedidoElCell(t)}</td>
       <td><span class="pill amber">Pendiente</span></td>
       <td style="display:flex;gap:6px;">
         <button class="btn btn-ghost btn-sm" onclick="resolveTurno(${t.id},'Aprobado')">Aprobar</button>
         <button class="btn btn-ghost btn-sm" onclick="resolveTurno(${t.id},'Rechazado')">Rechazar</button>
         <button class="row-del" title="Eliminar" onclick="deleteTurno(${t.id})">✕</button>
       </td>
-    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-soft);">Sin solicitudes activas.</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-soft);">Sin solicitudes activas.</td></tr>';
 
   histTbody.innerHTML = history.length ? history.map(t=>`
     <tr>
       <td>${personCell(t.p1_staff,t.p1_hora,t.p1_fecha)}</td><td>${personCell(t.p2_staff,t.p2_hora,t.p2_fecha)}</td><td style="color:var(--text-soft);">${t.motivo||'—'}</td>
+      <td style="color:var(--text-soft);">${pedidoElCell(t)}</td>
       <td><span class="pill ${t.estado==='Aprobado'?'green':'red'}">${t.estado}</span></td>
       <td><button class="row-del" title="Eliminar" onclick="deleteTurno(${t.id})">✕</button></td>
-    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-soft);">Todavía no hay histórico.</td></tr>';
+    </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--text-soft);">Todavía no hay histórico.</td></tr>';
 
   renderTurnosPorMes(list, fmtDate);
 }
@@ -5070,7 +5090,6 @@ async function renderTurnosPorMes(list){
   renderTurnosCalendar(list);
   const staffList = await fetchStaff();
   const names = staffList.map(s=>s.nombre);
-  function monthLabel(d){ const dt = new Date(d+'T00:00:00'); return `${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`; }
   // Se cuenta SOLO a quien CEDE el turno (p1), y en el mes en que lo PIDE
   // (fecha de la solicitud), no en el mes del turno.
   function monthOfRequest(t){
@@ -5078,21 +5097,32 @@ async function renderTurnosPorMes(list){
     if(isNaN(base)) return null;
     return `${TURNO_MONTHS[base.getMonth()]} ${base.getFullYear()}`;
   }
-  const months = [...new Set(list.map(monthOfRequest).filter(Boolean))];
+  // Siempre 3 meses fijos respecto a hoy: el anterior, el actual y el siguiente
+  // (no depende de qué datos haya, para que el mes anterior/siguiente se vean
+  // aunque todavía no tengan ningún cambio registrado).
+  const hoy = new Date();
+  const months = [-1,0,1].map(delta=>{
+    const d = new Date(hoy.getFullYear(), hoy.getMonth()+delta, 1);
+    return `${TURNO_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  });
+  const mesActual = months[1];
   const counts = {};
   names.forEach(n=>{ counts[n] = {}; months.forEach(m=>counts[n][m]=0); });
   list.forEach(t=>{
     const staff = t.p1_staff;
     const m = monthOfRequest(t);
-    if(!staff || !m) return;
+    if(!staff || !m || !months.includes(m)) return;
     if(!counts[staff]) counts[staff] = {};
     counts[staff][m] = (counts[staff][m]||0)+1;
   });
   const tbody = document.querySelector('#turnos-por-mes-table tbody');
   const thead = document.querySelector('#turnos-por-mes-table thead');
-  thead.innerHTML = `<tr><th>Staff</th>${months.map(m=>`<th>${m}</th>`).join('')}${months.length?'':'<th>Cambios</th>'}</tr>`;
+  thead.innerHTML = `<tr><th>Staff</th>${months.map(m=>`<th${m===mesActual?' class="tn-mes-actual"':''}>${m}</th>`).join('')}</tr>`;
   tbody.innerHTML = names.length ? names.map(n=>`
-    <tr><td><b>${n}</b></td>${months.length? months.map(m=>`<td class="mono">${counts[n][m]||0}</td>`).join('') : '<td class="mono">0</td>'}</tr>`).join('') : '<tr><td style="text-align:center;color:var(--text-soft);">Añade staff primero.</td></tr>';
+    <tr><td><b>${n}</b></td>${months.map(m=>{
+      const c = counts[n][m]||0;
+      return `<td class="mono${c>=2?' tn-alert':''}${m===mesActual?' tn-mes-actual':''}">${c}</td>`;
+    }).join('')}</tr>`).join('') : '<tr><td style="text-align:center;color:var(--text-soft);">Añade staff primero.</td></tr>';
 }
 async function addTurnoRequest(){
   const p1 = readTurnoBlock('tb1');
@@ -6256,7 +6286,7 @@ async function maybeAutoOpenRecapInforme(){
    DIEGO — tabla diego_tasks
    ============================================================ */
 async function fetchDiegoTasks(weekIso){
-  let q=sb.from('diego_tasks').select('*').order('created_at');
+  let q=sb.from('diego_tasks').select('*').order('orden',{ascending:true,nullsFirst:false}).order('created_at');
   if(weekIso) q=q.eq('week',weekIso);
   const {data,error}=await q;
   if(error){ console.error(error); return []; }
@@ -8425,18 +8455,68 @@ function diegoWeek(delta){
   if(delta===0) diegoWeekOffset=0; else diegoWeekOffset+=delta;
   renderDiego();
 }
+let DIEGO_TASKS = [];
 async function renderDiego(){
   const {lunes,label}=diegoWeekRange(diegoWeekOffset);
   const lbl=document.getElementById('diego-week-label');
   if(lbl) lbl.textContent=diegoWeekOffset===0?`Esta semana (${label})`:label;
   const tasks = await fetchDiegoTasks(lunes);
+  await diegoNormalizeOrden(tasks);
+  DIEGO_TASKS = tasks;
+  renderDiegoList();
+}
+/* Pinta la lista a partir de DIEGO_TASKS (sin volver a pedir datos a Supabase);
+   la usa tanto renderDiego() como el drag & drop al soltar una tarea. */
+function renderDiegoList(){
   const list = document.getElementById('diego-list');
-  list.innerHTML = tasks.length ? tasks.map(t=>`
-    <div class="checkbox-row ${t.done?'done':''}" style="display:flex;align-items:center;gap:8px;">
+  if(!list) return;
+  list.innerHTML = DIEGO_TASKS.length ? DIEGO_TASKS.map((t,i)=>`
+    <div class="checkbox-row diego-row ${t.done?'done':''}" draggable="true" data-idx="${i}"
+         ondragstart="diegoDragStart(event)" ondragover="diegoDragOver(event)"
+         ondragleave="diegoDragLeave(event)" ondrop="diegoDrop(event)" ondragend="diegoDragEnd(event)">
+      <span class="diego-handle" title="Arrastra para reordenar">⠿</span>
       <input type="checkbox" ${t.done?'checked':''} onchange="toggleDiegoTask(${t.id}, this.checked)">
       <div class="txt ${t.done?'done':''}" style="flex:1;">${esc(t.title)}</div>
       <button class="btn btn-ghost btn-sm" title="Eliminar tarea" onclick="deleteDiegoTask(${t.id})">✕</button>
     </div>`).join('') : '<div class="empty-state">Sin tareas de mantenimiento esta semana. Añade la primera arriba.</div>';
+}
+/* Asegura que todas las tareas tengan un valor de "orden" (0..n-1) sin huecos,
+   respetando el orden ya guardado. Las que no tenían orden (tareas antiguas o
+   recién creadas) se colocan al final, en el orden en que se crearon. */
+async function diegoNormalizeOrden(tasks){
+  const updates = [];
+  tasks.forEach((t,i)=>{ if(t.orden !== i){ t.orden = i; updates.push(sb.from('diego_tasks').update({orden:i}).eq('id', t.id)); } });
+  if(updates.length) await Promise.all(updates);
+}
+/* ---- Drag & drop para reordenar las tareas a mano ---- */
+let diegoDragIdx = null;
+function diegoDragStart(e){
+  diegoDragIdx = parseInt(e.currentTarget.dataset.idx,10);
+  e.dataTransfer.effectAllowed = 'move';
+  e.currentTarget.classList.add('dragging');
+}
+function diegoDragOver(e){
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  e.currentTarget.classList.add('drag-over');
+}
+function diegoDragLeave(e){
+  e.currentTarget.classList.remove('drag-over');
+}
+async function diegoDrop(e){
+  e.preventDefault();
+  const row = e.currentTarget;
+  row.classList.remove('drag-over');
+  const targetIdx = parseInt(row.dataset.idx,10);
+  if(diegoDragIdx===null || targetIdx===diegoDragIdx) return;
+  const moved = DIEGO_TASKS.splice(diegoDragIdx,1)[0];
+  DIEGO_TASKS.splice(targetIdx,0,moved);
+  diegoDragIdx = null;
+  renderDiegoList();
+  await diegoNormalizeOrden(DIEGO_TASKS);
+}
+function diegoDragEnd(){
+  document.querySelectorAll('.diego-row').forEach(r=>r.classList.remove('dragging','drag-over'));
 }
 async function toggleDiegoTask(id, done){
   await sb.from('diego_tasks').update({done}).eq('id', id);
