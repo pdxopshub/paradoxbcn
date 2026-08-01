@@ -1423,6 +1423,28 @@
   .recap-saved-banner{display:none;background:var(--success-soft);border:1px solid var(--success);color:var(--success);border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:700;margin-top:8px;}
   .recap-saved-banner.show{display:block;}
 
+  /* --- Informe de Recap (vista de solo lectura, tipo informe) --- */
+  .rc-inf-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px;}
+  .rc-inf-head .rc-inf-fecha{font-size:16px;font-weight:800;text-transform:capitalize;}
+  .rc-inf-head .rc-inf-sub{font-size:12px;color:var(--text-soft);margin-top:3px;}
+  .rc-inf-badge{flex-shrink:0;background:var(--accent-soft);color:var(--accent-dark);font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;}
+  .rc-inf-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+  .rc-inf-stat{background:var(--panel);border-radius:9px;padding:9px 11px;min-width:0;}
+  .rc-inf-stat .l{font-size:10.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px;}
+  .rc-inf-stat .v{font-size:18px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .rc-inf-stat .s{font-size:10.5px;color:var(--text-dim);margin-top:3px;}
+  .rc-inf-section{margin-bottom:14px;}
+  .rc-inf-section-title{font-size:11.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+  .rc-inf-block{background:var(--panel);border-radius:9px;padding:2px 12px;}
+  .rc-inf-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .rc-inf-row:last-child{border-bottom:none;}
+  .rc-inf-row .v{font-weight:700;}
+  .rc-inf-cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .rc-inf-obs{background:var(--panel);border-radius:9px;padding:10px 12px;display:flex;flex-direction:column;gap:7px;}
+  .rc-inf-obs .rc-inf-obs-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.4;}
+  .rc-inf-obs .rc-inf-obs-row .dot-b{flex-shrink:0;width:5px;height:5px;border-radius:50%;background:var(--text-dim);margin-top:7px;}
+  .rc-inf-empty{color:var(--text-dim);font-size:12.5px;font-style:italic;}
+
   /* weekly calendar — más amplio, más pulido */
   .dash-week-card{background:linear-gradient(180deg,var(--panel) 0%,var(--surface) 100%);}
   .day-col{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 13px;min-height:168px;
@@ -1701,6 +1723,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <button class="navitem" data-view="recap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>
           Recap
+          <span class="dot" id="recap-dot"></span>
         </button>
           <button class="navitem" data-view="turnos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
@@ -2847,8 +2870,11 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
 <!-- RECAP VIEW MODAL -->
 <div class="modal-overlay" id="recap-view-modal">
-  <div class="modal-box" style="max-width:520px;">
-    <h3 id="rvm-title">Recap</h3>
+  <div class="modal-box" style="max-width:680px;max-height:86vh;overflow-y:auto;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:2px;">
+      <div id="rvm-title">Recap</div>
+      <button class="icon-btn" onclick="closeRecapViewModal()" title="Cerrar">✕</button>
+    </div>
     <div id="rvm-body" style="font-size:13.5px;line-height:1.7;"></div>
     <div class="mfoot">
       <button class="btn btn-ghost" onclick="closeRecapViewModal()">Cerrar</button>
@@ -3125,7 +3151,7 @@ function goView(v){
   if(v==='cambiobanco') renderCambioBanco();
   if(v==='uniformes') renderUniformes();
   if(v==='dashboard'){ refreshDashboard(); renderDashGrupos(); }
-  if(v==='recap') renderRecap();
+  if(v==='recap'){ renderRecap(); maybeAutoOpenRecapInforme(); }
   if(v==='resenas') renderResenas();
   if(v==='marketing') renderMarketing();
   if(v==='loomis') renderLoomis();
@@ -3228,6 +3254,7 @@ async function checkNotificaciones(){
       if(dot) dot.classList.toggle('show', maxId > visto);
     }catch(e){ /* si la tabla no responde, no rompemos el resto */ }
   }
+  try{ await refreshDashboardRecapBadge(); }catch(e){ /* no romper el resto de notificaciones */ }
 }
 async function marcarNotifVista(view){
   const cfg = NOTIF_FUENTES[view];
@@ -6110,22 +6137,77 @@ async function renderRecapCapsules(){
     </div>`;
   }).join('') : '<div class="empty-state" style="font-size:12px;">Todavía no hay recaps guardados.</div>';
 }
+function rcInfEur(n){ return (parseFloat(n)||0).toFixed(2).replace('.',',') + ' €'; }
+/* Construye el HTML del informe de solo lectura de un recap (usado tanto al
+   abrir una cápsula del historial como al auto-abrirse desde el punto de
+   notificación del menú). */
+async function buildRecapInformeHtml(r){
+  const boutique = r.boutique || {};
+  const filas = Object.entries(boutique).filter(([,v])=>parseFloat(v)>0).sort((a,b)=>b[1]-a[1]);
+  const boutiqueTotal = filas.reduce((a,[,v])=>a+(parseFloat(v)||0),0);
+
+  let lyVisitantes = null;
+  try{
+    const { data: lyRow } = await sb.from('spv_days').select('visitantes').eq('fecha', lyIsoDow(r.fecha)).maybeSingle();
+    lyVisitantes = lyRow?.visitantes ?? null;
+  }catch(e){ lyVisitantes = null; }
+
+  const entradas = [
+    ['Box office', r.e_box_office],
+    ['Fever',      r.e_fever],
+    ['API',        r.e_api],
+    ['Grupos',     r.e_grupos],
+  ].filter(([,v])=>v!==null && v!==undefined);
+
+  const resenas = [
+    ['Tripadvisor',  r.ta_reviews],
+    ['Google',       r.google_reviews],
+    ['GetYourGuide', r.gyg_reviews],
+  ].filter(([,v])=>v!==null && v!==undefined);
+
+  const obsLineas = (r.observaciones||'').split('\n').map(s=>s.trim()).filter(Boolean);
+
+  return `
+    <div class="rc-inf-stats">
+      <div class="rc-inf-stat"><div class="l">Visitantes</div><div class="v">${r.visitantes ?? '—'}</div>${lyVisitantes!=null?`<div class="s">Año pasado: ${lyVisitantes.toLocaleString('es-ES')}</div>`:''}</div>
+      <div class="rc-inf-stat"><div class="l">Horas staff</div><div class="v">${r.horas_planday!=null?r.horas_planday+' h':'—'}</div></div>
+      <div class="rc-inf-stat"><div class="l">Total tienda</div><div class="v">${rcInfEur(boutiqueTotal)}</div></div>
+    </div>
+
+    <div class="rc-inf-section">
+      <div class="rc-inf-section-title">Tienda por persona</div>
+      ${filas.length ? `<div class="rc-inf-block">${filas.map(([nombre,importe])=>`<div class="rc-inf-row"><span>${esc(nombre)}</span><span class="v">${rcInfEur(importe)}</span></div>`).join('')}</div>` : '<div class="rc-inf-empty">Sin ventas registradas.</div>'}
+    </div>
+
+    <div class="rc-inf-cols2 rc-inf-section">
+      <div>
+        <div class="rc-inf-section-title">Tipo de entrada</div>
+        ${entradas.length ? `<div class="rc-inf-block">${entradas.map(([t,v])=>`<div class="rc-inf-row"><span>${esc(t)}</span><span class="v">${v}</span></div>`).join('')}</div>` : '<div class="rc-inf-empty">Sin datos.</div>'}
+      </div>
+      <div>
+        <div class="rc-inf-section-title">Reseñas hoy</div>
+        ${resenas.length ? `<div class="rc-inf-block">${resenas.map(([t,v])=>`<div class="rc-inf-row"><span>${esc(t)}</span><span class="v">${v}</span></div>`).join('')}</div>` : '<div class="rc-inf-empty">Sin datos.</div>'}
+      </div>
+    </div>
+
+    <div class="rc-inf-section" style="margin-bottom:0;">
+      <div class="rc-inf-section-title">Observaciones del día</div>
+      ${obsLineas.length ? `<div class="rc-inf-obs">${obsLineas.map(t=>`<div class="rc-inf-obs-row"><span class="dot-b"></span><span>${esc(t)}</span></div>`).join('')}</div>` : '<div class="rc-inf-empty">Sin observaciones.</div>'}
+    </div>
+  `;
+}
 let recapModalFecha = null;
 async function openRecapCapsule(fecha){
   const { data: r } = await sb.from('recap').select('*').eq('fecha', fecha).maybeSingle();
   if(!r) return;
   recapModalFecha = fecha;
   const d = new Date(fecha+'T12:00:00');
-  document.getElementById('rvm-title').textContent = d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const boutiqueTotal = Object.values(r.boutique||{}).reduce((a,b)=>a+(parseFloat(b)||0),0);
-  document.getElementById('rvm-body').innerHTML = `
-    <div><b>Autor:</b> ${r.autor || '—'}</div>
-    <div><b>Cerrado por:</b> ${r.cerrado_por || '—'}</div>
-    <div><b>Visitantes:</b> ${r.visitantes ?? '—'}</div>
-    <div><b>Boutique total:</b> ${boutiqueTotal.toFixed(2)}€</div>
-    <div><b>Horas Planday:</b> ${r.horas_planday ?? '—'}</div>
-    <div style="margin-top:8px;"><b>Observaciones:</b><br>${r.observaciones ? r.observaciones.replace(/\n/g,'<br>') : 'Sin observaciones.'}</div>
+  const cerradoPor = r.cerrado_por ? ` · Cerrado por ${esc(r.cerrado_por)}` : '';
+  document.getElementById('rvm-title').innerHTML = `
+    <div class="rc-inf-fecha">${d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</div>
+    <div class="rc-inf-sub">${r.autor?`Recap de ${esc(r.autor)}`:'Recap'}${cerradoPor}</div>
   `;
+  document.getElementById('rvm-body').innerHTML = await buildRecapInformeHtml(r);
   document.getElementById('recap-view-modal').classList.add('open');
   // Marcar como leído por el usuario actual
   const me = currentProfile?.nombre || '';
@@ -6141,14 +6223,30 @@ function openRecapForEdit(){
   if(recapModalFecha) recapGoDate(recapModalFecha);
   closeRecapViewModal();
 }
+/* Fecha del recap sin leer más reciente (null si no hay ninguno pendiente).
+   La usan tanto el punto del menú como el auto-informe al entrar en Recap. */
+let recapPendienteFecha = null;
 async function refreshDashboardRecapBadge(){
+  const recaps = await fetchRecentRecaps();
+  const pendientes = recaps.filter(recapUnread);
+  recapPendienteFecha = pendientes.length ? pendientes[0].fecha : null;
+  const dot = document.getElementById('recap-dot');
+  if(dot) dot.classList.toggle('show', !!recapPendienteFecha);
+
   const el = document.getElementById('dash-recaps-unread');
   if(!el) return;
-  const recaps = await fetchRecentRecaps();
-  const unread = recaps.filter(recapUnread).length;
+  const unread = pendientes.length;
   el.textContent = unread;
   const sub = document.getElementById('dash-recaps-unread-sub');
   if(sub) sub.textContent = unread ? 'sin leer' : 'al día';
+}
+/* Al entrar en la pestaña Recap: si hay un recap sin leer (el de la noche
+   anterior), se abre automáticamente en grande el informe de solo lectura.
+   El formulario para rellenar el de hoy ya queda cargado detrás, así que al
+   cerrar el informe con la ✕ aparece directamente listo para editar. */
+async function maybeAutoOpenRecapInforme(){
+  await refreshDashboardRecapBadge();
+  if(recapPendienteFecha) openRecapCapsule(recapPendienteFecha);
 }
 
 /* PDXspot ahora vive nativamente dentro del HUB (no como iframe aparte).
