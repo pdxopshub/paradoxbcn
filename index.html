@@ -8695,10 +8695,25 @@ function diegoWeek(delta){
   renderDiego();
 }
 let DIEGO_TASKS = [];
+/* Arrastra a la semana actual cualquier tarea sin marcar que se quedó en una
+   semana anterior (por lejana que sea), para que nunca se pierda al cambiar
+   de semana. Solo se ejecuta al entrar en la semana real de hoy (offset 0),
+   nunca al navegar manualmente a semanas pasadas o futuras. Se pone su orden
+   a null para que quede al final, detrás de las tareas propias de esta semana. */
+async function diegoRolloverPendientes(lunesActual){
+  const { data, error } = await sb.from('diego_tasks')
+    .select('id')
+    .eq('done', false)
+    .lt('week', lunesActual);
+  if(error || !data || !data.length) return;
+  const ids = data.map(r=>r.id);
+  await sb.from('diego_tasks').update({ week: lunesActual, orden: null }).in('id', ids);
+}
 async function renderDiego(){
   const {lunes,label}=diegoWeekRange(diegoWeekOffset);
   const lbl=document.getElementById('diego-week-label');
   if(lbl) lbl.textContent=diegoWeekOffset===0?`Esta semana (${label})`:label;
+  if(diegoWeekOffset===0) await diegoRolloverPendientes(lunes);
   const tasks = await fetchDiegoTasks(lunes);
   await diegoNormalizeOrden(tasks);
   DIEGO_TASKS = tasks;
