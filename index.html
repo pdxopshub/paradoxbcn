@@ -639,8 +639,6 @@
   /* Cambios por persona y mes: tabla compacta */
   #turnos-por-mes-table{font-size:11.5px;}
   #turnos-por-mes-table th,#turnos-por-mes-table td{padding:4px 8px;}
-  #turnos-por-mes-table th.tn-mes-actual{color:var(--accent);}
-  #turnos-por-mes-table td.tn-mes-actual{background:var(--accent-soft);}
   #turnos-por-mes-table td.tn-alert{background:var(--danger-soft);color:var(--danger);font-weight:800;}
   .tcal-wrap{display:grid;grid-template-columns:1fr 1fr;gap:0;}
   .tcal-wrap .tcal-month:first-child{padding-right:18px;border-right:2px solid var(--line-strong);}
@@ -1808,7 +1806,11 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </button>
           <button class="navitem" data-view="uniformes">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3l4 2 4-2 3 4-3 2v12H5V9L2 7z"/></svg>
-          Stock de uniformes
+          Stocks
+        </button>
+          <button class="navitem" data-view="sugerencias">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Sugerencias STAFF
         </button>
         </div>
       </nav>
@@ -2045,7 +2047,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <div class="section-title">Añadir cambio de turno</div>
               <div id="turno-block-1" class="turno-block" style="margin-bottom:12px;"></div>
               <div id="turno-block-2" class="turno-block" style="margin-bottom:12px;"></div>
-              <div><label class="field-label">Motivo</label><input id="turno-motivo" placeholder="Motivo (opcional)"></div>
+              <div style="display:flex;gap:10px;">
+                <div style="flex:1;"><label class="field-label">Motivo</label><input id="turno-motivo" placeholder="Motivo (opcional)"></div>
+                <div style="flex:0 0 150px;"><label class="field-label">Día que te lo piden</label><input type="date" id="turno-fecha-solicitud"></div>
+              </div>
               <div style="margin-top:12px;"><button class="btn btn-primary" onclick="addTurnoRequest()">Guardar cambio de turno</button></div>
             </div>
 
@@ -2825,7 +2830,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 </div>
               </div>
               <div class="table-wrap"><table id="clmant-table" class="no-filter"><thead>
-                <tr><th style="width:40px;">✓</th><th>Exhibición</th><th>Nota</th><th style="width:70px;">Reparar</th></tr>
+                <tr><th style="width:40px;">✓</th><th>Exhibición</th><th style="width:70px;">Reparar</th></tr>
               </thead><tbody></tbody></table></div>
             </div>
             <div class="card mat-layout-lista">
@@ -2855,16 +2860,67 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
       </div>
 
-      <!-- ============ STOCK DE UNIFORMES ============ -->
+      <!-- ============ STOCKS ============ -->
       <div class="view" id="view-uniformes">
-        <div class="card" style="max-width:640px;">
-          <div class="flex-between" style="margin-bottom:12px;">
-            <div class="section-title" style="margin:0;">Stock de uniformes</div>
-            <span id="unif-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓ Guardado</span>
-          </div>
-          <div id="unif-mono" class="unif-section"></div>
-          <div id="unif-camiseta" class="unif-section" style="margin-top:18px;"></div>
+        <div class="tab-strip">
+          <button class="tab-btn active" data-stocktab="uniformes" onclick="switchStockTab('uniformes')">Uniformes</button>
+          <button class="tab-btn" data-stocktab="pinganillos" onclick="switchStockTab('pinganillos')">Pinganillos</button>
+          <button class="tab-btn" data-stocktab="walkies" onclick="switchStockTab('walkies')">Walkie Talkies</button>
         </div>
+
+        <!-- ---- Uniformes ---- -->
+        <div class="stock-sub" id="stock-sub-uniformes">
+          <div class="card" style="max-width:640px;">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Uniformes</div>
+              <span id="unif-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓ Guardado</span>
+            </div>
+            <div id="unif-mono" class="unif-section"></div>
+            <div id="unif-camiseta" class="unif-section" style="margin-top:18px;"></div>
+          </div>
+        </div>
+
+        <!-- ---- Pinganillos ---- -->
+        <div class="stock-sub" id="stock-sub-pinganillos" style="display:none;">
+          <div class="card" style="max-width:360px;">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Pinganillos</div>
+              <span id="ping-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓ Guardado</span>
+            </div>
+            <div id="unif-pinganillos" class="unif-section"></div>
+          </div>
+        </div>
+
+        <!-- ---- Walkie Talkies ---- -->
+        <div class="stock-sub" id="stock-sub-walkies" style="display:none;">
+          <div class="card" style="max-width:480px;">
+            <div class="flex-between" style="margin-bottom:12px;">
+              <div class="section-title" style="margin:0;">Walkie Talkies</div>
+              <span id="walkie-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓ Guardado</span>
+            </div>
+            <div id="unif-walkies" class="unif-section"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ SUGERENCIAS STAFF ============ -->
+      <div class="view" id="view-sugerencias">
+        <div class="card" style="max-width:640px;margin-bottom:14px;">
+          <div class="section-title" style="margin-bottom:12px;">Nueva sugerencia del buzón</div>
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+            <div style="flex:1;min-width:260px;">
+              <label class="field-label">Texto de la sugerencia</label>
+              <textarea id="sug-texto" rows="2" placeholder="Transcribe aquí lo que ha dejado el staff en el buzón..."></textarea>
+            </div>
+            <div style="flex:0 0 150px;">
+              <label class="field-label">Fecha</label>
+              <input type="date" id="sug-fecha">
+            </div>
+            <div><button class="btn btn-primary" onclick="addSugerencia()">Añadir</button></div>
+          </div>
+        </div>
+
+        <div id="sugerencias-lista"></div>
       </div>
 
     </div>
@@ -3145,7 +3201,8 @@ const titles = {
   diego:['Mantenimiento','Tareas semanales de Diego'],
   cambiobanco:['Cambio Banco','Billetes y rulos de monedas para el pedido al banco'],
   clmant:['Checklists','Mantenimiento de exhibiciones y materiales'],
-  uniformes:['Stock de uniformes','Monos y camisetas por talla'],
+  uniformes:['Stocks','Uniformes, pinganillos y walkie talkies'],
+  sugerencias:['Sugerencias STAFF','Buzón anónimo del equipo: seguimiento por mes'],
   recap:['Recap del día','Cierre diario: info general, rutinas y observaciones'],
   loomis:['Loomis','Gestión semanal del lunes']
 };
@@ -3170,6 +3227,7 @@ function goView(v){
   if(v==='diego') renderDiego();
   if(v==='cambiobanco') renderCambioBanco();
   if(v==='uniformes') renderUniformes();
+  if(v==='sugerencias') renderSugerencias();
   if(v==='dashboard'){ refreshDashboard(); renderDashGrupos(); }
   if(v==='recap'){ renderRecap(); maybeAutoOpenRecapInforme(); }
   if(v==='resenas') renderResenas();
@@ -4939,6 +4997,8 @@ function readTurnoBlock(prefix){
 }
 async function renderTurnos(){
   await renderTurnoBlocks();
+  const fsEl = document.getElementById('turno-fecha-solicitud');
+  if(fsEl) fsEl.value = todayIso();
   const { data, error } = await sb.from('turnos').select('*').order('created_at', {ascending:false});
   if(error) console.error(error);
   const list = data || [];
@@ -4949,9 +5009,10 @@ async function renderTurnos(){
 
   function fmtDate(d){ const dt = new Date(d+'T00:00:00'); return `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`; }
   function personCell(staff,hora,fecha){ return `<b>${staff}</b><div class="meta" style="font-size:11.5px;color:var(--text-soft);">${hora} · ${fmtDate(fecha)}</div>`; }
-  // Día en que se PIDIÓ el cambio (created_at), no el día del turno en sí
+  // Día en que se PIDIÓ el cambio: usa fecha_solicitud si existe (lo que
+  // realmente se registró a mano), si no cae en created_at (registros antiguos).
   function pedidoElCell(t){
-    const dt = t.created_at ? new Date(t.created_at) : null;
+    const dt = t.fecha_solicitud ? new Date(t.fecha_solicitud+'T00:00:00') : (t.created_at ? new Date(t.created_at) : null);
     return (dt && !isNaN(dt)) ? `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}` : '—';
   }
 
@@ -5093,7 +5154,7 @@ async function renderTurnosPorMes(list){
   // Se cuenta SOLO a quien CEDE el turno (p1), y en el mes en que lo PIDE
   // (fecha de la solicitud), no en el mes del turno.
   function monthOfRequest(t){
-    const base = t.created_at ? new Date(t.created_at) : new Date((t.p1_fecha||'')+'T00:00:00');
+    const base = t.fecha_solicitud ? new Date(t.fecha_solicitud+'T00:00:00') : (t.created_at ? new Date(t.created_at) : new Date((t.p1_fecha||'')+'T00:00:00'));
     if(isNaN(base)) return null;
     return `${TURNO_MONTHS[base.getMonth()]} ${base.getFullYear()}`;
   }
@@ -5105,7 +5166,6 @@ async function renderTurnosPorMes(list){
     const d = new Date(hoy.getFullYear(), hoy.getMonth()+delta, 1);
     return `${TURNO_MONTHS[d.getMonth()]} ${d.getFullYear()}`;
   });
-  const mesActual = months[1];
   const counts = {};
   names.forEach(n=>{ counts[n] = {}; months.forEach(m=>counts[n][m]=0); });
   list.forEach(t=>{
@@ -5117,11 +5177,11 @@ async function renderTurnosPorMes(list){
   });
   const tbody = document.querySelector('#turnos-por-mes-table tbody');
   const thead = document.querySelector('#turnos-por-mes-table thead');
-  thead.innerHTML = `<tr><th>Staff</th>${months.map(m=>`<th${m===mesActual?' class="tn-mes-actual"':''}>${m}</th>`).join('')}</tr>`;
+  thead.innerHTML = `<tr><th>Staff</th>${months.map(m=>`<th>${m}</th>`).join('')}</tr>`;
   tbody.innerHTML = names.length ? names.map(n=>`
     <tr><td><b>${n}</b></td>${months.map(m=>{
       const c = counts[n][m]||0;
-      return `<td class="mono${c>=2?' tn-alert':''}${m===mesActual?' tn-mes-actual':''}">${c}</td>`;
+      return `<td class="mono${c>=2?' tn-alert':''}">${c}</td>`;
     }).join('')}</tr>`).join('') : '<tr><td style="text-align:center;color:var(--text-soft);">Añade staff primero.</td></tr>';
 }
 async function addTurnoRequest(){
@@ -5129,10 +5189,11 @@ async function addTurnoRequest(){
   const p2 = readTurnoBlock('tb2');
   if(!p1.staff || !p2.staff) return;
   const motivo = document.getElementById('turno-motivo').value.trim();
+  const fechaSolicitud = document.getElementById('turno-fecha-solicitud')?.value || todayIso();
   await sb.from('turnos').insert({
     p1_staff:p1.staff, p1_hora:p1.hora, p1_fecha:p1.fechaIso,
     p2_staff:p2.staff, p2_hora:p2.hora, p2_fecha:p2.fechaIso,
-    motivo, estado:'Pendiente'
+    motivo, estado:'Pendiente', fecha_solicitud: fechaSolicitud
   });
   document.getElementById('turno-motivo').value='';
   renderTurnos();
@@ -5706,7 +5767,7 @@ const BACKUP_TABLAS = ['profiles','spv_days','spv_entries','spv_commission_histo
   'staff_entradas','evaluaciones','entrevistas','turnos','pda_tasks','diego_tasks',
   'clmant_items','nfcards','reviews_cache','recap','reviews_history','pdxspot_kv',
   'chat_mensajes','vac_solicitudes','vac_bloqueos','vac_saldos','loomis_semanas',
-  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant','vac_bajas','checklist_materiales','grupos_contacto','checklist_mant_semana','uniformes_stock','spv_comision_acumulado'];
+  'grupos_maestro','grupos_leads','grupos_precios','mkt_campanas','mkt_influencers','audit_log','checklist_mant','vac_bajas','checklist_materiales','grupos_contacto','checklist_mant_semana','uniformes_stock','spv_comision_acumulado','sugerencias_staff'];
 
 async function descargarBackupHub(){
   const btn = document.getElementById('hub-backup-btn');
@@ -8408,16 +8469,27 @@ async function copyCambioBancoEmail(){
 }
 
 /* ============================================================
-   STOCK DE UNIFORMES — mono y camisetas por talla
+   STOCKS — uniformes (por talla), pinganillos y walkie talkies
    Tabla Supabase: uniformes_stock (id, prenda, talla, cantidad, orden)
+   Se reutiliza la misma tabla: "talla" hace de etiqueta de fila también
+   para pinganillos ("Cantidad") y walkie talkies (Perfectos/Sin pinza/
+   No funciona), sin necesitar columnas ni tablas nuevas.
    ============================================================ */
 let UNIF_CACHE = [];
+function switchStockTab(tab){
+  document.querySelectorAll('[data-stocktab]').forEach(b=>b.classList.toggle('active', b.dataset.stocktab===tab));
+  document.getElementById('stock-sub-uniformes').style.display   = tab==='uniformes'   ? 'block':'none';
+  document.getElementById('stock-sub-pinganillos').style.display = tab==='pinganillos' ? 'block':'none';
+  document.getElementById('stock-sub-walkies').style.display     = tab==='walkies'     ? 'block':'none';
+}
 async function renderUniformes(){
   const { data, error } = await sb.from('uniformes_stock').select('*').order('orden');
   if(error){ console.error(error); return; }
   UNIF_CACHE = data || [];
   const monoEl = document.getElementById('unif-mono');
   const camEl  = document.getElementById('unif-camiseta');
+  const pingEl = document.getElementById('unif-pinganillos');
+  const walkEl = document.getElementById('unif-walkies');
   if(monoEl){
     monoEl.innerHTML = `<div class="unif-section-title">Mono</div>` +
       UNIF_CACHE.filter(u=>u.prenda==='Mono').map(unifRowHtml).join('');
@@ -8425,6 +8497,13 @@ async function renderUniformes(){
   if(camEl){
     camEl.innerHTML = `<div class="unif-section-title">Camiseta</div>` +
       UNIF_CACHE.filter(u=>u.prenda==='Camiseta').map(unifRowHtml).join('');
+  }
+  if(pingEl){
+    pingEl.innerHTML = UNIF_CACHE.filter(u=>u.prenda==='Pinganillos').map(unifRowHtml).join('');
+  }
+  if(walkEl){
+    walkEl.innerHTML = `<div class="unif-section-title">Estado</div>` +
+      UNIF_CACHE.filter(u=>u.prenda==='WalkieTalkies').map(unifRowHtml).join('');
   }
 }
 function unifRowHtml(u){
@@ -8434,14 +8513,88 @@ function unifRowHtml(u){
            onchange="saveUnifCantidad(${u.id}, this.value)">
   </div>`;
 }
+const UNIF_SAVED_ID_POR_PRENDA = {Mono:'unif-saved', Camiseta:'unif-saved', Pinganillos:'ping-saved', WalkieTalkies:'walkie-saved'};
 async function saveUnifCantidad(id, valor){
   const cantidad = parseInt(valor,10) || 0;
   const { error } = await sb.from('uniformes_stock').update({ cantidad, updated_at: new Date().toISOString() }).eq('id', id);
   if(error){ console.error(error); return; }
   const row = UNIF_CACHE.find(u=>u.id===id);
   if(row) row.cantidad = cantidad;
-  const b = document.getElementById('unif-saved');
+  const b = document.getElementById(UNIF_SAVED_ID_POR_PRENDA[row?.prenda] || 'unif-saved');
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2000); }
+}
+
+/* ============================================================
+   SUGERENCIAS STAFF — tabla sugerencias_staff
+   Buzón anónimo transcrito a mano, agrupado por mes, con un check
+   de "Mejorado" por sugerencia para llevar el seguimiento.
+   ============================================================ */
+let SUGERENCIAS_CACHE = [];
+async function fetchSugerencias(){
+  const { data, error } = await sb.from('sugerencias_staff').select('*').order('fecha',{ascending:false});
+  if(error){ console.error(error); return []; }
+  return data || [];
+}
+async function renderSugerencias(){
+  const fechaEl = document.getElementById('sug-fecha');
+  if(fechaEl && !fechaEl.value) fechaEl.value = todayIso();
+  SUGERENCIAS_CACHE = await fetchSugerencias();
+  const cont = document.getElementById('sugerencias-lista');
+  if(!cont) return;
+  if(!SUGERENCIAS_CACHE.length){
+    cont.innerHTML = '<div class="empty-state">Todavía no hay sugerencias transcritas. Añade la primera arriba.</div>';
+    return;
+  }
+  // Agrupar por mes (según la fecha de la sugerencia), más reciente primero
+  const grupos = {};
+  const orden = [];
+  SUGERENCIAS_CACHE.forEach(s=>{
+    const dt = new Date(s.fecha+'T00:00:00');
+    const key = `${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`;
+    if(!grupos[key]){ grupos[key] = []; orden.push(key); }
+    grupos[key].push(s);
+  });
+  cont.innerHTML = orden.map(mes=>{
+    const items = grupos[mes];
+    const mejoradas = items.filter(s=>s.mejorado).length;
+    return `<div class="card" style="margin-bottom:14px;">
+      <div class="flex-between" style="margin-bottom:10px;">
+        <div class="section-title" style="margin:0;text-transform:capitalize;">${mes}</div>
+        <span class="pill ${mejoradas===items.length?'green':'grey'}">${mejoradas} / ${items.length} mejoradas</span>
+      </div>
+      ${items.map(s=>`
+        <div class="checkbox-row ${s.mejorado?'done':''}" style="align-items:flex-start;">
+          <input type="checkbox" style="margin-top:2px;" ${s.mejorado?'checked':''} onchange="toggleSugerenciaMejorada(${s.id}, this.checked)" title="Marcar como mejorado">
+          <div style="flex:1;">
+            <div class="txt ${s.mejorado?'done':''}">${esc(s.texto)}</div>
+            <div class="meta" style="font-size:11px;color:var(--text-soft);margin-top:2px;">${fmtDateEs(s.fecha)}</div>
+          </div>
+          <button class="row-del" title="Eliminar" onclick="deleteSugerencia(${s.id})">✕</button>
+        </div>`).join('')}
+    </div>`;
+  }).join('');
+}
+function fmtDateEs(iso){
+  const dt = new Date(iso+'T00:00:00');
+  return `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+async function addSugerencia(){
+  const texto = document.getElementById('sug-texto').value.trim();
+  if(!texto) return;
+  const fecha = document.getElementById('sug-fecha').value || todayIso();
+  const { error } = await sb.from('sugerencias_staff').insert({ texto, fecha, mejorado:false });
+  if(error){ alert('No se pudo añadir la sugerencia: '+error.message); return; }
+  document.getElementById('sug-texto').value = '';
+  renderSugerencias();
+}
+async function toggleSugerenciaMejorada(id, mejorado){
+  await sb.from('sugerencias_staff').update({ mejorado, updated_at:new Date().toISOString() }).eq('id', id);
+  renderSugerencias();
+}
+async function deleteSugerencia(id){
+  if(!confirm('¿Eliminar esta sugerencia?')) return;
+  await sb.from('sugerencias_staff').delete().eq('id', id);
+  renderSugerencias();
 }
 
 let diegoWeekOffset=0;
@@ -8575,11 +8728,11 @@ async function renderChecklistMant(){
   if(!tbody) return;
   if(!CLMANT_ITEMS.length){
     const { data, error } = await sb.from('checklist_mant').select('id,item,orden').order('orden');
-    if(error){ tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
+    if(error){ tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
     CLMANT_ITEMS = data || [];
   }
   const { data: semanaData, error: semanaErr } = await sb.from('checklist_mant_semana').select('*').eq('week', lunes);
-  if(semanaErr){ tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger);">Error: ${semanaErr.message}</td></tr>`; return; }
+  if(semanaErr){ tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--danger);">Error: ${semanaErr.message}</td></tr>`; return; }
   const semanaMap = {};
   (semanaData||[]).forEach(r=>{ semanaMap[r.item_id]=r; });
 
@@ -8594,10 +8747,8 @@ async function renderChecklistMant(){
         <button class="clmant-chk ${it.checked?'on':''}" onclick="toggleChecklistMant(${it.id})" title="Marcar/desmarcar">${it.checked?'✓':''}</button>
       </td>
       <td class="clmant-item" style="font-weight:${it.item.startsWith('CAJA')?'800':'600'};">${esc(it.item)}</td>
-      <td><input class="cell-input clmant-nota" value="${(it.nota||'').replace(/"/g,'&quot;')}" placeholder="—"
-                 onchange="saveChecklistNota(${it.id}, this.value)" style="width:140px;text-align:center;"></td>
       <td style="text-align:center;">
-        <button class="clmant-chk rep ${it.necesita_reparacion?'on':''}" onclick="toggleNecesitaReparacion(${it.id})" title="Marcar si necesita reparación">${it.necesita_reparacion?'⚠':''}</button>
+        <button class="clmant-chk rep ${it.necesita_reparacion?'on':''}" onclick="onClickReparar(${it.id})" title="${it.necesita_reparacion?(it.nota?esc(it.nota):'Marcado para reparar')+' · clic para quitar':'Marcar si necesita reparación'}">${it.necesita_reparacion?'⚠':''}</button>
       </td>
     </tr>`).join('');
   const hechos = CLMANT_CACHE.filter(x=>x.checked).length;
@@ -8626,11 +8777,25 @@ async function toggleNecesitaReparacion(id){
   await upsertClmantSemana(id, { checked: it.checked, nota: it.nota, necesita_reparacion: !it.necesita_reparacion });
   renderChecklistMant();
 }
-async function saveChecklistNota(id, nota){
+/* Clic en el botón Reparar: si ya estaba marcado, se quita directamente
+   (igual que al clicar en la lista "A reparar esta semana"). Si no lo estaba,
+   se abre un recuadro para escribir qué está roto o mal antes de marcarlo. */
+function onClickReparar(id){
   const it = CLMANT_CACHE.find(x=>x.id===id);
   if(!it) return;
-  await upsertClmantSemana(id, { checked: it.checked, nota, necesita_reparacion: it.necesita_reparacion });
-  it.nota = nota;
+  if(it.necesita_reparacion){
+    toggleNecesitaReparacion(id);
+    return;
+  }
+  const texto = prompt('¿Qué está roto o mal? Explica brevemente:', it.nota||'');
+  if(texto===null) return;
+  marcarReparar(id, texto.trim());
+}
+async function marcarReparar(id, nota){
+  const it = CLMANT_CACHE.find(x=>x.id===id);
+  if(!it) return;
+  await upsertClmantSemana(id, { checked: it.checked, nota, necesita_reparacion: true });
+  renderChecklistMant();
 }
 function renderClmantListaReparar(){
   const el = document.getElementById('clmant-lista-reparar');
