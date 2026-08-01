@@ -7393,6 +7393,7 @@ function filterLeadPicker(){
 async function addLeadFromPicker(canal){
   const hoy = new Date().toISOString().slice(0,10);
   const anyo = new Date().getFullYear();
+  const mesActual = new Date().getMonth()+1;
   let payload;
 
   if(lpModo === 'exist'){
@@ -7404,7 +7405,7 @@ async function addLeadFromPicker(canal){
       email:limpiaRef(g.email)||null, contacto:limpiaRef(g.contacto)||null,
       telefono:limpiaRef(g.tel1)||null,
       tipo_grupo: document.getElementById('lp-tipo-exist').value,
-      request_date:hoy, status:'Pending', travel_year:anyo
+      request_date:hoy, status:'Pending', travel_year:anyo, travel_month:mesActual
     };
   } else {
     const nombre = document.getElementById('lpn-nombre').value.trim();
@@ -7425,7 +7426,7 @@ async function addLeadFromPicker(canal){
     payload = {
       canal, grupo_id:grupoId, grupo_nombre:nombre,
       email:email||null, contacto:contacto||null, telefono:tel||null, tipo_grupo:tipo,
-      request_date:hoy, status:'Pending', travel_year:anyo
+      request_date:hoy, status:'Pending', travel_year:anyo, travel_month:mesActual
     };
   }
 
@@ -7490,6 +7491,7 @@ async function saveCumpleForm(){
 
   const hoy  = new Date().toISOString().slice(0,10);
   const anyo = new Date().getFullYear();
+  const mesActual = new Date().getMonth()+1;
   const desglose = {ninos, adultos};
   const total = calcTotalLead({tipo_grupo:tipo, desglose});
 
@@ -7497,7 +7499,7 @@ async function saveCumpleForm(){
     canal:'cumples', grupo_id:null, grupo_nombre:nino,
     email:email||null, contacto:padre||null, telefono:tel||null,
     tipo_grupo:tipo, desglose, total_eur:total, pax:(ninos+adultos)||null,
-    request_date:hoy, status:'Pending', travel_year:anyo
+    request_date:hoy, status:'Pending', travel_year:anyo, travel_month:mesActual
   };
   const { error } = await sb.from('grupos_leads').insert(payload);
   if(error){ alert('No se pudo añadir: '+error.message); return; }
