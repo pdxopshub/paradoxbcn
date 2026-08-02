@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDX Ops Hub</title>
+<script>
+  // Aplica el tema guardado ANTES de pintar nada, para evitar parpadeo (flash of wrong theme).
+  try{
+    if(localStorage.getItem('pdx-theme') === 'dark'){
+      document.documentElement.classList.add('theme-dark');
+    }
+  }catch(e){}
+</script>
 <meta name="theme-color" content="#252932">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -182,6 +190,42 @@
     --bad:#D93C46;     --bad-bg:#FCE4E6;  --bad-br:#F2B4B9;
     --off:#7B8394;     --off-bg:#E9EBEF;  --off-br:#D3D7DF;
   }
+
+  /* ============================================================
+     MODO NOCHE — azul marino oscuro elegante
+     Se activa con la clase body.theme-dark. El modo día (:root)
+     no se toca.
+     ============================================================ */
+  html.theme-dark{
+    --bg:#0A1A24;
+    --surface:#112838;
+    --panel:#16324A;
+    --line:#1E3D4E;
+    --line-strong:#2C5468;
+    --text:#E9EEF3;
+    --text-soft:#A8BAC7;
+    --text-dim:#7F94A3;
+    --accent:#4FC3E8;
+    --accent-dark:#90D5FF;
+    --accent-2:#FF7EC0;
+    --accent-soft:#123244;
+    --success:#4ADE94;
+    --success-soft:#123B2A;
+    --warning:#FFC069;
+    --warning-soft:#3A2A10;
+    --danger:#FF7078;
+    --danger-soft:#3A1519;
+    --tienda:#FF7EC0;
+    --tienda-soft:#3A1830;
+    --superv:#C7CCDA;
+    --superv-soft:#1E2733;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px -8px rgba(0,0,0,.55);
+    --ok:#4ADE94;      --ok-bg:#123B2A;   --ok-br:#1F5C40;
+    --wait:#FFC069;    --wait-bg:#3A2A10; --wait-br:#5C4419;
+    --bad:#FF7078;     --bad-bg:#3A1519;  --bad-br:#5C1E24;
+    --off:#9AA7B6;     --off-bg:#1C2530;  --off-br:#2C3A48;
+  }
+  /* El sidebar ya es azul marino oscuro de por sí: se mantiene igual en ambos modos. */
 
   /* --- Grupos del menú con franja de color --- */
   .navgroup{position:relative;padding-left:11px;margin-bottom:4px;}
@@ -739,14 +783,14 @@
   .m-react-pill{display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.65);
     border:1px solid rgba(18,58,115,.18);border-radius:20px;padding:1px 7px;font-size:12px;cursor:pointer;
     transition:transform .1s, background .12s;}
-  .m-react-pill:hover{background:#fff;transform:scale(1.08);}
-  .m-react-pill.mine-reacted{border-color:var(--accent);background:#fff;}
+  .m-react-pill:hover{background:var(--surface);transform:scale(1.08);}
+  .m-react-pill.mine-reacted{border-color:var(--accent);background:var(--surface);}
   .m-react-pill .cnt{font-size:10.5px;font-weight:800;color:#123A73;}
   .m-react-add{position:relative;display:inline-flex;}
   .m-react-add-btn{background:none;border:none;cursor:pointer;font-size:13px;opacity:0;transition:opacity .12s;
     padding:2px 4px;color:rgba(18,58,115,.6);}
   .msg:hover .m-react-add-btn{opacity:1;}
-  .m-react-menu{display:none;position:absolute;bottom:100%;left:0;margin-bottom:4px;background:#fff;
+  .m-react-menu{display:none;position:absolute;bottom:100%;left:0;margin-bottom:4px;background:var(--surface);
     border:1px solid var(--line-strong);border-radius:20px;padding:4px 6px;box-shadow:var(--shadow);
     gap:2px;z-index:20;white-space:nowrap;}
   .m-react-menu.open{display:flex;}
@@ -866,8 +910,8 @@
   .loomis-table td{border:1px solid #555;text-align:center;vertical-align:middle;}
   .lm-date{background:#F0F0F0;color:#1A1A1A;font-weight:700;font-size:11px;
     padding:4px 5px;width:110px;border:2px solid #333;}
-  .lm-c-sumup{background:#FFFFFF;}
-  .lm-c-fever{background:#FFFFFF;}
+  .lm-c-sumup{background:var(--surface);}
+  .lm-c-fever{background:var(--surface);}
   .lm-total-cell{background:#D9D9D9;font-weight:600;font-size:12.5px;color:#1A1A1A;
     border:2px solid #333;}
   .lm-total-cell.has-total{color:#1A1A1A;}
@@ -877,7 +921,7 @@
   .lm-sub .lm-subt:empty,.lm-sub .lm-subt:empty::after{content:'';background:#FFFF00;}
 
   /* fila separadora entre días */
-  .lm-sep td{background:#FFFFFF;border:none;height:5px;padding:0;}
+  .lm-sep td{background:var(--surface);border:none;height:5px;padding:0;}
 
   /* inputs sin estilo propio, heredan el fondo de la celda */
   .lm-in{width:100%;height:26px;text-align:center;background:transparent;
@@ -992,7 +1036,7 @@
   .lc-status.st-bad {background:var(--bad-bg)!important;color:var(--bad)!important;}
   .lc-status.st-wait{background:var(--wait-bg)!important;color:var(--wait)!important;}
   .lc-status.st-off {background:var(--panel)!important;color:var(--text-soft)!important;}
-  .lc-in option{background:#FFFFFF!important;color:#1B1F27!important;font-weight:600;
+  .lc-in option{background:var(--surface)!important;color:var(--text)!important;font-weight:600;
     padding:6px;text-align:center;}
   .lc-in{text-align:center;text-align-last:center;}
   .lead-cell.ta-left .lc-in{text-align:left;text-align-last:left;}
@@ -1001,7 +1045,7 @@
   .hora-cell:hover{background:rgba(0,0,0,.05);}
   .hora-val{font-weight:600;}
   /* desplegable de hora en dos columnas */
-  .hora-pop{position:fixed;z-index:9999;background:#FFFFFF;border:1px solid var(--line-strong);
+  .hora-pop{position:fixed;z-index:9999;background:var(--surface);border:1px solid var(--line-strong);
     border-radius:10px;box-shadow:0 16px 44px rgba(0,0,0,.7);overflow:hidden;width:168px;}
   .hp-cols{display:grid;grid-template-columns:1fr 1fr;}
   .hp-col{border-right:1px solid var(--line);}
@@ -1015,7 +1059,7 @@
   .hp-opt.sel{background:var(--accent);color:#fff;font-weight:800;}
   .hp-foot{border-top:1px solid var(--line);padding:6px;text-align:center;}
   .hp-foot .btn{width:100%;justify-content:center;}
-  .lc-in optgroup{background:#FFFFFF;color:#5B6270;}
+  .lc-in optgroup{background:var(--surface);color:#5B6270;}
   /* icono de estado junto al grupo */
   .grupo-cell{display:flex;align-items:center;gap:8px;min-width:0;padding-left:8px;}
   .grupo-cell .lc-in{flex:1;min-width:0;}
@@ -1104,7 +1148,7 @@
     width:0;height:0;border-top:6px solid #F2913D;border-left:6px solid transparent;}
   .lead-cell.has-note:hover::before{
     content:attr(data-note);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
-    background:#FFFFFF;color:#1B1F27;border:1px solid var(--line-strong);border-radius:7px;
+    background:var(--surface);color:var(--text);border:1px solid var(--line-strong);border-radius:7px;
     padding:7px 10px;font-size:11.5px;font-weight:500;white-space:pre-wrap;width:max-content;
     max-width:240px;z-index:1;box-shadow:0 8px 24px rgba(20,24,32,.25);text-align:left;
     pointer-events:none;margin-bottom:4px;}
@@ -1178,8 +1222,8 @@
     color:var(--text);font-size:12px;-moz-appearance:textfield;}
   #cb-table input.cb-in::-webkit-outer-spin-button,#cb-table input.cb-in::-webkit-inner-spin-button{-webkit-appearance:none;}
   #cb-table input.cb-in:focus{outline:none;background:rgba(0,123,167,.12);}
-  #cb-table .cb-importe{font-size:12px;font-weight:600;background:#FFFFFF;}
-  #cb-table .cb-rulos{font-size:12px;font-weight:700;background:#FFFFFF;color:var(--text-soft);}
+  #cb-table .cb-importe{font-size:12px;font-weight:600;background:var(--surface);}
+  #cb-table .cb-rulos{font-size:12px;font-weight:700;background:var(--surface);color:var(--text-soft);}
   #cb-foot .cb-total-row td{border:1px solid var(--line-strong);padding:6px 5px;font-size:12px;font-weight:800;
     text-align:right;background:#8FD1A8;color:#0E4A2A;}
   .cb-texto-area{width:100%;min-height:260px;resize:vertical;font-family:var(--font);font-size:13px;
@@ -1209,10 +1253,10 @@
   /* todas las td */
   .loomis-table td{border:1px solid var(--line);padding:0;text-align:center;vertical-align:middle;}
   /* columna Turnos (fecha): blanca */
-  .lm-date{background:#FFFFFF;color:var(--text);font-weight:700;font-size:11px;
+  .lm-date{background:var(--surface);color:var(--text);font-weight:700;font-size:11px;
     padding:4px 5px;border:1px solid var(--line-strong);}
   /* celdas de datos: blancas */
-  .lm-c-fever,.lm-c-sumup{background:#FFFFFF;}
+  .lm-c-fever,.lm-c-sumup{background:var(--surface);}
   /* columna TOTAL: gris clarito */
   .lm-total-cell{background:var(--panel);font-weight:600;font-size:12.5px;
     color:var(--text);border:1px solid var(--line-strong);}
@@ -1353,7 +1397,7 @@
   label.field-label{font-size:11.5px;font-weight:700;color:var(--text-soft);margin-bottom:5px;display:block;}
   /* Cambios de turno: los campos (Staff/Hora/Min/Día/Mes/Año) en blanco para que
      se distingan del fondo gris de la cápsula */
-  .turno-form-block select,.turno-form-block input{background:#FFFFFF;}
+  .turno-form-block select,.turno-form-block input{background:var(--surface);}
   input.cell-input{border:1px solid transparent;background:transparent;padding:5px 6px;text-align:right;border-radius:5px;}
   input.cell-input::placeholder{color:#4A4F60;}
   input.cell-input:hover{border-color:var(--line-strong);}
@@ -1635,7 +1679,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 }
 #modal-root .modal-overlay.open{display:flex;}
 #modal-root .modal{
-  background:#FFFFFF;
+  background:var(--surface);
   border:1px solid var(--line);
   border-radius:14px;
   width:100%; max-width:640px;
@@ -1850,6 +1894,16 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ DASHBOARD ============ -->
       <div class="view active" id="view-dashboard">
+
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+          <div id="theme-toggle" onclick="toggleTheme()" style="display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line-strong);border-radius:20px;padding:5px 6px;cursor:pointer;user-select:none;box-shadow:var(--shadow);">
+            <span id="theme-toggle-label-day" style="font-size:11.5px;font-weight:700;color:var(--text-soft);padding-left:6px;">☀️ Día</span>
+            <span style="position:relative;width:38px;height:20px;background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;display:inline-block;transition:background .18s;">
+              <span id="theme-toggle-knob" style="position:absolute;top:1px;left:1px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.3);"></span>
+            </span>
+            <span id="theme-toggle-label-night" style="font-size:11.5px;font-weight:700;color:var(--text-soft);padding-right:6px;">🌙 Noche</span>
+          </div>
+        </div>
 
         <div class="card dash-week-card">
           <div class="section-title" style="margin-bottom:14px;">
@@ -2510,12 +2564,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="gv-tablebox gv-tablebox-full">
             <table id="gm-table" class="gv-table no-filter">
               <thead><tr>
-                <th style="width:14%;text-align:center;">Grupo</th>
-                <th style="width:11%;text-align:center;">Tipo</th>
-                <th style="width:19%;text-align:center;">Email</th>
-                <th style="width:10%;text-align:center;">Teléfonos</th>
-                <th style="width:18%;text-align:center;">Contacto</th>
-                <th style="width:25%;text-align:center;">Comentarios</th>
+                <th style="width:13%;text-align:center;">Grupo</th>
+                <th style="width:10%;text-align:center;">Tipo</th>
+                <th style="width:17%;text-align:center;">Email</th>
+                <th style="width:11%;text-align:center;">Población</th>
+                <th style="width:9%;text-align:center;">Teléfonos</th>
+                <th style="width:16%;text-align:center;">Contacto</th>
+                <th style="width:21%;text-align:center;">Comentarios</th>
                 <th style="width:3%;"></th>
               </tr></thead>
               <tbody></tbody>
@@ -3552,6 +3607,37 @@ async function fetchDashboardVisits(){
     deltaEl.style.color = 'var(--text-soft)';
   }
   renderWeekCalendar();
+}
+
+/* ============================================================
+   MODO NOCHE — toggle Día/Noche con persistencia en localStorage
+   ============================================================ */
+function isDarkTheme(){
+  return document.documentElement.classList.contains('theme-dark');
+}
+function syncThemeToggleUI(){
+  const knob = document.getElementById('theme-toggle-knob');
+  const track = knob ? knob.parentElement : null;
+  const labelDay = document.getElementById('theme-toggle-label-day');
+  const labelNight = document.getElementById('theme-toggle-label-night');
+  const dark = isDarkTheme();
+  if(knob) knob.style.left = dark ? '19px' : '1px';
+  if(track) track.style.background = dark ? 'var(--accent-soft)' : 'var(--panel)';
+  if(labelDay) labelDay.style.color = dark ? 'var(--text-dim)' : 'var(--accent)';
+  if(labelDay) labelDay.style.fontWeight = dark ? '600' : '800';
+  if(labelNight) labelNight.style.color = dark ? 'var(--accent-dark)' : 'var(--text-dim)';
+  if(labelNight) labelNight.style.fontWeight = dark ? '800' : '600';
+}
+function toggleTheme(){
+  const dark = !isDarkTheme();
+  document.documentElement.classList.toggle('theme-dark', dark);
+  try{ localStorage.setItem('pdx-theme', dark ? 'dark' : 'light'); }catch(e){}
+  syncThemeToggleUI();
+}
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', syncThemeToggleUI);
+} else {
+  syncThemeToggleUI();
 }
 
 /* ============================================================
@@ -6856,7 +6942,7 @@ function renderGruposMaestro(){
   const list = GM_CACHE.filter(g=>{
     if(tipo && g.tipo !== tipo) return false;
     if(!q) return true;
-    return [g.grupo,g.email,g.contacto,g.comentarios,g.tel1,g.tel2]
+    return [g.grupo,g.email,g.contacto,g.comentarios,g.tel1,g.tel2,g.poblacion]
       .some(v=>(v||'').toString().toLowerCase().includes(q));
   });
 
@@ -6869,6 +6955,7 @@ function renderGruposMaestro(){
       <td class="gm-name" onclick="openGrupoModal(${g.id})">${esc(limpiaRef(g.grupo))}</td>
       <td>${tipoPill(g.tipo)}</td>
       <td class="gm-mail">${esc(limpiaRef(g.email))}</td>
+      <td>${esc(limpiaRef(g.poblacion))}</td>
       <td class="gm-tels">
         <div>${esc(limpiaRef(g.tel1))||'&nbsp;'}</div>
         <div>${esc(limpiaRef(g.tel2))||'&nbsp;'}</div>
@@ -6877,7 +6964,7 @@ function renderGruposMaestro(){
       <td class="gm-obs" title="${esc(limpiaRef(g.comentarios))}">${esc(limpiaRef(g.comentarios))}</td>
       <td><button class="row-del" onclick="deleteGrupo(${g.id})">✕</button></td>
     </tr>`).join('')
-    : '<tr><td colspan="7" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
+    : '<tr><td colspan="8" style="text-align:center;color:var(--text-soft);padding:20px;">No hay grupos con este filtro.</td></tr>';
 }
 
 function openGrupoModal(id){
@@ -6898,7 +6985,10 @@ function openGrupoModal(id){
             </div>
             <div class="field"><label>Contacto</label><input id="gmf-contacto" value="${esc(limpiaRef(g.contacto))}"></div>
           </div>
-          <div class="field"><label>Email</label><input id="gmf-email" value="${esc(limpiaRef(g.email))}"></div>
+          <div class="field-row">
+            <div class="field"><label>Email</label><input id="gmf-email" value="${esc(limpiaRef(g.email))}"></div>
+            <div class="field"><label>Población</label><input id="gmf-poblacion" value="${esc(limpiaRef(g.poblacion))}"></div>
+          </div>
           <div class="field-row">
             <div class="field"><label>Teléfono 1</label><input id="gmf-tel1" value="${esc(limpiaRef(g.tel1))}"></div>
             <div class="field"><label>Teléfono 2</label><input id="gmf-tel2" value="${esc(limpiaRef(g.tel2))}"></div>
@@ -6915,7 +7005,7 @@ function openGrupoModal(id){
 
 async function saveGrupo(id){
   const v = k => document.getElementById('gmf-'+k).value.trim();
-  const payload = {grupo:v('grupo'), tipo:v('tipo'), email:v('email'),
+  const payload = {grupo:v('grupo'), tipo:v('tipo'), email:v('email'), poblacion:v('poblacion'),
                    tel1:v('tel1'), tel2:v('tel2'),
                    contacto:v('contacto'), comentarios:v('com')};
   if(!payload.grupo){ alert('Ponle nombre al grupo.'); return; }
