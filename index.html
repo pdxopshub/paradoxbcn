@@ -4,14 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PDX Ops Hub</title>
-<script>
-  // Aplica el tema guardado ANTES de pintar nada, para evitar parpadeo (flash of wrong theme).
-  try{
-    if(localStorage.getItem('pdx-theme') === 'dark'){
-      document.documentElement.classList.add('theme-dark');
-    }
-  }catch(e){}
-</script>
 <meta name="theme-color" content="#252932">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -190,42 +182,6 @@
     --bad:#D93C46;     --bad-bg:#FCE4E6;  --bad-br:#F2B4B9;
     --off:#7B8394;     --off-bg:#E9EBEF;  --off-br:#D3D7DF;
   }
-
-  /* ============================================================
-     MODO NOCHE — azul marino oscuro elegante
-     Se activa con la clase body.theme-dark. El modo día (:root)
-     no se toca.
-     ============================================================ */
-  html.theme-dark{
-    --bg:#0A1A24;
-    --surface:#112838;
-    --panel:#16324A;
-    --line:#1E3D4E;
-    --line-strong:#2C5468;
-    --text:#E9EEF3;
-    --text-soft:#A8BAC7;
-    --text-dim:#7F94A3;
-    --accent:#4FC3E8;
-    --accent-dark:#90D5FF;
-    --accent-2:#FF7EC0;
-    --accent-soft:#123244;
-    --success:#4ADE94;
-    --success-soft:#123B2A;
-    --warning:#FFC069;
-    --warning-soft:#3A2A10;
-    --danger:#FF7078;
-    --danger-soft:#3A1519;
-    --tienda:#FF7EC0;
-    --tienda-soft:#3A1830;
-    --superv:#C7CCDA;
-    --superv-soft:#1E2733;
-    --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px -8px rgba(0,0,0,.55);
-    --ok:#4ADE94;      --ok-bg:#123B2A;   --ok-br:#1F5C40;
-    --wait:#FFC069;    --wait-bg:#3A2A10; --wait-br:#5C4419;
-    --bad:#FF7078;     --bad-bg:#3A1519;  --bad-br:#5C1E24;
-    --off:#9AA7B6;     --off-bg:#1C2530;  --off-br:#2C3A48;
-  }
-  /* El sidebar ya es azul marino oscuro de por sí: se mantiene igual en ambos modos. */
 
   /* --- Grupos del menú con franja de color --- */
   .navgroup{position:relative;padding-left:11px;margin-bottom:4px;}
@@ -1895,16 +1851,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <!-- ============ DASHBOARD ============ -->
       <div class="view active" id="view-dashboard">
 
-        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
-          <div id="theme-toggle" onclick="toggleTheme()" style="display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line-strong);border-radius:20px;padding:5px 6px;cursor:pointer;user-select:none;box-shadow:var(--shadow);">
-            <span id="theme-toggle-label-day" style="font-size:11.5px;font-weight:700;color:var(--text-soft);padding-left:6px;">☀️ Día</span>
-            <span style="position:relative;width:38px;height:20px;background:var(--panel);border:1px solid var(--line-strong);border-radius:20px;display:inline-block;transition:background .18s;">
-              <span id="theme-toggle-knob" style="position:absolute;top:1px;left:1px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.3);"></span>
-            </span>
-            <span id="theme-toggle-label-night" style="font-size:11.5px;font-weight:700;color:var(--text-soft);padding-right:6px;">🌙 Noche</span>
-          </div>
-        </div>
-
         <div class="card dash-week-card">
           <div class="section-title" style="margin-bottom:14px;">
             <span>Calendario de la semana</span>
@@ -2558,6 +2504,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="gv-toolbar">
             <input id="gm-search" placeholder="Buscar grupo…" oninput="renderGruposMaestro()">
             <select id="gm-tipo" onchange="renderGruposMaestro()"><option value="">Todos los tipos</option></select>
+            <select id="gm-provincia" onchange="renderGruposMaestro()">
+              <option value="">Todas las provincias</option>
+              <option value="Barcelona">Barcelona</option>
+              <option value="Girona">Girona</option>
+              <option value="Lleida">Lleida</option>
+              <option value="Tarragona">Tarragona</option>
+            </select>
             <span class="gv-count" id="gm-count"></span>
             <button class="btn btn-primary btn-sm" onclick="openGrupoModal()">+ Nuevo grupo</button>
           </div>
@@ -3607,37 +3560,6 @@ async function fetchDashboardVisits(){
     deltaEl.style.color = 'var(--text-soft)';
   }
   renderWeekCalendar();
-}
-
-/* ============================================================
-   MODO NOCHE — toggle Día/Noche con persistencia en localStorage
-   ============================================================ */
-function isDarkTheme(){
-  return document.documentElement.classList.contains('theme-dark');
-}
-function syncThemeToggleUI(){
-  const knob = document.getElementById('theme-toggle-knob');
-  const track = knob ? knob.parentElement : null;
-  const labelDay = document.getElementById('theme-toggle-label-day');
-  const labelNight = document.getElementById('theme-toggle-label-night');
-  const dark = isDarkTheme();
-  if(knob) knob.style.left = dark ? '19px' : '1px';
-  if(track) track.style.background = dark ? 'var(--accent-soft)' : 'var(--panel)';
-  if(labelDay) labelDay.style.color = dark ? 'var(--text-dim)' : 'var(--accent)';
-  if(labelDay) labelDay.style.fontWeight = dark ? '600' : '800';
-  if(labelNight) labelNight.style.color = dark ? 'var(--accent-dark)' : 'var(--text-dim)';
-  if(labelNight) labelNight.style.fontWeight = dark ? '800' : '600';
-}
-function toggleTheme(){
-  const dark = !isDarkTheme();
-  document.documentElement.classList.toggle('theme-dark', dark);
-  try{ localStorage.setItem('pdx-theme', dark ? 'dark' : 'light'); }catch(e){}
-  syncThemeToggleUI();
-}
-if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', syncThemeToggleUI);
-} else {
-  syncThemeToggleUI();
 }
 
 /* ============================================================
@@ -6926,10 +6848,225 @@ async function loadGruposData(){
   GC_CACHE = gc || [];
 }
 
+/* ============================================================
+   MAPEO POBLACIÓN → PROVINCIA (Catalunya: BCN / GI / LL / TGN)
+   Normaliza (minúsculas, sin acentos, sin paréntesis) y busca en
+   el diccionario. Si no encuentra nada, devuelve '' (desconocida).
+   ============================================================ */
+const PROVINCIA_MAP = {
+  'ager':'Lleida','agramunt':'Lleida','agullana':'Girona','aiguafreda':'Barcelona','aiguamurcia':'Tarragona',
+  'aiguaviva':'Girona','aitona':'Lleida','alas':'Lleida','albanya':'Girona','albesa':'Lleida','albinyana':'Tarragona',
+  'albons':'Girona','alcanar':'Tarragona','alcano':'Lleida','alcarras':'Lleida','alcoletge':'Lleida','alcover':'Tarragona',
+  'aldover':'Tarragona','alella':'Barcelona','alfara de carles':'Tarragona','alfarras':'Lleida','alfes':'Lleida',
+  'alforja':'Tarragona','algerri':'Lleida','alguaire':'Lleida','alins':'Lleida','alio':'Tarragona','almacelles':'Lleida',
+  'almeda mercader':'Barcelona','almenar':'Lleida','almoster':'Tarragona','alp':'Girona','alpens':'Barcelona',
+  'alpicat':'Lleida','altafulla':'Tarragona','amer':'Girona','amposta':'Tarragona','angles':'Girona','anglesola':'Lleida',
+  'arbeca':'Lleida','arbucies':'Girona','ardevol':'Lleida','arenys de mar':'Barcelona','arenys de munt':'Barcelona',
+  'argelaguer':'Girona','argentona':'Barcelona','arnes':'Tarragona','artes':'Barcelona','artesa de lleida':'Lleida',
+  'artesa de segre':'Lleida','arties':'Lleida','avia':'Barcelona','avinyo':'Barcelona','avinyo nou':'Barcelona',
+  'avinyonet de puigventos':'Girona','avinyonet del penedes':'Barcelona','badalona':'Barcelona','badia del valles':'Barcelona',
+  'badolana':'Barcelona','baga':'Barcelona','balaguer':'Lleida','balsareny':'Barcelona','banyeres del penedes':'Tarragona',
+  'banyoles':'Girona','barbens':'Lleida','barbera de la conca':'Tarragona','barbera del valles':'Barcelona',
+  'barri del remei-castell':'Barcelona','barri maritim de coma-ruga':'Tarragona','barriada nova':'Barcelona',
+  'barruera':'Lleida','bas':'Girona','bascara':'Girona','batea':'Tarragona','begues':'Barcelona','begur':'Girona',
+  'belianes':'Lleida',"bell-lloc d'urgell":'Lleida','bellaguarda':'Lleida','bellaterra':'Barcelona','bellavista':'Barcelona',
+  "bellcaire d'emporda":'Girona',"bellcaire d'urgell":'Lleida',"bellmunt d'urgell":'Lleida','bellmunt del priorat':'Tarragona',
+  'bellpuig':'Lleida','bellulla':'Tarragona','bellver de cerdanya':'Lleida','bellvis':'Lleida','benavent de segria':'Lleida',
+  'benifallet':'Tarragona','benissanet':'Tarragona','berga':'Barcelona','besalu':'Girona','bescano':'Girona',
+  'bitem':'Tarragona','biure':'Girona','blancafort':'Tarragona','blanes':'Girona','boadella':'Girona','bolvir':'Girona',
+  'bonastre':'Tarragona','bonavista':'Tarragona','bordils':'Girona','borras':'Barcelona','borrassa':'Girona',
+  'borreda':'Barcelona','bossost':'Lleida','bot':'Tarragona','botarell':'Tarragona','bovera':'Lleida','brafim':'Tarragona',
+  'breda':'Girona','butsenit':'Lleida','cabaces':'Tarragona','cabanes':'Girona','cabra del camp':'Tarragona',
+  'cabrera de mar':'Barcelona','cabrianes':'Barcelona','cabrils':'Barcelona','cadaques':'Girona','calaf':'Barcelona',
+  'calafell':'Tarragona','calders':'Barcelona','caldes de malavella':'Girona','caldes de montbui':'Barcelona',
+  'calella':'Barcelona','calldetenes':'Barcelona','callus':'Barcelona','calonge':'Girona','camallera':'Girona',
+  'camarasa':'Lleida','camarles':'Tarragona','cambrils':'Tarragona','campdevanol':'Girona','campins':'Barcelona',
+  'campllong':'Girona','campredo':'Tarragona','camprodon':'Girona','can castells':'Barcelona','can diviu':'Barcelona',
+  'can sant joan':'Barcelona','canaletes':'Tarragona','canet de mar':'Barcelona','canoves':'Barcelona',
+  'canyelles':'Barcelona','capcanes':'Tarragona','capellades':'Barcelona','capmany':'Girona','cardedeu':'Barcelona',
+  'cardona':'Barcelona','carme':'Barcelona','casc urba-santa susanna':'Barcelona','caseres':'Tarragona',
+  'cassa de la selva':'Girona','casserres':'Barcelona',"castell d'aro":'Girona','castellar del valles':'Barcelona',
+  'castellbisbal':'Barcelona','castellcir':'Barcelona','castellciutat':'Lleida','castelldans':'Lleida',
+  'castelldefels':'Barcelona','castellfollit de la roca':'Girona','castellfollit del boix':'Barcelona',
+  'castellgali':'Barcelona','castellnou de bages':'Barcelona','castellnou de seana':'Lleida',"castello d'empuries":'Girona',
+  'castello de farfanya':'Lleida','castelloli':'Barcelona','castellsera':'Lleida','castellterçol':'Barcelona',
+  'castellvell del camp':'Tarragona','castellvi de la marca':'Barcelona','celra':'Girona','centelles':'Barcelona',
+  'cercs':'Barcelona','cerdanyola del valles':'Barcelona','cervello':'Barcelona','cervera':'Lleida',
+  'cervia de les garrigues':'Lleida','cervia de ter':'Girona','cistella':'Girona','ciutadilla':'Lleida','colera':'Girona',
+  'coll de nargo':'Lleida','collbato':'Barcelona','collsuspina':'Barcelona','colonia guell':'Barcelona',
+  'constanti':'Tarragona','copons':'Barcelona',"corbera d'ebre":'Tarragona','corbera de llobregat':'Barcelona',
+  'corbins':'Lleida','corça':'Girona','cornella de llobregat':'Barcelona','cornella del terri':'Girona',
+  'cornudella de montsant':'Tarragona',"corro d'avall":'Barcelona','creixell':'Tarragona','creu de palau':'Girona',
+  'cruilles':'Girona','cubelles':'Barcelona','cubells':'Lleida','cunit':'Tarragona','darnius':'Girona',
+  'deltebre':'Tarragona','domeny':'Girona','dosrius':'Barcelona','duesaigues':'Tarragona','el bruc':'Barcelona',
+  'el catllar':'Tarragona',"el far d'emporda":'Girona','el gurri':'Barcelona','el mallol':'Girona','el masnou':'Barcelona',
+  'el masroig':'Tarragona','el mila':'Tarragona','el molar':'Tarragona','el morell':'Tarragona',
+  "el palau d'anglesola":'Lleida','el papiol':'Barcelona','el perello':'Tarragona','el pinell de brai':'Tarragona',
+  'el pla':'Barcelona','el pla de sant tirs':'Lleida','el pla de santa maria':'Tarragona','el pla del penedes':'Barcelona',
+  'el poal':'Lleida',"el pont d'armentera":'Tarragona','el pont de suert':'Lleida','el port de la selva':'Girona',
+  'el prat de llobregat':'Barcelona','el rieral':'Barcelona','el solerà':'Lleida','el soleras':'Lleida',
+  'el vendrell':'Tarragona','els alamus':'Lleida','els guiamets':'Tarragona','els hostalets':'Lleida',
+  'els hostalets de balenya':'Barcelona','els hostalets de pierola':'Barcelona','els monjos':'Barcelona',
+  'els muntells':'Tarragona','els omells de na gaia':'Lleida','els pallaresos':'Tarragona','els prats de rei':'Barcelona',
+  'els reguers':'Tarragona',"entitat oest d'abrera":'Barcelona',"es bordes":'Lleida','esclanya':'Girona',
+  'esparreguera':'Barcelona','espluga de serra':'Lleida','espluges':'Barcelona','esplugues de llobregat':'Barcelona',
+  'espolla':'Girona','esponella':'Girona',"esterri d'aneu":'Lleida','falset':'Tarragona','figaro-montmany':'Barcelona',
+  'figueres':'Girona','figuerola del camp':'Tarragona','flaça':'Girona','flix':'Tarragona','fogars de la selva':'Girona',
+  'folgueroles':'Barcelona','fondarella':'Lleida','fonollosa':'Barcelona','font-rubi':'Barcelona','fontcoberta':'Girona',
+  'fornells de la selva':'Girona','fortia':'Girona','freginals':'Tarragona','freixinet':'Lleida','gandesa':'Tarragona',
+  'garcia':'Tarragona','garrigas':'Girona','garriguella':'Girona','gava':'Barcelona','gelida':'Barcelona','ger':'Girona',
+  'gerb':'Lleida','gessa':'Lleida','gimenells':'Lleida','ginestar':'Tarragona','girona':'Girona','gironella':'Barcelona',
+  'godall':'Tarragona','golmes':'Lleida','gosol':'Barcelona','granollers':'Barcelona','gratallops':'Tarragona',
+  'gualba':'Barcelona','guardiola':'Barcelona','guardiola de bergueda':'Barcelona','guimera':'Lleida',
+  'guissona':'Lleida','gurb':'Barcelona','horta de sant joan':'Tarragona','hospitalet de llobregat':'Barcelona',
+  'hostalric':'Girona','igualada':'Barcelona','isona':'Lleida',"ivars d'urgell":'Lleida','ivars de noguera':'Lleida',
+  'jesus':'Tarragona','joncosa de montmell':'Tarragona','jorba':'Barcelona','juncosa':'Lleida','juneda':'Lleida',
+  "l'albages":'Lleida',"l'albi":'Lleida',"l'aldea":'Tarragona',"l'aleixar":'Tarragona',"l'ametlla de mar":'Tarragona',
+  "l'ametlla del valles":'Barcelona',"l'ampolla":'Tarragona',"l'arboç":'Tarragona',"l'armentera":'Girona',
+  "l'escala":'Girona',"l'espluga calba":'Lleida',"l'espluga de francoli":'Tarragona',"l'esquerda":'Barcelona',
+  "l'esquirol":'Barcelona',"l'estany":'Barcelona',"l'estartit":'Girona',"l'hospitalet de l'infant":'Tarragona',
+  "l'hospitalet de llobregat":'Barcelona','la batlloria':'Barcelona','la beguda alta':'Barcelona',
+  "la bisbal d'emporda":'Girona','la bisbal de falset':'Tarragona','la bisbal del penedes':'Tarragona',
+  'la canonja':'Tarragona','la canya':'Girona','la cellera de ter':'Girona','la coma':'Lleida','la coromina':'Barcelona',
+  'la fatarella':'Tarragona','la floresta':'Barcelona','la fuliola':'Lleida','la galera':'Tarragona','la garriga':'Barcelona',
+  'la gleva':'Barcelona','la gornal':'Barcelona','la granada':'Barcelona','la granadella':'Lleida',
+  "la granja d'escarp":'Lleida','la jonquera':'Girona','la llacuna':'Barcelona','la llagosta':'Barcelona',
+  'la maso':'Tarragona','la munia':'Barcelona','la nou de gaia':'Tarragona',"la palma d'ebre":'Tarragona',
+  'la palma de cervello':'Barcelona','la pera':'Girona','la pineda':'Tarragona','la pobla de claramunt':'Barcelona',
+  'la pobla de lillet':'Barcelona','la pobla de mafumet':'Tarragona','la pobla de massaluca':'Tarragona',
+  'la pobla de segur':'Lleida','la portella':'Lleida','la rapita':'Tarragona','la riba':'Tarragona',
+  'la riera de gaia':'Tarragona','la roca del valles':'Barcelona','la sagrera':'Barcelona','la secuita':'Tarragona',
+  'la selva del camp':'Tarragona','la senia':'Tarragona','la sentiu de sio':'Lleida','la serra':'Barcelona',
+  "la serra d'almos":'Tarragona',"la seu d'urgell":'Lleida','la torre alta':'Barcelona','la torre de cabdella':'Lleida',
+  "la torre de l'espanyol":'Tarragona','la vila':'Girona','la vilella baixa':'Tarragona','lavern':'Barcelona',
+  'lavit':'Barcelona','les':'Lleida','les avellanes':'Lleida','les borges blanques':'Lleida','les borges del camp':'Tarragona',
+  'les cabanyes':'Barcelona',"les cases d'alcanar":'Tarragona','les fonts':'Barcelona','les pallargues':'Lleida',
+  'les peces':'Tarragona',"les planes d'hostoles":'Girona','les preses':'Girona','les roquetes':'Barcelona',
+  'les ventoses':'Lleida','ligallo del ganguil':'Tarragona','linyola':'Lleida','llado':'Girona','lladurs':'Lleida',
+  'llagostera':'Girona','llanars':'Girona','llardecans':'Lleida','llavorsi':'Lleida','lleida':'Lleida','llers':'Girona',
+  'lles de cerdanya':'Girona','liça de vall':'Barcelona','lliça de vall':'Barcelona','llinars del valles':'Barcelona',
+  'llivia':'Girona','llobera':'Lleida','llorenç del penedes':'Tarragona','lloret de mar':'Girona',
+  'maçanet de cabrenys':'Girona','maçanet de la selva':'Girona','maials':'Lleida','maians':'Barcelona','malda':'Lleida',
+  'malgrat de mar':'Barcelona','manlleu':'Barcelona','manresa':'Barcelona','marça':'Tarragona','martinet':'Lleida',
+  'martorell':'Barcelona','martorelles':'Barcelona','mas de barberans':'Tarragona','mas rampinyo':'Barcelona',
+  'masdenverge':'Tarragona','masllorenç':'Tarragona','maspujols':'Tarragona','masquefa':'Barcelona',
+  'massalcoreig':'Lleida','mata':'Barcelona','matadepera':'Barcelona','mataro':'Barcelona','medinya':'Girona',
+  'mediona':'Barcelona','menarguens':'Lleida','miami platja':'Tarragona','mieres':'Girona','mira-sol':'Barcelona',
+  'miravet':'Tarragona','moia':'Barcelona','moja':'Barcelona','molins de rei':'Barcelona','mollerussa':'Lleida',
+  'mollet del valles':'Barcelona','monells':'Girona','monestir':'Barcelona','monistrol de calders':'Barcelona',
+  'monistrol de montserrat':'Barcelona','mont-ral':'Tarragona','mont-ras':'Girona','mont-roig del camp':'Tarragona',
+  'montagut':'Girona','montblanc':'Tarragona','montbrio del camp':'Tarragona','montcada centre':'Barcelona',
+  'montella':'Lleida','montesquiu':'Barcelona','montferrer':'Lleida','montgai':'Lleida','montgat':'Barcelona',
+  'montmajor':'Barcelona','montmelo':'Barcelona','montoliu de lleida':'Lleida','montornes centre':'Barcelona',
+  'montseny':'Barcelona',"mora d'ebre":'Tarragona','mora la nova':'Tarragona','muntanyola':'Barcelona','mura':'Barcelona',
+  'navarcles':'Barcelona','navas':'Barcelona','navata':'Girona','naves':'Lleida','nucli antic':'Barcelona',
+  'nulles':'Tarragona','odena':'Barcelona','ogassa':'Girona','olerdola':'Barcelona','olesa de bonesvalls':'Barcelona',
+  'olesa de montserrat':'Barcelona','oliana':'Lleida','olius':'Lleida','olivella':'Barcelona','olost':'Barcelona',
+  'olot':'Girona','olvan':'Barcelona','ordal':'Barcelona','ordis':'Girona','organya':'Lleida','orista':'Barcelona',
+  'orrius':'Barcelona','os de balaguer':'Lleida','pacs del penedes':'Barcelona','palafolls':'Barcelona',
+  'palafrugell':'Girona','palamos':'Girona','palau-saverdera':'Girona','palau-solita i plegamans':'Barcelona',
+  'palleja':'Barcelona','pals':'Girona','parets del valles':'Barcelona','parlava':'Girona','pau':'Girona',
+  'pauls':'Tarragona','penelles':'Lleida','perafita':'Barcelona','perafort':'Tarragona','peralada':'Girona',
+  'peramola':'Lleida','picamoixons':'Tarragona','piera':'Barcelona','pineda de mar':'Barcelona','pira':'Tarragona',
+  'pla de la font':'Lleida','plana de mont-la ros':'Lleida','planoles':'Girona',"platja d'aro":'Girona',
+  'poble nou del delta':'Tarragona','poboleda':'Tarragona','polinya':'Barcelona','pont de molins':'Girona',
+  'pont major':'Girona','ponts':'Lleida','porqueres':'Girona','porrera':'Tarragona','prades':'Tarragona',
+  'prat de comte':'Tarragona','pratdip':'Tarragona','prats':'Lleida','prats de lluçanes':'Barcelona','preixana':'Lleida',
+  'preixens':'Lleida','premia de mar':'Barcelona','prullans':'Lleida','puig-reig':'Barcelona','puigcerda':'Girona',
+  'puigdalber':'Barcelona','puiggros':'Lleida','puigpelat':'Tarragona',"puigverd d'agramunt":'Lleida',
+  'puigverd de lleida':'Lleida','quart':'Girona','quintanas':'Barcelona','raimat':'Lleida','rasquera':'Tarragona',
+  'raval de cristo':'Tarragona','rellinars':'Barcelona','reus':'Tarragona','rialp':'Lleida',"riba-roja d'ebre":'Tarragona',
+  'ribera de cardos':'Lleida','ribes de freser':'Girona','rieral de bigues':'Barcelona','ripoll':'Girona',
+  'ripollet':'Barcelona','riudarenes':'Girona','riudaura':'Girona','riudecanyes':'Tarragona','riudecols':'Tarragona',
+  'riudellots de la selva':'Girona','riudoms':'Tarragona','riumors':'Girona','rocafort de queralt':'Tarragona',
+  'roda de bera':'Tarragona','roda de ter':'Barcelona','rodonya':'Tarragona','roquetes':'Tarragona','roses':'Girona',
+  'rossello':'Lleida','rubi':'Barcelona','rupit':'Barcelona','sabadell':'Barcelona','salardu':'Lleida',
+  'salas de pallars':'Lleida','sallent':'Barcelona','salomo':'Tarragona','salou':'Tarragona','salt':'Girona',
+  'sanauja':'Lleida','sant adria':'Barcelona','sant adria de beso':'Barcelona',"sant adria de besos":'Barcelona',
+  "sant adria del besos":'Barcelona','sant andreu de la barca':'Barcelona','sant andreu de llavaneres':'Barcelona',
+  'sant andria del besos':'Barcelona','sant antoli i vilanova':'Lleida','sant antoni de calonge':'Girona',
+  'sant antoni de vilamajor':'Barcelona','sant bartomeu del grau':'Barcelona','sant boi de llobregat':'Barcelona',
+  'sant boi de lluçanes':'Barcelona','sant cebria de vallalta':'Barcelona','sant celoni':'Barcelona',
+  'sant climenç':'Lleida','sant climent de llobregat':'Barcelona','sant climent sescebes':'Girona',
+  'sant cristofol les fonts':'Girona','sant cugat':'Barcelona','sant cugat del valles':'Barcelona',
+  'sant cugat sesgarrigues':'Barcelona','sant esteve de guialbes':'Girona','sant esteve de palautordera':'Barcelona',
+  'sant esteve sesrovires':'Barcelona','sant feliu de buixalleu':'Girona','sant feliu de codines':'Barcelona',
+  "sant feliu de guixols":'Girona','sant feliu de llobregat':'Barcelona','sant feliu de pallerols':'Girona',
+  'sant feliu sasserra':'Barcelona','sant fost de campsentelles':'Barcelona','sant fruitos de bages':'Barcelona',
+  'sant gregori':'Girona','sant guim de freixenet':'Lleida','sant hilari sacalm':'Girona',
+  "sant hipolit de voltrega":'Barcelona','sant iscle de vallalta':'Barcelona',"sant jaume d'enveja":'Tarragona',
+  'sant jaume de llierca':'Girona','sant jaume dels domenys':'Tarragona','sant joan de les abadesses':'Girona',
+  'sant joan de palamos':'Girona','sant joan de vilatorrada':'Barcelona','sant joan despi':'Barcelona',
+  'sant joan les fonts':'Girona','sant jordi':'Lleida','sant julia de cerdanyola':'Barcelona',
+  'sant julia de ramis':'Girona','sant julia de vilatorta':'Barcelona','sant just desvern':'Barcelona',
+  'sant llorenç de morunys':'Lleida','sant llorenç savall':'Barcelona','sant marçal':'Barcelona',
+  'sant marti de centelles':'Barcelona','sant marti de malda':'Lleida','sant marti de tous':'Barcelona',
+  'sant marti sarroca':'Barcelona','sant marti sesgueioles':'Barcelona',"sant miquel d'olerdola":'Barcelona',
+  'sant miquel de balenya':'Barcelona','sant miquel de fluvia':'Girona',"sant pau d'ordal":'Barcelona',
+  'sant pau de seguries':'Girona','sant pere de ribes':'Barcelona','sant pere de riudebitlles':'Barcelona',
+  'sant pere de torello':'Barcelona','sant pere de vilamajor':'Barcelona','sant pere i sant pau':'Tarragona',
+  'sant pere molanta':'Barcelona','sant pere pescador':'Girona','sant pere ribes':'Barcelona',
+  'sant pere sacarrera i urbanitzacio font del bosc':'Barcelona','sant pol de mar':'Barcelona',
+  'sant quinti de mediona':'Barcelona','sant quirze de besora':'Barcelona','sant quirze del valles':'Barcelona',
+  'sant quirze safaja':'Barcelona','sant ramon':'Lleida','sant sadurni':'Girona',"sant sadurni d'anoia":'Barcelona',
+  'sant salvador':'Tarragona','sant salvador de guardiola':'Barcelona','sant vicenç de camos':'Girona',
+  'sant vicenç de castellet':'Barcelona','sant vicenç de montalt':'Barcelona','sant vicenç de torello':'Barcelona',
+  'sant vicenç dels horts':'Barcelona',"santa agnes de malanyanes":'Barcelona','santa anna-tio':'Lleida',
+  'santa barbara':'Tarragona','santa coloma de cervello':'Barcelona','santa coloma de farners':'Girona',
+  'santa coloma de gramanet':'Barcelona','santa coloma de gramenet':'Barcelona','santa coloma de queralt':'Tarragona',
+  "santa cristina d'aro":'Girona','santa eugenia de berga':'Barcelona','santa eulalia de puig-oriol':'Barcelona',
+  'santa eulalia de riuprimer':'Barcelona','santa fe del penedes':'Barcelona','santa margarida de montbui':'Barcelona',
+  'santa margarida i els monjos':'Barcelona',"santa maria d'olo":'Barcelona','santa maria de besora':'Barcelona',
+  'santa maria de martorelles':'Barcelona','santa maria de palautordera':'Barcelona','santa oliva':'Tarragona',
+  'santa pau':'Girona','santa perpetua de mogoda':'Barcelona','santpedor':'Barcelona','sarral':'Tarragona',
+  'sarria de ter':'Girona','sarroca de lleida':'Lleida','segur de calafell':'Tarragona','sentmenat':'Barcelona',
+  'serinya':'Girona','seros':'Lleida','seva':'Barcelona','sidamon':'Lleida','sils':'Girona','sitges':'Barcelona',
+  'solivella':'Tarragona','solsona':'Lleida','sort':'Lleida','soses':'Lleida','subirats':'Barcelona','suchs':'Lleida',
+  'sudanell':'Lleida','sunyer':'Lleida','suria':'Barcelona','taradell':'Barcelona','tarragona':'Tarragona',
+  'tarrega':'Lleida','tartareu':'Lleida','teia centre':'Barcelona','termens':'Lleida','terrasa':'Barcelona',
+  'terrassa':'Barcelona','tiana':'Barcelona','tirvia':'Lleida','tivenys':'Tarragona','tivissa':'Tarragona',
+  'tona':'Barcelona','tora':'Lleida','tordera':'Barcelona','torello':'Barcelona','tornabous':'Lleida',
+  'torre-serona':'Lleida','torrebesses':'Lleida','torredembarra':'Tarragona','torrefarrera':'Lleida',
+  'torreforta':'Tarragona','torregrossa':'Lleida','torrelameu':'Lleida','torrelles de foix':'Barcelona',
+  'torrelles de llobregat':'Barcelona','torres de segre':'Lleida','torroella de montgri':'Girona','tortella':'Girona',
+  'tortosa':'Tarragona','tossa':'Girona','tredos':'Lleida','tremp':'Lleida','tuixent':'Lleida','ulla':'Girona',
+  'ullastrell':'Barcelona','ullastret':'Girona','ulldecona':'Tarragona','ulldemolins':'Tarragona',
+  'vacarisses':'Barcelona','vall-llobrega':'Girona',"vallbona d'anoia":'Barcelona','vallcebre':'Barcelona',
+  'valldoreix':'Barcelona','vallfogona de balaguer':'Lleida','vallfogona de ripolles':'Girona',
+  'vallgorguina':'Barcelona','vallromanes':'Barcelona','valls':'Tarragona','valls de torruella':'Lleida',
+  'vandellos':'Tarragona','ventallo':'Girona','verdu':'Lleida','verges':'Girona','viabrea':'Girona','vic':'Barcelona',
+  'vidra':'Barcelona','vidreres':'Girona','vielha':'Lleida','vila-rodona':'Tarragona','vila-roja':'Girona',
+  'vila-sana':'Lleida','vila-seca':'Tarragona','vilabella':'Tarragona','vilabertran':'Girona','vilablareix':'Girona',
+  'vilada':'Barcelona','viladamat':'Girona','viladecans':'Barcelona','viladecavalls':'Barcelona',
+  'viladoma i la geltru':'Barcelona','viladrau':'Barcelona','vilafant':'Girona','vilafranca del penedes':'Barcelona',
+  'vilagrassa':'Lleida','vilajuiga':'Girona','vilalba dels arcs':'Tarragona','vilalba sasserra':'Barcelona',
+  'vilaller':'Lleida','vilallonga de ter':'Girona','vilallonga del camp':'Tarragona','vilamacolum':'Girona',
+  'vilamalla':'Girona',"vilanova d'escornalbou":'Tarragona',"vilanova d'espoia":'Barcelona',
+  'vilanova de bellpuig':'Lleida','vilanova de la barca':'Lleida','vilanova de meia':'Lleida','vilanova de sau':'Barcelona',
+  'vilanova de segria':'Lleida','vilanova del cami':'Barcelona','vilanova del valles':'Barcelona',
+  'vilanova i la geltru':'Barcelona','vilaplana':'Tarragona','vilassar de dalt':'Barcelona','vilassar de mar':'Barcelona',
+  'vilaverd':'Tarragona',"vilobi d'onyar":'Girona','vilobi del penedes':'Barcelona','vimbodi i poblet':'Tarragona',
+  'vinaixa':'Lleida','vinallop':'Tarragona','vinebre':'Tarragona','vinyoles':'Barcelona','vinyols i els arcs':'Tarragona',
+  'vulpellac':'Girona','xerta':'Tarragona'
+};
+function getProvincia(poblacion){
+  if(!poblacion) return '';
+  let s = poblacion.toString().trim();
+  // "Barcelona (Distrito)" -> siempre Barcelona ciudad
+  if(/^barcelona\s*\(/i.test(s)) return 'Barcelona';
+  // quita sufijos ",Lleida" / ",Girona" / ",Tarragona" / ",Barcelona" ya explícitos
+  const suf = s.match(/,\s*(Lleida|Girona|Tarragona|Barcelona)\s*$/i);
+  if(suf) return suf[1].charAt(0).toUpperCase()+suf[1].slice(1).toLowerCase();
+  s = s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+  s = s.replace(/\.$/,'').replace(/\s+/g,' ');
+  return PROVINCIA_MAP[s] || '';
+}
+
 /* ---------------- MAESTRO ---------------- */
 function renderGruposMaestro(){
   const q    = (document.getElementById('gm-search')?.value||'').toLowerCase().trim();
   const tipo = document.getElementById('gm-tipo')?.value || '';
+  const prov = document.getElementById('gm-provincia')?.value || '';
 
   // rellenar el selector de tipos
   const sel = document.getElementById('gm-tipo');
@@ -6941,6 +7078,7 @@ function renderGruposMaestro(){
 
   const list = GM_CACHE.filter(g=>{
     if(tipo && g.tipo !== tipo) return false;
+    if(prov && getProvincia(g.poblacion) !== prov) return false;
     if(!q) return true;
     return [g.grupo,g.email,g.contacto,g.comentarios,g.tel1,g.tel2,g.poblacion]
       .some(v=>(v||'').toString().toLowerCase().includes(q));
