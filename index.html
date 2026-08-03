@@ -901,6 +901,26 @@
     color:var(--text-soft);}
   .lm-arrow,.lm-eur,.lm-cal{flex-shrink:0;font-weight:800;color:var(--accent);width:16px;text-align:center;}
 
+  /* pantallazos semanales (SumUp / Fever) */
+  .lm-shots{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:900px){.lm-shots{grid-template-columns:1fr;}}
+  .lm-shot-box{display:flex;flex-direction:column;gap:7px;min-width:0;}
+  .lm-shot-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .lm-shot-name{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--text-soft);}
+  .lm-shot-actions{display:flex;gap:6px;}
+  .lm-drop{border:2px dashed var(--line-strong);border-radius:10px;background:var(--panel);
+    min-height:104px;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:12px;cursor:pointer;transition:all .12s;outline:none;}
+  .lm-drop:hover,.lm-drop:focus{border-color:var(--accent);background:var(--accent-soft);}
+  .lm-drop.dragover{border-color:var(--accent);background:var(--accent-soft);border-style:solid;}
+  .lm-drop.has-img{border-style:solid;border-color:var(--line-strong);background:var(--surface);
+    padding:6px;min-height:0;display:block;cursor:zoom-in;}
+  .lm-drop img{display:block;width:100%;height:auto;border-radius:6px;}
+  .lm-drop-hint{font-size:12px;line-height:1.5;color:var(--text-soft);font-weight:600;}
+  .lm-drop-hint b{color:var(--accent);}
+  .lm-shot-state{font-size:11px;font-weight:700;color:var(--text-dim);min-height:14px;}
+  .lm-pick{color:var(--accent);font-weight:800;text-decoration:underline;cursor:pointer;}
+
   /* ── GRUPOS v2 ─────────────────────────────────────────────── */
   .gv-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
   .gv-toolbar input[type=text],.gv-toolbar input:not([type]){width:220px;}
@@ -2484,6 +2504,55 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             </div>
           </div>
 
+        </div>
+
+        <!-- Pantallazos de la semana: efectivo en SumUp vs Fever -->
+        <div class="card" style="margin-top:14px;">
+          <div class="section-title" style="margin-bottom:10px;">
+            Pantallazos de la semana
+            <span class="hint" id="loomis-shots-week">Se guardan junto al cuadre de esta semana</span>
+          </div>
+          <div class="lm-shots">
+
+            <div class="lm-shot-box">
+              <div class="lm-shot-head">
+                <span class="lm-shot-name">SumUp</span>
+                <span class="lm-shot-actions" id="lm-shot-actions-sumup"></span>
+              </div>
+              <div class="lm-drop" id="lm-drop-sumup" tabindex="0"
+                   onclick="loomisShotClick('sumup')"
+                   onpaste="loomisShotPaste(event,'sumup')"
+                   ondragover="loomisShotDrag(event,'sumup',true)"
+                   ondragleave="loomisShotDrag(event,'sumup',false)"
+                   ondrop="loomisShotDrop(event,'sumup')">
+                <div class="lm-drop-hint">Haz clic aquí y pega con <b>Ctrl+V</b><br>arrastra la imagen, o
+                  <a href="#" class="lm-pick" onclick="loomisShotPick(event,'sumup');return false;">elige un archivo</a></div>
+              </div>
+              <div class="lm-shot-state" id="lm-shot-state-sumup"></div>
+              <input type="file" accept="image/*" id="lm-file-sumup" style="display:none;"
+                     onchange="loomisShotFile(event,'sumup')">
+            </div>
+
+            <div class="lm-shot-box">
+              <div class="lm-shot-head">
+                <span class="lm-shot-name">Fever</span>
+                <span class="lm-shot-actions" id="lm-shot-actions-fever"></span>
+              </div>
+              <div class="lm-drop" id="lm-drop-fever" tabindex="0"
+                   onclick="loomisShotClick('fever')"
+                   onpaste="loomisShotPaste(event,'fever')"
+                   ondragover="loomisShotDrag(event,'fever',true)"
+                   ondragleave="loomisShotDrag(event,'fever',false)"
+                   ondrop="loomisShotDrop(event,'fever')">
+                <div class="lm-drop-hint">Haz clic aquí y pega con <b>Ctrl+V</b><br>arrastra la imagen, o
+                  <a href="#" class="lm-pick" onclick="loomisShotPick(event,'fever');return false;">elige un archivo</a></div>
+              </div>
+              <div class="lm-shot-state" id="lm-shot-state-fever"></div>
+              <input type="file" accept="image/*" id="lm-file-fever" style="display:none;"
+                     onchange="loomisShotFile(event,'fever')">
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -8577,10 +8646,16 @@ async function renderLoomis(){
   if(lbl) lbl.textContent=`${fmt(monday)} – ${fmt(sunday)} ${sunday.getFullYear()}`;
 
   loomisData={};
+  LOOMIS_SHOTS = { sumup:null, fever:null };
   try{
     const {data}=await sb.from('loomis_semanas').select('*').eq('semana',mondayIso).single();
     if(data?.dias) loomisData=(typeof data.dias==='string')?JSON.parse(data.dias):data.dias;
+    if(data){
+      LOOMIS_SHOTS.sumup = data.shot_sumup || null;
+      LOOMIS_SHOTS.fever = data.shot_fever || null;
+    }
   }catch(e){}
+  renderLoomisShots();
 
   const dias=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
   const body=document.getElementById('loomis-body');
@@ -8760,6 +8835,167 @@ async function saveLoomis(){
   );
   const b = document.getElementById('loomis-saved');
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2500); }
+}
+
+/* ============================================================
+   LOOMIS — pantallazos semanales (SumUp / Fever)
+   Las imágenes NO van dentro de la base de datos: se suben al
+   bucket 'loomis' de Supabase Storage y en loomis_semanas solo
+   guardamos la URL (shot_sumup / shot_fever). Así el backup
+   nocturno y las consultas siguen siendo ligeros.
+   ============================================================ */
+let LOOMIS_SHOTS = { sumup:null, fever:null };
+const LM_SHOT_LABEL = { sumup:'SumUp', fever:'Fever' };
+
+function lmShotState(tipo, msg, color){
+  const el = document.getElementById('lm-shot-state-'+tipo);
+  if(el){ el.textContent = msg || ''; el.style.color = color || 'var(--text-dim)'; }
+}
+
+function renderLoomisShots(){
+  const wk = document.getElementById('loomis-shots-week');
+  if(wk){
+    const lbl = document.getElementById('loomis-week-label');
+    wk.textContent = lbl ? ('Semana ' + lbl.textContent) : 'Se guardan por semana';
+  }
+  ['sumup','fever'].forEach(tipo=>{
+    const drop = document.getElementById('lm-drop-'+tipo);
+    const acts = document.getElementById('lm-shot-actions-'+tipo);
+    if(!drop) return;
+    const url = LOOMIS_SHOTS[tipo];
+    if(url){
+      drop.classList.add('has-img');
+      drop.title = 'Clic para ver el pantallazo a tamaño completo';
+      drop.innerHTML = `<img src="${esc(url)}" alt="Pantallazo ${LM_SHOT_LABEL[tipo]}">`;
+      if(acts) acts.innerHTML =
+        `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();loomisShotOpen('${tipo}')">Ver</button>
+         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();loomisShotDelete('${tipo}')">Quitar</button>`;
+    }else{
+      drop.classList.remove('has-img');
+      drop.title = '';
+      drop.innerHTML = '<div class="lm-drop-hint">Haz clic aquí y pega con <b>Ctrl+V</b><br>arrastra la imagen, o '
+        + '<a href="#" class="lm-pick" onclick="loomisShotPick(event,\''+tipo+'\');return false;">elige un archivo</a></div>';
+      if(acts) acts.innerHTML = '';
+    }
+    lmShotState(tipo, '');
+  });
+}
+
+function loomisShotClick(tipo){
+  // Con imagen: el clic la abre a tamaño completo.
+  // Sin imagen: solo enfoca el recuadro, para que Ctrl+V funcione al momento.
+  // (Abrir aquí el selector de archivo robaría el foco e impediría pegar.)
+  if(LOOMIS_SHOTS[tipo]){ loomisShotOpen(tipo); return; }
+  const d = document.getElementById('lm-drop-'+tipo);
+  if(d) d.focus();
+  lmShotState(tipo, 'Listo para pegar: pulsa Ctrl+V (⌘+V en Mac).', 'var(--accent)');
+}
+function loomisShotPick(ev, tipo){
+  ev.stopPropagation();
+  const f = document.getElementById('lm-file-'+tipo);
+  if(f) f.click();
+}
+function loomisShotOpen(tipo){
+  const url = LOOMIS_SHOTS[tipo];
+  if(url) window.open(url, '_blank', 'noopener');
+}
+function loomisShotDrag(ev, tipo, on){
+  ev.preventDefault();
+  const d = document.getElementById('lm-drop-'+tipo);
+  if(d) d.classList.toggle('dragover', !!on);
+}
+function loomisShotDrop(ev, tipo){
+  ev.preventDefault();
+  loomisShotDrag(ev, tipo, false);
+  const file = [...(ev.dataTransfer?.files||[])].find(f=>f.type.startsWith('image/'));
+  if(file) loomisShotUpload(tipo, file);
+  else lmShotState(tipo, 'Eso no era una imagen.', 'var(--bad)');
+}
+function loomisShotPaste(ev, tipo){
+  const items = [...(ev.clipboardData?.items||[])];
+  const it = items.find(i=>i.type.startsWith('image/'));
+  if(!it) return;
+  ev.preventDefault();
+  const file = it.getAsFile();
+  if(file) loomisShotUpload(tipo, file);
+}
+function loomisShotFile(ev, tipo){
+  const file = ev.target.files && ev.target.files[0];
+  if(file) loomisShotUpload(tipo, file);
+  ev.target.value = '';
+}
+
+/* Reduce la imagen solo si hace falta. Por debajo de 700 KB se sube tal cual
+   para no perder nitidez en los números pequeños del informe. */
+function loomisShotShrink(file){
+  return new Promise(resolve=>{
+    if(file.size <= 700*1024) return resolve(file);
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = ()=>{
+      const maxW = 2000;
+      const scale = Math.min(1, maxW / img.width);
+      const c = document.createElement('canvas');
+      c.width  = Math.round(img.width  * scale);
+      c.height = Math.round(img.height * scale);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => resolve(b || file), 'image/jpeg', 0.92);
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+async function loomisShotUpload(tipo, file){
+  const mondayIso = loomisIso(loomisMonday);
+  lmShotState(tipo, 'Subiendo…', 'var(--accent)');
+  try{
+    const blob = await loomisShotShrink(file);
+    const ext  = (blob.type === 'image/png') ? 'png' : (blob.type === 'image/webp' ? 'webp' : 'jpg');
+    const path = `${mondayIso}/${tipo}.${ext}`;
+
+    const { error: upErr } = await sb.storage.from('loomis')
+      .upload(path, blob, { upsert:true, contentType: blob.type || 'image/jpeg' });
+    if(upErr) throw upErr;
+
+    const { data:pub } = sb.storage.from('loomis').getPublicUrl(path);
+    // ?v= evita que el navegador siga mostrando la imagen anterior de esa semana
+    const url = pub.publicUrl + '?v=' + Date.now();
+
+    const patch = { semana: mondayIso, updated_at: new Date().toISOString() };
+    patch['shot_' + tipo] = url;
+    const { error: dbErr } = await sb.from('loomis_semanas')
+      .upsert(patch, { onConflict:'semana' });
+    if(dbErr) throw dbErr;
+
+    LOOMIS_SHOTS[tipo] = url;
+    renderLoomisShots();
+    lmShotState(tipo, '✓ Guardado (' + Math.round(blob.size/1024) + ' KB)', 'var(--ok)');
+  }catch(err){
+    lmShotState(tipo, 'Error: ' + (err.message || err), 'var(--bad)');
+  }
+}
+
+async function loomisShotDelete(tipo){
+  if(!confirm('¿Quitar el pantallazo de ' + LM_SHOT_LABEL[tipo] + ' de esta semana?')) return;
+  const mondayIso = loomisIso(loomisMonday);
+  try{
+    // Borra los posibles formatos guardados para esa semana
+    await sb.storage.from('loomis').remove(
+      ['png','jpg','webp'].map(e=>`${mondayIso}/${tipo}.${e}`)
+    );
+    const patch = { semana: mondayIso, updated_at: new Date().toISOString() };
+    patch['shot_' + tipo] = null;
+    await sb.from('loomis_semanas').upsert(patch, { onConflict:'semana' });
+    LOOMIS_SHOTS[tipo] = null;
+    renderLoomisShots();
+  }catch(err){
+    lmShotState(tipo, 'Error al quitar: ' + (err.message || err), 'var(--bad)');
+  }
 }
 
 /* ============================================================
