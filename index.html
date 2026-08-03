@@ -974,6 +974,15 @@
   .rs-p-OC{background:#E8E8E8;color:#888;}
   .rs-p-{background:transparent;}
   td.rs-fuera{background:repeating-linear-gradient(45deg,#FAFAFA,#FAFAFA 4px,#F0F0F0 4px,#F0F0F0 8px);}
+  td.rs-drop-over{outline:2px dashed var(--accent);outline-offset:-2px;}
+  tr.rs-fila-resp td.rs-turno,tr.rs-fila-resp td.rs-nombre{background:#FFF3D6;}
+  tr.rs-fila-laia td.rs-turno,tr.rs-fila-laia td.rs-nombre{background:#E6EEFF;}
+
+  /* leyenda de puestos, arrastrable a la rejilla */
+  .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
+  .rs-legend-chip{cursor:grab;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:800;
+    border:1px solid rgba(0,0,0,.15);user-select:none;}
+  .rs-legend-chip:active{cursor:grabbing;}
 
   .rs-warn{display:flex;flex-direction:column;gap:6px;}
   .rs-warn-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;padding:6px 9px;
@@ -2661,16 +2670,18 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 </label>
                 <button class="btn btn-primary btn-sm" onclick="rsAutoFill()">Repartir puestos</button>
                 <button class="btn btn-ghost btn-sm" onclick="rsAddFila()">+ Turno</button>
+                <button class="btn btn-ghost btn-sm" id="rs-btn-laia" onclick="rsToggleLaia()">+ Laia</button>
                 <button class="btn btn-ghost btn-sm" onclick="rsSaveDia()">Guardar</button>
                 <span id="rs-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓</span>
               </div>
             </div>
+            <div class="rs-legend" id="rs-legend"></div>
             <div class="rs-grid-wrap">
               <table id="rs-grid"><thead id="rs-grid-head"></thead><tbody id="rs-grid-body"></tbody></table>
             </div>
             <div class="hint" style="margin-top:8px;">
-              Clic en una celda para cambiar el puesto. El orden es:
-              Caja 1 → Caja 2 → 0G → F2 → AV → Admin → Pompas → Greater → Fliers → ARRG → Breaker → Descanso → vacío.
+              Clic en una celda para ciclar el puesto, o arrastra una etiqueta de la leyenda hasta la celda.
+              Las dos primeras filas son fijas para Ignacio, Paula o Ceci; la fila de Laia es opcional.
             </div>
           </div>
 
@@ -9031,6 +9042,42 @@ const RS_HAB = { '1':'caja1', '2':'caja2', '0G':'zerog', 'F2':'floor2', 'AV':'av
                  'Admin':'admin', 'Pompas':'pompas', 'Greater':'greater', 'Fliers':'fliers', 'ARRG':'arrg' };
 const RS_APERTURA = '1000', RS_CIERRE = '2000';   // franja en la que las cajas deben estar cubiertas
 
+/* Filas fijas: Ignacio/Paula/Ceci siempre ocupan las 2 primeras filas (horario
+   predefinido, no editable libremente); Laia es una fila extra opcional que se
+   puede añadir arriba del todo. */
+const RS_RESP_NOMBRES = ['Ignacio','Paula','Ceci'];
+const RS_ETIQ_PUESTO = { '1':'Caja 1','2':'Caja 2','0G':'Zero Gravity','F2':'Floor 2','AV':'Asist. visitante',
+  'Admin':'Admin','Pompas':'Pompas','Greater':'Greater','Fliers':'Fliers','ARRG':'ARRG',
+  'BRK':'Breaker','DESC':'Descanso','OC':'Apertura/Cierre' };
+/* Horarios fijos de los responsables. Ignacio y Paula entran a las 1215 (en vez
+   de las 1245) los lunes, porque son ellos quienes abren tras el fin de semana. */
+function rsTurnosResp(nombre, fechaIso){
+  if(nombre==='Ceci') return ['930-1600','945-1600','1415-2045','1430-2045'];
+  if(nombre==='Ignacio' || nombre==='Paula'){
+    const d = new Date((fechaIso||rsFecha)+'T12:00:00');
+    const lunes = d.getDay()===1;
+    return lunes ? ['930-1730','1215-2045'] : ['930-1730','1245-2045'];
+  }
+  return [];
+}
+/* Turnos del resto del staff: se elige solo la hora de entrada (cada 15 min,
+   de 930 a 1645) y el turno de 4h se calcula solo. */
+function rsMinDeCodigo(c){ const s=String(c).padStart(4,'0'); return parseInt(s.slice(0,2),10)*60 + parseInt(s.slice(2),10); }
+function rsCodigoDeMin(mins){
+  const hh = Math.floor(mins/60) % 24, mm = mins % 60;
+  return String(hh) + String(mm).padStart(2,'0');
+}
+function rsGenInicios(){
+  const out = []; const fin = rsMinDeCodigo('1645');
+  for(let m = rsMinDeCodigo('930'); m <= fin; m += 15) out.push(rsCodigoDeMin(m));
+  return out;
+}
+function rsTurnoDesdeInicio(codigo){
+  if(!codigo) return '';
+  const ini = rsMinDeCodigo(codigo);
+  return codigo + '-' + rsCodigoDeMin(ini + 240);   // 4 horas de turno
+}
+
 let RS_STAFF = [];        // [{nombre, caja1, caja2, ...}]
 let RS_DIA = null;        // {fecha, config, filas}
 let RS_PLAN = {};         // {'YYYY-MM-DD': {nombre: 0|1|2}}
@@ -9171,19 +9218,57 @@ async function rsLoadDia(){
   document.getElementById('rs-cfg-pompas').checked = !!RS_DIA.config.pompas;
   const lbl=document.getElementById('rs-dia-label');
   if(lbl) lbl.textContent = d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
-  if(!RS_DIA.filas.length) rsFilasDesdePlan();
+  const eraNuevo = RS_DIA.filas.length === 0;
+  if(eraNuevo) rsFilasDesdePlan();
+  rsEnsureFilasEspeciales();
   rsRenderGrid();
 }
-/* Si el día está vacío, propone una fila por cada turno que Laia haya marcado */
+/* Si el día está vacío, propone una fila de STAFF por cada turno que Laia haya
+   marcado (Ignacio/Paula/Ceci/Laia no entran aquí: tienen sus propias filas fijas). */
 function rsFilasDesdePlan(){
   const plan = RS_PLAN[rsFecha];
   if(!plan) return;
-  const filas=[];
+  const excluir = new Set(RS_RESP_NOMBRES.concat(['Laia']));
   RS_STAFF.forEach(s=>{
+    if(excluir.has(s.nombre)) return;
     const n = parseInt(plan[s.nombre],10) || 0;
-    for(let i=0;i<n;i++) filas.push({ turno:'', nombre:s.nombre, slots:{} });
+    for(let i=0;i<n;i++) RS_DIA.filas.push({ turno:'', nombre:s.nombre, slots:{} });
   });
-  RS_DIA.filas = filas;
+}
+/* Garantiza que existan siempre exactamente 2 filas de responsables
+   (Ignacio/Paula/Ceci). La fila de Laia es opcional y se gestiona aparte
+   con rsToggleLaia(). */
+function rsEnsureFilasEspeciales(){
+  const resp = RS_DIA.filas.filter(f=>f.tipo==='resp');
+  while(resp.length < 2){
+    const nueva = { tipo:'resp', turno:'', nombre:'', slots:{} };
+    RS_DIA.filas.push(nueva);
+    resp.push(nueva);
+  }
+  const btn = document.getElementById('rs-btn-laia');
+  if(btn) btn.textContent = RS_DIA.filas.some(f=>f.tipo==='laia') ? 'Quitar Laia' : '+ Laia';
+}
+/* Orden de visualización: Laia (si existe) → los 2 responsables → el resto del staff.
+   Devuelve los índices reales dentro de RS_DIA.filas, para que los onclick sigan
+   apuntando a la fila correcta. */
+function rsOrdenFilas(){
+  const laia=[], resp=[], staff=[];
+  RS_DIA.filas.forEach((f,i)=>{
+    if(f.tipo==='laia') laia.push(i);
+    else if(f.tipo==='resp') resp.push(i);
+    else staff.push(i);
+  });
+  return laia.concat(resp, staff);
+}
+function rsToggleLaia(){
+  const tiene = RS_DIA.filas.some(f=>f.tipo==='laia');
+  if(tiene){
+    if(!confirm('¿Quitar la fila de Laia de este día?')) return;
+    RS_DIA.filas = RS_DIA.filas.filter(f=>f.tipo!=='laia');
+  } else {
+    RS_DIA.filas.unshift({ tipo:'laia', turno:'', nombre:'Laia', slots:{} });
+  }
+  rsRenderGrid();
 }
 function rsSaveConfig(){
   RS_DIA.config.caja1  = document.getElementById('rs-cfg-caja1').checked;
@@ -9195,40 +9280,86 @@ function rsAddFila(){
   rsRenderGrid();
 }
 function rsDelFila(i){
+  if(RS_DIA.filas[i]?.tipo==='resp'){ alert('Las dos filas de responsables (Ignacio/Paula/Ceci) no se pueden borrar.'); return; }
   RS_DIA.filas.splice(i,1);
   rsRenderGrid();
 }
 function rsSetTurno(i, val){ RS_DIA.filas[i].turno = val.trim(); rsRenderGrid(); }
-function rsSetNombre(i, val){ RS_DIA.filas[i].nombre = val; rsRenderGrid(); }
+function rsSetTurnoResp(i, val){ RS_DIA.filas[i].turno = val; rsRenderGrid(); }
+function rsSetInicioStaff(i, val){ RS_DIA.filas[i].turno = val ? rsTurnoDesdeInicio(val) : ''; rsRenderGrid(); }
+function rsSetNombre(i, val){
+  const f = RS_DIA.filas[i];
+  f.nombre = val;
+  if(f.tipo==='resp'){
+    const validos = rsTurnosResp(val, RS_DIA.fecha);
+    if(!validos.includes(f.turno)) f.turno = '';
+  }
+  rsRenderGrid();
+}
 
 function rsRenderGrid(){
+  rsRenderLeyenda();
   const head=document.getElementById('rs-grid-head');
   if(head) head.innerHTML = '<tr><th class="rs-h-turno">Turno</th><th class="rs-h-nombre">Nombre</th>' +
     RS_SLOTS.map(t=>`<th>${t}</th>`).join('') + '<th></th></tr>';
   const body=document.getElementById('rs-grid-body');
   if(!body) return;
-  const opts = ['<option value=""></option>'].concat(
-    RS_STAFF.map(s=>`<option value="${esc(s.nombre)}">${esc(s.nombre)}</option>`)).join('');
+  const excluirStaff = new Set(RS_RESP_NOMBRES.concat(['Laia']));
+  const optsStaff = ['<option value=""></option>'].concat(
+    RS_STAFF.filter(s=>!excluirStaff.has(s.nombre))
+      .map(s=>`<option value="${esc(s.nombre)}">${esc(s.nombre)}</option>`)).join('');
+  const inicios = rsGenInicios();
   let html='';
-  RS_DIA.filas.forEach((f,i)=>{
+  rsOrdenFilas().forEach(i=>{
+    const f = RS_DIA.filas[i];
     const dentro = new Set(rsRango(f.turno));
     const celdas = RS_SLOTS.map((t,ci)=>{
       const v = f.slots[t] || '';
       const fuera = (dentro.size && !dentro.has(ci)) ? ' rs-fuera' : '';
       const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : v;
       const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
-      return `<td class="${fuera}"><button class="rs-slot rs-p-${esc(v)}" style="${mal}"
+      return `<td class="${fuera}" ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
+        ondrop="rsSlotDrop(event,${i},'${t}')"><button class="rs-slot rs-p-${esc(v)}" style="${mal}"
         onclick="rsCicla(${i},'${t}')" title="${esc(v)}">${esc(txt)}</button></td>`;
     }).join('');
-    html += `<tr>
-      <td class="rs-turno"><input value="${esc(f.turno)}" placeholder="930-1730"
+
+    let nombreCell, turnoCell, delCell, filaClase;
+    if(f.tipo==='resp'){
+      filaClase='rs-fila-resp';
+      const opts = ['<option value=""></option>'].concat(
+        RS_RESP_NOMBRES.map(n=>`<option value="${n}" ${n===f.nombre?'selected':''}>${n}</option>`)).join('');
+      nombreCell = `<select onchange="rsSetNombre(${i}, this.value)"
+        style="width:78px;border:none;background:transparent;font-weight:800;font-size:11px;">${opts}</select>`;
+      const validos = rsTurnosResp(f.nombre, RS_DIA.fecha);
+      const optsT = ['<option value="">-</option>'].concat(
+        validos.map(o=>`<option value="${o}" ${o===f.turno?'selected':''}>${o}</option>`)).join('');
+      turnoCell = `<select onchange="rsSetTurnoResp(${i}, this.value)"
+        style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;">${optsT}</select>`;
+      delCell = '<td></td>';
+    } else if(f.tipo==='laia'){
+      filaClase='rs-fila-laia';
+      nombreCell = `<span style="font-weight:800;padding-left:2px;">Laia</span>`;
+      turnoCell = `<input value="${esc(f.turno)}" placeholder="930-1730"
           onchange="rsSetTurno(${i}, this.value)"
-          style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;text-align:center;"></td>
-      <td class="rs-nombre"><select onchange="rsSetNombre(${i}, this.value)"
+          style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;text-align:center;">`;
+      delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>`;
+    } else {
+      filaClase='';
+      nombreCell = `<select onchange="rsSetNombre(${i}, this.value)"
           style="width:78px;border:none;background:transparent;font-weight:700;font-size:11px;">
-          ${opts.replace('value="'+esc(f.nombre)+'"','value="'+esc(f.nombre)+'" selected')}</select></td>
+          ${optsStaff.replace('value="'+esc(f.nombre)+'"','value="'+esc(f.nombre)+'" selected')}</select>`;
+      const inicioActual = (f.turno||'').split('-')[0] || '';
+      const optsT = ['<option value="">-</option>'].concat(
+        inicios.map(c=>`<option value="${c}" ${c===inicioActual?'selected':''}>${rsTurnoDesdeInicio(c)}</option>`)).join('');
+      turnoCell = `<select onchange="rsSetInicioStaff(${i}, this.value)"
+        style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;">${optsT}</select>`;
+      delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>`;
+    }
+    html += `<tr class="${filaClase}">
+      <td class="rs-turno">${turnoCell}</td>
+      <td class="rs-nombre">${nombreCell}</td>
       ${celdas}
-      <td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>
+      ${delCell}
     </tr>`;
   });
   const n = RS_DIA.filas.length;
@@ -9238,12 +9369,34 @@ function rsRenderGrid(){
   body.innerHTML = html;
   rsValidar();
 }
+function rsRenderLeyenda(){
+  const el = document.getElementById('rs-legend');
+  if(!el) return;
+  el.innerHTML = Object.keys(RS_ETIQ_PUESTO).map(p=>
+    `<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')">${RS_ETIQ_PUESTO[p]}</span>`
+  ).join('');
+}
 function rsCicla(i, t){
   const f = RS_DIA.filas[i];
   const actual = f.slots[t] || '';
   const idx = RS_CICLO.indexOf(actual);
   const next = RS_CICLO[(idx+1) % RS_CICLO.length];
   if(next) f.slots[t] = next; else delete f.slots[t];
+  rsRenderGrid();
+}
+/* arrastrar un puesto de la leyenda hasta una celda de la rejilla */
+function rsDragStart(ev, puesto){
+  ev.dataTransfer.setData('text/plain', puesto);
+  ev.dataTransfer.effectAllowed = 'copy';
+}
+function rsSlotDragOver(ev){ ev.preventDefault(); ev.currentTarget.classList.add('rs-drop-over'); }
+function rsSlotDragLeave(ev){ ev.currentTarget.classList.remove('rs-drop-over'); }
+function rsSlotDrop(ev, i, t){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('rs-drop-over');
+  const puesto = ev.dataTransfer.getData('text/plain');
+  if(!puesto) return;
+  RS_DIA.filas[i].slots[t] = puesto;
   rsRenderGrid();
 }
 async function rsSaveDia(){
