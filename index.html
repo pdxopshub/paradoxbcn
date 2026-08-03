@@ -972,11 +972,17 @@
   .rs-p-BRK{background:#000;color:#000;}
   .rs-p-DESC{background:#fff;color:#555;font-weight:600;font-style:italic;}
   .rs-p-OC{background:#E8E8E8;color:#888;}
-  .rs-p-{background:transparent;}
-  td.rs-fuera{background:repeating-linear-gradient(45deg,#FAFAFA,#FAFAFA 4px,#F0F0F0 4px,#F0F0F0 8px);}
+  .rs-p-{background:#fff;}
+  #rs-grid td{background:#fff;}
   td.rs-drop-over{outline:2px dashed var(--accent);outline-offset:-2px;}
+  td.rs-selected{outline:2px solid var(--accent);outline-offset:-2px;}
+  td.rs-fill-prev{outline:2px dashed var(--accent);outline-offset:-2px;background:rgba(28,110,164,.08);}
   tr.rs-fila-resp td.rs-turno,tr.rs-fila-resp td.rs-nombre{background:#FFF3D6;}
   tr.rs-fila-laia td.rs-turno,tr.rs-fila-laia td.rs-nombre{background:#E6EEFF;}
+  .rs-slot{position:relative;}
+  .rs-fill-handle{position:absolute;right:-3px;bottom:-3px;width:8px;height:8px;
+    background:var(--accent);border:1px solid #fff;border-radius:1px;cursor:crosshair;z-index:6;}
+  body.rs-dragging-alt,body.rs-dragging-alt *{cursor:copy !important;}
 
   /* leyenda de puestos, arrastrable a la rejilla */
   .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
@@ -2679,10 +2685,11 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <div class="rs-grid-wrap">
               <table id="rs-grid"><thead id="rs-grid-head"></thead><tbody id="rs-grid-body"></tbody></table>
             </div>
-            <div class="hint" style="margin-top:8px;">
-              Clic en una celda para ciclar el puesto, o arrastra una etiqueta de la leyenda hasta la celda.
-              Las dos primeras filas son fijas para Ignacio, Paula o Ceci; la fila de Laia es opcional.
-            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:12px;">
+            <div class="section-title" style="margin-bottom:10px;">Este día en el equipo</div>
+            <div id="rs-contexto"></div>
           </div>
 
           <div class="card">
@@ -9221,7 +9228,49 @@ async function rsLoadDia(){
   const eraNuevo = RS_DIA.filas.length === 0;
   if(eraNuevo) rsFilasDesdePlan();
   rsEnsureFilasEspeciales();
+  RS_SEL = null;
   rsRenderGrid();
+  rsCargarContexto();
+}
+/* Cambios de turno aprobados y vacaciones/bajas para el día del roster,
+   para no tener que ir a mirarlo a otra pestaña. */
+async function rsCargarContexto(){
+  const el = document.getElementById('rs-contexto');
+  if(!el) return;
+  el.innerHTML = '<span class="hint">Cargando…</span>';
+  const fecha = RS_DIA.fecha;
+
+  let cambios = [];
+  try{
+    const { data } = await sb.from('turnos').select('*').eq('estado','Aprobado');
+    (data||[]).forEach(t=>{
+      if(t.p1_fecha===fecha) cambios.push(`<b>${esc(t.p1_staff||'?')}</b> cede su turno de las ${esc(t.p1_hora||'')} a <b>${esc(t.p2_staff||'?')}</b>`);
+      if(t.p2_fecha===fecha) cambios.push(`<b>${esc(t.p2_staff||'?')}</b> cede su turno de las ${esc(t.p2_hora||'')} a <b>${esc(t.p1_staff||'?')}</b>`);
+    });
+  }catch(e){}
+
+  let fuera = [];
+  try{
+    const { data } = await sb.from('vac_solicitudes').select('*')
+      .lte('fecha_inicio', fecha).gte('fecha_fin', fecha).eq('estado','aprobado');
+    fuera = (data||[]).filter(s=> s.tipo==='vacaciones' || s.tipo==='recuperacion').map(s=>{
+      const lbl = (typeof VAC_TIPOS!=='undefined' && VAC_TIPOS[s.tipo]?.label) || s.tipo;
+      return `<b>${esc(s.persona||'?')}</b> — ${esc(lbl)}`;
+    });
+  }catch(e){}
+
+  let bajas = [];
+  try{
+    const { data } = await sb.from('vac_bajas').select('*').lte('fecha_inicio', fecha).gte('fecha_fin', fecha);
+    bajas = (data||[]).map(b=> `<b>${esc(b.persona||'?')}</b> — de baja`);
+  }catch(e){}
+
+  const offList = fuera.concat(bajas);
+  const bloques = [];
+  if(cambios.length) bloques.push(`<div style="margin-bottom:8px;"><div class="hint" style="margin-bottom:3px;">Cambios de turno</div>${cambios.join('<br>')}</div>`);
+  if(offList.length) bloques.push(`<div><div class="hint" style="margin-bottom:3px;">Vacaciones / bajas</div>${offList.join('<br>')}</div>`);
+  el.innerHTML = bloques.length ? bloques.join('') :
+    `<span class="hint">Sin cambios de turno ni vacaciones/bajas registrados para este día.</span>`;
 }
 /* Si el día está vacío, propone una fila de STAFF por cada turno que Laia haya
    marcado (Ignacio/Paula/Ceci/Laia no entran aquí: tienen sus propias filas fijas). */
@@ -9312,15 +9361,17 @@ function rsRenderGrid(){
   let html='';
   rsOrdenFilas().forEach(i=>{
     const f = RS_DIA.filas[i];
-    const dentro = new Set(rsRango(f.turno));
     const celdas = RS_SLOTS.map((t,ci)=>{
       const v = f.slots[t] || '';
-      const fuera = (dentro.size && !dentro.has(ci)) ? ' rs-fuera' : '';
       const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : v;
       const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
-      return `<td class="${fuera}" ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
+      const seleccionada = (RS_SEL && RS_SEL.i===i && RS_SEL.ci===ci);
+      const handle = seleccionada ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${ci})"></span>` : '';
+      return `<td class="${seleccionada?'rs-selected':''}" data-fila="${i}" data-col="${ci}"
+        ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
         ondrop="rsSlotDrop(event,${i},'${t}')"><button class="rs-slot rs-p-${esc(v)}" style="${mal}"
-        onclick="rsCicla(${i},'${t}')" title="${esc(v)}">${esc(txt)}</button></td>`;
+        onmousedown="rsAltDragStart(event,${i},${ci})"
+        onclick="rsCicla(event,${i},${ci},'${t}')" title="${esc(v)}">${esc(txt)}${handle}</button></td>`;
     }).join('');
 
     let nombreCell, turnoCell, delCell, filaClase;
@@ -9376,12 +9427,15 @@ function rsRenderLeyenda(){
     `<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')">${RS_ETIQ_PUESTO[p]}</span>`
   ).join('');
 }
-function rsCicla(i, t){
+function rsCicla(ev, i, ci, t){
+  if(ev && ev.altKey) return;               // con Alt pulsado, el clic sirve para copiar, no para ciclar
+  if(Date.now() < RS_SUPPRESS_CLICK_UNTIL) return;   // clic fantasma tras soltar un arrastre
   const f = RS_DIA.filas[i];
   const actual = f.slots[t] || '';
   const idx = RS_CICLO.indexOf(actual);
   const next = RS_CICLO[(idx+1) % RS_CICLO.length];
   if(next) f.slots[t] = next; else delete f.slots[t];
+  RS_SEL = { i, ci };
   rsRenderGrid();
 }
 /* arrastrar un puesto de la leyenda hasta una celda de la rejilla */
@@ -9397,6 +9451,84 @@ function rsSlotDrop(ev, i, t){
   const puesto = ev.dataTransfer.getData('text/plain');
   if(!puesto) return;
   RS_DIA.filas[i].slots[t] = puesto;
+  rsRenderGrid();
+}
+
+/* ---------- tirador de autorelleno (estilo Excel) y copia con Alt ---------- */
+let RS_SEL = null;                  // {i, ci} celda seleccionada, muestra el tirador
+let RS_DRAG = null;                 // arrastre en curso (autorelleno o copia con Alt)
+let RS_SUPPRESS_CLICK_UNTIL = 0;    // evita que el "click" fantasma tras soltar el ratón cicle la celda
+
+function rsCeldaBajoPuntero(x, y){
+  const el = document.elementFromPoint(x, y);
+  const td = el && el.closest('td[data-fila]');
+  if(!td) return null;
+  return { i: parseInt(td.dataset.fila, 10), ci: parseInt(td.dataset.col, 10) };
+}
+
+/* Autorelleno: arrastrar el tirador de la celda seleccionada a lo largo de la
+   misma fila copia esa posición en todas las celdas que se recorran. */
+function rsFillStart(ev, i, ci){
+  ev.preventDefault(); ev.stopPropagation();
+  const valor = RS_DIA.filas[i].slots[RS_SLOTS[ci]] || '';
+  RS_DRAG = { modo:'fill', i, origCi:ci, valor, visitadas:new Set([ci]) };
+  document.addEventListener('mousemove', rsFillMove);
+  document.addEventListener('mouseup', rsFillEnd);
+}
+function rsFillMove(ev){
+  if(!RS_DRAG || RS_DRAG.modo!=='fill') return;
+  const pos = rsCeldaBajoPuntero(ev.clientX, ev.clientY);
+  if(!pos || pos.i !== RS_DRAG.i) return;    // el autorelleno solo funciona dentro de la misma fila
+  const a = Math.min(RS_DRAG.origCi, pos.ci), b = Math.max(RS_DRAG.origCi, pos.ci);
+  const nuevas = new Set();
+  for(let c=a; c<=b; c++) nuevas.add(c);
+  RS_DRAG.visitadas = nuevas;
+  document.querySelectorAll('#rs-grid td.rs-fill-prev').forEach(el=>el.classList.remove('rs-fill-prev'));
+  nuevas.forEach(c=>{
+    const td = document.querySelector(`#rs-grid td[data-fila="${RS_DRAG.i}"][data-col="${c}"]`);
+    if(td) td.classList.add('rs-fill-prev');
+  });
+}
+function rsFillEnd(ev){
+  document.removeEventListener('mousemove', rsFillMove);
+  document.removeEventListener('mouseup', rsFillEnd);
+  if(ev) ev.preventDefault();
+  RS_SUPPRESS_CLICK_UNTIL = Date.now() + 300;
+  if(!RS_DRAG || RS_DRAG.modo!=='fill'){ RS_DRAG=null; return; }
+  const { i, valor, visitadas } = RS_DRAG;
+  const f = RS_DIA.filas[i];
+  visitadas.forEach(c=>{
+    const t = RS_SLOTS[c];
+    if(valor) f.slots[t] = valor; else delete f.slots[t];
+  });
+  RS_SEL = { i, ci: RS_DRAG.origCi };
+  RS_DRAG = null;
+  rsRenderGrid();
+}
+
+/* Copiar con Alt: mantener Alt, pulsar sobre una celda con puesto asignado y
+   soltar sobre otra celda (de cualquier fila) para copiar ese puesto ahí. */
+function rsAltDragStart(ev, i, ci){
+  if(!ev.altKey) return;
+  ev.preventDefault(); ev.stopPropagation();
+  const valor = RS_DIA.filas[i].slots[RS_SLOTS[ci]] || '';
+  if(!valor) return;
+  RS_DRAG = { modo:'alt', valor };
+  document.body.classList.add('rs-dragging-alt');
+  document.addEventListener('mouseup', rsAltDragEnd);
+}
+function rsAltDragEnd(ev){
+  document.removeEventListener('mouseup', rsAltDragEnd);
+  document.body.classList.remove('rs-dragging-alt');
+  if(ev) ev.preventDefault();
+  RS_SUPPRESS_CLICK_UNTIL = Date.now() + 300;
+  if(!RS_DRAG || RS_DRAG.modo!=='alt'){ RS_DRAG=null; return; }
+  const pos = ev ? rsCeldaBajoPuntero(ev.clientX, ev.clientY) : null;
+  if(pos){
+    RS_DIA.filas[pos.i].slots[RS_SLOTS[pos.ci]] = RS_DRAG.valor;
+    RS_SEL = pos;
+  }
+  RS_DRAG = null;
   rsRenderGrid();
 }
 async function rsSaveDia(){
