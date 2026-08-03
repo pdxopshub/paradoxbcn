@@ -848,7 +848,7 @@
   /* Pase de compacidad: tarjetas más ajustadas y menos aire entre bloques,
      para que toda la vista se vea más apretada y cuidada. */
   #view-loomis .card{padding:12px 14px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,42%) minmax(320px,1fr) 230px;gap:12px;align-items:start;}
+  .lm-layout{display:grid;grid-template-columns:minmax(240px,30%) minmax(260px,36%) minmax(280px,34%);gap:12px;align-items:start;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-left{min-width:0;}
   .lm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -978,11 +978,7 @@
     white-space:nowrap;padding:0 5px;z-index:2;border-right:2px solid #333;}
   #rs-grid td.rs-nombre{position:sticky;left:92px;background:var(--surface);font-weight:700;
     font-size:11px;white-space:nowrap;padding:0 6px;text-align:left;z-index:2;border-right:2px solid #333;}
-  /* box-sizing:border-box para que el ancho del select incluya su propio
-     padding-right: así el hueco para la flechita nativa nunca se come parte
-     del texto de la hora ni desborda la columna fija de Turno. */
-  #rs-grid td.rs-turno select{box-sizing:border-box;}
-  #rs-grid td.rs-turno input{padding-right:6px;box-sizing:border-box;}
+  #rs-grid td.rs-turno select,#rs-grid td.rs-turno input{padding-right:14px;}
   .rs-slot{width:100%;height:100%;min-height:26px;border:none;background:transparent;cursor:default;
     font-size:10px;font-weight:800;padding:0;line-height:26px;color:inherit;}
   /* mismos colores que el Excel */
@@ -1020,21 +1016,6 @@
   tr.rs-fila-resp td.rs-turno,tr.rs-fila-resp td.rs-nombre{background:#FFF3D6;}
   tr.rs-fila-laia td.rs-turno,tr.rs-fila-laia td.rs-nombre{background:#E6EEFF;}
 
-  /* Desplegable propio del nombre del staff: el punto de "trabaja según
-     planificación" solo se ve en la lista abierta, nunca en el valor ya
-     elegido (que se ve siempre en el roster). Muy pequeño y naranja; el
-     botón se ve igual que el select de antes (sin aspecto de botón). */
-  .rs-staff-pick{position:relative;display:inline-block;width:78px;}
-  .rs-staff-btn{width:100%;border:none;background:transparent;font-weight:700;font-size:11px;
-    text-align:left;cursor:pointer;color:var(--text);padding:0;font-family:inherit;}
-  .rs-staff-list{position:absolute;top:100%;left:0;z-index:50;background:var(--surface);
-    border:1px solid var(--line-strong);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.2);
-    max-height:210px;overflow-y:auto;min-width:110px;padding:2px 0;text-align:left;}
-  .rs-staff-opt{display:flex;align-items:center;gap:5px;padding:4px 9px;font-size:11px;
-    font-weight:600;cursor:pointer;white-space:nowrap;color:var(--text);}
-  .rs-staff-opt:hover{background:var(--panel);}
-  .rs-staff-dot{width:5px;height:5px;flex-shrink:0;border-radius:50%;background:#FF9500;}
-  .rs-staff-dot-hidden{visibility:hidden;}
 
   /* leyenda de puestos, arrastrable a la rejilla */
   .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0;justify-content:center;}
@@ -1324,7 +1305,7 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .lm-quote.lq-visible{opacity:1;}
   .lm-subt{font-weight:800;font-size:12px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,42%) minmax(320px,1fr) 230px;gap:12px;align-items:start;}
+  .lm-layout{display:grid;grid-template-columns:minmax(240px,30%) minmax(260px,36%) minmax(280px,34%);gap:12px;align-items:start;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-middle{min-width:0;}
   .caja-widget{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -9550,7 +9531,6 @@ async function rsLoadDia(){
   const el=document.getElementById('rs-fecha');
   if(el && el.value) rsFecha = el.value;
   RS_UNDO_STACK = [];
-  RS_STAFF_PICK_OPEN = null;
   RS_DIA = { fecha: rsFecha, config:{}, filas:[], revisado_por:'' };
   try{
     const {data} = await sb.from('roster_dias').select('*').eq('fecha',rsFecha).single();
@@ -9854,7 +9834,7 @@ function rsRenderGrid(){
       const optsT = ['<option value="">-</option>'].concat(
         validos.map(o=>`<option value="${o}" ${o===f.turno?'selected':''}>${o}</option>`)).join('');
       turnoCell = `<select onchange="rsSetTurnoResp(${i}, this.value)"
-        style="width:82px;border:none;background:transparent;font-weight:800;font-size:9.5px;padding-right:15px;box-sizing:border-box;">${optsT}</select>`;
+        style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;padding-right:14px;">${optsT}</select>`;
       delCell = '<td></td>';
     } else if(f.tipo==='laia'){
       filaClase='rs-fila-laia';
@@ -9872,25 +9852,24 @@ function rsRenderGrid(){
       delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar fila">✕</button></td>`;
     } else {
       filaClase='';
-      // Desplegable propio (no <select> nativo): así el punto verde de quién
-      // trabaja según la planificación solo aparece en la lista al abrirla,
-      // nunca en el valor ya elegido que se ve en el roster.
-      const listaOpen = (RS_STAFF_PICK_OPEN === i);
-      const opciones = ['<div class="rs-staff-opt" data-fila="'+i+'" data-nombre="" onclick="event.stopPropagation();rsStaffPickChooseEl(this)">—</div>']
-        .concat(listaStaff.map(s=>{
+      // Select nativo de toda la vida. Quien trabaja según la planificación
+      // semanal se marca con un punto naranja pequeño delante del nombre
+      // (un <option> no permite colorear solo una parte del texto, así que
+      // el punto va como carácter, no como fondo).
+      const optsStaff = ['<option value=""></option>'].concat(
+        listaStaff.map(s=>{
           const trabaja = (parseInt(planHoy[s.nombre],10)||0) > 0;
-          const dot = trabaja ? '<span class="rs-staff-dot"></span>' : '<span class="rs-staff-dot rs-staff-dot-hidden"></span>';
-          return `<div class="rs-staff-opt" data-fila="${i}" data-nombre="${esc(s.nombre)}" onclick="event.stopPropagation();rsStaffPickChooseEl(this)">${dot}${esc(s.nombre)}</div>`;
+          const prefijo = trabaja ? '🔸 ' : '';
+          return `<option value="${esc(s.nombre)}">${prefijo}${esc(s.nombre)}</option>`;
         })).join('');
-      nombreCell = `<div class="rs-staff-pick">
-          <button type="button" class="rs-staff-btn" onclick="event.stopPropagation();rsStaffPickToggle(${i})">${esc(f.nombre)||'—'}</button>
-          ${listaOpen ? `<div class="rs-staff-list">${opciones}</div>` : ''}
-        </div>`;
+      nombreCell = `<select onchange="rsSetNombre(${i}, this.value)"
+          style="width:78px;border:none;background:transparent;font-weight:700;font-size:11px;">
+          ${optsStaff.replace('value="'+esc(f.nombre)+'"','value="'+esc(f.nombre)+'" selected')}</select>`;
       const inicioActual = (f.turno||'').split('-')[0] || '';
       const optsT = ['<option value="">-</option>'].concat(
         inicios.map(c=>`<option value="${c}" ${c===inicioActual?'selected':''}>${rsTurnoDesdeInicio(c)}</option>`)).join('');
       turnoCell = `<select onchange="rsSetInicioStaff(${i}, this.value)"
-        style="width:82px;border:none;background:transparent;font-weight:800;font-size:9.5px;padding-right:15px;box-sizing:border-box;">${optsT}</select>`;
+        style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;padding-right:14px;">${optsT}</select>`;
       delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>`;
     }
     html += `<tr class="${filaClase}">
@@ -9956,20 +9935,6 @@ function rsRenderLeyenda(){
    Excel), o con Alt + arrastrar para copiar una celda concreta a otra. */
 let RS_SEL = null;      // {i, ci} celda seleccionada (muestra el tirador si tiene valor)
 let RS_DRAG = null;     // arrastre en curso (autorelleno o copia con Alt)
-let RS_STAFF_PICK_OPEN = null;   // fila (índice) cuyo desplegable de nombre está abierto
-function rsStaffPickToggle(i){
-  RS_STAFF_PICK_OPEN = (RS_STAFF_PICK_OPEN === i) ? null : i;
-  rsRenderGrid();
-}
-function rsStaffPickChooseEl(el){
-  const i = parseInt(el.dataset.fila, 10);
-  const nombre = el.dataset.nombre || '';
-  RS_STAFF_PICK_OPEN = null;
-  rsSetNombre(i, nombre);
-}
-document.addEventListener('click', function(){
-  if(RS_STAFF_PICK_OPEN !== null){ RS_STAFF_PICK_OPEN = null; rsRenderGrid(); }
-});
 
 function rsDragStart(ev, puesto){
   ev.dataTransfer.setData('text/plain', puesto);
