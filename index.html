@@ -848,7 +848,7 @@
   /* Pase de compacidad: tarjetas más ajustadas y menos aire entre bloques,
      para que toda la vista se vea más apretada y cuidada. */
   #view-loomis .card{padding:12px 14px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,0.92fr) minmax(0,1.38fr) minmax(0,0.8fr);gap:12px;align-items:stretch;}
+  .lm-layout{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.12fr);gap:12px;align-items:start;}
   /* Las 3 columnas son cajas idénticas: misma anchura, misma altura y una
      cabecera de altura fija, para que "W32 · ...", "Depósito Cajas" y
      "Deposit 1" queden alineados en la misma línea horizontal. */
@@ -1094,15 +1094,29 @@
        (para ahorrar tinta) y el roster salía en blanco y negro en vez de
        con los verdes/colores reales de la pantalla. */
     *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
+    /* Solo se imprime la rejilla: ni título, ni botones, ni la línea de horas
+       totales / revisado por / cambios de turno. */
     body.rs-imprimiendo *{visibility:hidden;}
-    body.rs-imprimiendo #rs-print-area, body.rs-imprimiendo #rs-print-area *{visibility:visible;}
-    body.rs-imprimiendo #rs-print-area{position:absolute;left:0;top:0;width:100%;}
+    body.rs-imprimiendo .rs-grid-wrap, body.rs-imprimiendo .rs-grid-wrap *{visibility:visible;}
+    body.rs-imprimiendo .rs-grid-wrap{position:absolute;left:0;top:0;width:100%;
+      max-height:none !important;overflow:visible !important;border:none;}
     body.rs-imprimiendo .rs-no-print{display:none !important;}
-    body.rs-imprimiendo .rs-print-title{display:block;margin-bottom:10px;}
-    body.rs-imprimiendo .rs-grid-wrap{max-height:none !important;overflow:visible !important;border:none;}
+    body.rs-imprimiendo .rs-print-title{display:none !important;}
     body.rs-imprimiendo #rs-grid th,
     body.rs-imprimiendo #rs-grid td.rs-turno,
     body.rs-imprimiendo #rs-grid td.rs-nombre{position:static;}
+    /* apretado para que las 26 medias horas entren en un A4 apaisado */
+    body.rs-imprimiendo #rs-grid{width:100%;font-size:7.5px;}
+    body.rs-imprimiendo #rs-grid th{padding:3px 1px;font-size:6.5px;min-width:0;}
+    body.rs-imprimiendo #rs-grid td{height:20px;}
+    body.rs-imprimiendo .rs-slot{font-size:7px;line-height:20px;min-height:20px;}
+    body.rs-imprimiendo #rs-grid td.rs-turno{font-size:7.5px;padding:0 2px;}
+    body.rs-imprimiendo #rs-grid td.rs-nombre{font-size:8px;padding:0 3px;}
+    body.rs-imprimiendo #rs-grid .btn,
+    body.rs-imprimiendo .rs-fill-handle,
+    body.rs-imprimiendo .rs-staff-caret{display:none !important;}
+    body.rs-imprimiendo .rs-staff-btn,
+    body.rs-imprimiendo #rs-grid select{-webkit-appearance:none;appearance:none;font-size:8px;}
   }
 
   .rs-warn{display:flex;flex-direction:column;gap:6px;}
@@ -1368,7 +1382,7 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .lm-quote.lq-visible{opacity:1;}
   .lm-subt{font-weight:800;font-size:12px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,0.92fr) minmax(0,1.38fr) minmax(0,0.8fr);gap:12px;align-items:stretch;}
+  .lm-layout{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.12fr);gap:12px;align-items:start;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-middle{min-width:0;}
   .caja-widget{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -1397,11 +1411,16 @@
   /* Depósito Cajas ocupa la columna ancha: se reparten los anchos para que
      Comments se lleve la mayor parte y quepan comentarios largos. */
   #depo-dias-table{table-layout:fixed;}
-  #depo-dias-table th:nth-child(1),#depo-dias-table td:nth-child(1){width:15%;}
-  #depo-dias-table th:nth-child(2),#depo-dias-table td:nth-child(2){width:20%;}
-  #depo-dias-table th:nth-child(3),#depo-dias-table td:nth-child(3){width:20%;}
-  #depo-dias-table th:nth-child(4),#depo-dias-table td:nth-child(4){width:45%;}
-  .depo-dia{font-weight:700;white-space:nowrap;}
+  #depo-dias-table thead th:nth-child(1){width:16%;}
+  #depo-dias-table thead th:nth-child(2){width:17%;}
+  #depo-dias-table thead th:nth-child(3){width:21%;}
+  #depo-dias-table thead th:nth-child(4){width:46%;}
+  /* DIA y Date deposit Bank van con letra más pequeña: así el título entra en
+     su celda sin cortarse y la fecha del calendario se ve entera. */
+  #depo-dias-table thead th{font-size:8.5px;line-height:1.15;white-space:normal;letter-spacing:0;}
+  .depo-dia{font-weight:700;white-space:nowrap;font-size:9.5px;}
+  .depo-fecha{padding:2px 2px !important;}
+  .depo-fecha input[type="date"]{font-size:9.5px;padding:0;min-width:0;}
   .depo-total-row td{background:#FFF3A3;font-weight:800;}
   /* Deposit 1 (billetaje): tabla más corta y estrecha, con la columna de
      cantidad muy angosta ya que solo lleva un par de dígitos. */
@@ -1417,18 +1436,32 @@
   @media print{
     *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
     body.depo-imprimiendo *{visibility:hidden;}
-    body.depo-imprimiendo #depo-print-area, body.depo-imprimiendo #depo-print-area *,
-    body.depo-imprimiendo #depo-denom-card, body.depo-imprimiendo #depo-denom-card *{visibility:visible;}
-    body.depo-imprimiendo #depo-print-area{position:absolute;left:0;top:0;width:62%;}
-    body.depo-imprimiendo #depo-denom-card{position:absolute;left:64%;top:0;width:34%;border:none;box-shadow:none;padding:0;}
+    body.depo-imprimiendo #depo-print-stack, body.depo-imprimiendo #depo-print-stack *{visibility:visible;}
+    /* Las dos tablas salen una debajo de otra, en el mismo orden que en
+       pantalla, ocupando todo el ancho de la hoja. */
+    body.depo-imprimiendo #depo-print-stack{position:absolute;left:0;top:0;width:100%;
+      display:block;gap:0;}
+    body.depo-imprimiendo #depo-print-stack .card{border:none;box-shadow:none;padding:0;
+      margin:0 0 12px 0;display:block;}
+    body.depo-imprimiendo .lm-colhead{min-height:0;margin-bottom:5px;padding-bottom:3px;
+      border-bottom:1px solid #000;}
+    body.depo-imprimiendo .lm-colhead-actions{display:none;}
     body.depo-imprimiendo .depo-print-title{display:block;margin-bottom:6px;}
+    /* PDF completamente en blanco y negro: nada de fondos negros ni amarillos,
+       solo texto negro sobre blanco con los bordes de la tabla. */
+    body.depo-imprimiendo #depo-print-stack *{background:#fff !important;color:#000 !important;
+      box-shadow:none !important;}
+    body.depo-imprimiendo #depo-print-stack .depo-table th,
+    body.depo-imprimiendo #depo-print-stack .depo-table td{border:1px solid #000 !important;}
     /* la hoja de impresión debe salir mucho más compacta que en pantalla,
        igual que el PDF original que se manda por email */
-    body.depo-imprimiendo .depo-table{font-size:8.5px;}
-    body.depo-imprimiendo .depo-table th{padding:3px 2px;font-size:8px;}
-    body.depo-imprimiendo .depo-table td{padding:2px 3px;}
-    body.depo-imprimiendo .depo-table input{font-size:8.5px;}
-    body.depo-imprimiendo .section-title{font-size:11px;}
+    body.depo-imprimiendo .depo-table{font-size:7.5px;}
+    body.depo-imprimiendo .depo-table th{padding:2px 2px;font-size:7px;}
+    body.depo-imprimiendo .depo-table td{padding:1px 2px;}
+    body.depo-imprimiendo .depo-table input{font-size:7.5px;}
+    body.depo-imprimiendo .depo-denom{font-size:7px;width:58%;}
+    body.depo-imprimiendo .depo-denom td,body.depo-imprimiendo .depo-denom th{font-size:7px;padding:1px 2px;}
+    body.depo-imprimiendo .section-title{font-size:10px;}
   }
 
   /* ---- Precios de entradas + Precios de cumpleaños, lado a lado ---- */
@@ -2725,36 +2758,41 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             </div>
           </div>
 
-          <!-- CENTRO (columna ancha): Depósito Cajas -->
-          <div class="lm-middle card lm-col">
-            <div class="lm-colhead">
-              <div class="section-title" style="margin:0;">Depósito Cajas</div>
-              <div class="lm-colhead-actions">
-                <button class="btn btn-ghost btn-sm" onclick="depoImprimir()">🖨 PDF</button>
+          <!-- DERECHA: Depósito Cajas y, debajo, Deposit 1 (las dos van juntas
+               al PDF, por eso comparten el contenedor #depo-print-stack) -->
+          <div class="lm-colstack" id="depo-print-stack">
+
+            <div class="lm-middle card lm-col">
+              <div class="lm-colhead">
+                <div class="section-title" style="margin:0;">Depósito Cajas</div>
+                <div class="lm-colhead-actions">
+                  <button class="btn btn-ghost btn-sm" onclick="depoImprimir()">🖨 PDF</button>
+                </div>
+              </div>
+              <div id="depo-print-area">
+                <h3 class="depo-print-title" id="depo-print-title"></h3>
+                <table class="depo-table" id="depo-dias-table">
+                  <thead><tr><th>DIA</th><th>Deposit Bank</th><th>Date deposit Bank</th><th>Comments</th></tr></thead>
+                  <tbody id="depo-dias-body"></tbody>
+                  <tfoot id="depo-dias-foot"></tfoot>
+                </table>
               </div>
             </div>
-            <div id="depo-print-area">
-              <h3 class="depo-print-title" id="depo-print-title"></h3>
-              <table class="depo-table" id="depo-dias-table">
-                <thead><tr><th>DIA</th><th>Deposit Bank</th><th>Date deposit Bank</th><th>Comments</th></tr></thead>
-                <tbody id="depo-dias-body"></tbody>
-                <tfoot id="depo-dias-foot"></tfoot>
+
+            <div class="card lm-col" id="depo-denom-card">
+              <div class="lm-colhead">
+                <div class="section-title" style="margin:0;">Deposit 1</div>
+                <div class="lm-colhead-actions">
+                  <button class="lm-info-btn" onclick="lmOpenSobreInfo()" title="Info Sobre de Loomis">ⓘ</button>
+                </div>
+              </div>
+              <table class="depo-table depo-denom" id="depo-denom-table">
+                <thead><tr><th>BILLETE/MONEDA</th><th>CANTIDAD</th><th>TOTAL</th></tr></thead>
+                <tbody id="depo-denom-body"></tbody>
+                <tfoot id="depo-denom-foot"></tfoot>
               </table>
             </div>
-          </div>
 
-          <!-- DERECHA: Deposit 1, con la info del sobre de Loomis en cápsula -->
-          <div class="lm-right card lm-col" id="depo-denom-card">
-            <div class="lm-colhead">
-              <div class="section-title" style="margin:0;">Deposit 1</div>
-              <div class="lm-colhead-actions">
-                <button class="lm-info-btn" onclick="lmOpenSobreInfo()" title="Info Sobre de Loomis">ⓘ</button>
-              </div>
-            </div>
-            <table class="depo-table depo-denom" id="depo-denom-table">
-              <tbody id="depo-denom-body"></tbody>
-              <tfoot id="depo-denom-foot"></tfoot>
-            </table>
           </div>
 
         </div>
@@ -9193,7 +9231,7 @@ function depoRenderDias(){
     // "Date deposit Bank" es una única fecha para toda la semana (no una por
     // día), así que solo se pinta una vez con rowspan="7" en la primera fila.
     const fechaCell = (i===0)
-      ? `<td rowspan="7"><input type="date" value="${DEPO_DATA.fecha_deposito||''}" onchange="depoSetFechaDeposito(this.value)"></td>`
+      ? `<td rowspan="7" class="depo-fecha"><input type="date" value="${DEPO_DATA.fecha_deposito||''}" onchange="depoSetFechaDeposito(this.value)"></td>`
       : '';
     html += `<tr>
       <td class="depo-dia">${fmt(d)}</td>
@@ -9215,21 +9253,42 @@ function depoRefrescarTotales(){
 function depoRenderDenom(){
   const body = document.getElementById('depo-denom-body');
   if(!body) return;
-  let total = 0, html='';
-  DEPO_DENOMS.forEach(d=>{
+  let html='';
+  DEPO_DENOMS.forEach((d,idx)=>{
     const key = String(d);
     const cant = parseInt(DEPO_DATA.denominaciones[key],10) || 0;
-    const subt = cant * d;
-    total += subt;
     html += `<tr>
       <td class="depo-denom-label">${d.toFixed(2)} €</td>
-      <td class="depo-denom-cant"><input type="number" step="1" min="0" value="${cant||''}" onchange="depoSetDenom('${key}',this.value)"></td>
-      <td class="depo-denom-total">${subt.toFixed(2)} €</td>
+      <td class="depo-denom-cant"><input type="number" step="1" min="0" id="depo-denom-in-${idx}"
+        value="${cant||''}" oninput="depoSetDenom('${key}',this.value)"
+        onkeydown="depoDenomKey(event,${idx})"></td>
+      <td class="depo-denom-total" id="depo-denom-sub-${idx}">0.00 €</td>
     </tr>`;
   });
   body.innerHTML = html;
+  depoActualizarTotalesDenom();
+}
+/* Los subtotales y el total se refrescan escribiendo directamente en las
+   celdas, sin volver a pintar la tabla: si se repintara, el input perdería el
+   foco en cada tecla y no se podría bajar con Tab ni con Enter. */
+function depoActualizarTotalesDenom(){
+  let total = 0;
+  DEPO_DENOMS.forEach((d,idx)=>{
+    const cant = parseInt(DEPO_DATA.denominaciones[String(d)],10) || 0;
+    const subt = cant * d;
+    total += subt;
+    const celda = document.getElementById('depo-denom-sub-'+idx);
+    if(celda) celda.textContent = subt.toFixed(2) + ' €';
+  });
   const foot = document.getElementById('depo-denom-foot');
   if(foot) foot.innerHTML = `<tr class="depo-denom-total-row"><td colspan="2">TOTAL</td><td>${total.toFixed(2)} €</td></tr>`;
+}
+/* Enter baja a la siguiente denominación, igual que el tabulador. */
+function depoDenomKey(ev, idx){
+  if(ev.key !== 'Enter') return;
+  ev.preventDefault();
+  const sig = document.getElementById('depo-denom-in-'+(idx+1));
+  if(sig){ sig.focus(); sig.select(); } else { ev.target.blur(); }
 }
 let DEPO_SAVE_TIMER = null;
 function depoAutoGuardar(){
@@ -9255,7 +9314,7 @@ function depoSetFechaDeposito(val){
 }
 function depoSetDenom(key, val){
   DEPO_DATA.denominaciones[key] = parseInt(val,10) || 0;
-  depoRenderDenom();
+  depoActualizarTotalesDenom();
   depoAutoGuardar();
 }
 /* PDF: abre el diálogo de impresión del navegador (Guardar como PDF) mostrando
@@ -10260,14 +10319,25 @@ function rsAutoGuardar(){
 }
 /* Imprimir: abre el diálogo de impresión del navegador mostrando solo la
    rejilla del roster de ese día (todo lo demás se oculta vía CSS). */
+/* La orientación horizontal se inyecta como @page solo mientras se imprime el
+   roster: una regla @page fija afectaría también al PDF de Depósito Cajas,
+   que va en vertical. */
 function rsImprimir(){
-  const t = document.getElementById('rs-print-title');
-  const lbl = document.getElementById('rs-dia-label');
-  if(t) t.textContent = 'Roster — ' + (lbl ? lbl.textContent : rsFecha);
+  let st = document.getElementById('rs-page-landscape');
+  if(!st){
+    st = document.createElement('style');
+    st.id = 'rs-page-landscape';
+    st.textContent = '@page{size:A4 landscape;margin:8mm;}';
+    document.head.appendChild(st);
+  }
   document.body.classList.add('rs-imprimiendo');
   window.print();
 }
-window.addEventListener('afterprint', ()=> document.body.classList.remove('rs-imprimiendo'));
+window.addEventListener('afterprint', ()=>{
+  document.body.classList.remove('rs-imprimiendo');
+  const st = document.getElementById('rs-page-landscape');
+  if(st) st.remove();
+});
 
 /* ============================================================
    Reparto automático de puestos
