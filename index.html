@@ -979,6 +979,23 @@
   #rs-grid td.rs-nombre{position:sticky;left:92px;background:var(--surface);font-weight:700;
     font-size:11px;white-space:nowrap;padding:0 6px;text-align:left;z-index:2;border-right:2px solid #333;}
   #rs-grid td.rs-turno select,#rs-grid td.rs-turno input{padding-right:14px;}
+  /* Desplegable propio del nombre del staff: en la columna cerrada solo se ve
+     el nombre y la flecha; el rombito naranja de "trabaja hoy" solo aparece
+     dentro de la lista, al abrirla. */
+  .rs-staff-pick{position:relative;width:78px;}
+  .rs-staff-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:2px;
+    border:none;background:transparent;font-weight:700;font-size:11px;font-family:inherit;color:inherit;
+    text-align:left;cursor:pointer;padding:0;}
+  .rs-staff-btn-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .rs-staff-caret{font-size:9px;color:#666;flex:none;margin-left:2px;}
+  .rs-staff-list{position:absolute;top:100%;left:-6px;z-index:60;min-width:120px;
+    background:#fff;border:1px solid #C9CDD4;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.18);
+    max-height:220px;overflow-y:auto;padding:2px;}
+  .rs-staff-opt{display:flex;align-items:center;gap:6px;padding:4px 7px;font-size:11.5px;font-weight:600;
+    border-radius:4px;cursor:pointer;white-space:nowrap;}
+  .rs-staff-opt:hover{background:#F0F2F5;}
+  .rs-staff-dot{width:6px;height:6px;border-radius:50%;background:#FF9500;flex:none;}
+  .rs-staff-dot-hidden{visibility:hidden;}
   .rs-slot{width:100%;height:100%;min-height:26px;border:none;background:transparent;cursor:default;
     font-size:10px;font-weight:800;padding:0;line-height:26px;color:inherit;}
   /* mismos colores que el Excel */
@@ -998,7 +1015,13 @@
   .rs-p-CU{background:#9B59B6;color:#fff;}
   .rs-p-TA{background:#9AA0A6;color:#fff;}
   td.rs-p-GR,td.rs-p-CU,td.rs-p-TA{padding:0;height:26px;max-height:26px;overflow:hidden;}
-  .rs-especial-in{width:100%;height:26px;max-height:26px;border:none;background:transparent;
+  /* table-layout de #rs-grid es auto, así que height en <td> solo es una
+     altura mínima: si cualquier celda de la fila (nombre/turno incluidos)
+     pide más espacio, toda la fila crece. Por eso se fuerza aquí, para
+     TODAS las celdas de estas filas, altura y line-height fijos. */
+  tr.rs-fila-grupos td,tr.rs-fila-cumples td,tr.rs-fila-taller td{
+    height:26px;max-height:26px;line-height:26px;overflow:hidden;}
+  .rs-especial-in{width:100%;height:26px;max-height:26px;line-height:26px;border:none;background:transparent;
     color:inherit;font-size:10.5px;font-weight:700;text-align:center;padding:0 4px;box-sizing:border-box;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .rs-especial-in::placeholder{color:rgba(255,255,255,.75);}
@@ -9531,6 +9554,7 @@ async function rsLoadDia(){
   const el=document.getElementById('rs-fecha');
   if(el && el.value) rsFecha = el.value;
   RS_UNDO_STACK = [];
+  RS_STAFF_PICK_OPEN = null;
   RS_DIA = { fecha: rsFecha, config:{}, filas:[], revisado_por:'' };
   try{
     const {data} = await sb.from('roster_dias').select('*').eq('fecha',rsFecha).single();
@@ -9778,11 +9802,10 @@ function rsRenderGrid(){
         }
         let fin = ci;
         while(fin+1 < RS_SLOTS.length && (f.slots[RS_SLOTS[fin+1]]||'') === v) fin++;
-        if(dentro.has(ci) || dentro.has(fin)){
-          borde = 'border-top:1.5px solid #000;border-bottom:1.5px solid #000;';
-          if(inicioRango!==null && ci<=inicioRango && inicioRango<=fin) borde += 'border-left:1.5px solid #000;';
-          if(finRango!==null    && ci<=finRango    && finRango<=fin)    borde += 'border-right:1.5px solid #000;';
-        }
+        // Estas celdas de evento siempre llevan el recuadro negro completo,
+        // en las 4 caras, sin depender de si el turno de texto libre encaja
+        // con el rango calculado (a diferencia de las filas normales).
+        borde = 'border:2px solid #000;';
         const startKey = RS_SLOTS[ci];
         const texto = (f.textos && f.textos[startKey]) || '';
         // Tirador de arrastre (estilo Excel) en la esquina: coge el valor de la
@@ -9845,26 +9868,31 @@ function rsRenderGrid(){
       delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>`;
     } else if(f.tipo==='grupos' || f.tipo==='cumples' || f.tipo==='taller'){
       filaClase='rs-fila-'+f.tipo;
-      nombreCell = `<span style="font-weight:800;padding-left:2px;">${esc(RS_ESPECIAL_LABEL[f.tipo])}</span>`;
+      nombreCell = `<span style="font-weight:800;padding-left:2px;line-height:26px;">${esc(RS_ESPECIAL_LABEL[f.tipo])}</span>`;
       turnoCell = `<input value="${esc(f.turno)}" placeholder="930-1730"
           onchange="rsSetTurno(${i}, this.value)"
-          style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;text-align:center;">`;
+          style="width:84px;height:26px;line-height:26px;border:none;background:transparent;font-weight:800;font-size:10.5px;text-align:center;box-sizing:border-box;">`;
       delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar fila">✕</button></td>`;
     } else {
       filaClase='';
-      // Select nativo de toda la vida. Quien trabaja según la planificación
-      // semanal se marca con un punto naranja pequeño delante del nombre
-      // (un <option> no permite colorear solo una parte del texto, así que
-      // el punto va como carácter, no como fondo).
-      const optsStaff = ['<option value=""></option>'].concat(
-        listaStaff.map(s=>{
+      // Desplegable propio (no <select> nativo): en la columna, cerrado, solo
+      // se ve el nombre + una flechita; el rombito naranja de quien trabaja
+      // según la planificación semanal solo aparece DENTRO de la lista, al
+      // desplegarla con la flecha (un <option> nativo no permite ocultar el
+      // rombito en el valor cerrado y mostrarlo solo en la lista abierta).
+      const abierto = (RS_STAFF_PICK_OPEN === i);
+      const opciones = ['<div class="rs-staff-opt" data-fila="'+i+'" data-nombre="" onmousedown="rsStaffPickChoose(event,'+i+',\'\')"></div>']
+        .concat(listaStaff.map(s=>{
           const trabaja = (parseInt(planHoy[s.nombre],10)||0) > 0;
-          const prefijo = trabaja ? '🔸 ' : '';
-          return `<option value="${esc(s.nombre)}">${prefijo}${esc(s.nombre)}</option>`;
+          const dot = `<span class="rs-staff-dot${trabaja?'':' rs-staff-dot-hidden'}"></span>`;
+          return `<div class="rs-staff-opt" data-fila="${i}" data-nombre="${esc(s.nombre)}" onmousedown="rsStaffPickChoose(event,${i},'${esc(s.nombre)}')">${dot}${esc(s.nombre)}</div>`;
         })).join('');
-      nombreCell = `<select onchange="rsSetNombre(${i}, this.value)"
-          style="width:78px;border:none;background:transparent;font-weight:700;font-size:11px;">
-          ${optsStaff.replace('value="'+esc(f.nombre)+'"','value="'+esc(f.nombre)+'" selected')}</select>`;
+      nombreCell = `<div class="rs-staff-pick">
+          <button type="button" class="rs-staff-btn" onclick="rsStaffPickToggle(event,${i})">
+            <span class="rs-staff-btn-txt">${esc(f.nombre)||''}</span><span class="rs-staff-caret">▾</span>
+          </button>
+          ${abierto ? `<div class="rs-staff-list">${opciones}</div>` : ''}
+        </div>`;
       const inicioActual = (f.turno||'').split('-')[0] || '';
       const optsT = ['<option value="">-</option>'].concat(
         inicios.map(c=>`<option value="${c}" ${c===inicioActual?'selected':''}>${rsTurnoDesdeInicio(c)}</option>`)).join('');
@@ -9934,6 +9962,20 @@ function rsRenderLeyenda(){
    (clic para seleccionar + arrastrar el punto a lo largo de la fila, estilo
    Excel), o con Alt + arrastrar para copiar una celda concreta a otra. */
 let RS_SEL = null;      // {i, ci} celda seleccionada (muestra el tirador si tiene valor)
+let RS_STAFF_PICK_OPEN = null;  // índice de fila cuyo desplegable de nombre está abierto
+function rsStaffPickToggle(ev, i){
+  ev.stopPropagation();
+  RS_STAFF_PICK_OPEN = (RS_STAFF_PICK_OPEN === i) ? null : i;
+  rsRenderGrid();
+}
+function rsStaffPickChoose(ev, i, nombre){
+  ev.preventDefault(); ev.stopPropagation();
+  RS_STAFF_PICK_OPEN = null;
+  rsSetNombre(i, nombre);
+}
+document.addEventListener('click', ()=>{
+  if(RS_STAFF_PICK_OPEN !== null){ RS_STAFF_PICK_OPEN = null; rsRenderGrid(); }
+});
 let RS_DRAG = null;     // arrastre en curso (autorelleno o copia con Alt)
 
 function rsDragStart(ev, puesto){
@@ -9964,8 +10006,31 @@ function rsSlotDrop(ev, i, t){
       if(!(o.i===i && RS_SLOTS[o.ci]===t)) delete RS_DIA.filas[o.i].slots[RS_SLOTS[o.ci]];
     }catch(e){}
   }
+  // Grupos y Cumpleaños siempre ocupan un mínimo de 3 medias horas: si viene
+  // de la leyenda (colocación nueva, sin origen) se completa el bloque hasta
+  // llegar a 3 celdas, para que ya se vea de un tirón lo que va a cubrir.
+  const f = RS_DIA.filas[i];
+  if(!origenRaw && (f.tipo==='grupos' || f.tipo==='cumples')){
+    rsAsegurarMinimo3(i, t, puesto);
+  }
   rsRenderGrid();
   rsAutoGuardar();
+}
+/* Extiende hacia adelante (o hacia atrás si no hay hueco) el bloque contiguo
+   recién colocado en la celda t de la fila i hasta que ocupe 3 medias horas. */
+function rsAsegurarMinimo3(i, t, puesto){
+  const f = RS_DIA.filas[i];
+  const ci = RS_SLOTS.indexOf(t);
+  if(ci < 0) return;
+  let a = ci, b = ci;
+  while(a>0 && (f.slots[RS_SLOTS[a-1]]||'')===puesto) a--;
+  while(b<RS_SLOTS.length-1 && (f.slots[RS_SLOTS[b+1]]||'')===puesto) b++;
+  let len = b - a + 1;
+  while(len < 3){
+    if(b+1 < RS_SLOTS.length && !f.slots[RS_SLOTS[b+1]]){ b++; f.slots[RS_SLOTS[b]]=puesto; len++; continue; }
+    if(a-1 >= 0 && !f.slots[RS_SLOTS[a-1]]){ a--; f.slots[RS_SLOTS[a]]=puesto; len++; continue; }
+    break;
+  }
 }
 /* Clic: solo selecciona (para mostrar el tirador de autorelleno); no cambia
    el valor de la celda. */
