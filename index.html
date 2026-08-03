@@ -1013,6 +1013,13 @@
   #rs-grid td.rs-nombre{position:sticky;left:92px;background:var(--surface);font-weight:700;
     font-size:11px;white-space:nowrap;padding:0 6px;text-align:left;z-index:2;border-right:2px solid #333;}
   #rs-grid td.rs-turno select,#rs-grid td.rs-turno input{padding-right:14px;}
+  /* La altura real de la fila la marcaba el elemento más alto de la fila, no el
+     height de la celda: los desplegables de Turno/Nombre heredan el padding
+     de 7px de la regla global de formularios, y el botón ✕ el suyo propio. Con
+     esto los tres se quedan por debajo de los 21px de la celda. */
+  #rs-grid td select,#rs-grid td input{padding-top:0;padding-bottom:0;
+    height:19px;line-height:19px;box-sizing:border-box;}
+  #rs-grid td .btn{padding:0 5px;height:18px;line-height:18px;font-size:11px;min-height:0;}
   /* Desplegable propio del nombre del staff: en la columna cerrada solo se ve
      el nombre y la flecha; el rombito naranja de "trabaja hoy" solo aparece
      dentro de la lista, al abrirla. */
