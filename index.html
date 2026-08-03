@@ -949,8 +949,13 @@
   tr.rs-total td.rs-pname{background:#1A1A1A;color:#fff;}
 
   /* rejilla del día */
-  .rs-grid-wrap{overflow:auto;max-height:calc(100vh - 300px);border:1px solid var(--line-strong);border-radius:9px;}
-  #rs-grid{border-collapse:separate;border-spacing:0;font-size:11px;}
+  .rs-grid-wrap{overflow:auto;max-height:calc(100vh - 300px);border:1px solid var(--line-strong);
+    border-radius:9px;margin-top:10px;}
+  /* border-collapse:collapse hace que, en cada línea compartida entre dos
+     celdas, el navegador se quede solo con el borde más grueso en vez de
+     dibujar los dos bordes uno al lado del otro (que es lo que duplicaba
+     el grosor del recuadro del turno). */
+  #rs-grid{border-collapse:collapse;font-size:11px;}
   #rs-grid th{position:sticky;top:0;z-index:3;background:#1A1A1A;color:#fff;padding:5px 3px;
     font-size:9.5px;font-weight:800;text-align:center;white-space:nowrap;min-width:34px;}
   #rs-grid th.rs-h-turno{left:0;z-index:5;min-width:92px;}
@@ -9368,9 +9373,12 @@ function rsRenderGrid(){
       const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
       let borde = '';
       if(dentro.has(ci)){
-        borde = 'border-top:1px solid #000;border-bottom:1px solid #000;';
-        if(ci===inicioRango) borde += 'border-left:1px solid #000;';
-        if(ci===finRango)    borde += 'border-right:1px solid #000;';
+        // 2px: con border-collapse:collapse, el navegador se queda con el
+        // más grueso en cada línea compartida, así que siempre sale a 2px,
+        // nunca más grueso por solaparse con la celda vecina.
+        borde = 'border-top:2px solid #000;border-bottom:2px solid #000;';
+        if(ci===inicioRango) borde += 'border-left:2px solid #000;';
+        if(ci===finRango)    borde += 'border-right:2px solid #000;';
       }
       return `<td data-fila="${i}" data-col="${ci}" style="${borde}"
         ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
@@ -9427,23 +9435,28 @@ function rsRenderGrid(){
   rsRenderHorasTotales();
 }
 /* Duración en horas de un turno tipo "930-1730". */
-function rsDuracionHoras(turno){
+/* Duración de un turno tipo "930-1730" en MINUTOS exactos (nada de decimales
+   de horas, para evitar errores de redondeo al sumar). */
+function rsDuracionMinutos(turno){
   const m = String(turno||'').match(/(\d{3,4})\s*-\s*(\d{3,4})/);
   if(!m) return 0;
   const min = t => { const s=String(t).padStart(4,'0'); return parseInt(s.slice(0,2),10)*60 + parseInt(s.slice(2),10); };
   let ini = min(m[1]), fin = min(m[2]);
   if(fin <= ini) fin += 24*60;
-  return (fin - ini) / 60;
+  return fin - ini;
 }
 /* Suma las horas de todo el staff y los responsables (Ignacio/Paula/Ceci).
-   Laia nunca se cuenta, aunque tenga turno puesto ese día. */
+   Laia nunca se cuenta, aunque tenga turno puesto ese día.
+   Se muestra en horas y minutos (ej. 51h 30min), como en Planday, no en
+   decimal, para que no haya dudas al compararlo. */
 function rsRenderHorasTotales(){
   const el = document.getElementById('rs-horas-totales');
   if(!el) return;
-  const total = RS_DIA.filas
+  const totalMin = RS_DIA.filas
     .filter(f => f.tipo !== 'laia' && f.turno)
-    .reduce((acc, f) => acc + rsDuracionHoras(f.turno), 0);
-  el.textContent = total.toFixed(1).replace('.', ',') + ' h';
+    .reduce((acc, f) => acc + rsDuracionMinutos(f.turno), 0);
+  const h = Math.floor(totalMin / 60), m = totalMin % 60;
+  el.textContent = `${h}h ${String(m).padStart(2,'0')}min`;
 }
 function rsRenderLeyenda(){
   const el = document.getElementById('rs-legend');
@@ -9609,7 +9622,7 @@ function rsValidar(){
   // cajas descubiertas o duplicadas
   // Si en esa franja alguien tiene la celda negra (BRK), esa persona está
   // cubriendo el descanso de quien lleva la caja: no se cuenta como hueco.
-  const revisaCaja=(puesto,label,desde)=>{
+  const revisaCaja=(puesto,label,desde,avisarHueco)=>{
     const huecos=[], dobles=[];
     for(let ci=desde; ci<iCi; ci++){
       const t=RS_SLOTS[ci];
@@ -9617,14 +9630,13 @@ function rsValidar(){
       const hayBreaker = filas.some(f=>f.slots[t]==='BRK');
       if(n===0){ if(!hayBreaker) huecos.push(t); } else if(n>1) dobles.push(t);
     }
-    if(huecos.length) avisos.push(['err',`${label} sin cubrir`, huecos.join(', ')]);
+    if(avisarHueco && huecos.length) avisos.push(['err',`${label} sin cubrir`, huecos.join(', ')]);
     if(dobles.length) avisos.push(['err',`${label} con dos personas a la vez`, dobles.join(', ')]);
   };
-  // Los días que Caja 1 está abierta, Caja 2 abre más tarde (10:30 o 10:45),
-  // no a las 10:00: no avisamos de hueco en esa franja de apertura.
-  const iAp2 = RS_DIA.config.caja1 ? RS_SLOTS.indexOf('1045') : iAp;
-  revisaCaja('2','Caja 2', iAp2);
-  if(RS_DIA.config.caja1) revisaCaja('1','Caja 1', iAp);
+  // Caja 2: ya no avisamos de huecos (el horario real de apertura varía
+  // según si Caja 1 está abierta, y daba falsos positivos).
+  revisaCaja('2','Caja 2', iAp, false);
+  if(RS_DIA.config.caja1) revisaCaja('1','Caja 1', iAp, true);
 
   // puestos sin habilitación
   filas.forEach(f=>{
