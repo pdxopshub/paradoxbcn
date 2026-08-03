@@ -907,6 +907,9 @@
   .lm-shot-box{display:flex;flex-direction:column;gap:7px;min-width:0;}
   .lm-shot-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .lm-shot-name{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--text-soft);}
+  .lm-info-btn{border:none;background:none;color:var(--accent);cursor:pointer;font-size:13px;
+    line-height:1;padding:0 0 0 4px;vertical-align:middle;}
+  .lm-info-btn:hover{opacity:.7;}
   .lm-shot-actions{display:flex;gap:6px;}
   .lm-drop{border:2px dashed var(--line-strong);border-radius:10px;background:var(--panel);
     min-height:104px;display:flex;align-items:center;justify-content:center;text-align:center;
@@ -946,6 +949,10 @@
   .rs-cell.v0{background:#2B2B2B;color:#2B2B2B;}
   .rs-cell:hover{outline:2px solid var(--accent);outline-offset:-2px;}
   tr.rs-total td{background:#1A1A1A;color:#fff;font-weight:800;font-size:12px;padding:6px 4px;}
+  /* #rs-grid td{background:#fff} tiene más especificidad (usa #id) que
+     tr.rs-total td (solo clases), así que sin esto la última fila del
+     roster del día se veía blanca en vez de negra. */
+  #rs-grid tr.rs-total td{background:#1A1A1A !important;color:#fff !important;}
   tr.rs-total td.rs-pname{background:#1A1A1A;color:#fff;}
 
   /* rejilla del día */
@@ -991,7 +998,7 @@
   tr.rs-fila-laia td.rs-turno,tr.rs-fila-laia td.rs-nombre{background:#E6EEFF;}
 
   /* leyenda de puestos, arrastrable a la rejilla */
-  .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;justify-content:center;}
+  .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0;justify-content:center;}
   .rs-legend-chip{cursor:grab;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:800;
     border:1px solid rgba(0,0,0,.15);user-select:none;}
   .rs-legend-chip:active{cursor:grabbing;}
@@ -1000,6 +1007,10 @@
   /* imprimir solo el horario del día */
   .rs-print-title{display:none;}
   @media print{
+    /* sin esto, la mayoría de navegadores imprimen sin fondos de color
+       (para ahorrar tinta) y el roster salía en blanco y negro en vez de
+       con los verdes/colores reales de la pantalla. */
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
     body.rs-imprimiendo *{visibility:hidden;}
     body.rs-imprimiendo #rs-print-area, body.rs-imprimiendo #rs-print-area *{visibility:visible;}
     body.rs-imprimiendo #rs-print-area{position:absolute;left:0;top:0;width:100%;}
@@ -1306,10 +1317,20 @@
   .depo-denom-total-row td{background:#1A1A1A;color:#fff;font-weight:800;}
   .depo-print-title{display:none;}
   @media print{
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
     body.depo-imprimiendo *{visibility:hidden;}
-    body.depo-imprimiendo #depo-print-area, body.depo-imprimiendo #depo-print-area *{visibility:visible;}
-    body.depo-imprimiendo #depo-print-area{position:absolute;left:0;top:0;width:100%;}
-    body.depo-imprimiendo .depo-print-title{display:block;margin-bottom:10px;}
+    body.depo-imprimiendo #depo-print-area, body.depo-imprimiendo #depo-print-area *,
+    body.depo-imprimiendo #depo-denom-card, body.depo-imprimiendo #depo-denom-card *{visibility:visible;}
+    body.depo-imprimiendo #depo-print-area{position:absolute;left:0;top:0;width:62%;}
+    body.depo-imprimiendo #depo-denom-card{position:absolute;left:64%;top:0;width:34%;border:none;box-shadow:none;padding:0;}
+    body.depo-imprimiendo .depo-print-title{display:block;margin-bottom:6px;}
+    /* la hoja de impresión debe salir mucho más compacta que en pantalla,
+       igual que el PDF original que se manda por email */
+    body.depo-imprimiendo .depo-table{font-size:8.5px;}
+    body.depo-imprimiendo .depo-table th{padding:3px 2px;font-size:8px;}
+    body.depo-imprimiendo .depo-table td{padding:2px 3px;}
+    body.depo-imprimiendo .depo-table input{font-size:8.5px;}
+    body.depo-imprimiendo .section-title{font-size:11px;}
   }
 
   /* ---- Precios de entradas + Precios de cumpleaños, lado a lado ---- */
@@ -2603,7 +2624,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="lm-middle">
             <div class="card">
               <div class="rs-head" style="margin-bottom:10px;">
-                <div class="section-title">Depósito Cajas <span class="hint">Se calcula solo con Fever + SumUp de cada día</span></div>
+                <div class="section-title">Depósito Cajas</div>
                 <button class="btn btn-ghost btn-sm" onclick="depoImprimir()">🖨 PDF</button>
               </div>
               <div id="depo-print-area">
@@ -2613,43 +2634,22 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                   <tbody id="depo-dias-body"></tbody>
                   <tfoot id="depo-dias-foot"></tfoot>
                 </table>
-                <table class="depo-table depo-denom" id="depo-denom-table" style="margin-top:14px;">
-                  <thead><tr><th colspan="3">Deposit 1</th></tr></thead>
-                  <tbody id="depo-denom-body"></tbody>
-                  <tfoot id="depo-denom-foot"></tfoot>
-                </table>
               </div>
             </div>
           </div>
 
-          <!-- DERECHA: enlaces e info -->
+          <!-- DERECHA: cápsula info + tabla de billetaje (Deposit 1), más estrecha -->
           <div class="lm-right">
             <div class="card" style="margin-bottom:12px;">
-              <a class="lm-link" href="https://docs.google.com/spreadsheets/d/13qDZD_KF8Qkp6U0_1IaJKSy86yUVZv7c/edit?gid=1418629642#gid=1418629642" target="_blank" rel="noopener">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M14 3h7v7"/><path d="M10 14L21 3"/><path d="M21 14v7H3V3h7"/></svg>
-                Depósito Cajas
-              </a>
+              <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="lmOpenSobreInfo()">ℹ️ Info Sobre de Loomis</button>
             </div>
 
-            <div class="card" style="margin-bottom:12px;">
-              <div class="section-title" style="margin-bottom:10px;">Sobre de Loomis</div>
-              <ul class="lm-info">
-                <li><span class="lm-arrow">←</span> Black and White Museum S.L</li>
-                <li><span class="lm-arrow">→</span> Paradox Museum Barcelona</li>
-                <li><span class="lm-eur">€</span> Poner cantidad de cash de la semana</li>
-                <li><span class="lm-cal">📅</span> Poner fecha de recogida</li>
-              </ul>
-            </div>
-
-            <div class="card">
-              <div class="section-title" style="margin-bottom:10px;">Pantallazo SumUp</div>
-              <ul class="lm-info">
-                <li><span class="lm-arrow">1</span> Categoría de Informes</li>
-                <li><span class="lm-arrow">2</span> Descarga de informes</li>
-                <li><span class="lm-arrow">3</span> Fecha (inicio - fin)</li>
-                <li><span class="lm-arrow">4</span> INGRESOS</li>
-                <li><span class="lm-arrow">5</span> Descargar</li>
-              </ul>
+            <div class="card" id="depo-denom-card">
+              <div class="section-title" style="margin-bottom:10px;">Deposit 1</div>
+              <table class="depo-table depo-denom" id="depo-denom-table">
+                <tbody id="depo-denom-body"></tbody>
+                <tfoot id="depo-denom-foot"></tfoot>
+              </table>
             </div>
           </div>
 
@@ -2665,7 +2665,9 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
             <div class="lm-shot-box">
               <div class="lm-shot-head">
-                <span class="lm-shot-name">SumUp</span>
+                <span class="lm-shot-name">SumUp
+                  <button class="lm-info-btn" onclick="lmOpenSumupInfo()" title="Cómo sacar el pantallazo de SumUp">ⓘ</button>
+                </span>
                 <span class="lm-shot-actions" id="lm-shot-actions-sumup"></span>
               </div>
               <div class="lm-drop" id="lm-drop-sumup" tabindex="0"
@@ -2742,10 +2744,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <div style="display:flex;justify-content:flex-start;margin-top:8px;" class="rs-no-print">
                 <button class="btn btn-ghost btn-sm" onclick="rsAddFila()">+ Turno</button>
               </div>
-              <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;font-size:11.5px;margin-top:12px;">
+              <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;font-size:13px;margin-top:6px;">
                 <div><b>Horas totales:</b> <span id="rs-horas-totales">—</span></div>
                 <div><b>Revisado por:</b>
-                  <select id="rs-revisado-por" onchange="rsSetRevisadoPor(this.value)" style="width:auto;display:inline-block;margin-left:4px;">
+                  <select id="rs-revisado-por" onchange="rsSetRevisadoPor(this.value)" style="width:auto;display:inline-block;margin-left:4px;font-size:13px;">
                     <option value="">—</option>
                     <option value="Ignacio">Ignacio</option>
                     <option value="Paula">Paula</option>
@@ -2753,8 +2755,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                     <option value="Laia">Laia</option>
                   </select>
                 </div>
-                <div><b>Cambios de turno:</b><div id="rs-ctx-cambios" class="hint" style="margin-top:2px;">—</div></div>
-                <div><b>Vacaciones:</b><div id="rs-ctx-vac" class="hint" style="margin-top:2px;">—</div></div>
+                <div><b>Cambios de turno:</b><div id="rs-ctx-cambios" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
+                <div><b>Vacaciones:</b><div id="rs-ctx-vac" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
               </div>
             </div>
           </div>
@@ -9025,15 +9027,16 @@ function recalcLoomis(){
    Excel que mandó Ignacio. Se guarda por semana en deposito_cajas_semanas.
    ============================================================ */
 const DEPO_DENOMS = [200,100,50,20,10,5,2,1,0.5,0.2,0.1,0.05,0.02,0.01];
-let DEPO_DATA = { dias:{}, denominaciones:{} };
+let DEPO_DATA = { dias:{}, denominaciones:{}, fecha_deposito:'' };
 
 async function renderDepositoCajas(mondayIso){
-  DEPO_DATA = { dias:{}, denominaciones:{} };
+  DEPO_DATA = { dias:{}, denominaciones:{}, fecha_deposito:'' };
   try{
     const {data} = await sb.from('deposito_cajas_semanas').select('*').eq('semana', mondayIso).single();
     if(data){
       DEPO_DATA.dias = (typeof data.dias==='string') ? JSON.parse(data.dias) : (data.dias||{});
       DEPO_DATA.denominaciones = (typeof data.denominaciones==='string') ? JSON.parse(data.denominaciones) : (data.denominaciones||{});
+      DEPO_DATA.fecha_deposito = data.fecha_deposito || '';
     }
   }catch(e){}
   depoRenderDias();
@@ -9060,10 +9063,15 @@ function depoRenderDias(){
     const dd = DEPO_DATA.dias[iso] || {};
     const auto = depoTotalDia(iso);
     total += auto;
+    // "Date deposit Bank" es una única fecha para toda la semana (no una por
+    // día), así que solo se pinta una vez con rowspan="7" en la primera fila.
+    const fechaCell = (i===0)
+      ? `<td rowspan="7"><input type="date" value="${DEPO_DATA.fecha_deposito||''}" onchange="depoSetFechaDeposito(this.value)"></td>`
+      : '';
     html += `<tr>
       <td class="depo-dia">${fmt(d)}</td>
       <td id="depo-total-${iso}">${auto.toFixed(2)}</td>
-      <td><input type="date" value="${dd.fecha_deposito||''}" onchange="depoSetDia('${iso}','fecha_deposito',this.value)"></td>
+      ${fechaCell}
       <td><input type="text" value="${esc(dd.comentarios||'')}" onchange="depoSetDia('${iso}','comentarios',this.value)"></td>
     </tr>`;
   }
@@ -9103,6 +9111,7 @@ function depoAutoGuardar(){
     try{
       await sb.from('deposito_cajas_semanas').upsert(
         { semana: loomisIso(loomisMonday), dias: DEPO_DATA.dias, denominaciones: DEPO_DATA.denominaciones,
+          fecha_deposito: DEPO_DATA.fecha_deposito || null,
           updated_at: new Date().toISOString() },
         { onConflict:'semana' });
     }catch(e){ console.error(e); }
@@ -9111,6 +9120,10 @@ function depoAutoGuardar(){
 function depoSetDia(iso, campo, val){
   if(!DEPO_DATA.dias[iso]) DEPO_DATA.dias[iso] = {};
   DEPO_DATA.dias[iso][campo] = val;
+  depoAutoGuardar();
+}
+function depoSetFechaDeposito(val){
+  DEPO_DATA.fecha_deposito = val;
   depoAutoGuardar();
 }
 function depoSetDenom(key, val){
@@ -9132,6 +9145,45 @@ function depoImprimir(){
   window.print();
 }
 window.addEventListener('afterprint', ()=> document.body.classList.remove('depo-imprimiendo'));
+
+/* Ventanas de info: sustituyen a las antiguas cápsulas "Sobre de Loomis" y
+   "Pantallazo SumUp", que ahora se abren como popup en vez de ocupar sitio
+   fijo en la columna derecha de Loomis. */
+function lmOpenSobreInfo(){
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
+      <div class="modal" style="max-width:420px;">
+        <div class="modal-head"><h2>Info Sobre de Loomis</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <ul class="lm-info">
+            <li><span class="lm-arrow">←</span> Black and White Museum S.L</li>
+            <li><span class="lm-arrow">→</span> Paradox Museum Barcelona</li>
+            <li><span class="lm-eur">€</span> Poner cantidad de cash de la semana</li>
+            <li><span class="lm-cal">📅</span> Poner fecha de recogida</li>
+          </ul>
+        </div>
+      </div>
+    </div>`;
+}
+function lmOpenSumupInfo(){
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
+      <div class="modal" style="max-width:420px;">
+        <div class="modal-head"><h2>Pantallazo SumUp</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <ul class="lm-info">
+            <li><span class="lm-arrow">1</span> Categoría de Informes</li>
+            <li><span class="lm-arrow">2</span> Descarga de informes</li>
+            <li><span class="lm-arrow">3</span> Fecha (inicio - fin)</li>
+            <li><span class="lm-arrow">4</span> INGRESOS</li>
+            <li><span class="lm-arrow">5</span> Descargar</li>
+          </ul>
+        </div>
+      </div>
+    </div>`;
+}
 
 /* ---- (código antiguo, ya no se usa: Conteo de caja Caja 1/Caja 2) ----
    Se deja sin borrar por si hiciera falta recuperar algo, pero ningún botón
@@ -9243,12 +9295,13 @@ const RS_ETIQ_PUESTO = { '1':'Caja 1','2':'Caja 2','0G':'Zero Gravity','F2':'Flo
   'BRK':'Breaker','DESC':'Descanso','OC':'Apertura/Cierre' };
 /* Horarios fijos de los responsables. Ignacio y Paula entran a las 1215 (en vez
    de las 1245) los lunes, porque son ellos quienes abren tras el fin de semana. */
-function rsTurnosResp(nombre, fechaIso){
-  if(nombre==='Ceci') return ['930-1600','945-1600','1415-2045','1430-2045'];
+function rsTurnosResp(nombre, fechaIso, fila){
+  const d = new Date((fechaIso||rsFecha)+'T12:00:00');
+  const lunes = d.getDay()===1;
+  if(nombre==='Ceci') return fila===2 ? ['1415-2045','1430-2045'] : ['930-1600','945-1600'];
   if(nombre==='Ignacio' || nombre==='Paula'){
-    const d = new Date((fechaIso||rsFecha)+'T12:00:00');
-    const lunes = d.getDay()===1;
-    return lunes ? ['930-1730','1215-2045'] : ['930-1730','1245-2045'];
+    if(fila===2) return lunes ? ['1215-2045'] : ['1245-2045'];
+    return ['930-1730'];
   }
   return [];
 }
@@ -9274,6 +9327,28 @@ let RS_STAFF = [];        // [{nombre, caja1, caja2, ...}]
 let RS_DIA = null;        // {fecha, config, filas}
 let RS_PLAN = {};         // {'YYYY-MM-DD': {nombre: 0|1|2}}
 let rsPlanMonday = null;
+/* Ctrl+Z: guarda una copia (JSON) de RS_DIA antes de cada cambio en la rejilla
+   del roster del día, para poder deshacer la última acción. */
+let RS_UNDO_STACK = [];
+function rsSnapshot(){
+  if(!RS_DIA) return;
+  try{ RS_UNDO_STACK.push(JSON.stringify(RS_DIA)); }catch(e){}
+  if(RS_UNDO_STACK.length>50) RS_UNDO_STACK.shift();
+}
+function rsUndo(){
+  if(!RS_UNDO_STACK.length) return;
+  const prev = RS_UNDO_STACK.pop();
+  try{ RS_DIA = JSON.parse(prev); }catch(e){ return; }
+  rsRenderGrid();
+  rsAutoGuardar();
+}
+document.addEventListener('keydown', function(ev){
+  const key = (ev.key||'').toLowerCase();
+  if((ev.ctrlKey||ev.metaKey) && !ev.shiftKey && key==='z' && document.getElementById('rs-grid')){
+    ev.preventDefault();
+    rsUndo();
+  }
+});
 let rsFecha = null;
 
 const rsIso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -9394,6 +9469,7 @@ function rsDay(delta){
 async function rsLoadDia(){
   const el=document.getElementById('rs-fecha');
   if(el && el.value) rsFecha = el.value;
+  RS_UNDO_STACK = [];
   RS_DIA = { fecha: rsFecha, config:{}, filas:[], revisado_por:'' };
   try{
     const {data} = await sb.from('roster_dias').select('*').eq('fecha',rsFecha).single();
@@ -9481,8 +9557,7 @@ function rsEnsureFilasEspeciales(){
   let r1 = RS_DIA.filas.find(f=>f.tipo==='resp1');
   let r2 = RS_DIA.filas.find(f=>f.tipo==='resp2');
   if(!r1){ r1 = { tipo:'resp1', turno:'', nombre:'', slots:{} }; RS_DIA.filas.push(r1); }
-  if(!r2){ r2 = { tipo:'resp2', turno:'', nombre:'Ceci', slots:{} }; RS_DIA.filas.push(r2); }
-  if(!r2.nombre) r2.nombre = 'Ceci';
+  if(!r2){ r2 = { tipo:'resp2', turno:'', nombre:'', slots:{} }; RS_DIA.filas.push(r2); }
   const btn = document.getElementById('rs-btn-laia');
   if(btn) btn.textContent = RS_DIA.filas.some(f=>f.tipo==='laia') ? 'Quitar Laia' : '+ Laia';
 }
@@ -9503,14 +9578,17 @@ function rsToggleLaia(){
   const tiene = RS_DIA.filas.some(f=>f.tipo==='laia');
   if(tiene){
     if(!confirm('¿Quitar la fila de Laia de este día?')) return;
+    rsSnapshot();
     RS_DIA.filas = RS_DIA.filas.filter(f=>f.tipo!=='laia');
   } else {
+    rsSnapshot();
     RS_DIA.filas.unshift({ tipo:'laia', turno:'', nombre:'Laia', slots:{} });
   }
   rsRenderGrid();
   rsAutoGuardar();
 }
 function rsAddFila(){
+  rsSnapshot();
   RS_DIA.filas.push({ turno:'', nombre:'', slots:{} });
   rsRenderGrid();
   rsAutoGuardar();
@@ -9518,18 +9596,21 @@ function rsAddFila(){
 function rsDelFila(i){
   const t = RS_DIA.filas[i]?.tipo;
   if(t==='resp1' || t==='resp2'){ alert('Las dos filas de responsables (Ignacio/Paula y Ceci) no se pueden borrar.'); return; }
+  rsSnapshot();
   RS_DIA.filas.splice(i,1);
   rsRenderGrid();
   rsAutoGuardar();
 }
-function rsSetTurno(i, val){ RS_DIA.filas[i].turno = val.trim(); rsRenderGrid(); rsAutoGuardar(); }
-function rsSetTurnoResp(i, val){ RS_DIA.filas[i].turno = val; rsRenderGrid(); rsAutoGuardar(); }
-function rsSetInicioStaff(i, val){ RS_DIA.filas[i].turno = val ? rsTurnoDesdeInicio(val) : ''; rsRenderGrid(); rsAutoGuardar(); }
+function rsSetTurno(i, val){ rsSnapshot(); RS_DIA.filas[i].turno = val.trim(); rsRenderGrid(); rsAutoGuardar(); }
+function rsSetTurnoResp(i, val){ rsSnapshot(); RS_DIA.filas[i].turno = val; rsRenderGrid(); rsAutoGuardar(); }
+function rsSetInicioStaff(i, val){ rsSnapshot(); RS_DIA.filas[i].turno = val ? rsTurnoDesdeInicio(val) : ''; rsRenderGrid(); rsAutoGuardar(); }
 function rsSetNombre(i, val){
+  rsSnapshot();
   const f = RS_DIA.filas[i];
   f.nombre = val;
-  if(f.tipo==='resp1'){
-    const validos = rsTurnosResp(val, RS_DIA.fecha);
+  if(f.tipo==='resp1' || f.tipo==='resp2'){
+    const fila = f.tipo==='resp1' ? 1 : 2;
+    const validos = rsTurnosResp(val, RS_DIA.fecha, fila);
     if(!validos.includes(f.turno)) f.turno = '';
   }
   rsRenderGrid();
@@ -9549,9 +9630,13 @@ function rsRenderGrid(){
     .slice().sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
   const optsStaff = ['<option value=""></option>'].concat(
     listaStaff.map(s=>{
+      // Un <option> nativo no permite colorear solo una parte del texto (no hay
+      // forma de pintar únicamente un punto y dejar el nombre en color normal),
+      // así que en vez de fondo azul se antepone un punto azul (🔵) al nombre
+      // de quien trabaja según la planificación semanal.
       const trabaja = (parseInt(planHoy[s.nombre],10)||0) > 0;
-      const estilo = trabaja ? ' style="background:#CFE3FF;font-weight:800;"' : '';
-      return `<option value="${esc(s.nombre)}"${estilo}>${esc(s.nombre)}</option>`;
+      const prefijo = trabaja ? '🔵 ' : '';
+      return `<option value="${esc(s.nombre)}">${prefijo}${esc(s.nombre)}</option>`;
     })).join('');
   const inicios = rsGenInicios();
   let html='';
@@ -9587,22 +9672,14 @@ function rsRenderGrid(){
     }).join('');
 
     let nombreCell, turnoCell, delCell, filaClase;
-    if(f.tipo==='resp1'){
+    if(f.tipo==='resp1' || f.tipo==='resp2'){
       filaClase='rs-fila-resp';
+      const filaNum = f.tipo==='resp1' ? 1 : 2;
       const opts = ['<option value=""></option>'].concat(
-        ['Ignacio','Paula'].map(n=>`<option value="${n}" ${n===f.nombre?'selected':''}>${n}</option>`)).join('');
+        ['Ignacio','Paula','Ceci'].map(n=>`<option value="${n}" ${n===f.nombre?'selected':''}>${n}</option>`)).join('');
       nombreCell = `<select onchange="rsSetNombre(${i}, this.value)"
         style="width:78px;border:none;background:transparent;font-weight:800;font-size:11px;">${opts}</select>`;
-      const validos = rsTurnosResp(f.nombre, RS_DIA.fecha);
-      const optsT = ['<option value="">-</option>'].concat(
-        validos.map(o=>`<option value="${o}" ${o===f.turno?'selected':''}>${o}</option>`)).join('');
-      turnoCell = `<select onchange="rsSetTurnoResp(${i}, this.value)"
-        style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;padding-right:14px;">${optsT}</select>`;
-      delCell = '<td></td>';
-    } else if(f.tipo==='resp2'){
-      filaClase='rs-fila-resp';
-      nombreCell = `<span style="font-weight:800;padding-left:2px;">Ceci</span>`;
-      const validos = rsTurnosResp('Ceci', RS_DIA.fecha);
+      const validos = rsTurnosResp(f.nombre, RS_DIA.fecha, filaNum);
       const optsT = ['<option value="">-</option>'].concat(
         validos.map(o=>`<option value="${o}" ${o===f.turno?'selected':''}>${o}</option>`)).join('');
       turnoCell = `<select onchange="rsSetTurnoResp(${i}, this.value)"
@@ -9700,6 +9777,7 @@ function rsSlotDrop(ev, i, t){
   ev.currentTarget.classList.remove('rs-drop-over');
   const puesto = ev.dataTransfer.getData('text/plain');
   if(!puesto) return;
+  rsSnapshot();
   RS_DIA.filas[i].slots[t] = puesto;
   // si el arrastre venía de otra celda de la rejilla (no de la leyenda), se
   // mueve: se borra de la celda de origen (salvo que se suelte en la misma).
@@ -9753,6 +9831,7 @@ function rsFillEnd(ev){
   document.removeEventListener('mouseup', rsFillEnd);
   if(ev) ev.preventDefault();
   if(!RS_DRAG || RS_DRAG.modo!=='fill'){ RS_DRAG=null; return; }
+  rsSnapshot();
   const { i, valor, visitadas } = RS_DRAG;
   const f = RS_DIA.filas[i];
   visitadas.forEach(c=>{
@@ -9782,6 +9861,7 @@ function rsAltDragEnd(ev){
   if(!RS_DRAG || RS_DRAG.modo!=='alt'){ RS_DRAG=null; return; }
   const pos = ev ? rsCeldaBajoPuntero(ev.clientX, ev.clientY) : null;
   if(pos){
+    rsSnapshot();
     RS_DIA.filas[pos.i].slots[RS_SLOTS[pos.ci]] = RS_DRAG.valor;
     RS_SEL = pos;
   }
