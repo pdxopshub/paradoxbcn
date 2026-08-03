@@ -848,7 +848,7 @@
   /* Pase de compacidad: tarjetas más ajustadas y menos aire entre bloques,
      para que toda la vista se vea más apretada y cuidada. */
   #view-loomis .card{padding:12px 14px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.42fr) minmax(0,1fr);gap:12px;align-items:start;}
+  .lm-layout{display:grid;grid-template-columns:minmax(0,0.92fr) minmax(0,1.38fr) minmax(0,0.8fr);gap:12px;align-items:stretch;}
   /* Las 3 columnas son cajas idénticas: misma anchura, misma altura y una
      cabecera de altura fija, para que "W32 · ...", "Depósito Cajas" y
      "Deposit 1" queden alineados en la misma línea horizontal. */
@@ -917,10 +917,10 @@
     color:var(--text-soft);}
   .lm-arrow,.lm-eur,.lm-cal{flex-shrink:0;font-weight:800;color:var(--accent);width:16px;text-align:center;}
 
-  /* pantallazos semanales (SumUp / Fever): van apilados dentro de la columna
-     derecha de Loomis, para que todo quepa en una pantalla sin scroll. */
-  .lm-shots{display:grid;grid-template-columns:1fr;gap:10px;}
-  .lm-shot-box{display:flex;flex-direction:column;gap:4px;min-width:0;}
+  /* pantallazos semanales (SumUp / Fever): abajo del todo y en horizontal */
+  .lm-shots{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:900px){.lm-shots{grid-template-columns:1fr;}}
+  .lm-shot-box{display:flex;flex-direction:column;gap:6px;min-width:0;}
   .lm-shot-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .lm-shot-name{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--text-soft);}
   .lm-info-btn{border:none;background:none;color:var(--accent);cursor:pointer;font-size:13px;
@@ -1368,7 +1368,7 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .lm-quote.lq-visible{opacity:1;}
   .lm-subt{font-weight:800;font-size:12px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.42fr) minmax(0,1fr);gap:12px;align-items:start;}
+  .lm-layout{display:grid;grid-template-columns:minmax(0,0.92fr) minmax(0,1.38fr) minmax(0,0.8fr);gap:12px;align-items:stretch;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-middle{min-width:0;}
   .caja-widget{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -2696,7 +2696,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div class="lm-layout">
 
           <!-- IZQUIERDA: tabla de turnos -->
-          <div class="lm-colstack">
           <div class="lm-left card lm-col">
             <div class="lm-colhead">
               <div class="section-title" style="margin:0;" id="loomis-week-label">Semana</div>
@@ -2725,116 +2724,91 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <span id="loomis-saved" style="display:none;font-size:12.5px;font-weight:700;color:var(--ok);">✓ Guardado</span>
             </div>
           </div>
-          </div>
 
-          <!-- CENTRO (columna ancha): Depósito Cajas y, debajo, Deposit 1 -->
-          <div class="lm-colstack">
-            <div class="lm-middle card lm-col">
-              <div class="lm-colhead">
-                <div class="section-title" style="margin:0;">Depósito Cajas</div>
-                <div class="lm-colhead-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="depoImprimir()">🖨 PDF</button>
-                </div>
-              </div>
-              <div id="depo-print-area">
-                <h3 class="depo-print-title" id="depo-print-title"></h3>
-                <table class="depo-table" id="depo-dias-table">
-                  <thead><tr><th>DIA</th><th>Deposit Bank</th><th>Date deposit Bank</th><th>Comments</th></tr></thead>
-                  <tbody id="depo-dias-body"></tbody>
-                  <tfoot id="depo-dias-foot"></tfoot>
-                </table>
+          <!-- CENTRO (columna ancha): Depósito Cajas -->
+          <div class="lm-middle card lm-col">
+            <div class="lm-colhead">
+              <div class="section-title" style="margin:0;">Depósito Cajas</div>
+              <div class="lm-colhead-actions">
+                <button class="btn btn-ghost btn-sm" onclick="depoImprimir()">🖨 PDF</button>
               </div>
             </div>
-
-            <div class="card lm-col" id="depo-denom-card">
-              <div class="lm-colhead">
-                <div class="section-title" style="margin:0;">Deposit 1</div>
-              </div>
-              <table class="depo-table depo-denom" id="depo-denom-table">
-                <tbody id="depo-denom-body"></tbody>
-                <tfoot id="depo-denom-foot"></tfoot>
+            <div id="depo-print-area">
+              <h3 class="depo-print-title" id="depo-print-title"></h3>
+              <table class="depo-table" id="depo-dias-table">
+                <thead><tr><th>DIA</th><th>Deposit Bank</th><th>Date deposit Bank</th><th>Comments</th></tr></thead>
+                <tbody id="depo-dias-body"></tbody>
+                <tfoot id="depo-dias-foot"></tfoot>
               </table>
             </div>
           </div>
 
-          <!-- DERECHA: las dos cápsulas del sobre de Loomis + los pantallazos -->
-          <div class="lm-colstack">
-            <div class="card lm-col">
-              <div class="lm-colhead">
-                <div class="section-title" style="margin:0;">Sobre de Loomis</div>
-              </div>
-              <ul class="lm-info">
-                <li><span class="lm-arrow">←</span> Black and White Museum S.L</li>
-                <li><span class="lm-arrow">→</span> Paradox Museum Barcelona</li>
-                <li><span class="lm-eur">€</span> Poner cantidad de cash de la semana</li>
-                <li><span class="lm-cal">📅</span> Poner fecha de recogida</li>
-              </ul>
-            </div>
-
-            <div class="card lm-col">
-              <div class="lm-colhead">
-                <div class="section-title" style="margin:0;">Pantallazo SumUp</div>
-              </div>
-              <ul class="lm-info">
-                <li><span class="lm-arrow">1</span> Categoría de Informes</li>
-                <li><span class="lm-arrow">2</span> Descarga de informes</li>
-                <li><span class="lm-arrow">3</span> Fecha (inicio - fin)</li>
-                <li><span class="lm-arrow">4</span> INGRESOS</li>
-                <li><span class="lm-arrow">5</span> Descargar</li>
-              </ul>
-            </div>
-
-            <div class="card lm-col">
-              <div class="lm-colhead">
-                <div class="section-title" style="margin:0;">Pantallazos de la semana</div>
-                <div class="lm-colhead-actions"><span class="hint" id="loomis-shots-week"></span></div>
-              </div>
-              <div class="lm-shots">
-
-                <div class="lm-shot-box">
-                  <div class="lm-shot-head">
-                    <span class="lm-shot-name">SumUp</span>
-                    <span class="lm-shot-actions" id="lm-shot-actions-sumup"></span>
-                  </div>
-                  <div class="lm-drop" id="lm-drop-sumup" tabindex="0"
-                       onclick="loomisShotClick('sumup')"
-                       onpaste="loomisShotPaste(event,'sumup')"
-                       ondragover="loomisShotDrag(event,'sumup',true)"
-                       ondragleave="loomisShotDrag(event,'sumup',false)"
-                       ondrop="loomisShotDrop(event,'sumup')">
-                    <div class="lm-drop-hint">Clic y <b>Ctrl+V</b>, arrastra la imagen, o
-                      <a href="#" class="lm-pick" onclick="loomisShotPick(event,'sumup');return false;">elige archivo</a></div>
-                  </div>
-                  <div class="lm-shot-state" id="lm-shot-state-sumup"></div>
-                  <input type="file" accept="image/*" id="lm-file-sumup" style="display:none;"
-                         onchange="loomisShotFile(event,'sumup')">
-                </div>
-
-                <div class="lm-shot-box">
-                  <div class="lm-shot-head">
-                    <span class="lm-shot-name">Fever</span>
-                    <span class="lm-shot-actions" id="lm-shot-actions-fever"></span>
-                  </div>
-                  <div class="lm-drop" id="lm-drop-fever" tabindex="0"
-                       onclick="loomisShotClick('fever')"
-                       onpaste="loomisShotPaste(event,'fever')"
-                       ondragover="loomisShotDrag(event,'fever',true)"
-                       ondragleave="loomisShotDrag(event,'fever',false)"
-                       ondrop="loomisShotDrop(event,'fever')">
-                    <div class="lm-drop-hint">Clic y <b>Ctrl+V</b>, arrastra la imagen, o
-                      <a href="#" class="lm-pick" onclick="loomisShotPick(event,'fever');return false;">elige archivo</a></div>
-                  </div>
-                  <div class="lm-shot-state" id="lm-shot-state-fever"></div>
-                  <input type="file" accept="image/*" id="lm-file-fever" style="display:none;"
-                         onchange="loomisShotFile(event,'fever')">
-                </div>
-
+          <!-- DERECHA: Deposit 1, con la info del sobre de Loomis en cápsula -->
+          <div class="lm-right card lm-col" id="depo-denom-card">
+            <div class="lm-colhead">
+              <div class="section-title" style="margin:0;">Deposit 1</div>
+              <div class="lm-colhead-actions">
+                <button class="lm-info-btn" onclick="lmOpenSobreInfo()" title="Info Sobre de Loomis">ⓘ</button>
               </div>
             </div>
+            <table class="depo-table depo-denom" id="depo-denom-table">
+              <tbody id="depo-denom-body"></tbody>
+              <tfoot id="depo-denom-foot"></tfoot>
+            </table>
           </div>
 
         </div>
 
+        <!-- Pantallazos de la semana: efectivo en SumUp vs Fever -->
+        <div class="card" style="margin-top:12px;">
+          <div class="section-title" style="margin-bottom:8px;">
+            Pantallazos de la semana
+            <span class="hint" id="loomis-shots-week">Se guardan junto al cuadre de esta semana</span>
+          </div>
+          <div class="lm-shots">
+
+            <div class="lm-shot-box">
+              <div class="lm-shot-head">
+                <span class="lm-shot-name">SumUp
+                  <button class="lm-info-btn" onclick="lmOpenSumupInfo()" title="Cómo sacar el pantallazo de SumUp">ⓘ</button>
+                </span>
+                <span class="lm-shot-actions" id="lm-shot-actions-sumup"></span>
+              </div>
+              <div class="lm-drop" id="lm-drop-sumup" tabindex="0"
+                   onclick="loomisShotClick('sumup')"
+                   onpaste="loomisShotPaste(event,'sumup')"
+                   ondragover="loomisShotDrag(event,'sumup',true)"
+                   ondragleave="loomisShotDrag(event,'sumup',false)"
+                   ondrop="loomisShotDrop(event,'sumup')">
+                <div class="lm-drop-hint">Haz clic aquí y pega con <b>Ctrl+V</b><br>arrastra la imagen, o
+                  <a href="#" class="lm-pick" onclick="loomisShotPick(event,'sumup');return false;">elige un archivo</a></div>
+              </div>
+              <div class="lm-shot-state" id="lm-shot-state-sumup"></div>
+              <input type="file" accept="image/*" id="lm-file-sumup" style="display:none;"
+                     onchange="loomisShotFile(event,'sumup')">
+            </div>
+
+            <div class="lm-shot-box">
+              <div class="lm-shot-head">
+                <span class="lm-shot-name">Fever</span>
+                <span class="lm-shot-actions" id="lm-shot-actions-fever"></span>
+              </div>
+              <div class="lm-drop" id="lm-drop-fever" tabindex="0"
+                   onclick="loomisShotClick('fever')"
+                   onpaste="loomisShotPaste(event,'fever')"
+                   ondragover="loomisShotDrag(event,'fever',true)"
+                   ondragleave="loomisShotDrag(event,'fever',false)"
+                   ondrop="loomisShotDrop(event,'fever')">
+                <div class="lm-drop-hint">Haz clic aquí y pega con <b>Ctrl+V</b><br>arrastra la imagen, o
+                  <a href="#" class="lm-pick" onclick="loomisShotPick(event,'fever');return false;">elige un archivo</a></div>
+              </div>
+              <div class="lm-shot-state" id="lm-shot-state-fever"></div>
+              <input type="file" accept="image/*" id="lm-file-fever" style="display:none;"
+                     onchange="loomisShotFile(event,'fever')">
+            </div>
+
+          </div>
+        </div>
       </div>
 
       <!-- ============ ROSTERS (solo Ignacio) ============ -->
