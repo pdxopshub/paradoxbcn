@@ -955,7 +955,7 @@
     font-size:9.5px;font-weight:800;text-align:center;white-space:nowrap;min-width:34px;}
   #rs-grid th.rs-h-turno{left:0;z-index:5;min-width:92px;}
   #rs-grid th.rs-h-nombre{left:92px;z-index:5;min-width:84px;}
-  #rs-grid td{border:1px solid #C9CDD4;text-align:center;padding:0;height:26px;}
+  #rs-grid td{border:1px solid #000;text-align:center;padding:0;height:26px;}
   #rs-grid td.rs-turno{position:sticky;left:0;background:#F0F0F0;font-weight:800;font-size:10.5px;
     white-space:nowrap;padding:0 5px;z-index:2;border-right:2px solid #333;}
   #rs-grid td.rs-nombre{position:sticky;left:92px;background:var(--surface);font-weight:700;
@@ -985,10 +985,11 @@
   body.rs-dragging-alt,body.rs-dragging-alt *{cursor:copy !important;}
 
   /* leyenda de puestos, arrastrable a la rejilla */
-  .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;}
+  .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px;justify-content:center;}
   .rs-legend-chip{cursor:grab;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:800;
     border:1px solid rgba(0,0,0,.15);user-select:none;}
   .rs-legend-chip:active{cursor:grabbing;}
+  .rs-legend-chip.rs-p-BRK{color:#fff;}
 
   .rs-warn{display:flex;flex-direction:column;gap:6px;}
   .rs-warn-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;padding:6px 9px;
@@ -2668,12 +2669,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <span class="hint" id="rs-dia-label"></span>
               </div>
               <div class="rs-actions">
-                <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;">
-                  <input type="checkbox" id="rs-cfg-caja1" onchange="rsSaveConfig()"> Caja 1 abierta
-                </label>
-                <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;">
-                  <input type="checkbox" id="rs-cfg-pompas" onchange="rsSaveConfig()"> Pompas
-                </label>
                 <button class="btn btn-primary btn-sm" onclick="rsAutoFill()">Repartir puestos</button>
                 <button class="btn btn-ghost btn-sm" onclick="rsAddFila()">+ Turno</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-laia" onclick="rsToggleLaia()">+ Laia</button>
@@ -2681,15 +2676,14 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <span id="rs-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓</span>
               </div>
             </div>
+            <div style="display:flex;justify-content:flex-end;gap:18px;font-size:11.5px;margin-bottom:8px;flex-wrap:wrap;">
+              <span><b>Cambios de turno:</b> <span id="rs-ctx-cambios" class="hint">—</span></span>
+              <span><b>Vacaciones:</b> <span id="rs-ctx-vac" class="hint">—</span></span>
+            </div>
             <div class="rs-legend" id="rs-legend"></div>
             <div class="rs-grid-wrap">
               <table id="rs-grid"><thead id="rs-grid-head"></thead><tbody id="rs-grid-body"></tbody></table>
             </div>
-          </div>
-
-          <div class="card" style="margin-bottom:12px;">
-            <div class="section-title" style="margin-bottom:10px;">Este día en el equipo</div>
-            <div id="rs-contexto"></div>
           </div>
 
           <div class="card">
@@ -9221,8 +9215,6 @@ async function rsLoadDia(){
   const finde = (d.getDay()===0 || d.getDay()===6);
   if(RS_DIA.config.caja1  === undefined) RS_DIA.config.caja1  = finde;   // entre semana por defecto cerrada
   if(RS_DIA.config.pompas === undefined) RS_DIA.config.pompas = finde;   // pompas solo findes
-  document.getElementById('rs-cfg-caja1').checked  = !!RS_DIA.config.caja1;
-  document.getElementById('rs-cfg-pompas').checked = !!RS_DIA.config.pompas;
   const lbl=document.getElementById('rs-dia-label');
   if(lbl) lbl.textContent = d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
   const eraNuevo = RS_DIA.filas.length === 0;
@@ -9235,17 +9227,19 @@ async function rsLoadDia(){
 /* Cambios de turno aprobados y vacaciones/bajas para el día del roster,
    para no tener que ir a mirarlo a otra pestaña. */
 async function rsCargarContexto(){
-  const el = document.getElementById('rs-contexto');
-  if(!el) return;
-  el.innerHTML = '<span class="hint">Cargando…</span>';
+  const elC = document.getElementById('rs-ctx-cambios');
+  const elV = document.getElementById('rs-ctx-vac');
+  if(!elC && !elV) return;
+  if(elC) elC.textContent = '…';
+  if(elV) elV.textContent = '…';
   const fecha = RS_DIA.fecha;
 
   let cambios = [];
   try{
     const { data } = await sb.from('turnos').select('*').eq('estado','Aprobado');
     (data||[]).forEach(t=>{
-      if(t.p1_fecha===fecha) cambios.push(`<b>${esc(t.p1_staff||'?')}</b> cede su turno de las ${esc(t.p1_hora||'')} a <b>${esc(t.p2_staff||'?')}</b>`);
-      if(t.p2_fecha===fecha) cambios.push(`<b>${esc(t.p2_staff||'?')}</b> cede su turno de las ${esc(t.p2_hora||'')} a <b>${esc(t.p1_staff||'?')}</b>`);
+      if(t.p1_fecha===fecha) cambios.push(`${t.p1_staff||'?'} cede su turno de las ${t.p1_hora||''} a ${t.p2_staff||'?'}`);
+      if(t.p2_fecha===fecha) cambios.push(`${t.p2_staff||'?'} cede su turno de las ${t.p2_hora||''} a ${t.p1_staff||'?'}`);
     });
   }catch(e){}
 
@@ -9255,22 +9249,18 @@ async function rsCargarContexto(){
       .lte('fecha_inicio', fecha).gte('fecha_fin', fecha).eq('estado','aprobado');
     fuera = (data||[]).filter(s=> s.tipo==='vacaciones' || s.tipo==='recuperacion').map(s=>{
       const lbl = (typeof VAC_TIPOS!=='undefined' && VAC_TIPOS[s.tipo]?.label) || s.tipo;
-      return `<b>${esc(s.persona||'?')}</b> — ${esc(lbl)}`;
+      return `${s.persona||'?'} (${lbl})`;
     });
   }catch(e){}
 
   let bajas = [];
   try{
     const { data } = await sb.from('vac_bajas').select('*').lte('fecha_inicio', fecha).gte('fecha_fin', fecha);
-    bajas = (data||[]).map(b=> `<b>${esc(b.persona||'?')}</b> — de baja`);
+    bajas = (data||[]).map(b=> `${b.persona||'?'} (baja)`);
   }catch(e){}
 
-  const offList = fuera.concat(bajas);
-  const bloques = [];
-  if(cambios.length) bloques.push(`<div style="margin-bottom:8px;"><div class="hint" style="margin-bottom:3px;">Cambios de turno</div>${cambios.join('<br>')}</div>`);
-  if(offList.length) bloques.push(`<div><div class="hint" style="margin-bottom:3px;">Vacaciones / bajas</div>${offList.join('<br>')}</div>`);
-  el.innerHTML = bloques.length ? bloques.join('') :
-    `<span class="hint">Sin cambios de turno ni vacaciones/bajas registrados para este día.</span>`;
+  if(elC) elC.textContent = cambios.length ? cambios.join(' · ') : 'Ninguno';
+  if(elV) elV.textContent = (fuera.concat(bajas)).length ? fuera.concat(bajas).join(' · ') : 'Nadie';
 }
 /* Si el día está vacío, propone una fila de STAFF por cada turno que Laia haya
    marcado (Ignacio/Paula/Ceci/Laia no entran aquí: tienen sus propias filas fijas). */
@@ -9319,11 +9309,6 @@ function rsToggleLaia(){
   }
   rsRenderGrid();
 }
-function rsSaveConfig(){
-  RS_DIA.config.caja1  = document.getElementById('rs-cfg-caja1').checked;
-  RS_DIA.config.pompas = document.getElementById('rs-cfg-pompas').checked;
-  rsRenderGrid();
-}
 function rsAddFila(){
   RS_DIA.filas.push({ turno:'', nombre:'', slots:{} });
   rsRenderGrid();
@@ -9361,13 +9346,25 @@ function rsRenderGrid(){
   let html='';
   rsOrdenFilas().forEach(i=>{
     const f = RS_DIA.filas[i];
+    /* Recuadro negro automático: las celdas cubiertas por el turno escrito
+       en la primera columna se enmarcan con un borde grueso, como en el
+       Excel original. */
+    const dentro = new Set(rsRango(f.turno));
+    const inicioRango = dentro.size ? Math.min(...dentro) : null;
+    const finRango    = dentro.size ? Math.max(...dentro) : null;
     const celdas = RS_SLOTS.map((t,ci)=>{
       const v = f.slots[t] || '';
       const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : v;
       const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
       const seleccionada = (RS_SEL && RS_SEL.i===i && RS_SEL.ci===ci);
       const handle = seleccionada ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${ci})"></span>` : '';
-      return `<td class="${seleccionada?'rs-selected':''}" data-fila="${i}" data-col="${ci}"
+      let borde = '';
+      if(dentro.has(ci)){
+        borde = 'border-top:2px solid #000;border-bottom:2px solid #000;';
+        if(ci===inicioRango) borde += 'border-left:2px solid #000;';
+        if(ci===finRango)    borde += 'border-right:2px solid #000;';
+      }
+      return `<td class="${seleccionada?'rs-selected':''}" data-fila="${i}" data-col="${ci}" style="${borde}"
         ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
         ondrop="rsSlotDrop(event,${i},'${t}')"><button class="rs-slot rs-p-${esc(v)}" style="${mal}"
         onmousedown="rsAltDragStart(event,${i},${ci})"
@@ -9423,8 +9420,11 @@ function rsRenderGrid(){
 function rsRenderLeyenda(){
   const el = document.getElementById('rs-legend');
   if(!el) return;
+  /* Códigos cortos (1, 2, 0G...) en el chip; el significado completo solo
+     aparece al pasar el ratón por encima, en el title. */
   el.innerHTML = Object.keys(RS_ETIQ_PUESTO).map(p=>
-    `<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')">${RS_ETIQ_PUESTO[p]}</span>`
+    `<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')"
+      title="${esc(RS_ETIQ_PUESTO[p])}">${esc(p)}</span>`
   ).join('');
 }
 function rsCicla(ev, i, ci, t){
@@ -9651,12 +9651,15 @@ function rsValidar(){
   const iAp = RS_SLOTS.indexOf(RS_APERTURA), iCi = RS_SLOTS.indexOf(RS_CIERRE);
 
   // cajas descubiertas o duplicadas
+  // Si en esa franja alguien tiene la celda negra (BRK), esa persona está
+  // cubriendo el descanso de quien lleva la caja: no se cuenta como hueco.
   const revisaCaja=(puesto,label)=>{
     const huecos=[], dobles=[];
     for(let ci=iAp; ci<iCi; ci++){
       const t=RS_SLOTS[ci];
       const n=filas.filter(f=>f.slots[t]===puesto).length;
-      if(n===0) huecos.push(t); else if(n>1) dobles.push(t);
+      const hayBreaker = filas.some(f=>f.slots[t]==='BRK');
+      if(n===0){ if(!hayBreaker) huecos.push(t); } else if(n>1) dobles.push(t);
     }
     if(huecos.length) avisos.push(['err',`${label} sin cubrir`, huecos.join(', ')]);
     if(dobles.length) avisos.push(['err',`${label} con dos personas a la vez`, dobles.join(', ')]);
