@@ -845,17 +845,20 @@
   #spv-grid-table th.spv-addcol:hover{background:var(--accent-soft);}
   #spv-summary-table{max-width:560px;}
   /* ── LOOMIS ─────────────────────────────────────────────────── */
-  .lm-layout{display:grid;grid-template-columns:minmax(0,42%) minmax(320px,1fr) 260px;gap:14px;align-items:start;}
+  /* Pase de compacidad: tarjetas más ajustadas y menos aire entre bloques,
+     para que toda la vista se vea más apretada y cuidada. */
+  #view-loomis .card{padding:12px 14px;}
+  .lm-layout{display:grid;grid-template-columns:minmax(0,42%) minmax(320px,1fr) 230px;gap:12px;align-items:start;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-left{min-width:0;}
   .lm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
-    flex-wrap:wrap;margin-bottom:10px;}
+    flex-wrap:wrap;margin-bottom:8px;}
 
   .loomis-table{border-collapse:collapse;width:100%;table-layout:fixed;}
 
   /* cabeceras */
   .loomis-table thead th{
-    padding:7px 4px;font-size:10.5px;font-weight:800;text-align:center;
+    padding:5px 4px;font-size:10px;font-weight:800;text-align:center;
     border:2px solid #333;letter-spacing:.4px;}
   .lm-h-turnos{background:#1A1A1A;color:#FFFFFF;width:110px;}
   .lm-h-sumup {background:#1A1A1A;color:#FFFFFF;}
@@ -880,8 +883,8 @@
   .lm-sep td{background:var(--surface);border:none;height:5px;padding:0;}
 
   /* inputs sin estilo propio, heredan el fondo de la celda */
-  .lm-in{width:100%;height:26px;text-align:center;background:transparent;
-    border:none;color:#1A1A1A;font-size:12px;padding:0 2px;}
+  .lm-in{width:100%;height:22px;text-align:center;background:transparent;
+    border:none;color:#1A1A1A;font-size:11.5px;padding:0 2px;}
   .lm-in:hover{background:rgba(0,0,0,.06);}
   .lm-in:focus{outline:none;background:#F0F4FF;}
 
@@ -896,15 +899,15 @@
   .lm-link{display:flex;align-items:center;gap:8px;color:var(--accent);text-decoration:none;
     font-weight:700;font-size:13px;}
   .lm-link:hover{text-decoration:underline;}
-  .lm-info{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:9px;}
-  .lm-info li{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;line-height:1.4;
+  .lm-info{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px;}
+  .lm-info li{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.35;
     color:var(--text-soft);}
   .lm-arrow,.lm-eur,.lm-cal{flex-shrink:0;font-weight:800;color:var(--accent);width:16px;text-align:center;}
 
   /* pantallazos semanales (SumUp / Fever) */
-  .lm-shots{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .lm-shots{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media(max-width:900px){.lm-shots{grid-template-columns:1fr;}}
-  .lm-shot-box{display:flex;flex-direction:column;gap:7px;min-width:0;}
+  .lm-shot-box{display:flex;flex-direction:column;gap:6px;min-width:0;}
   .lm-shot-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
   .lm-shot-name{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--text-soft);}
   .lm-info-btn{border:none;background:none;color:var(--accent);cursor:pointer;font-size:13px;
@@ -912,8 +915,8 @@
   .lm-info-btn:hover{opacity:.7;}
   .lm-shot-actions{display:flex;gap:6px;}
   .lm-drop{border:2px dashed var(--line-strong);border-radius:10px;background:var(--panel);
-    min-height:104px;display:flex;align-items:center;justify-content:center;text-align:center;
-    padding:12px;cursor:pointer;transition:all .12s;outline:none;}
+    min-height:84px;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:10px;cursor:pointer;transition:all .12s;outline:none;}
   .lm-drop:hover,.lm-drop:focus{border-color:var(--accent);background:var(--accent-soft);}
   .lm-drop.dragover{border-color:var(--accent);background:var(--accent-soft);border-style:solid;}
   .lm-drop.has-img{border-style:solid;border-color:var(--line-strong);background:var(--surface);
@@ -995,12 +998,13 @@
   .rs-p-{background:#fff;}
   /* Grupos (azul), Cumpleaños (morado), Taller (gris): celdas de evento sin
      habilitación asociada, se fusionan en una sola celda editable. */
-  .rs-p-GR{background:#4C8DFF;color:#fff;}
+  .rs-p-GR{background:#1554D6;color:#fff;}
   .rs-p-CU{background:#9B59B6;color:#fff;}
   .rs-p-TA{background:#9AA0A6;color:#fff;}
-  td.rs-p-GR,td.rs-p-CU,td.rs-p-TA{padding:0;}
-  .rs-especial-in{width:100%;height:100%;min-height:26px;border:none;background:transparent;
-    color:inherit;font-size:10.5px;font-weight:700;text-align:center;padding:0 4px;box-sizing:border-box;}
+  td.rs-p-GR,td.rs-p-CU,td.rs-p-TA{padding:0;height:26px;max-height:26px;overflow:hidden;}
+  .rs-especial-in{width:100%;height:26px;max-height:26px;border:none;background:transparent;
+    color:inherit;font-size:10.5px;font-weight:700;text-align:center;padding:0 4px;box-sizing:border-box;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .rs-especial-in::placeholder{color:rgba(255,255,255,.75);}
   tr.rs-fila-grupos td.rs-turno,tr.rs-fila-grupos td.rs-nombre{background:#DCE8FF;}
   tr.rs-fila-cumples td.rs-turno,tr.rs-fila-cumples td.rs-nombre{background:#EFE0F5;}
@@ -1018,18 +1022,18 @@
 
   /* Desplegable propio del nombre del staff: el punto de "trabaja según
      planificación" solo se ve en la lista abierta, nunca en el valor ya
-     elegido (que se ve siempre en el roster). Muy pequeño y verde. */
+     elegido (que se ve siempre en el roster). Muy pequeño y naranja; el
+     botón se ve igual que el select de antes (sin aspecto de botón). */
   .rs-staff-pick{position:relative;display:inline-block;width:78px;}
   .rs-staff-btn{width:100%;border:none;background:transparent;font-weight:700;font-size:11px;
-    text-align:left;cursor:pointer;color:var(--text);padding:2px 3px;font-family:inherit;}
-  .rs-staff-btn:hover{text-decoration:underline;}
+    text-align:left;cursor:pointer;color:var(--text);padding:0;font-family:inherit;}
   .rs-staff-list{position:absolute;top:100%;left:0;z-index:50;background:var(--surface);
     border:1px solid var(--line-strong);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.2);
     max-height:210px;overflow-y:auto;min-width:110px;padding:2px 0;text-align:left;}
   .rs-staff-opt{display:flex;align-items:center;gap:5px;padding:4px 9px;font-size:11px;
     font-weight:600;cursor:pointer;white-space:nowrap;color:var(--text);}
   .rs-staff-opt:hover{background:var(--panel);}
-  .rs-staff-dot{width:5px;height:5px;flex-shrink:0;border-radius:50%;background:#1FAA59;}
+  .rs-staff-dot{width:5px;height:5px;flex-shrink:0;border-radius:50%;background:#FF9500;}
   .rs-staff-dot-hidden{visibility:hidden;}
 
   /* leyenda de puestos, arrastrable a la rejilla */
@@ -1320,7 +1324,7 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .lm-quote.lq-visible{opacity:1;}
   .lm-subt{font-weight:800;font-size:12px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,38%) minmax(320px,1fr) 260px;gap:14px;align-items:start;}
+  .lm-layout{display:grid;grid-template-columns:minmax(0,42%) minmax(320px,1fr) 230px;gap:12px;align-items:start;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-middle{min-width:0;}
   .caja-widget{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -1348,8 +1352,15 @@
   .depo-table input[type="text"]{text-align:left;}
   .depo-dia{font-weight:700;white-space:nowrap;}
   .depo-total-row td{background:#FFF3A3;font-weight:800;}
-  .depo-denom .depo-denom-label{font-weight:700;background:var(--panel);}
-  .depo-denom .depo-denom-total{font-weight:800;}
+  /* Deposit 1 (billetaje): tabla más corta y estrecha, con la columna de
+     cantidad muy angosta ya que solo lleva un par de dígitos. */
+  .depo-denom{font-size:10px;table-layout:fixed;}
+  .depo-denom th{padding:3px 4px;font-size:9px;}
+  .depo-denom td{padding:1px 3px;font-size:10px;line-height:1.1;}
+  .depo-denom input{font-size:10px;padding:1px 0;}
+  .depo-denom .depo-denom-label{font-weight:700;background:var(--panel);width:46%;}
+  .depo-denom .depo-denom-cant{width:22%;}
+  .depo-denom .depo-denom-total{font-weight:800;width:32%;}
   .depo-denom-total-row td{background:#1A1A1A;color:#fff;font-weight:800;}
   .depo-print-title{display:none;}
   @media print{
@@ -2699,8 +2710,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
 
         <!-- Pantallazos de la semana: efectivo en SumUp vs Fever -->
-        <div class="card" style="margin-top:14px;">
-          <div class="section-title" style="margin-bottom:10px;">
+        <div class="card" style="margin-top:10px;">
+          <div class="section-title" style="margin-bottom:8px;">
             Pantallazos de la semana
             <span class="hint" id="loomis-shots-week">Se guardan junto al cuadre de esta semana</span>
           </div>
@@ -2803,10 +2814,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <!-- Horas totales va agrupado con Cambios de turno y Vacaciones en un
                      mismo bloque flex: así, si hace falta partir la línea, se parte el
                      bloque entero y Horas totales nunca queda solo arriba con Revisado. -->
-                <div style="display:flex;flex-wrap:wrap;gap:14px;">
+                <div style="display:flex;flex-wrap:wrap;gap:22px;">
                   <div><b>Horas totales:</b> <span id="rs-horas-totales">—</span></div>
-                  <div><b>Cambios de turno:</b><div id="rs-ctx-cambios" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
-                  <div><b>Vacaciones:</b><div id="rs-ctx-vac" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
+                  <div style="padding-left:22px;border-left:1.5px solid var(--line-strong);"><b>Cambios de turno:</b><div id="rs-ctx-cambios" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
+                  <div style="padding-left:22px;border-left:1.5px solid var(--line-strong);"><b>Vacaciones:</b><div id="rs-ctx-vac" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
                 </div>
               </div>
             </div>
@@ -9161,7 +9172,7 @@ function depoRenderDenom(){
     total += subt;
     html += `<tr>
       <td class="depo-denom-label">${d.toFixed(2)} €</td>
-      <td><input type="number" step="1" min="0" value="${cant||''}" onchange="depoSetDenom('${key}',this.value)"></td>
+      <td class="depo-denom-cant"><input type="number" step="1" min="0" value="${cant||''}" onchange="depoSetDenom('${key}',this.value)"></td>
       <td class="depo-denom-total">${subt.toFixed(2)} €</td>
     </tr>`;
   });
@@ -9722,7 +9733,25 @@ function rsSetNombre(i, val){
   rsAutoGuardar();
 }
 
+/* Automatismos por nombre: hay personas que siempre hacen el mismo puesto
+   dentro de su turno (de momento solo Mario -> Caja 2, verde). Es idempotente:
+   solo rellena huecos vacíos dentro de su rango, nunca pisa lo que ya esté
+   puesto a mano (por si un día concreto hiciera falta ponerle otra cosa). */
+const RS_AUTO_PUESTO_POR_NOMBRE = { 'Mario': '2' };
+function rsAplicarAutomatismosNombre(){
+  let cambiado = false;
+  RS_DIA.filas.forEach(f=>{
+    const puesto = RS_AUTO_PUESTO_POR_NOMBRE[f.nombre];
+    if(!puesto || !f.turno) return;
+    rsRango(f.turno).forEach(ci=>{
+      const t = RS_SLOTS[ci];
+      if(!f.slots[t]){ f.slots[t] = puesto; cambiado = true; }
+    });
+  });
+  return cambiado;
+}
 function rsRenderGrid(){
+  if(rsAplicarAutomatismosNombre()) rsAutoGuardar();
   rsRenderLeyenda();
   const head=document.getElementById('rs-grid-head');
   if(head) head.innerHTML = '<tr><th class="rs-h-turno">Turno</th><th class="rs-h-nombre">Nombre</th>' +
@@ -9776,11 +9805,15 @@ function rsRenderGrid(){
         }
         const startKey = RS_SLOTS[ci];
         const texto = (f.textos && f.textos[startKey]) || '';
-        out += `<td class="rs-p-${esc(v)}" colspan="${fin-ci+1}" data-fila="${i}" data-col="${ci}" style="${borde}"
+        // Tirador de arrastre (estilo Excel) en la esquina: coge el valor de la
+        // última media hora de la tanda y lo extiende arrastrando, igual que en
+        // las celdas normales de la rejilla.
+        out += `<td class="rs-p-${esc(v)}" colspan="${fin-ci+1}" data-fila="${i}" data-col="${ci}" style="position:relative;${borde}"
           draggable="true" ondragstart="rsCellDragStart(event,${i},${ci},'${v}')"
           ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)" ondrop="rsSlotDrop(event,${i},'${t}')">
           <input type="text" class="rs-especial-in" value="${esc(texto)}" placeholder="p.ej. 35 PAX"
-            onclick="event.stopPropagation();" onchange="rsSetTextoEspecial(${i},'${startKey}',this.value)"></td>`;
+            onclick="event.stopPropagation();" onchange="rsSetTextoEspecial(${i},'${startKey}',this.value)">
+          <span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${fin})"></span></td>`;
         ci = fin + 1;
       }
       celdas = out;
