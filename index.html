@@ -848,7 +848,19 @@
   /* Pase de compacidad: tarjetas más ajustadas y menos aire entre bloques,
      para que toda la vista se vea más apretada y cuidada. */
   #view-loomis .card{padding:12px 14px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(240px,30%) minmax(260px,36%) minmax(280px,34%);gap:12px;align-items:start;}
+  .lm-layout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch;}
+  /* Las 3 columnas son cajas idénticas: misma anchura, misma altura y una
+     cabecera de altura fija, para que "W32 · ...", "Depósito Cajas" y
+     "Deposit 1" queden alineados en la misma línea horizontal. */
+  .lm-col{display:flex;flex-direction:column;min-width:0;}
+  .lm-colhead{display:flex;align-items:center;justify-content:space-between;gap:8px;
+    min-height:34px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line);}
+  .lm-colhead .section-title{font-size:13px;line-height:1.2;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;}
+  .lm-colhead-actions{display:flex;align-items:center;gap:4px;flex:none;}
+  .lm-colhead-actions .btn{padding:3px 8px;font-size:11px;}
+  .lm-colfoot{margin-top:auto;padding-top:10px;display:flex;gap:10px;align-items:center;}
+  .lm-col table{width:100%;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-left{min-width:0;}
   .lm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -992,11 +1004,13 @@
      td.rs-nombre es sticky y recorta/descoloca cualquier hijo absolute que se
      salga de su caja, lo que rompía visualmente el desplegable. Con fixed se
      ancla a la ventana y no depende del contenedor con scroll/sticky. */
-  .rs-staff-list{position:fixed;z-index:200;min-width:120px;
+  /* Sin scroll: se ven todos los nombres de una vez. Las opciones van
+     compactas para que la lista completa quepa en pantalla. */
+  .rs-staff-list{position:fixed;z-index:200;min-width:118px;
     background:#fff;border:1px solid #C9CDD4;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.18);
-    max-height:220px;overflow-y:auto;padding:2px;}
-  .rs-staff-opt{display:flex;align-items:center;gap:6px;padding:4px 7px;font-size:11.5px;font-weight:600;
-    border-radius:4px;cursor:pointer;white-space:nowrap;}
+    overflow:visible;padding:2px;}
+  .rs-staff-opt{display:flex;align-items:center;gap:6px;padding:2px 7px;font-size:11px;font-weight:600;
+    border-radius:4px;cursor:pointer;white-space:nowrap;line-height:16px;}
   .rs-staff-opt:hover{background:#F0F2F5;}
   .rs-staff-dot{width:6px;height:6px;border-radius:50%;background:#FF9500;flex:none;}
   .rs-staff-dot-hidden{visibility:hidden;}
@@ -1034,7 +1048,17 @@
   .rs-especial-in{width:100%;height:26px;max-height:26px;line-height:26px;border:none;background:transparent;
     color:inherit;font-size:10.5px;font-weight:700;text-align:center;padding:0 4px;box-sizing:border-box;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none;}
-  .rs-especial-in:focus{outline:none;box-shadow:none;}
+  /* El recuadro azul venía de la regla global input:focus{outline:2px solid
+     rgba(0,123,167,.35)} de más abajo en la hoja. Aquí se anula en todos los
+     estados para que el texto (p.ej. "42 PAX") se escriba en blanco
+     directamente sobre el color de la celda, sin ninguna caja. */
+  #rs-grid td .rs-especial-in,
+  #rs-grid td .rs-especial-in:focus,
+  #rs-grid td .rs-especial-in:hover,
+  #rs-grid td .rs-especial-in:active{
+    border:0 !important;border-radius:0 !important;outline:0 !important;
+    box-shadow:none !important;background:transparent !important;color:#fff !important;
+    -webkit-appearance:none;appearance:none;}
   .rs-especial-in::placeholder{color:rgba(255,255,255,.75);}
   tr.rs-fila-grupos td.rs-turno,tr.rs-fila-grupos td.rs-nombre{background:#DCE8FF;}
   tr.rs-fila-cumples td.rs-turno,tr.rs-fila-cumples td.rs-nombre{background:#EFE0F5;}
@@ -1052,7 +1076,11 @@
 
 
   /* leyenda de puestos, arrastrable a la rejilla */
-  .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin:18px 0;justify-content:center;}
+  /* Barra única encima de la tabla: botones de filas especiales + cápsulas de
+     puestos arrastrables, todo en la misma línea. */
+  .rs-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:10px;}
+  .rs-toolbar-sep{width:1px;align-self:stretch;min-height:22px;background:var(--line-strong);margin:0 2px;}
+  .rs-legend{display:flex;flex-wrap:wrap;gap:6px;margin:0;flex:1;}
   .rs-legend-chip{cursor:grab;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:800;
     border:1px solid rgba(0,0,0,.15);user-select:none;}
   .rs-legend-chip:active{cursor:grabbing;}
@@ -1339,7 +1367,7 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .lm-quote.lq-visible{opacity:1;}
   .lm-subt{font-weight:800;font-size:12px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(240px,30%) minmax(260px,36%) minmax(280px,34%);gap:12px;align-items:start;}
+  .lm-layout{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-middle{min-width:0;}
   .caja-widget{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -2659,14 +2687,14 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <div class="view" id="view-loomis">
         <div class="lm-layout">
 
-          <!-- IZQUIERDA: tabla -->
-          <div class="lm-left">
-            <div class="lm-head">
+          <!-- IZQUIERDA: tabla de turnos -->
+          <div class="lm-left card lm-col">
+            <div class="lm-colhead">
               <div class="section-title" style="margin:0;" id="loomis-week-label">Semana</div>
-              <div style="display:flex;align-items:center;gap:8px;">
-                <button class="btn btn-ghost btn-sm" onclick="loomisWeek(-1)">‹ Anterior</button>
-                <button class="btn btn-ghost btn-sm today-btn" onclick="loomisWeek(0)">Esta semana</button>
-                <button class="btn btn-ghost btn-sm" onclick="loomisWeek(1)">Siguiente ›</button>
+              <div class="lm-colhead-actions">
+                <button class="btn btn-ghost btn-sm" onclick="loomisWeek(-1)" title="Semana anterior">‹</button>
+                <button class="btn btn-ghost btn-sm today-btn" onclick="loomisWeek(0)" title="Esta semana">Hoy</button>
+                <button class="btn btn-ghost btn-sm" onclick="loomisWeek(1)" title="Semana siguiente">›</button>
               </div>
             </div>
 
@@ -2683,43 +2711,42 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <tfoot id="loomis-foot"></tfoot>
             </table>
 
-            <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+            <div class="lm-colfoot">
               <button class="btn btn-primary btn-sm" onclick="saveLoomis()">Guardar semana</button>
               <span id="loomis-saved" style="display:none;font-size:12.5px;font-weight:700;color:var(--ok);">✓ Guardado</span>
             </div>
           </div>
 
           <!-- CENTRO: depósito de cajas (se rellena solo con Fever+SumUp) -->
-          <div class="lm-middle">
-            <div class="card">
-              <div class="rs-head" style="margin-bottom:10px;">
-                <div class="section-title">Depósito Cajas</div>
+          <div class="lm-middle card lm-col">
+            <div class="lm-colhead">
+              <div class="section-title" style="margin:0;">Depósito Cajas</div>
+              <div class="lm-colhead-actions">
                 <button class="btn btn-ghost btn-sm" onclick="depoImprimir()">🖨 PDF</button>
               </div>
-              <div id="depo-print-area">
-                <h3 class="depo-print-title" id="depo-print-title"></h3>
-                <table class="depo-table" id="depo-dias-table">
-                  <thead><tr><th>DIA</th><th>Deposit Bank</th><th>Date deposit Bank</th><th>Comments</th></tr></thead>
-                  <tbody id="depo-dias-body"></tbody>
-                  <tfoot id="depo-dias-foot"></tfoot>
-                </table>
-              </div>
+            </div>
+            <div id="depo-print-area">
+              <h3 class="depo-print-title" id="depo-print-title"></h3>
+              <table class="depo-table" id="depo-dias-table">
+                <thead><tr><th>DIA</th><th>Deposit Bank</th><th>Date deposit Bank</th><th>Comments</th></tr></thead>
+                <tbody id="depo-dias-body"></tbody>
+                <tfoot id="depo-dias-foot"></tfoot>
+              </table>
             </div>
           </div>
 
-          <!-- DERECHA: cápsula info + tabla de billetaje (Deposit 1), más estrecha -->
-          <div class="lm-right">
-            <div class="card" style="margin-bottom:12px;">
-              <button class="btn btn-ghost btn-sm" style="width:100%;" onclick="lmOpenSobreInfo()">ℹ️ Info Sobre de Loomis</button>
+          <!-- DERECHA: tabla de billetaje (Deposit 1) -->
+          <div class="lm-right card lm-col" id="depo-denom-card">
+            <div class="lm-colhead">
+              <div class="section-title" style="margin:0;">Deposit 1</div>
+              <div class="lm-colhead-actions">
+                <button class="btn btn-ghost btn-sm" onclick="lmOpenSobreInfo()" title="Info Sobre de Loomis">ℹ️ Info Sobre</button>
+              </div>
             </div>
-
-            <div class="card" id="depo-denom-card">
-              <div class="section-title" style="margin-bottom:10px;">Deposit 1</div>
-              <table class="depo-table depo-denom" id="depo-denom-table">
-                <tbody id="depo-denom-body"></tbody>
-                <tfoot id="depo-denom-foot"></tfoot>
-              </table>
-            </div>
+            <table class="depo-table depo-denom" id="depo-denom-table">
+              <tbody id="depo-denom-body"></tbody>
+              <tfoot id="depo-denom-foot"></tfoot>
+            </table>
           </div>
 
         </div>
@@ -2803,12 +2830,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             </div>
             <div id="rs-print-area">
               <h2 class="rs-print-title" id="rs-print-title"></h2>
-              <div class="rs-legend rs-no-print" id="rs-legend"></div>
-              <div style="display:flex;justify-content:flex-start;gap:8px;margin-bottom:6px;" class="rs-no-print">
+              <div class="rs-toolbar rs-no-print">
                 <button class="btn btn-ghost btn-sm" id="rs-btn-laia" onclick="rsToggleLaia()">+ Laia</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-grupos" onclick="rsToggleEspecial('grupos')">+ Grupos</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-cumples" onclick="rsToggleEspecial('cumples')">+ Cumples</button>
-                <button class="btn btn-ghost btn-sm" id="rs-btn-taller" style="background:#9AA0A6;color:#fff;border-color:#9AA0A6;" onclick="rsToggleEspecial('taller')">+ Taller</button>
+                <button class="btn btn-ghost btn-sm" id="rs-btn-taller" onclick="rsToggleEspecial('taller')">+ Taller</button>
+                <span class="rs-toolbar-sep"></span>
+                <div class="rs-legend" id="rs-legend"></div>
               </div>
               <div class="rs-grid-wrap">
                 <table id="rs-grid"><thead id="rs-grid-head"></thead><tbody id="rs-grid-body"></tbody></table>
@@ -9782,8 +9810,28 @@ function rsAplicarAutomatismosTurnoEspecial(){
   });
   return cambiado;
 }
+/* Apertura y cierre: la media hora previa a abrir (930-1000) y la posterior a
+   cerrar (2030-2100) no son puesto de sala, son montaje/desmontaje. Quien
+   tenga turno en esas franjas se le pone OC (gris) automáticamente, solo si la
+   celda está vacía: nunca pisa nada puesto a mano. */
+const RS_SLOTS_OC = ['930','2030'];
+function rsAplicarAutomatismosOC(){
+  let cambiado = false;
+  RS_DIA.filas.forEach(f=>{
+    if(f.tipo==='grupos' || f.tipo==='cumples' || f.tipo==='taller') return;
+    if(!f.turno) return;
+    const dentro = new Set(rsRango(f.turno));
+    RS_SLOTS_OC.forEach(t=>{
+      const ci = RS_SLOTS.indexOf(t);
+      if(ci<0 || !dentro.has(ci)) return;
+      if(!f.slots[t]){ f.slots[t] = 'OC'; cambiado = true; }
+    });
+  });
+  return cambiado;
+}
 function rsRenderGrid(){
   if(rsAplicarAutomatismosNombre()) rsAutoGuardar();
+  if(rsAplicarAutomatismosOC()) rsAutoGuardar();
   if(rsAplicarAutomatismosTurnoEspecial()) rsAutoGuardar();
   rsRenderLeyenda();
   const head=document.getElementById('rs-grid-head');
@@ -9881,7 +9929,7 @@ function rsRenderGrid(){
       const opts = ['<option value=""></option>'].concat(
         ['Ignacio','Paula','Ceci'].map(n=>`<option value="${n}" ${n===f.nombre?'selected':''}>${n}</option>`)).join('');
       nombreCell = `<select onchange="rsSetNombre(${i}, this.value)"
-        style="width:78px;border:none;background:transparent;font-weight:800;font-size:11px;">${opts}</select>`;
+        style="width:78px;border:none;background:transparent;font-weight:800;font-size:11px;text-align:left;padding-left:0;">${opts}</select>`;
       const validos = rsTurnosResp(f.nombre, RS_DIA.fecha, filaNum);
       const optsT = ['<option value="">-</option>'].concat(
         validos.map(o=>`<option value="${o}" ${o===f.turno?'selected':''}>${o}</option>`)).join('');
@@ -10035,10 +10083,12 @@ function rsPosicionarStaffList(){
   const r = btn.getBoundingClientRect();
   el.style.top = (r.bottom + 2) + 'px';
   el.style.left = r.left + 'px';
-  // si no cabe por abajo, se abre hacia arriba
+  // No lleva scroll (se ven todos los nombres), así que si no cabe por abajo se
+  // abre hacia arriba, y si tampoco cabe se pega al borde superior.
   const alto = el.offsetHeight;
-  if(r.bottom + 2 + alto > window.innerHeight && r.top - alto - 2 > 0){
-    el.style.top = (r.top - alto - 2) + 'px';
+  if(r.bottom + 2 + alto > window.innerHeight){
+    const arriba = r.top - alto - 2;
+    el.style.top = (arriba > 4 ? arriba : Math.max(4, window.innerHeight - alto - 4)) + 'px';
   }
   const cerrarAlScroll = ()=>{
     if(RS_STAFF_PICK_OPEN !== null){ RS_STAFF_PICK_OPEN = null; rsRenderGrid(); }
