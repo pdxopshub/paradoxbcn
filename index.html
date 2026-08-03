@@ -1018,6 +1018,12 @@
   .rs-p-GR{background:#1554D6;color:#fff;}
   .rs-p-CU{background:#9B59B6;color:#fff;}
   .rs-p-TA{background:#9AA0A6;color:#fff;}
+  /* OJO especificidad: #rs-grid td{background:#fff} es un selector de ID y
+     gana a .rs-p-GR/.rs-p-CU/.rs-p-TA (clase), por eso las celdas salían
+     blancas. Estas reglas llevan el #rs-grid delante para poder ganar. */
+  #rs-grid td.rs-p-GR{background:#1554D6;color:#fff;}
+  #rs-grid td.rs-p-CU{background:#9B59B6;color:#fff;}
+  #rs-grid td.rs-p-TA{background:#9AA0A6;color:#fff;}
   td.rs-p-GR,td.rs-p-CU,td.rs-p-TA{padding:0;height:26px;max-height:26px;overflow:hidden;}
   /* table-layout de #rs-grid es auto, así que height en <td> solo es una
      altura mínima: si cualquier celda de la fila (nombre/turno incluidos)
@@ -9903,18 +9909,22 @@ function rsRenderGrid(){
       // según la planificación semanal solo aparece DENTRO de la lista, al
       // desplegarla con la flecha (un <option> nativo no permite ocultar el
       // rombito en el valor cerrado y mostrarlo solo en la lista abierta).
-      const abierto = (RS_STAFF_PICK_OPEN === i);
-      const opciones = ['<div class="rs-staff-opt" data-fila="'+i+'" data-nombre="" onmousedown="rsStaffPickChoose(event,'+i+',\'\')"></div>']
-        .concat(listaStaff.map(s=>{
-          const trabaja = (parseInt(planHoy[s.nombre],10)||0) > 0;
-          const dot = `<span class="rs-staff-dot${trabaja?'':' rs-staff-dot-hidden'}"></span>`;
-          return `<div class="rs-staff-opt" data-fila="${i}" data-nombre="${esc(s.nombre)}" onmousedown="rsStaffPickChoose(event,${i},'${esc(s.nombre)}')">${dot}${esc(s.nombre)}</div>`;
-        })).join('');
+      if(RS_STAFF_PICK_OPEN === i){
+        // La lista NO se pinta aquí dentro: se guarda y se saca fuera de la
+        // tabla (ver rsPosicionarStaffList), porque td.rs-nombre es sticky con
+        // z-index y crea un contexto de apilamiento propio que dejaba la lista
+        // por debajo de las celdas de las filas siguientes.
+        RS_STAFF_OPTS_HTML = ['<div class="rs-staff-opt" onmousedown="rsStaffPickChoose(event,'+i+',\'\')">&nbsp;</div>']
+          .concat(listaStaff.map(s=>{
+            const trabaja = (parseInt(planHoy[s.nombre],10)||0) > 0;
+            const dot = `<span class="rs-staff-dot${trabaja?'':' rs-staff-dot-hidden'}"></span>`;
+            return `<div class="rs-staff-opt" onmousedown="rsStaffPickChoose(event,${i},'${esc(s.nombre)}')">${dot}${esc(s.nombre)}</div>`;
+          })).join('');
+      }
       nombreCell = `<div class="rs-staff-pick">
           <button type="button" id="rs-staff-btn-${i}" class="rs-staff-btn" onclick="rsStaffPickToggle(event,${i})">
             <span class="rs-staff-btn-txt">${esc(f.nombre)||''}</span><span class="rs-staff-caret">▾</span>
           </button>
-          ${abierto ? `<div class="rs-staff-list" id="rs-staff-list-${i}">${opciones}</div>` : ''}
         </div>`;
       const inicioActual = (f.turno||'').split('-')[0] || '';
       const optsT = ['<option value="">-</option>'].concat(
@@ -9997,20 +10007,39 @@ function rsStaffPickChoose(ev, i, nombre){
   RS_STAFF_PICK_OPEN = null;
   rsSetNombre(i, nombre);
 }
-/* La lista es position:fixed (para no depender del contenedor con scroll y
-   columnas sticky, que la recortaba/descolocaba); tras cada render con un
-   desplegable abierto, se ancla justo debajo de su botón usando la posición
-   real en pantalla. Se cierra sola si se hace scroll, para no quedar
-   "flotando" en un sitio que ya no corresponde. */
+/* La lista se monta colgando de <body>, no dentro de la celda: td.rs-nombre es
+   sticky con z-index propio, lo que crea un contexto de apilamiento y dejaba la
+   lista por debajo de las celdas sticky de las filas siguientes (de ahí que se
+   viera cortada y con texto de otras filas encima). Fuera de la tabla no hay
+   contexto que la limite. Se coloca con position:fixed sobre el botón real y se
+   cierra sola al hacer scroll. */
+let RS_STAFF_OPTS_HTML = '';
+function rsStaffListEl(){
+  let el = document.getElementById('rs-staff-list-float');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'rs-staff-list-float';
+    el.className = 'rs-staff-list';
+    el.style.display = 'none';
+    document.body.appendChild(el);
+  }
+  return el;
+}
 function rsPosicionarStaffList(){
-  if(RS_STAFF_PICK_OPEN === null) return;
-  const i = RS_STAFF_PICK_OPEN;
-  const btn = document.getElementById('rs-staff-btn-'+i);
-  const list = document.getElementById('rs-staff-list-'+i);
-  if(!btn || !list) return;
+  const el = rsStaffListEl();
+  if(RS_STAFF_PICK_OPEN === null){ el.style.display='none'; el.innerHTML=''; return; }
+  const btn = document.getElementById('rs-staff-btn-'+RS_STAFF_PICK_OPEN);
+  if(!btn){ el.style.display='none'; return; }
+  el.innerHTML = RS_STAFF_OPTS_HTML;
+  el.style.display = 'block';
   const r = btn.getBoundingClientRect();
-  list.style.top = (r.bottom + 2) + 'px';
-  list.style.left = r.left + 'px';
+  el.style.top = (r.bottom + 2) + 'px';
+  el.style.left = r.left + 'px';
+  // si no cabe por abajo, se abre hacia arriba
+  const alto = el.offsetHeight;
+  if(r.bottom + 2 + alto > window.innerHeight && r.top - alto - 2 > 0){
+    el.style.top = (r.top - alto - 2) + 'px';
+  }
   const cerrarAlScroll = ()=>{
     if(RS_STAFF_PICK_OPEN !== null){ RS_STAFF_PICK_OPEN = null; rsRenderGrid(); }
   };
