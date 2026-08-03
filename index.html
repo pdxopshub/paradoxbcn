@@ -848,7 +848,9 @@
   /* Pase de compacidad: tarjetas más ajustadas y menos aire entre bloques,
      para que toda la vista se vea más apretada y cuidada. */
   #view-loomis .card{padding:12px 14px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.12fr);gap:12px;align-items:start;}
+  /* align-items:stretch para que la columna derecha (Depósito Cajas + las tres
+     cápsulas) acabe exactamente a la misma altura que la tabla de Turnos. */
+  .lm-layout{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.12fr);gap:12px;align-items:stretch;}
   /* Las 3 columnas son cajas idénticas: misma anchura, misma altura y una
      cabecera de altura fija, para que "W32 · ...", "Depósito Cajas" y
      "Deposit 1" queden alineados en la misma línea horizontal. */
@@ -863,6 +865,15 @@
   .lm-subgrid > .lm-colstack > .card{flex:1 1 0;min-height:0;}
   .lm-subgrid .lm-info li{font-size:11px;line-height:1.25;}
   .lm-subgrid .lm-colhead{min-height:0;margin-bottom:6px;padding-bottom:5px;}
+  /* La fila de las tres cápsulas se estira para ocupar todo lo que sobra
+     debajo de Depósito Cajas, así el borde inferior cuadra con Turnos. */
+  #depo-print-stack{height:100%;}
+  #depo-print-stack > .lm-subgrid{flex:1 1 auto;}
+  /* Billetaje compacto: con 14 denominaciones, si las filas fueran más altas
+     la cápsula se saldría por debajo de la tabla de Turnos. */
+  .depo-denom td{padding:0 3px;font-size:9.5px;line-height:1.05;}
+  .depo-denom th{padding:2px 3px;font-size:8.5px;}
+  .depo-denom input{font-size:9.5px;padding:0;}
   .lm-col{display:flex;flex-direction:column;min-width:0;}
   .lm-colhead{display:flex;align-items:center;justify-content:space-between;gap:8px;
     min-height:34px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--line);}
@@ -996,7 +1007,7 @@
     font-size:9.5px;font-weight:800;text-align:center;white-space:nowrap;min-width:34px;}
   #rs-grid th.rs-h-turno{left:0;z-index:5;min-width:92px;}
   #rs-grid th.rs-h-nombre{left:92px;z-index:5;min-width:84px;}
-  #rs-grid td{border:1px solid #C9CDD4;text-align:center;padding:0;height:26px;background:#fff;}
+  #rs-grid td{border:1px solid #C9CDD4;text-align:center;padding:0;height:21px;background:#fff;}
   #rs-grid td.rs-turno{position:sticky;left:0;background:#E4F5E0;font-weight:800;font-size:10.5px;
     white-space:nowrap;padding:0 5px;z-index:2;border-right:2px solid #333;}
   #rs-grid td.rs-nombre{position:sticky;left:92px;background:var(--surface);font-weight:700;
@@ -1025,8 +1036,8 @@
   .rs-staff-opt:hover{background:#F0F2F5;}
   .rs-staff-dot{width:6px;height:6px;border-radius:50%;background:#FF9500;flex:none;}
   .rs-staff-dot-hidden{visibility:hidden;}
-  .rs-slot{width:100%;height:100%;min-height:26px;border:none;background:transparent;cursor:default;
-    font-size:10px;font-weight:800;padding:0;line-height:26px;color:inherit;}
+  .rs-slot{width:100%;height:100%;min-height:21px;border:none;background:transparent;cursor:default;
+    font-size:10px;font-weight:800;padding:0;line-height:21px;color:inherit;}
   /* mismos colores que el Excel */
   .rs-p-1{background:#92D050;color:#123;}
   .rs-p-2{background:#47D359;color:#123;}
@@ -1049,14 +1060,14 @@
   #rs-grid td.rs-p-GR{background:#1554D6;color:#fff;}
   #rs-grid td.rs-p-CU{background:#9B59B6;color:#fff;}
   #rs-grid td.rs-p-TA{background:#9AA0A6;color:#fff;}
-  td.rs-p-GR,td.rs-p-CU,td.rs-p-TA{padding:0;height:26px;max-height:26px;overflow:hidden;}
+  td.rs-p-GR,td.rs-p-CU,td.rs-p-TA{padding:0;height:21px;max-height:21px;overflow:hidden;}
   /* table-layout de #rs-grid es auto, así que height en <td> solo es una
      altura mínima: si cualquier celda de la fila (nombre/turno incluidos)
      pide más espacio, toda la fila crece. Por eso se fuerza aquí, para
      TODAS las celdas de estas filas, altura y line-height fijos. */
   tr.rs-fila-grupos td,tr.rs-fila-cumples td,tr.rs-fila-taller td{
-    height:26px;max-height:26px;line-height:26px;overflow:hidden;}
-  .rs-especial-in{width:100%;height:26px;max-height:26px;line-height:26px;border:none;background:transparent;
+    height:21px;max-height:21px;line-height:21px;overflow:hidden;}
+  .rs-especial-in{width:100%;height:21px;max-height:21px;line-height:21px;border:none;background:transparent;
     color:inherit;font-size:10.5px;font-weight:700;text-align:center;padding:0 4px;box-sizing:border-box;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;outline:none;}
   /* El recuadro azul venía de la regla global input:focus{outline:2px solid
@@ -1403,7 +1414,9 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .lm-quote.lq-visible{opacity:1;}
   .lm-subt{font-weight:800;font-size:12px;}
-  .lm-layout{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.12fr);gap:12px;align-items:start;}
+  /* align-items:stretch para que la columna derecha (Depósito Cajas + las tres
+     cápsulas) acabe exactamente a la misma altura que la tabla de Turnos. */
+  .lm-layout{display:grid;grid-template-columns:minmax(0,0.88fr) minmax(0,1.12fr);gap:12px;align-items:stretch;}
   @media(max-width:1200px){.lm-layout{grid-template-columns:1fr;}}
   .lm-middle{min-width:0;}
   .caja-widget{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -2846,7 +2859,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
 
         <!-- Pantallazos de la semana: efectivo en SumUp vs Fever -->
-        <div class="card" style="margin-top:12px;">
+        <div class="card" style="margin-top:8px;">
           <div class="section-title" style="margin-bottom:8px;">
             Pantallazos de la semana
             <span class="hint" id="loomis-shots-week">Se guardan junto al cuadre de esta semana</span>
@@ -10060,10 +10073,10 @@ function rsRenderGrid(){
       delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>`;
     } else if(f.tipo==='grupos' || f.tipo==='cumples' || f.tipo==='taller'){
       filaClase='rs-fila-'+f.tipo;
-      nombreCell = `<span style="font-weight:800;padding-left:2px;line-height:26px;">${esc(RS_ESPECIAL_LABEL[f.tipo])}</span>`;
+      nombreCell = `<span style="font-weight:800;padding-left:2px;line-height:21px;">${esc(RS_ESPECIAL_LABEL[f.tipo])}</span>`;
       turnoCell = `<input value="${esc(f.turno)}" placeholder="930-1730"
           onchange="rsSetTurno(${i}, this.value)"
-          style="width:84px;height:26px;line-height:26px;border:none;background:transparent;font-weight:800;font-size:10.5px;text-align:center;box-sizing:border-box;">`;
+          style="width:84px;height:21px;line-height:21px;border:none;background:transparent;font-weight:800;font-size:10.5px;text-align:center;box-sizing:border-box;">`;
       delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar fila">✕</button></td>`;
     } else {
       filaClase='';
