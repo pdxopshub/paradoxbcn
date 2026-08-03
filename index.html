@@ -921,6 +921,79 @@
   .lm-shot-state{font-size:11px;font-weight:700;color:var(--text-dim);min-height:14px;}
   .lm-pick{color:var(--accent);font-weight:800;text-decoration:underline;cursor:pointer;}
 
+  /* ── ROSTERS ───────────────────────────────────────────────── */
+  .rs-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .rs-tab{padding:7px 14px;border-radius:8px;border:1.5px solid var(--line-strong);
+    background:var(--surface);font-size:12px;font-weight:800;cursor:pointer;color:var(--text-soft);}
+  .rs-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .rs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .rs-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+  /* planificación semanal */
+  .rs-plan-wrap{overflow:auto;max-height:calc(100vh - 250px);border:1px solid var(--line-strong);border-radius:9px;}
+  #rs-plan-table{border-collapse:separate;border-spacing:0;font-size:12px;width:100%;}
+  #rs-plan-table th{position:sticky;top:0;z-index:3;background:var(--panel);padding:6px 8px;
+    font-size:10.5px;font-weight:800;text-align:center;border-bottom:1.5px solid var(--line-strong);white-space:nowrap;}
+  #rs-plan-table td{padding:0;border-bottom:1px solid var(--line);text-align:center;}
+  #rs-plan-table td.rs-pname{text-align:left;padding:5px 10px;font-weight:700;white-space:nowrap;
+    position:sticky;left:0;background:var(--surface);z-index:2;border-right:1.5px solid var(--line-strong);}
+  #rs-plan-table tr.rs-off td.rs-pname{color:var(--text-dim);font-style:italic;}
+  #rs-plan-table tr.rs-off td{background:#EFEFEF;}
+  .rs-cell{width:100%;height:30px;border:none;background:transparent;cursor:pointer;
+    font-size:12.5px;font-weight:800;color:var(--text);}
+  .rs-cell.v1{background:#D6F0DE;color:#0E6B45;}
+  .rs-cell.v2{background:#8FD1A8;color:#0E4A2A;}
+  .rs-cell.v0{background:#2B2B2B;color:#2B2B2B;}
+  .rs-cell:hover{outline:2px solid var(--accent);outline-offset:-2px;}
+  tr.rs-total td{background:#1A1A1A;color:#fff;font-weight:800;font-size:12px;padding:6px 4px;}
+  tr.rs-total td.rs-pname{background:#1A1A1A;color:#fff;}
+
+  /* rejilla del día */
+  .rs-grid-wrap{overflow:auto;max-height:calc(100vh - 300px);border:1px solid var(--line-strong);border-radius:9px;}
+  #rs-grid{border-collapse:separate;border-spacing:0;font-size:11px;}
+  #rs-grid th{position:sticky;top:0;z-index:3;background:#1A1A1A;color:#fff;padding:5px 3px;
+    font-size:9.5px;font-weight:800;text-align:center;white-space:nowrap;min-width:34px;}
+  #rs-grid th.rs-h-turno{left:0;z-index:5;min-width:92px;}
+  #rs-grid th.rs-h-nombre{left:92px;z-index:5;min-width:84px;}
+  #rs-grid td{border:1px solid #C9CDD4;text-align:center;padding:0;height:26px;}
+  #rs-grid td.rs-turno{position:sticky;left:0;background:#F0F0F0;font-weight:800;font-size:10.5px;
+    white-space:nowrap;padding:0 5px;z-index:2;border-right:2px solid #333;}
+  #rs-grid td.rs-nombre{position:sticky;left:92px;background:var(--surface);font-weight:700;
+    font-size:11px;white-space:nowrap;padding:0 6px;text-align:left;z-index:2;border-right:2px solid #333;}
+  .rs-slot{width:100%;height:100%;min-height:26px;border:none;background:transparent;cursor:pointer;
+    font-size:10px;font-weight:800;padding:0;line-height:26px;color:inherit;}
+  /* mismos colores que el Excel */
+  .rs-p-1{background:#92D050;color:#123;}
+  .rs-p-2{background:#47D359;color:#123;}
+  .rs-p-0G{background:#DAF2D0;color:#123;}
+  .rs-p-F2,.rs-p-AV,.rs-p-Pompas,.rs-p-Greater,.rs-p-Fliers{background:#12501A;color:#fff;}
+  .rs-p-Admin{background:#DAE9F8;color:#123;}
+  .rs-p-ARRG{background:#4EA72E;color:#fff;}
+  .rs-p-BRK{background:#000;color:#000;}
+  .rs-p-DESC{background:#fff;color:#555;font-weight:600;font-style:italic;}
+  .rs-p-OC{background:#E8E8E8;color:#888;}
+  .rs-p-{background:transparent;}
+  td.rs-fuera{background:repeating-linear-gradient(45deg,#FAFAFA,#FAFAFA 4px,#F0F0F0 4px,#F0F0F0 8px);}
+
+  .rs-warn{display:flex;flex-direction:column;gap:6px;}
+  .rs-warn-row{display:flex;align-items:flex-start;gap:8px;font-size:12px;padding:6px 9px;
+    border-radius:7px;background:var(--panel);line-height:1.4;}
+  .rs-warn-row.err{background:rgba(217,60,70,.10);}
+  .rs-warn-row.ok{background:rgba(28,154,91,.10);}
+  .rs-warn-tag{flex-shrink:0;font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:5px;
+    background:var(--bad);color:#fff;letter-spacing:.3px;}
+  .rs-warn-row.ok .rs-warn-tag{background:var(--ok);}
+
+  /* habilitaciones */
+  #rs-hab-table{border-collapse:separate;border-spacing:0;font-size:12px;}
+  #rs-hab-table th{background:var(--panel);padding:7px 6px;font-size:10px;font-weight:800;
+    text-align:center;position:sticky;top:0;z-index:2;white-space:nowrap;}
+  #rs-hab-table td{padding:4px 6px;text-align:center;border-bottom:1px solid var(--line);}
+  #rs-hab-table td.rs-hname{text-align:left;font-weight:700;white-space:nowrap;}
+  .rs-hab-chk{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--line-strong);
+    background:var(--surface);cursor:pointer;font-size:12px;font-weight:900;color:#0E6B45;}
+  .rs-hab-chk.on{background:#8FD1A8;border-color:#0E6B45;}
+
   /* ── GRUPOS v2 ─────────────────────────────────────────────── */
   .gv-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
   .gv-toolbar input[type=text],.gv-toolbar input:not([type]){width:220px;}
@@ -1839,6 +1912,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           Sugerencias STAFF
         </button>
+          <button class="navitem" data-view="rosters" id="nav-rosters" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M7 13h3"/><path d="M14 13h3"/><path d="M7 17h3"/></svg>
+          Rosters
+        </button>
         </div>
       </nav>
 
@@ -2552,6 +2629,92 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                      onchange="loomisShotFile(event,'fever')">
             </div>
 
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ ROSTERS (solo Ignacio) ============ -->
+      <div class="view" id="view-rosters">
+        <div class="rs-tabs">
+          <button class="rs-tab active" data-rstab="dia">Roster del día</button>
+          <button class="rs-tab" data-rstab="plan">Planificación semanal</button>
+          <button class="rs-tab" data-rstab="hab">Equipo y habilitaciones</button>
+        </div>
+
+        <!-- ---------- ROSTER DEL DÍA ---------- -->
+        <div id="rs-sub-dia">
+          <div class="card" style="margin-bottom:12px;">
+            <div class="rs-head">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <button class="btn btn-ghost btn-sm" onclick="rsDay(-1)">‹</button>
+                <input type="date" id="rs-fecha" onchange="rsLoadDia()" style="width:auto;">
+                <button class="btn btn-ghost btn-sm" onclick="rsDay(1)">›</button>
+                <button class="btn btn-ghost btn-sm" onclick="rsDay(0)">Hoy</button>
+                <span class="hint" id="rs-dia-label"></span>
+              </div>
+              <div class="rs-actions">
+                <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;">
+                  <input type="checkbox" id="rs-cfg-caja1" onchange="rsSaveConfig()"> Caja 1 abierta
+                </label>
+                <label style="display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;">
+                  <input type="checkbox" id="rs-cfg-pompas" onchange="rsSaveConfig()"> Pompas
+                </label>
+                <button class="btn btn-primary btn-sm" onclick="rsAutoFill()">Repartir puestos</button>
+                <button class="btn btn-ghost btn-sm" onclick="rsAddFila()">+ Turno</button>
+                <button class="btn btn-ghost btn-sm" onclick="rsSaveDia()">Guardar</button>
+                <span id="rs-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓</span>
+              </div>
+            </div>
+            <div class="rs-grid-wrap">
+              <table id="rs-grid"><thead id="rs-grid-head"></thead><tbody id="rs-grid-body"></tbody></table>
+            </div>
+            <div class="hint" style="margin-top:8px;">
+              Clic en una celda para cambiar el puesto. El orden es:
+              Caja 1 → Caja 2 → 0G → F2 → AV → Admin → Pompas → Greater → Fliers → ARRG → Breaker → Descanso → vacío.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title" style="margin-bottom:10px;">Revisión <span class="hint" id="rs-warn-count"></span></div>
+            <div class="rs-warn" id="rs-warns"></div>
+          </div>
+        </div>
+
+        <!-- ---------- PLANIFICACIÓN SEMANAL ---------- -->
+        <div id="rs-sub-plan" style="display:none;">
+          <div class="card">
+            <div class="rs-head">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="btn btn-ghost btn-sm" onclick="rsPlanWeek(-1)">‹ Anterior</button>
+                <button class="btn btn-ghost btn-sm" onclick="rsPlanWeek(0)">Esta semana</button>
+                <button class="btn btn-ghost btn-sm" onclick="rsPlanWeek(1)">Siguiente ›</button>
+                <span class="hint" id="rs-plan-label"></span>
+              </div>
+              <div class="rs-actions">
+                <button class="btn btn-primary btn-sm" onclick="rsSavePlan()">Guardar semana</button>
+                <span id="rs-plan-saved" style="display:none;font-size:12px;font-weight:700;color:var(--ok);">✓</span>
+              </div>
+            </div>
+            <div class="rs-plan-wrap">
+              <table id="rs-plan-table"><thead id="rs-plan-head"></thead><tbody id="rs-plan-body"></tbody></table>
+            </div>
+            <div class="hint" style="margin-top:8px;">
+              Clic en una celda para ir cambiando entre libra → 1 turno → 2 turnos.
+              El Headcount suma los turnos, igual que la hoja de Laia.
+            </div>
+          </div>
+        </div>
+
+        <!-- ---------- HABILITACIONES ---------- -->
+        <div id="rs-sub-hab" style="display:none;">
+          <div class="card">
+            <div class="section-title" style="margin-bottom:4px;">Quién puede hacer cada puesto</div>
+            <div class="hint" style="margin-bottom:12px;">
+              Calculado a partir de los 35 días del Excel. Corrígelo si algo no encaja: el reparto automático lo respeta.
+            </div>
+            <div style="overflow:auto;max-height:calc(100vh - 260px);">
+              <table id="rs-hab-table"><thead id="rs-hab-head"></thead><tbody id="rs-hab-body"></tbody></table>
+            </div>
           </div>
         </div>
       </div>
@@ -3351,8 +3514,11 @@ const titles = {
   uniformes:['Stocks','Uniformes, pinganillos y walkie talkies'],
   sugerencias:['Sugerencias STAFF','Buzón anónimo del equipo: seguimiento por mes'],
   recap:['Recap del día','Cierre diario: info general, rutinas y observaciones'],
-  loomis:['Loomis','Gestión semanal del lunes']
+  loomis:['Loomis','Gestión semanal del lunes'],
+  rosters:['Rosters','Planificación semanal y reparto de puestos']
 };
+/* La pestaña Rosters solo la ve Ignacio */
+function rsPuedeVer(){ return currentProfile?.nombre === 'Ignacio'; }
 function goView(v){
   const btn = document.querySelector('.navitem[data-view="'+v+'"]');
   document.querySelectorAll('.navitem').forEach(b=>b.classList.remove('active'));
@@ -3381,6 +3547,10 @@ function goView(v){
   if(v==='resenas') renderResenas();
   if(v==='marketing') renderMarketing();
   if(v==='loomis') renderLoomis();
+  if(v==='rosters'){
+    if(!rsPuedeVer()){ goView('dashboard'); return; }
+    initRosters();
+  }
   setTimeout(installTableFilters, 60);
   if(v==='grupos') initGruposV2();
   // Ocultar frases Loomis al salir
@@ -3438,6 +3608,12 @@ function initApp(){
   if(appInitialised) return;
   appInitialised = true;
   initNav();
+  // Rosters: solo aparece en el menú si entra Ignacio
+  const navRs = document.getElementById('nav-rosters');
+  if(navRs) navRs.style.display = rsPuedeVer() ? '' : 'none';
+  document.querySelectorAll('[data-rstab]').forEach(b=>{
+    b.addEventListener('click', ()=> rsTab(b.dataset.rstab));
+  });
   document.getElementById('page-title').textContent = titles.dashboard[0];
   document.getElementById('today-date').textContent = titles.dashboard[1];
   renderDashGrupos(); // grupos confirmados en el Resumen
@@ -8835,6 +9011,425 @@ async function saveLoomis(){
   );
   const b = document.getElementById('loomis-saved');
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none', 2500); }
+}
+
+/* ============================================================
+   ROSTERS — planificación semanal + rejilla diaria de puestos
+   Solo visible para Ignacio. Tres tablas en Supabase:
+     roster_staff    → personas y qué puesto puede hacer cada una
+     roster_planning → lo que manda Laia (0 libra / 1 turno / 2 dobles)
+     roster_dias     → la rejilla de medias horas de un día concreto
+   La rejilla usa los mismos colores que el Excel de ROSTERS.
+   ============================================================ */
+const RS_SLOTS = ['900','930','1000','1030','1100','1130','1200','1230','1300','1330','1400','1430',
+                  '1500','1530','1600','1630','1700','1730','1800','1830','1900','1930','2000','2030','2100','2130'];
+/* Ciclo de puestos al hacer clic. BRK = breaker, DESC = descanso, OC = apertura/cierre */
+const RS_CICLO = ['','1','2','0G','F2','AV','Admin','Pompas','Greater','Fliers','ARRG','BRK','DESC','OC'];
+const RS_ETIQUETA = { BRK:'', DESC:'desc.', OC:'' };
+/* Puesto → columna de habilitación en roster_staff */
+const RS_HAB = { '1':'caja1', '2':'caja2', '0G':'zerog', 'F2':'floor2', 'AV':'av',
+                 'Admin':'admin', 'Pompas':'pompas', 'Greater':'greater', 'Fliers':'fliers', 'ARRG':'arrg' };
+const RS_APERTURA = '1000', RS_CIERRE = '2000';   // franja en la que las cajas deben estar cubiertas
+
+let RS_STAFF = [];        // [{nombre, caja1, caja2, ...}]
+let RS_DIA = null;        // {fecha, config, filas}
+let RS_PLAN = {};         // {'YYYY-MM-DD': {nombre: 0|1|2}}
+let rsPlanMonday = null;
+let rsFecha = null;
+
+const rsIso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function rsMondayOf(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
+function rsStaffDe(nombre){ return RS_STAFF.find(s=>s.nombre===nombre) || null; }
+function rsPuede(nombre, puesto){
+  const col = RS_HAB[puesto];
+  if(!col) return true;                       // BRK, DESC, OC y vacío no piden habilitación
+  const s = rsStaffDe(nombre);
+  return s ? !!s[col] : true;                 // si no está fichado, no bloqueamos
+}
+/* "930-1730" → índices de RS_SLOTS que cubre. Un inicio a las 1045 entra en la franja de 1030. */
+function rsRango(turno){
+  const m = String(turno||'').match(/(\d{3,4})\s*-\s*(\d{3,4})/);
+  if(!m) return [];
+  const min = t => { const s=String(t).padStart(4,'0'); return parseInt(s.slice(0,2),10)*60 + parseInt(s.slice(2),10); };
+  const ini = min(m[1]), fin = min(m[2]);
+  const out = [];
+  RS_SLOTS.forEach((t,i)=>{
+    const a = min(t), b = a+30;
+    if(b > ini && a < fin) out.push(i);        // solapa con el turno
+  });
+  return out;
+}
+
+/* ---------- carga ---------- */
+async function initRosters(){
+  if(!RS_STAFF.length){
+    const {data} = await sb.from('roster_staff').select('*').eq('activo',true).order('orden');
+    RS_STAFF = data || [];
+  }
+  if(!rsFecha){
+    rsFecha = rsIso(new Date());
+    const el=document.getElementById('rs-fecha'); if(el) el.value = rsFecha;
+  }
+  if(!rsPlanMonday) rsPlanMonday = rsMondayOf(new Date());
+  await rsLoadDia();
+  await rsLoadPlan();
+  rsRenderHab();
+}
+function rsTab(t){
+  document.querySelectorAll('[data-rstab]').forEach(b=>b.classList.toggle('active', b.dataset.rstab===t));
+  ['dia','plan','hab'].forEach(x=>{
+    const el=document.getElementById('rs-sub-'+x);
+    if(el) el.style.display = (x===t) ? 'block' : 'none';
+  });
+}
+
+/* ---------- planificación semanal ---------- */
+function rsPlanWeek(delta){
+  if(delta===0) rsPlanMonday = rsMondayOf(new Date());
+  else rsPlanMonday.setDate(rsPlanMonday.getDate()+delta*7);
+  rsLoadPlan();
+}
+async function rsLoadPlan(){
+  const iso = rsIso(rsPlanMonday);
+  RS_PLAN = {};
+  try{
+    const {data} = await sb.from('roster_planning').select('*').eq('semana',iso).single();
+    if(data?.datos) RS_PLAN = (typeof data.datos==='string') ? JSON.parse(data.datos) : data.datos;
+  }catch(e){}
+  rsRenderPlan();
+}
+function rsRenderPlan(){
+  const DIAS=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  const dias=[]; for(let i=0;i<7;i++){ const d=new Date(rsPlanMonday); d.setDate(d.getDate()+i); dias.push(d); }
+  const lbl=document.getElementById('rs-plan-label');
+  if(lbl){
+    const f=d=>d.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+    lbl.textContent = `${f(dias[0])} – ${f(dias[6])} ${dias[6].getFullYear()}`;
+  }
+  const head=document.getElementById('rs-plan-head');
+  if(head) head.innerHTML = '<tr><th style="text-align:left;">Persona</th>' +
+    dias.map((d,i)=>`<th>${DIAS[i]}<br>${d.getDate()}</th>`).join('') + '</tr>';
+
+  const body=document.getElementById('rs-plan-body');
+  if(!body) return;
+  let html='';
+  RS_STAFF.forEach(s=>{
+    const cells = dias.map(d=>{
+      const iso=rsIso(d);
+      const v = (RS_PLAN[iso] && RS_PLAN[iso][s.nombre]) || 0;
+      return `<td><button class="rs-cell v${v}" onclick="rsPlanToggle('${iso}','${esc(s.nombre)}')">${v||''}</button></td>`;
+    }).join('');
+    html += `<tr><td class="rs-pname">${esc(s.nombre)}</td>${cells}</tr>`;
+  });
+  const tot = dias.map(d=>{
+    const iso=rsIso(d);
+    const n = Object.values(RS_PLAN[iso]||{}).reduce((a,b)=>a+(parseInt(b,10)||0),0);
+    return `<td>${n||''}</td>`;
+  }).join('');
+  html += `<tr class="rs-total"><td class="rs-pname">Headcount</td>${tot}</tr>`;
+  body.innerHTML = html;
+}
+function rsPlanToggle(iso, nombre){
+  if(!RS_PLAN[iso]) RS_PLAN[iso]={};
+  const v = RS_PLAN[iso][nombre] || 0;
+  const nuevo = (v+1) % 3;                      // 0 → 1 → 2 → 0
+  if(nuevo===0) delete RS_PLAN[iso][nombre]; else RS_PLAN[iso][nombre]=nuevo;
+  rsRenderPlan();
+}
+async function rsSavePlan(){
+  await sb.from('roster_planning').upsert(
+    { semana: rsIso(rsPlanMonday), datos: RS_PLAN, updated_at:new Date().toISOString() },
+    { onConflict:'semana' });
+  const b=document.getElementById('rs-plan-saved');
+  if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none',2200); }
+}
+
+/* ---------- roster del día ---------- */
+function rsDay(delta){
+  const d = delta===0 ? new Date() : new Date(rsFecha+'T12:00:00');
+  if(delta!==0) d.setDate(d.getDate()+delta);
+  rsFecha = rsIso(d);
+  const el=document.getElementById('rs-fecha'); if(el) el.value=rsFecha;
+  rsLoadDia();
+}
+async function rsLoadDia(){
+  const el=document.getElementById('rs-fecha');
+  if(el && el.value) rsFecha = el.value;
+  RS_DIA = { fecha: rsFecha, config:{}, filas:[] };
+  try{
+    const {data} = await sb.from('roster_dias').select('*').eq('fecha',rsFecha).single();
+    if(data){
+      RS_DIA.config = (typeof data.config==='string') ? JSON.parse(data.config) : (data.config||{});
+      RS_DIA.filas  = (typeof data.filas ==='string') ? JSON.parse(data.filas)  : (data.filas ||[]);
+    }
+  }catch(e){}
+  const d = new Date(rsFecha+'T12:00:00');
+  const finde = (d.getDay()===0 || d.getDay()===6);
+  if(RS_DIA.config.caja1  === undefined) RS_DIA.config.caja1  = finde;   // entre semana por defecto cerrada
+  if(RS_DIA.config.pompas === undefined) RS_DIA.config.pompas = finde;   // pompas solo findes
+  document.getElementById('rs-cfg-caja1').checked  = !!RS_DIA.config.caja1;
+  document.getElementById('rs-cfg-pompas').checked = !!RS_DIA.config.pompas;
+  const lbl=document.getElementById('rs-dia-label');
+  if(lbl) lbl.textContent = d.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+  if(!RS_DIA.filas.length) rsFilasDesdePlan();
+  rsRenderGrid();
+}
+/* Si el día está vacío, propone una fila por cada turno que Laia haya marcado */
+function rsFilasDesdePlan(){
+  const plan = RS_PLAN[rsFecha];
+  if(!plan) return;
+  const filas=[];
+  RS_STAFF.forEach(s=>{
+    const n = parseInt(plan[s.nombre],10) || 0;
+    for(let i=0;i<n;i++) filas.push({ turno:'', nombre:s.nombre, slots:{} });
+  });
+  RS_DIA.filas = filas;
+}
+function rsSaveConfig(){
+  RS_DIA.config.caja1  = document.getElementById('rs-cfg-caja1').checked;
+  RS_DIA.config.pompas = document.getElementById('rs-cfg-pompas').checked;
+  rsRenderGrid();
+}
+function rsAddFila(){
+  RS_DIA.filas.push({ turno:'', nombre:'', slots:{} });
+  rsRenderGrid();
+}
+function rsDelFila(i){
+  RS_DIA.filas.splice(i,1);
+  rsRenderGrid();
+}
+function rsSetTurno(i, val){ RS_DIA.filas[i].turno = val.trim(); rsRenderGrid(); }
+function rsSetNombre(i, val){ RS_DIA.filas[i].nombre = val; rsRenderGrid(); }
+
+function rsRenderGrid(){
+  const head=document.getElementById('rs-grid-head');
+  if(head) head.innerHTML = '<tr><th class="rs-h-turno">Turno</th><th class="rs-h-nombre">Nombre</th>' +
+    RS_SLOTS.map(t=>`<th>${t}</th>`).join('') + '<th></th></tr>';
+  const body=document.getElementById('rs-grid-body');
+  if(!body) return;
+  const opts = ['<option value=""></option>'].concat(
+    RS_STAFF.map(s=>`<option value="${esc(s.nombre)}">${esc(s.nombre)}</option>`)).join('');
+  let html='';
+  RS_DIA.filas.forEach((f,i)=>{
+    const dentro = new Set(rsRango(f.turno));
+    const celdas = RS_SLOTS.map((t,ci)=>{
+      const v = f.slots[t] || '';
+      const fuera = (dentro.size && !dentro.has(ci)) ? ' rs-fuera' : '';
+      const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : v;
+      const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
+      return `<td class="${fuera}"><button class="rs-slot rs-p-${esc(v)}" style="${mal}"
+        onclick="rsCicla(${i},'${t}')" title="${esc(v)}">${esc(txt)}</button></td>`;
+    }).join('');
+    html += `<tr>
+      <td class="rs-turno"><input value="${esc(f.turno)}" placeholder="930-1730"
+          onchange="rsSetTurno(${i}, this.value)"
+          style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;text-align:center;"></td>
+      <td class="rs-nombre"><select onchange="rsSetNombre(${i}, this.value)"
+          style="width:78px;border:none;background:transparent;font-weight:700;font-size:11px;">
+          ${opts.replace('value="'+esc(f.nombre)+'"','value="'+esc(f.nombre)+'" selected')}</select></td>
+      ${celdas}
+      <td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>
+    </tr>`;
+  });
+  const n = RS_DIA.filas.length;
+  html += `<tr class="rs-total"><td class="rs-turno" style="background:#1A1A1A;color:#fff;">${n}</td>
+    <td class="rs-nombre" style="background:#1A1A1A;color:#fff;">turnos</td>
+    <td colspan="${RS_SLOTS.length+1}"></td></tr>`;
+  body.innerHTML = html;
+  rsValidar();
+}
+function rsCicla(i, t){
+  const f = RS_DIA.filas[i];
+  const actual = f.slots[t] || '';
+  const idx = RS_CICLO.indexOf(actual);
+  const next = RS_CICLO[(idx+1) % RS_CICLO.length];
+  if(next) f.slots[t] = next; else delete f.slots[t];
+  rsRenderGrid();
+}
+async function rsSaveDia(){
+  await sb.from('roster_dias').upsert(
+    { fecha: rsFecha, config: RS_DIA.config, filas: RS_DIA.filas, updated_at:new Date().toISOString() },
+    { onConflict:'fecha' });
+  const b=document.getElementById('rs-saved');
+  if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none',2200); }
+}
+
+/* ============================================================
+   Reparto automático de puestos
+   Prioridad: primero las cajas (son las que no pueden quedar
+   descubiertas), después sala, y lo que sobra a AV. Elige
+   siempre entre quien tiene el puesto habilitado y está dentro
+   de su turno, prefiriendo a quien menos puestos distintos
+   puede hacer (los especialistas van antes que los polivalentes).
+   ============================================================ */
+function rsVersatilidad(nombre){
+  const s = rsStaffDe(nombre);
+  if(!s) return 99;
+  return Object.values(RS_HAB).reduce((a,c)=> a + (s[c]?1:0), 0);
+}
+function rsAutoFill(){
+  const filas = RS_DIA.filas.filter(f=>f.turno && f.nombre);
+  if(!filas.length){ alert('Primero pon el turno y el nombre de cada fila.'); return; }
+  if(!confirm('Se va a reescribir el reparto de puestos de este día. ¿Sigo?')) return;
+
+  const rangos = new Map(filas.map(f=>[f, new Set(rsRango(f.turno))]));
+  filas.forEach(f=> f.slots = {});
+
+  const iAp = RS_SLOTS.indexOf(RS_APERTURA), iCi = RS_SLOTS.indexOf(RS_CIERRE);
+  const libre = (f,ci)=> rangos.get(f).has(ci) && !f.slots[RS_SLOTS[ci]];
+  const elegir = (ci, puesto, pref)=>{
+    const cand = filas.filter(f=> libre(f,ci) && rsPuede(f.nombre,puesto));
+    if(!cand.length) return null;
+    cand.sort((a,b)=>{
+      if(pref){                                   // continuidad: quien ya venía en el puesto sigue
+        const pa = (a===pref)?0:1, pb = (b===pref)?0:1;
+        if(pa!==pb) return pa-pb;
+      }
+      const va = rsVersatilidad(a.nombre), vb = rsVersatilidad(b.nombre);
+      if(va!==vb) return va-vb;                   // especialistas primero
+      return rangos.get(b).size - rangos.get(a).size;
+    });
+    return cand[0];
+  };
+  /* cadena continua de un puesto entre apertura y cierre */
+  const cadena = (puesto, desde, hasta)=>{
+    let ultimo = null;
+    for(let ci=desde; ci<=hasta; ci++){
+      if(ultimo && !libre(ultimo,ci)) ultimo = null;
+      const f = elegir(ci, puesto, ultimo);
+      if(!f){ ultimo = null; continue; }
+      f.slots[RS_SLOTS[ci]] = puesto;
+      ultimo = f;
+    }
+  };
+
+  // 1) apertura y cierre: media hora antes de abrir y después de cerrar
+  filas.forEach(f=>{
+    const r=[...rangos.get(f)].sort((a,b)=>a-b);
+    if(!r.length) return;
+    if(r[0] < iAp) f.slots[RS_SLOTS[r[0]]] = 'OC';
+    const fin = r[r.length-1];
+    if(fin >= iCi) f.slots[RS_SLOTS[fin]] = 'OC';
+  });
+
+  // 2) cajas: lo primero, porque son la restricción dura
+  cadena('2', iAp, iCi-1);
+  if(RS_DIA.config.caja1) cadena('1', iAp, iCi-1);
+
+  // 3) sala
+  cadena('0G', iAp, iCi-1);
+  cadena('F2', iAp, iCi-1);
+
+  // 4) responsables a Admin un par de bloques a media tarde
+  filas.filter(f=>rsPuede(f.nombre,'Admin')).forEach(f=>{
+    const r=[...rangos.get(f)].sort((a,b)=>a-b).filter(ci=>libre(f,ci));
+    r.slice(Math.floor(r.length/2), Math.floor(r.length/2)+2).forEach(ci=> f.slots[RS_SLOTS[ci]]='Admin');
+  });
+
+  // 5) un breaker por franja mientras haya gente de sobra
+  for(let ci=iAp; ci<iCi; ci++){
+    const sobra = filas.filter(f=>libre(f,ci));
+    if(sobra.length >= 2) sobra[0].slots[RS_SLOTS[ci]] = 'BRK';
+  }
+
+  // 6) el resto: pompas si toca, greater/fliers y AV
+  const extra = RS_DIA.config.pompas ? 'Pompas' : (RS_DIA.config.caja1 ? 'Fliers' : 'Greater');
+  filas.forEach(f=>{
+    [...rangos.get(f)].sort((a,b)=>a-b).forEach(ci=>{
+      if(f.slots[RS_SLOTS[ci]]) return;
+      const t=RS_SLOTS[ci];
+      if(rsPuede(f.nombre,extra) && Math.random()<0.28) f.slots[t]=extra;
+      else if(rsPuede(f.nombre,'AV')) f.slots[t]='AV';
+      else if(rsPuede(f.nombre,'F2')) f.slots[t]='F2';
+    });
+  });
+
+  // 7) descanso a mitad de turno, sin tocar las cajas
+  filas.forEach(f=>{
+    const r=[...rangos.get(f)].sort((a,b)=>a-b);
+    if(r.length < 4) return;
+    const medio = r[Math.floor(r.length/2)];
+    const p = f.slots[RS_SLOTS[medio]];
+    if(p && p!=='1' && p!=='2' && p!=='OC' && p!=='BRK') f.slots[RS_SLOTS[medio]]='DESC';
+  });
+
+  rsRenderGrid();
+}
+
+/* ---------- validaciones ---------- */
+function rsValidar(){
+  const box=document.getElementById('rs-warns');
+  const cnt=document.getElementById('rs-warn-count');
+  if(!box) return;
+  const avisos=[];
+  const filas = RS_DIA.filas.filter(f=>f.nombre);
+  const iAp = RS_SLOTS.indexOf(RS_APERTURA), iCi = RS_SLOTS.indexOf(RS_CIERRE);
+
+  // cajas descubiertas o duplicadas
+  const revisaCaja=(puesto,label)=>{
+    const huecos=[], dobles=[];
+    for(let ci=iAp; ci<iCi; ci++){
+      const t=RS_SLOTS[ci];
+      const n=filas.filter(f=>f.slots[t]===puesto).length;
+      if(n===0) huecos.push(t); else if(n>1) dobles.push(t);
+    }
+    if(huecos.length) avisos.push(['err',`${label} sin cubrir`, huecos.join(', ')]);
+    if(dobles.length) avisos.push(['err',`${label} con dos personas a la vez`, dobles.join(', ')]);
+  };
+  revisaCaja('2','Caja 2');
+  if(RS_DIA.config.caja1) revisaCaja('1','Caja 1');
+
+  // puestos sin habilitación
+  filas.forEach(f=>{
+    const malos=[...new Set(Object.values(f.slots).filter(p=>RS_HAB[p] && !rsPuede(f.nombre,p)))];
+    if(malos.length) avisos.push(['err',`${f.nombre} no tiene habilitado`, malos.join(', ')]);
+  });
+
+  // filas incompletas
+  const sinTurno = RS_DIA.filas.filter(f=>f.nombre && !f.turno).length;
+  if(sinTurno) avisos.push(['err','Turnos sin horario', `${sinTurno} fila(s) sin rellenar`]);
+  const sinNombre = RS_DIA.filas.filter(f=>f.turno && !f.nombre).length;
+  if(sinNombre) avisos.push(['err','Turnos sin persona', `${sinNombre} fila(s) sin asignar`]);
+
+  // descuadre con lo que pidió Laia
+  const plan = RS_PLAN[rsFecha];
+  if(plan){
+    const pedidos = Object.values(plan).reduce((a,b)=>a+(parseInt(b,10)||0),0);
+    if(pedidos !== RS_DIA.filas.length){
+      avisos.push(['err','No cuadra con la planificación',
+        `Laia marcó ${pedidos} turno(s) y el roster tiene ${RS_DIA.filas.length}`]);
+    }
+  }
+
+  if(cnt) cnt.textContent = avisos.length ? `${avisos.length} aviso(s)` : '';
+  box.innerHTML = avisos.length
+    ? avisos.map(([tipo,tag,txt])=>`<div class="rs-warn-row ${tipo}">
+        <span class="rs-warn-tag">${esc(tag)}</span><span>${esc(txt)}</span></div>`).join('')
+    : `<div class="rs-warn-row ok"><span class="rs-warn-tag">OK</span>
+       <span>Cajas cubiertas, habilitaciones correctas y cuadra con la planificación.</span></div>`;
+}
+
+/* ---------- habilitaciones ---------- */
+function rsRenderHab(){
+  const cols=[['caja1','Caja 1'],['caja2','Caja 2'],['zerog','0G'],['floor2','F2'],['av','AV'],
+              ['admin','Admin'],['pompas','Pompas'],['greater','Greater'],['fliers','Fliers'],['arrg','ARRG']];
+  const head=document.getElementById('rs-hab-head');
+  if(head) head.innerHTML = '<tr><th style="text-align:left;">Persona</th>' +
+    cols.map(c=>`<th>${c[1]}</th>`).join('') + '</tr>';
+  const body=document.getElementById('rs-hab-body');
+  if(!body) return;
+  body.innerHTML = RS_STAFF.map(s=>`<tr><td class="rs-hname">${esc(s.nombre)}</td>` +
+    cols.map(c=>`<td><button class="rs-hab-chk ${s[c[0]]?'on':''}"
+      onclick="rsToggleHab('${esc(s.nombre)}','${c[0]}')">${s[c[0]]?'✓':''}</button></td>`).join('') +
+    '</tr>').join('');
+}
+async function rsToggleHab(nombre, col){
+  const s = rsStaffDe(nombre);
+  if(!s) return;
+  s[col] = !s[col];
+  rsRenderHab();
+  rsRenderGrid();
+  await sb.from('roster_staff').update({ [col]: s[col], updated_at:new Date().toISOString() }).eq('nombre', nombre);
 }
 
 /* ============================================================
