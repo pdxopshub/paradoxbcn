@@ -2974,6 +2974,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <button class="btn btn-ghost btn-sm" id="rs-btn-grupos" onclick="rsToggleEspecial('grupos')">+ Grupos</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-cumples" onclick="rsToggleEspecial('cumples')">+ Cumples</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-taller" onclick="rsToggleEspecial('taller')">+ Taller</button>
+                <button class="btn btn-ghost btn-sm" id="rs-btn-resp1" style="display:none;" onclick="rsRestaurarResp('resp1')">+ Ignacio/Paula</button>
+                <button class="btn btn-ghost btn-sm" id="rs-btn-resp2" style="display:none;" onclick="rsRestaurarResp('resp2')">+ Ceci</button>
                 <span class="rs-toolbar-sep"></span>
                 <div class="rs-legend" id="rs-legend"></div>
               </div>
@@ -9858,14 +9860,30 @@ function rsEnsureFilasEspeciales(){
   viejas.forEach((f,idx)=>{ f.tipo = (idx===0) ? 'resp1' : 'resp2'; });
   let r1 = RS_DIA.filas.find(f=>f.tipo==='resp1');
   let r2 = RS_DIA.filas.find(f=>f.tipo==='resp2');
-  if(!r1){ r1 = { tipo:'resp1', turno:'', nombre:'', slots:{} }; RS_DIA.filas.push(r1); }
-  if(!r2){ r2 = { tipo:'resp2', turno:'', nombre:'', slots:{} }; RS_DIA.filas.push(r2); }
+  // si la fila se quitó a propósito (vacaciones), no se vuelve a crear sola:
+  // hace falta pulsar el botón de restaurar en la barra de arriba.
+  if(!r1 && !RS_DIA.config.sin_resp1){ r1 = { tipo:'resp1', turno:'', nombre:'', slots:{} }; RS_DIA.filas.push(r1); }
+  if(!r2 && !RS_DIA.config.sin_resp2){ r2 = { tipo:'resp2', turno:'', nombre:'', slots:{} }; RS_DIA.filas.push(r2); }
   const btn = document.getElementById('rs-btn-laia');
   if(btn) btn.textContent = RS_DIA.filas.some(f=>f.tipo==='laia') ? 'Quitar Laia' : '+ Laia';
   Object.keys(RS_TIPO_ESPECIAL_CODE).forEach(tipo=>{
     const b = document.getElementById('rs-btn-'+tipo);
     if(b) b.textContent = RS_DIA.filas.some(f=>f.tipo===tipo) ? ('Quitar '+RS_ESPECIAL_LABEL[tipo]) : ('+ '+RS_ESPECIAL_LABEL[tipo]);
   });
+  const b1 = document.getElementById('rs-btn-resp1');
+  if(b1) b1.style.display = RS_DIA.config.sin_resp1 ? '' : 'none';
+  const b2 = document.getElementById('rs-btn-resp2');
+  if(b2) b2.style.display = RS_DIA.config.sin_resp2 ? '' : 'none';
+}
+/* Restaura (vuelve a crear) la fila de responsable 1 (Ignacio/Paula) o 2 (Ceci)
+   que se había quitado a propósito por vacaciones. */
+function rsRestaurarResp(tipo){
+  rsSnapshot();
+  RS_DIA.config['sin_'+tipo] = false;
+  RS_DIA.filas.unshift({ tipo, turno:'', nombre:'', slots:{} });
+  rsEnsureFilasEspeciales();
+  rsRenderGrid();
+  rsAutoGuardar();
 }
 /* Orden de visualización: Laia → Grupos → Cumpleaños → Taller (si existen) →
    resp1 → resp2 → el resto del staff. Devuelve los índices reales dentro de
@@ -9921,7 +9939,17 @@ function rsAddFila(){
 }
 function rsDelFila(i){
   const t = RS_DIA.filas[i]?.tipo;
-  if(t==='resp1' || t==='resp2'){ alert('Las dos filas de responsables (Ignacio/Paula y Ceci) no se pueden borrar.'); return; }
+  if(t==='resp1' || t==='resp2'){
+    const quien = t==='resp1' ? 'Ignacio/Paula' : 'Ceci';
+    if(!confirm(`¿Quitar la fila de ${quien} de este día (p.ej. por vacaciones)? Podrás volver a añadirla con el botón "+ ${quien}" de la barra de arriba.`)) return;
+    rsSnapshot();
+    RS_DIA.config['sin_'+t] = true;
+    RS_DIA.filas.splice(i,1);
+    rsEnsureFilasEspeciales();
+    rsRenderGrid();
+    rsAutoGuardar();
+    return;
+  }
   rsSnapshot();
   RS_DIA.filas.splice(i,1);
   rsRenderGrid();
@@ -10113,7 +10141,7 @@ function rsRenderGrid(){
         validos.map(o=>`<option value="${o}" ${o===f.turno?'selected':''}>${o}</option>`)).join('');
       turnoCell = `<select onchange="rsSetTurnoResp(${i}, this.value)"
         style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;padding-right:14px;">${optsT}</select>`;
-      delCell = '<td></td>';
+      delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar fila (vacaciones)">✕</button></td>`;
     } else if(f.tipo==='laia'){
       filaClase='rs-fila-laia';
       nombreCell = `<span style="font-weight:800;padding-left:2px;">Laia</span>`;
@@ -10409,11 +10437,25 @@ function rsAltDragStart(ev, i, ci){
   if(!valor) return;
   RS_DRAG = { modo:'alt', valor };
   document.body.classList.add('rs-dragging-alt');
+  document.addEventListener('mousemove', rsAltDragMove);
   document.addEventListener('mouseup', rsAltDragEnd);
 }
+/* Mientras se arrastra con Alt, va marcando en azul (rs-fill-prev) la celda
+   que hay justo bajo el puntero, para que se vea claramente el recorrido
+   antes de soltar. */
+function rsAltDragMove(ev){
+  if(!RS_DRAG || RS_DRAG.modo!=='alt') return;
+  document.querySelectorAll('#rs-grid td.rs-fill-prev').forEach(el=>el.classList.remove('rs-fill-prev'));
+  const pos = rsCeldaBajoPuntero(ev.clientX, ev.clientY);
+  if(!pos) return;
+  const td = document.querySelector(`#rs-grid td[data-fila="${pos.i}"][data-col="${pos.ci}"]`);
+  if(td) td.classList.add('rs-fill-prev');
+}
 function rsAltDragEnd(ev){
+  document.removeEventListener('mousemove', rsAltDragMove);
   document.removeEventListener('mouseup', rsAltDragEnd);
   document.body.classList.remove('rs-dragging-alt');
+  document.querySelectorAll('#rs-grid td.rs-fill-prev').forEach(el=>el.classList.remove('rs-fill-prev'));
   if(ev) ev.preventDefault();
   if(!RS_DRAG || RS_DRAG.modo!=='alt'){ RS_DRAG=null; return; }
   const pos = ev ? rsCeldaBajoPuntero(ev.clientX, ev.clientY) : null;
