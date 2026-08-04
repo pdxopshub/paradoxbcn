@@ -9656,6 +9656,29 @@ let rsFecha = null;
 const rsIso = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function rsMondayOf(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
 function rsStaffDe(nombre){ return RS_STAFF.find(s=>s.nombre===nombre) || null; }
+/* Los cambios de turno se registran con el nombre que escribió quien lo pidió
+   ("Carolina", "Cecilia"...), mientras que la planificación y el roster usan
+   el nombre corto del equipo ("Carol", "Ceci"). Sin esto, un cambio aprobado
+   no se cruzaba con el roster y salía un falso aviso de descuadre.
+   Se resuelve contra la lista real de staff, sin tabla de alias fija:
+   coincidencia exacta → uno es prefijo del otro → se deja tal cual. */
+function rsNombreCanonico(nombre){
+  const n = String(nombre||'').trim();
+  if(!n) return '';
+  const norm = s => String(s||'').trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const nn = norm(n);
+  const exacto = RS_STAFF.find(s=>norm(s.nombre)===nn);
+  if(exacto) return exacto.nombre;
+  // "Carolina" → "Carol", "Cecilia" → "Ceci": el nombre del equipo es un
+  // prefijo del nombre largo (o al revés). Mínimo 3 letras para no confundir.
+  const prefijo = RS_STAFF.find(s=>{
+    const sn = norm(s.nombre);
+    if(sn.length < 3 || nn.length < 3) return false;
+    return nn.startsWith(sn) || sn.startsWith(nn);
+  });
+  return prefijo ? prefijo.nombre : n;
+}
 function rsPuede(nombre, puesto){
   const col = RS_HAB[puesto];
   if(!col) return true;                       // BRK, DESC, OC y vacío no piden habilitación
@@ -9812,11 +9835,11 @@ async function rsCargarContexto(){
     (data||[]).forEach(t=>{
       if(t.p1_fecha===fecha){
         cambios.push(`<b>${esc(t.p1_staff||'?')}</b> cede su turno de las ${esc(t.p1_hora||'')} a <b>${esc(t.p2_staff||'?')}</b>`);
-        RS_CAMBIOS_DIA.push({ cede: t.p1_staff||'', recibe: t.p2_staff||'' });
+        RS_CAMBIOS_DIA.push({ cede: rsNombreCanonico(t.p1_staff), recibe: rsNombreCanonico(t.p2_staff) });
       }
       if(t.p2_fecha===fecha){
         cambios.push(`<b>${esc(t.p2_staff||'?')}</b> cede su turno de las ${esc(t.p2_hora||'')} a <b>${esc(t.p1_staff||'?')}</b>`);
-        RS_CAMBIOS_DIA.push({ cede: t.p2_staff||'', recibe: t.p1_staff||'' });
+        RS_CAMBIOS_DIA.push({ cede: rsNombreCanonico(t.p2_staff), recibe: rsNombreCanonico(t.p1_staff) });
       }
     });
   }catch(e){}
