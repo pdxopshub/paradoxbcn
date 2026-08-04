@@ -1069,6 +1069,11 @@
     border:1px solid #B9BEC7;box-sizing:border-box;white-space:nowrap;overflow:hidden;
     text-overflow:clip;padding:0 1px;}
   #rs-grid td.rs-td-contador{overflow:hidden;max-width:0;}
+  /* Turnos que empiezan/acaban a y cuarto o menos cuarto: la celda es media
+     hora, así que el marco negro se dibuja por dentro con la anchura exacta
+     que corresponde en vez de rellenar la celda entera. */
+  #rs-grid .rs-turno-parcial{position:absolute;top:0;bottom:0;pointer-events:none;
+    border-top:1.5px solid #000;border-bottom:1.5px solid #000;z-index:1;}
   /* Agarradera para reordenar la fila de turno arrastrándola arriba o abajo. */
   .rs-row-grip{display:inline-block;cursor:grab;color:var(--text-soft);font-size:13px;
     line-height:1;padding:0 3px;vertical-align:middle;user-select:none;}
@@ -9710,6 +9715,48 @@ function rsRango(turno){
   });
   return out;
 }
+/* Cada celda es media hora, pero los turnos pueden empezar o acabar a y cuarto
+   o menos cuarto (p.ej. 1215-2045). Devuelve qué proporción de la primera y de
+   la última celda ocupa realmente el turno, para poder pintar el marco negro
+   hasta donde toca en vez de rellenar la celda entera.
+   fracIni = punto de la primera celda donde entra (0 = justo al principio,
+   0.5 = a mitad); fracFin = punto de la última celda donde sale (1 = entera). */
+function rsFraccionesTurno(turno){
+  const m = String(turno||'').match(/(\d{3,4})\s*-\s*(\d{3,4})/);
+  if(!m) return { fracIni:0, fracFin:1 };
+  const min = t => { const s=String(t).padStart(4,'0'); return parseInt(s.slice(0,2),10)*60 + parseInt(s.slice(2),10); };
+  const ini = min(m[1]), fin = min(m[2]);
+  const idx = rsRango(turno);
+  if(!idx.length) return { fracIni:0, fracFin:1 };
+  const cl = x => Math.max(0, Math.min(1, x));
+  return {
+    fracIni: cl((ini - min(RS_SLOTS[idx[0]])) / 30),
+    fracFin: cl((fin - min(RS_SLOTS[idx[idx.length-1]])) / 30)
+  };
+}
+/* Estilo del marco negro para una celda (o celda fusionada, de ciA a ciB).
+   Si el turno cubre la celda entera se usa el borde normal del <td>; si solo
+   la cubre a medias, se dibuja por dentro una banda con la anchura exacta. */
+function rsMarcoTurno(ciA, ciB, inicioRango, finRango, fracIni, fracFin){
+  if(inicioRango===null) return { estilo:'', overlay:'' };
+  const esIni = (ciA===inicioRango), esFin = (ciB===finRango);
+  const pIni = esIni ? fracIni : 0;
+  const pFin = esFin ? fracFin : 1;
+  if(pIni<=0 && pFin>=1){
+    let s = 'border-top:1.5px solid #000;border-bottom:1.5px solid #000;';
+    if(esIni) s += 'border-left:1.5px solid #000;';
+    if(esFin) s += 'border-right:1.5px solid #000;';
+    return { estilo:s, overlay:'' };
+  }
+  const n = ciB - ciA + 1;                       // nº de medias horas que abarca
+  const izq = (pIni * 100 / n).toFixed(3);
+  const der = ((1 - pFin) * 100 / n).toFixed(3);
+  let b = '';
+  if(esIni) b += 'border-left:1.5px solid #000;';
+  if(esFin) b += 'border-right:1.5px solid #000;';
+  return { estilo:'position:relative;',
+    overlay:`<span class="rs-turno-parcial" style="left:${izq}%;right:${der}%;${b}"></span>` };
+}
 
 /* ---------- carga ---------- */
 async function initRosters(){
@@ -10089,6 +10136,7 @@ function rsRenderGrid(){
     const dentro = new Set(rsRango(f.turno));
     const inicioRango = dentro.size ? Math.min(...dentro) : null;
     const finRango    = dentro.size ? Math.max(...dentro) : null;
+    const { fracIni, fracFin } = rsFraccionesTurno(f.turno);
     const esEspecial = (f.tipo==='grupos' || f.tipo==='cumples' || f.tipo==='taller');
     let celdas;
     if(esEspecial){
@@ -10144,17 +10192,16 @@ function rsRenderGrid(){
         if(v === RS_CONTADOR_CODE){
           let fin = ci;
           while(fin+1 < RS_SLOTS.length && (f.slots[RS_SLOTS[fin+1]]||'') === v) fin++;
-          let bordeC = '';
+          let bordeC = '', overlayC = '';
           if(dentro.has(ci)){
-            bordeC = 'border-top:1.5px solid #000;border-bottom:1.5px solid #000;';
-            if(ci===inicioRango) bordeC += 'border-left:1.5px solid #000;';
-            if(fin===finRango)   bordeC += 'border-right:1.5px solid #000;';
+            const mc = rsMarcoTurno(ci, fin, inicioRango, finRango, fracIni, fracFin);
+            bordeC = mc.estilo; overlayC = mc.overlay;
           }
           const selC = (RS_SEL && RS_SEL.i===i && RS_SEL.ci>=ci && RS_SEL.ci<=fin);
           const handleC = selC ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${fin})"></span>` : '';
           out += `<td class="rs-td-contador${selC?' rs-selected':''}" colspan="${fin-ci+1}" data-fila="${i}" data-col="${ci}" style="${bordeC}"
             ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
-            ondrop="rsSlotDrop(event,${i},'${t}')"><button class="rs-slot rs-p-${RS_CONTADOR_CODE}"
+            ondrop="rsSlotDrop(event,${i},'${t}')">${overlayC}<button class="rs-slot rs-p-${RS_CONTADOR_CODE}"
             draggable="true" ondragstart="rsCellDragStart(event,${i},${ci},'${RS_CONTADOR_CODE}')"
             onmousedown="rsAltDragStart(event,${i},${ci})"
             onclick="rsSlotClick(event,${i},${ci})" title="${esc(RS_CONTADOR_LABEL)}">${esc(RS_CONTADOR_LABEL)}${handleC}</button></td>`;
@@ -10163,20 +10210,21 @@ function rsRenderGrid(){
         }
         const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : v;
         const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
-        let borde = '';
+        let borde = '', overlay = '';
         if(dentro.has(ci)){
           // con border-collapse:collapse, el navegador se queda con el más
           // grueso en cada línea compartida: sale siempre este grosor, nunca
-          // más grueso por solaparse con la celda vecina.
-          borde = 'border-top:1.5px solid #000;border-bottom:1.5px solid #000;';
-          if(ci===inicioRango) borde += 'border-left:1.5px solid #000;';
-          if(ci===finRango)    borde += 'border-right:1.5px solid #000;';
+          // más grueso por solaparse con la celda vecina. Si el turno solo
+          // cubre media celda (entradas a y cuarto/menos cuarto), rsMarcoTurno
+          // devuelve una banda interior con la anchura proporcional.
+          const mc = rsMarcoTurno(ci, ci, inicioRango, finRango, fracIni, fracFin);
+          borde = mc.estilo; overlay = mc.overlay;
         }
         const seleccionada = (RS_SEL && RS_SEL.i===i && RS_SEL.ci===ci);
         const handle = (seleccionada && v) ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${ci})"></span>` : '';
         out += `<td class="${seleccionada?'rs-selected':''}" data-fila="${i}" data-col="${ci}" style="${borde}"
           ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
-          ondrop="rsSlotDrop(event,${i},'${t}')"><button class="rs-slot rs-p-${esc(v)}" style="${mal}"
+          ondrop="rsSlotDrop(event,${i},'${t}')">${overlay}<button class="rs-slot rs-p-${esc(v)}" style="${mal}"
           draggable="${v ? 'true' : 'false'}" ondragstart="rsCellDragStart(event,${i},${ci},'${v}')"
           onmousedown="rsAltDragStart(event,${i},${ci})"
           onclick="rsSlotClick(event,${i},${ci})" title="${esc(v)}">${esc(txt)}${handle}</button></td>`;
