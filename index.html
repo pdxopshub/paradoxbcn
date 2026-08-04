@@ -1069,6 +1069,14 @@
     border:1px solid #B9BEC7;box-sizing:border-box;white-space:nowrap;overflow:hidden;
     text-overflow:clip;padding:0 1px;}
   #rs-grid td.rs-td-contador{overflow:hidden;max-width:0;}
+  /* Agarradera para reordenar la fila de turno arrastrándola arriba o abajo. */
+  .rs-row-grip{display:inline-block;cursor:grab;color:var(--text-soft);font-size:13px;
+    line-height:1;padding:0 3px;vertical-align:middle;user-select:none;}
+  .rs-row-grip:hover{color:var(--text);}
+  body.rs-dragging-row{cursor:grabbing;}
+  body.rs-dragging-row .rs-row-grip{cursor:grabbing;}
+  /* fila sobre la que se soltará: línea gruesa arriba y abajo para verla bien */
+  #rs-grid tr.rs-row-target td{box-shadow:inset 0 2px 0 var(--accent),inset 0 -2px 0 var(--accent);}
   /* Grupos (azul), Cumpleaños (morado), Taller (gris): celdas de evento sin
      habilitación asociada, se fusionan en una sola celda editable. */
   .rs-p-GR{background:#1554D6;color:#fff;}
@@ -10248,17 +10256,21 @@ function rsRenderGrid(){
         inicios.map(c=>`<option value="${c}" ${c===inicioActual?'selected':''}>${rsTurnoDesdeInicio(c)}</option>`)).join('');
       turnoCell = `<select onchange="rsSetInicioStaff(${i}, this.value)"
         style="width:84px;border:none;background:transparent;font-weight:800;font-size:10.5px;padding-right:14px;">${optsT}</select>`;
-      delCell = `<td><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>`;
+      // Tirador para reordenar: los turnos nuevos nacen al final de la lista,
+      // pero se pueden subir o bajar arrastrando esta agarradera.
+      delCell = `<td style="white-space:nowrap;"><span class="rs-row-grip" title="Arrastrar para mover la fila"
+          onmousedown="rsRowDragStart(event,${i})">⠿</span><button class="btn btn-ghost btn-sm" onclick="rsDelFila(${i})" title="Quitar turno">✕</button></td>`;
     }
-    html += `<tr class="${filaClase}">
+    html += `<tr class="${filaClase}" data-fila="${i}">
       <td class="rs-turno">${turnoCell}</td>
       <td class="rs-nombre">${nombreCell}</td>
       ${celdas}
       ${delCell}
     </tr>`;
   });
-  // Grupos/Cumpleaños/Taller son eventos, no turnos de nadie: no se cuentan.
-  const n = RS_DIA.filas.filter(f=>!['grupos','cumples','taller'].includes(f.tipo)).length;
+  // Grupos/Cumpleaños/Taller son eventos, no turnos de nadie. Laia tampoco
+  // cuenta como turno de sala (igual que ya se excluye de las horas totales).
+  const n = RS_DIA.filas.filter(f=>!['grupos','cumples','taller','laia'].includes(f.tipo)).length;
   html += `<tr class="rs-total"><td class="rs-turno">${n}</td>
     <td class="rs-nombre" style="text-align:center;">turnos</td>
     <td colspan="${RS_SLOTS.length+1}"></td></tr>`;
@@ -10493,6 +10505,57 @@ function rsFillEnd(ev){
   });
   RS_SEL = { i, ci: RS_DRAG.origCi };
   RS_DRAG = null;
+  rsRenderGrid();
+  rsAutoGuardar();
+}
+/* Reordenar filas de turno arrastrando la agarradera (⠿) del final de la fila.
+   Solo se mueven las filas normales de staff: Laia, los eventos y las dos filas
+   de responsables tienen su sitio fijo por rsOrdenFilas(). */
+let RS_ROWDRAG = null;   // {origen} índice real en RS_DIA.filas
+function rsFilaBajoPuntero(x, y){
+  const el = document.elementFromPoint(x, y);
+  const tr = el && el.closest('#rs-grid tr[data-fila]');
+  if(!tr) return null;
+  const i = parseInt(tr.dataset.fila, 10);
+  return Number.isInteger(i) ? i : null;
+}
+function rsRowDragStart(ev, i){
+  ev.preventDefault(); ev.stopPropagation();
+  if(RS_DIA.filas[i]?.tipo) return;     // solo filas de staff
+  RS_ROWDRAG = { origen:i };
+  document.body.classList.add('rs-dragging-row');
+  document.addEventListener('mousemove', rsRowDragMove);
+  document.addEventListener('mouseup', rsRowDragEnd);
+}
+function rsRowDragMove(ev){
+  if(!RS_ROWDRAG) return;
+  document.querySelectorAll('#rs-grid tr.rs-row-target').forEach(el=>el.classList.remove('rs-row-target'));
+  const destino = rsFilaBajoPuntero(ev.clientX, ev.clientY);
+  if(destino===null || destino===RS_ROWDRAG.origen) return;
+  if(RS_DIA.filas[destino]?.tipo) return;   // no se puede soltar sobre filas fijas
+  const tr = document.querySelector(`#rs-grid tr[data-fila="${destino}"]`);
+  if(tr) tr.classList.add('rs-row-target');
+}
+function rsRowDragEnd(ev){
+  document.removeEventListener('mousemove', rsRowDragMove);
+  document.removeEventListener('mouseup', rsRowDragEnd);
+  document.body.classList.remove('rs-dragging-row');
+  document.querySelectorAll('#rs-grid tr.rs-row-target').forEach(el=>el.classList.remove('rs-row-target'));
+  if(!RS_ROWDRAG){ return; }
+  const origen = RS_ROWDRAG.origen;
+  RS_ROWDRAG = null;
+  const destino = ev ? rsFilaBajoPuntero(ev.clientX, ev.clientY) : null;
+  if(destino===null || destino===origen) return;
+  const movida  = RS_DIA.filas[origen];
+  const objetivo = RS_DIA.filas[destino];
+  if(!movida || !objetivo || movida.tipo || objetivo.tipo) return;
+  rsSnapshot();
+  // se quita de su sitio y se vuelve a insertar junto a la fila de destino:
+  // por encima si se ha arrastrado hacia arriba, por debajo si hacia abajo.
+  RS_DIA.filas.splice(origen, 1);
+  const idx = RS_DIA.filas.indexOf(objetivo);
+  RS_DIA.filas.splice(destino > origen ? idx+1 : idx, 0, movida);
+  RS_SEL = null;
   rsRenderGrid();
   rsAutoGuardar();
 }
@@ -10737,8 +10800,10 @@ function rsValidar(){
       if(c.cede)   { enPlan.delete(c.cede);  porCambio[c.cede]   = c.recibe; }
       if(c.recibe) { enPlan.add(c.recibe);   porCambio[c.recibe] = c.cede;   }
     });
+    // Laia no entra en su propia planificación semanal, así que su fila no se
+    // compara: si no, siempre saldría como "está en el roster y no en el plan".
     const enRoster = RS_DIA.filas
-      .filter(f=>f.nombre && !['grupos','cumples','taller'].includes(f.tipo))
+      .filter(f=>f.nombre && !['grupos','cumples','taller','laia'].includes(f.tipo))
       .map(f=>f.nombre);
     const enRosterSet = new Set(enRoster);
     [...enRosterSet].filter(n=>!enPlan.has(n)).sort().forEach(n=>{
