@@ -1052,6 +1052,10 @@
   .rs-p-F2,.rs-p-AV,.rs-p-Pompas,.rs-p-Greater,.rs-p-Fliers{background:#12501A;color:#fff;}
   .rs-p-Admin{background:#DAE9F8;color:#123;}
   .rs-p-ARRG{background:#4EA72E;color:#fff;}
+  /* DUTY: responsable de sala cuando no está Ignacio/Paula/Ceci (suele cerrar).
+     T: taller como posición, distinto de la fila de eventos "Taller". */
+  .rs-p-DUTY{background:#6B7280;color:#fff;font-size:8.5px;letter-spacing:-.2px;}
+  .rs-p-T{background:#8B5E3C;color:#fff;}
   .rs-p-BRK{background:#000;color:#000;cursor:grab;}
   .rs-p-DESC{background:#fff;color:#555;font-weight:600;font-style:italic;}
   .rs-p-OC{background:#E8E8E8;color:#888;}
@@ -2993,6 +2997,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                      mismo bloque flex: así, si hace falta partir la línea, se parte el
                      bloque entero y Horas totales nunca queda solo arriba con Revisado. -->
                 <div style="display:flex;flex-wrap:wrap;gap:22px;">
+                  <div id="rs-duty-box" style="display:none;"><b>DUTY:</b> <span id="rs-duty">—</span></div>
                   <div><b>Horas totales:</b> <span id="rs-horas-totales">—</span></div>
                   <div style="padding-left:22px;border-left:1.5px solid var(--line-strong);"><b>Cambios de turno:</b><div id="rs-ctx-cambios" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
                   <div style="padding-left:22px;border-left:1.5px solid var(--line-strong);"><b>Vacaciones:</b><div id="rs-ctx-vac" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
@@ -9554,11 +9559,12 @@ async function saveLoomis(){
 const RS_SLOTS = ['900','930','1000','1030','1100','1130','1200','1230','1300','1330','1400','1430',
                   '1500','1530','1600','1630','1700','1730','1800','1830','1900','1930','2000','2030','2100','2130'];
 /* Ciclo de puestos al hacer clic. BRK = breaker, DESC = descanso, OC = apertura/cierre */
-const RS_CICLO = ['','1','2','0G','F2','AV','Admin','Pompas','Greater','Fliers','ARRG','BRK','DESC','OC'];
+const RS_CICLO = ['','1','2','0G','F2','AV','Admin','Pompas','Greater','Fliers','ARRG','T','DUTY','BRK','DESC','OC'];
 const RS_ETIQUETA = { BRK:'', DESC:'desc.', OC:'' };
 /* Puesto → columna de habilitación en roster_staff */
 const RS_HAB = { '1':'caja1', '2':'caja2', '0G':'zerog', 'F2':'floor2', 'AV':'av',
-                 'Admin':'admin', 'Pompas':'pompas', 'Greater':'greater', 'Fliers':'fliers', 'ARRG':'arrg' };
+                 'Admin':'admin', 'Pompas':'pompas', 'Greater':'greater', 'Fliers':'fliers', 'ARRG':'arrg',
+                 'DUTY':'duty' };   // Taller (T) no lleva habilitación: lo puede hacer cualquiera
 const RS_APERTURA = '1000', RS_CIERRE = '2000';   // franja en la que las cajas deben estar cubiertas
 
 /* Filas fijas: Ignacio/Paula/Ceci siempre ocupan las 2 primeras filas (horario
@@ -9567,6 +9573,7 @@ const RS_APERTURA = '1000', RS_CIERRE = '2000';   // franja en la que las cajas 
 const RS_RESP_NOMBRES = ['Ignacio','Paula','Ceci'];
 const RS_ETIQ_PUESTO = { '1':'Caja 1','2':'Caja 2','0G':'Zero Gravity','F2':'Floor 2','AV':'Asist. visitante',
   'Admin':'Admin','Pompas':'Pompas','Greater':'Greater','Fliers':'Fliers','ARRG':'ARRG',
+  'T':'Taller','DUTY':'Duty (responsable de sala)',
   'BRK':'Breaker','DESC':'Descanso','OC':'Apertura/Cierre' };
 /* Filas especiales de eventos (Grupos/Cumpleaños/Taller): añaden una posición
    nueva a la leyenda (solo mientras la fila esté puesta) que, al arrastrarla a
@@ -10184,7 +10191,22 @@ function rsDuracionMinutos(turno){
    Laia nunca se cuenta, aunque tenga turno puesto ese día.
    Se muestra en horas y minutos (ej. 51h 30min), como en Planday, no en
    decimal, para que no haya dudas al compararlo. */
+/* Quién lleva el DUTY ese día: se saca de la propia rejilla (quien tenga alguna
+   celda DUTY) y se muestra a la izquierda de Horas totales, ej. "Laura: DUTY".
+   Si no hay ninguno, la etiqueta ni aparece. */
+function rsRenderDuty(){
+  const box = document.getElementById('rs-duty-box');
+  const el  = document.getElementById('rs-duty');
+  if(!box || !el) return;
+  const nombres = [...new Set(RS_DIA.filas
+    .filter(f => f.nombre && Object.values(f.slots||{}).includes('DUTY'))
+    .map(f => f.nombre))];
+  if(!nombres.length){ box.style.display='none'; return; }
+  box.style.display = '';
+  el.textContent = nombres.join(', ');
+}
 function rsRenderHorasTotales(){
+  rsRenderDuty();
   const el = document.getElementById('rs-horas-totales');
   if(!el) return;
   const totalMin = RS_DIA.filas
@@ -10651,7 +10673,8 @@ function rsSetJustificado(clave, valor){
 /* ---------- habilitaciones ---------- */
 function rsRenderHab(){
   const cols=[['caja1','Caja 1'],['caja2','Caja 2'],['zerog','0G'],['floor2','F2'],['av','AV'],
-              ['admin','Admin'],['pompas','Pompas'],['greater','Greater'],['fliers','Fliers'],['arrg','ARRG']];
+              ['admin','Admin'],['pompas','Pompas'],['greater','Greater'],['fliers','Fliers'],['arrg','ARRG'],
+              ['duty','DUTY']];
   const head=document.getElementById('rs-hab-head');
   if(head) head.innerHTML = '<tr><th style="text-align:left;">Persona</th>' +
     cols.map(c=>`<th>${c[1]}</th>`).join('') + '</tr>';
