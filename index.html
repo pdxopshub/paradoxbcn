@@ -1060,6 +1060,9 @@
   .rs-p-DESC{background:#fff;color:#555;font-weight:600;font-style:italic;}
   .rs-p-OC{background:#E8E8E8;color:#888;}
   .rs-p-{background:#fff;}
+  /* Coger contador: cápsula especial, blanca con texto negro, que al
+     arrastrarla a la rejilla rellena automáticamente 3 celdas seguidas. */
+  .rs-p-CONTADOR{background:#fff;color:#000;font-size:8px;letter-spacing:-.2px;border:1px solid #B9BEC7;box-sizing:border-box;}
   /* Grupos (azul), Cumpleaños (morado), Taller (gris): celdas de evento sin
      habilitación asociada, se fusionan en una sola celda editable. */
   .rs-p-GR{background:#1554D6;color:#fff;}
@@ -9562,7 +9565,7 @@ const RS_SLOTS = ['900','930','1000','1030','1100','1130','1200','1230','1300','
                   '1500','1530','1600','1630','1700','1730','1800','1830','1900','1930','2000','2030','2100','2130'];
 /* Ciclo de puestos al hacer clic. BRK = breaker, DESC = descanso, OC = apertura/cierre */
 const RS_CICLO = ['','1','2','0G','F2','AV','Admin','Pompas','Greater','Fliers','ARRG','T','DUTY','BRK','DESC','OC'];
-const RS_ETIQUETA = { BRK:'', DESC:'desc.', OC:'' };
+const RS_ETIQUETA = { BRK:'', DESC:'desc.', OC:'', CONTADOR:'Contador' };
 /* Puesto → columna de habilitación en roster_staff */
 const RS_HAB = { '1':'caja1', '2':'caja2', '0G':'zerog', 'F2':'floor2', 'AV':'av',
                  'Admin':'admin', 'Pompas':'pompas', 'Greater':'greater', 'Fliers':'fliers', 'ARRG':'arrg',
@@ -9577,6 +9580,10 @@ const RS_ETIQ_PUESTO = { '1':'Caja 1','2':'Caja 2','0G':'Zero Gravity','F2':'Flo
   'Admin':'Admin','Pompas':'Pompas','Greater':'Greater','Fliers':'Fliers','ARRG':'ARRG',
   'T':'Taller','DUTY':'Duty (responsable de sala)',
   'BRK':'Breaker','DESC':'Descanso','OC':'Apertura/Cierre' };
+/* "Coger contador": cápsula de leyenda especial (no es un puesto con
+   habilitación); al arrastrarla a la rejilla se planta y se autorrellena
+   hasta ocupar 3 medias horas seguidas, igual que Grupos/Cumpleaños/Taller. */
+const RS_CONTADOR_CODE = 'CONTADOR', RS_CONTADOR_LABEL = 'Coger contador :)';
 /* Filas especiales de eventos (Grupos/Cumpleaños/Taller): añaden una posición
    nueva a la leyenda (solo mientras la fila esté puesta) que, al arrastrarla a
    varias celdas seguidas, se fusionan en una única celda con texto libre
@@ -10259,6 +10266,8 @@ function rsRenderLeyenda(){
     .filter(([tipo])=>tiposPresentes.has(tipo))
     .map(([,p])=>`<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')"
       title="${esc(RS_ETIQ_PUESTO_ESPECIAL[p])}">${esc(RS_ETIQ_PUESTO_ESPECIAL[p])}</span>`).join('');
+  html += `<span class="rs-legend-chip rs-p-${RS_CONTADOR_CODE}" draggable="true" ondragstart="rsDragStart(event,'${RS_CONTADOR_CODE}')"
+      title="${esc(RS_CONTADOR_LABEL)}">${esc(RS_CONTADOR_LABEL)}</span>`;
   el.innerHTML = html;
 }
 /* Colocar un puesto en una celda: arrastrando desde la leyenda (copia),
@@ -10354,7 +10363,7 @@ function rsSlotDrop(ev, i, t){
   // de la leyenda (colocación nueva, sin origen) se completa el bloque hasta
   // llegar a 3 celdas, para que ya se vea de un tirón lo que va a cubrir.
   const f = RS_DIA.filas[i];
-  if(!origenRaw && (f.tipo==='grupos' || f.tipo==='cumples' || f.tipo==='taller')){
+  if(!origenRaw && (f.tipo==='grupos' || f.tipo==='cumples' || f.tipo==='taller' || puesto===RS_CONTADOR_CODE)){
     rsAsegurarMinimo3(i, t, puesto);
   }
   rsRenderGrid();
