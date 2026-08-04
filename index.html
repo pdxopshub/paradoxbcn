@@ -1093,9 +1093,18 @@
   tr.rs-fila-cumples td.rs-turno,tr.rs-fila-cumples td.rs-nombre{background:#EFE0F5;}
   tr.rs-fila-taller td.rs-turno,tr.rs-fila-taller td.rs-nombre{background:#E4E5E7;}
   .rs-slot[draggable="true"]{cursor:grab;}
-  td.rs-drop-over{outline:2px dashed var(--accent);outline-offset:-2px;}
-  td.rs-selected{outline:2px solid var(--accent);outline-offset:-2px;}
-  td.rs-fill-prev{outline:2px dashed var(--accent);outline-offset:-2px;background:rgba(28,110,164,.08);}
+  /* OJO: llevan #rs-grid delante a propósito. #rs-grid td{background:#fff} es un
+     selector de ID y le ganaba a estas clases, por eso el azulito de la
+     previsualización de arrastre no llegaba a verse nunca. */
+  #rs-grid td.rs-drop-over{outline:2px dashed var(--accent);outline-offset:-2px;
+    background:#CBE3F6;}
+  #rs-grid td.rs-selected{outline:2px solid var(--accent);outline-offset:-2px;}
+  /* Marca en azul todas las celdas por las que va pasando el arrastre, para ver
+     hasta dónde se va a rellenar antes de soltar. */
+  #rs-grid td.rs-fill-prev{outline:2px solid var(--accent);outline-offset:-2px;
+    background:#BBDCF4;}
+  #rs-grid td.rs-fill-prev .rs-slot{background:rgba(28,110,164,.30);}
+  #rs-grid td.rs-drop-over .rs-slot{background:rgba(28,110,164,.25);}
   .rs-slot{position:relative;}
   .rs-fill-handle{position:absolute;right:-3px;bottom:-3px;width:8px;height:8px;
     background:var(--accent);border:1px solid #fff;border-radius:1px;cursor:crosshair;z-index:6;}
@@ -1166,6 +1175,18 @@
   .rs-warn-tag{flex-shrink:0;font-size:9.5px;font-weight:900;padding:2px 6px;border-radius:5px;
     background:var(--bad);color:#fff;letter-spacing:.3px;}
   .rs-warn-row.ok .rs-warn-tag{background:var(--ok);}
+  /* ¿Está justificado? Sí/No para los descuadres con la planificación. */
+  /* Fila TOTAL de la planificación semanal: fondo blanco y número en negro
+     negrita (lleva #rs-plan delante porque si no la gana el selector de ID de
+     la tabla). */
+  #rs-plan-body tr.rs-plan-total td{background:#fff;color:#000;font-weight:900;font-size:12px;}
+  .rs-just{margin-left:auto;display:flex;align-items:center;gap:5px;flex-shrink:0;
+    font-size:11px;font-weight:700;color:var(--text-soft);white-space:nowrap;}
+  .rs-just-btn{border:1px solid var(--line-strong);background:var(--surface);color:var(--text-soft);
+    font-size:11px;font-weight:800;padding:1px 9px;border-radius:6px;cursor:pointer;line-height:17px;}
+  .rs-just-btn:hover{border-color:var(--accent);}
+  .rs-just-btn.on{background:var(--ok);border-color:var(--ok);color:#fff;}
+  .rs-just-btn.no{background:#D93C46;border-color:#D93C46;color:#fff;}
 
   /* habilitaciones: filas de título en negro/blanco, tabla más compacta */
   #rs-hab-table{border-collapse:separate;border-spacing:0;font-size:11px;}
@@ -9698,7 +9719,7 @@ function rsRenderPlan(){
     const n = Object.values(RS_PLAN[iso]||{}).reduce((a,b)=>a+(parseInt(b,10)||0),0);
     return `<td>${n||''}</td>`;
   }).join('');
-  html += `<tr class="rs-total"><td class="rs-pname">Headcount</td>${tot}</tr>`;
+  html += `<tr class="rs-plan-total"><td class="rs-pname">TOTAL</td>${tot}</tr>`;
   body.innerHTML = html;
 }
 function rsPlanToggle(iso, nombre){
@@ -10123,7 +10144,8 @@ function rsRenderGrid(){
       ${delCell}
     </tr>`;
   });
-  const n = RS_DIA.filas.length;
+  // Grupos/Cumpleaños/Taller son eventos, no turnos de nadie: no se cuentan.
+  const n = RS_DIA.filas.filter(f=>!['grupos','cumples','taller'].includes(f.tipo)).length;
   html += `<tr class="rs-total"><td class="rs-turno">${n}</td>
     <td class="rs-nombre" style="text-align:center;">turnos</td>
     <td colspan="${RS_SLOTS.length+1}"></td></tr>`;
@@ -10523,9 +10545,10 @@ function rsValidar(){
   // cajas descubiertas o duplicadas
   // Si en esa franja alguien tiene la celda negra (BRK), esa persona está
   // cubriendo el descanso de quien lleva la caja: no se cuenta como hueco.
-  const revisaCaja=(puesto,label,desde,avisarHueco)=>{
+  const revisaCaja=(puesto,label,desde,avisarHueco,hasta)=>{
     const huecos=[], dobles=[];
-    for(let ci=desde; ci<iCi; ci++){
+    const fin = (hasta===undefined) ? iCi : hasta;
+    for(let ci=desde; ci<fin; ci++){
       const t=RS_SLOTS[ci];
       const n=filas.filter(f=>f.slots[t]===puesto).length;
       const hayBreaker = filas.some(f=>f.slots[t]==='BRK');
@@ -10537,7 +10560,9 @@ function rsValidar(){
   // Caja 2: ya no avisamos de huecos (el horario real de apertura varía
   // según si Caja 1 está abierta, y daba falsos positivos).
   revisaCaja('2','Caja 2', iAp, false);
-  if(RS_DIA.config.caja1) revisaCaja('1','Caja 1', iAp, true);
+  // Caja 1 siempre cierra a las 19:15, así que la última media hora que hay que
+  // tener cubierta es la de 1900; a partir de ahí no se avisa de huecos.
+  if(RS_DIA.config.caja1) revisaCaja('1','Caja 1', iAp, true, RS_SLOTS.indexOf('1900')+1);
 
   // puestos sin habilitación
   filas.forEach(f=>{
@@ -10551,22 +10576,52 @@ function rsValidar(){
   const sinNombre = RS_DIA.filas.filter(f=>f.turno && !f.nombre).length;
   if(sinNombre) avisos.push(['err','Turnos sin persona', `${sinNombre} fila(s) sin asignar`]);
 
-  // descuadre con lo que pidió Laia
+  // Descuadre con lo que pidió Laia, dicho por nombre y no por número: es
+  // mucho más útil saber QUIÉN sobra o falta que cuántos. Las filas de
+  // Grupos/Cumpleaños/Taller no son turnos de nadie, así que no entran.
   const plan = RS_PLAN[rsFecha];
   if(plan){
-    const pedidos = Object.values(plan).reduce((a,b)=>a+(parseInt(b,10)||0),0);
-    if(pedidos !== RS_DIA.filas.length){
-      avisos.push(['err','No cuadra con la planificación',
-        `Laia marcó ${pedidos} turno(s) y el roster tiene ${RS_DIA.filas.length}`]);
-    }
+    const enPlan = new Set(Object.keys(plan).filter(n=>(parseInt(plan[n],10)||0) > 0));
+    const enRoster = RS_DIA.filas
+      .filter(f=>f.nombre && !['grupos','cumples','taller'].includes(f.tipo))
+      .map(f=>f.nombre);
+    const enRosterSet = new Set(enRoster);
+    [...enRosterSet].filter(n=>!enPlan.has(n)).sort().forEach(n=>{
+      avisos.push(['err','Fuera de planificación',
+        `${n} está en el roster y NO está en la planificación`, n]);
+    });
+    [...enPlan].filter(n=>!enRosterSet.has(n)).sort().forEach(n=>{
+      avisos.push(['err','Falta en el roster',
+        `${n} está en la planificación y NO está en el roster`, n]);
+    });
   }
 
-  if(cnt) cnt.textContent = avisos.length ? `${avisos.length} aviso(s)` : '';
+  const just = RS_DIA.config.justificados || {};
+  const pendientes = avisos.filter(a => !(a[3] && just[a[3]]==='si')).length;
+  if(cnt) cnt.textContent = pendientes ? `${pendientes} aviso(s)` : '';
   box.innerHTML = avisos.length
-    ? avisos.map(([tipo,tag,txt])=>`<div class="rs-warn-row ${tipo}">
-        <span class="rs-warn-tag">${esc(tag)}</span><span>${esc(txt)}</span></div>`).join('')
+    ? avisos.map(([tipo,tag,txt,clave])=>{
+        const j = clave ? (just[clave]||'') : '';
+        const toggle = clave ? `<span class="rs-just">¿Está justificado?
+            <button class="rs-just-btn ${j==='si'?'on':''}" onclick="rsSetJustificado('${esc(clave)}','si')">Sí</button>
+            <button class="rs-just-btn ${j==='no'?'no':''}" onclick="rsSetJustificado('${esc(clave)}','no')">No</button>
+          </span>` : '';
+        return `<div class="rs-warn-row ${j==='si'?'ok':tipo}">
+          <span class="rs-warn-tag">${esc(tag)}</span><span>${esc(txt)}</span>${toggle}</div>`;
+      }).join('')
     : `<div class="rs-warn-row ok"><span class="rs-warn-tag">OK</span>
        <span>Cajas cubiertas, habilitaciones correctas y cuadra con la planificación.</span></div>`;
+}
+/* Un descuadre puede estar justificado (un cambio de turno hecho después de que
+   Laia cerrara la planificación), así que se marca a mano y se guarda con el
+   día para no volver a revisarlo. */
+function rsSetJustificado(clave, valor){
+  if(!RS_DIA.config.justificados) RS_DIA.config.justificados = {};
+  const actual = RS_DIA.config.justificados[clave];
+  if(actual === valor) delete RS_DIA.config.justificados[clave];
+  else RS_DIA.config.justificados[clave] = valor;
+  rsValidar();
+  rsAutoGuardar();
 }
 
 /* ---------- habilitaciones ---------- */
