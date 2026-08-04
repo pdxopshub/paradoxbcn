@@ -9606,6 +9606,10 @@ function rsTurnoDesdeInicio(codigo){
 }
 
 let RS_STAFF = [];        // [{nombre, caja1, caja2, ...}]
+/* Cambios de turno aprobados del día que se está viendo: [{cede, recibe}].
+   Los usa la revisión para no dar por descuadrado un roster que en realidad
+   sigue un cambio ya aprobado. */
+let RS_CAMBIOS_DIA = [];
 let RS_DIA = null;        // {fecha, config, filas}
 let RS_PLAN = {};         // {'YYYY-MM-DD': {nombre: 0|1|2}}
 let rsPlanMonday = null;
@@ -9750,6 +9754,7 @@ async function rsLoadDia(){
   if(el && el.value) rsFecha = el.value;
   RS_UNDO_STACK = [];
   RS_STAFF_PICK_OPEN = null;
+  RS_CAMBIOS_DIA = [];   // se recargan al final, en rsCargarContexto
   RS_DIA = { fecha: rsFecha, config:{}, filas:[], revisado_por:'' };
   try{
     const {data} = await sb.from('roster_dias').select('*').eq('fecha',rsFecha).single();
@@ -9785,13 +9790,23 @@ async function rsCargarContexto(){
   const fecha = RS_DIA.fecha;
 
   let cambios = [];
+  RS_CAMBIOS_DIA = [];
   try{
     const { data } = await sb.from('turnos').select('*').eq('estado','Aprobado');
     (data||[]).forEach(t=>{
-      if(t.p1_fecha===fecha) cambios.push(`<b>${esc(t.p1_staff||'?')}</b> cede su turno de las ${esc(t.p1_hora||'')} a <b>${esc(t.p2_staff||'?')}</b>`);
-      if(t.p2_fecha===fecha) cambios.push(`<b>${esc(t.p2_staff||'?')}</b> cede su turno de las ${esc(t.p2_hora||'')} a <b>${esc(t.p1_staff||'?')}</b>`);
+      if(t.p1_fecha===fecha){
+        cambios.push(`<b>${esc(t.p1_staff||'?')}</b> cede su turno de las ${esc(t.p1_hora||'')} a <b>${esc(t.p2_staff||'?')}</b>`);
+        RS_CAMBIOS_DIA.push({ cede: t.p1_staff||'', recibe: t.p2_staff||'' });
+      }
+      if(t.p2_fecha===fecha){
+        cambios.push(`<b>${esc(t.p2_staff||'?')}</b> cede su turno de las ${esc(t.p2_hora||'')} a <b>${esc(t.p1_staff||'?')}</b>`);
+        RS_CAMBIOS_DIA.push({ cede: t.p2_staff||'', recibe: t.p1_staff||'' });
+      }
     });
   }catch(e){}
+  // Los cambios se cargan de Supabase (asíncrono) y la planificación no los
+  // conoce, así que hay que revalidar en cuanto llegan.
+  rsValidar();
 
   let fuera = [];
   try{
@@ -10582,6 +10597,14 @@ function rsValidar(){
   const plan = RS_PLAN[rsFecha];
   if(plan){
     const enPlan = new Set(Object.keys(plan).filter(n=>(parseInt(plan[n],10)||0) > 0));
+    // Un cambio de turno aprobado no se refleja en la planificación de Laia:
+    // quien cede sale de lo previsto y quien lo coge entra. Así no se avisa de
+    // descuadres que en realidad ya están resueltos y aprobados.
+    const porCambio = {};
+    RS_CAMBIOS_DIA.forEach(c=>{
+      if(c.cede)   { enPlan.delete(c.cede);  porCambio[c.cede]   = c.recibe; }
+      if(c.recibe) { enPlan.add(c.recibe);   porCambio[c.recibe] = c.cede;   }
+    });
     const enRoster = RS_DIA.filas
       .filter(f=>f.nombre && !['grupos','cumples','taller'].includes(f.tipo))
       .map(f=>f.nombre);
@@ -10591,8 +10614,9 @@ function rsValidar(){
         `${n} está en el roster y NO está en la planificación`, n]);
     });
     [...enPlan].filter(n=>!enRosterSet.has(n)).sort().forEach(n=>{
+      const via = porCambio[n] ? ` (le cedió el turno ${porCambio[n]})` : '';
       avisos.push(['err','Falta en el roster',
-        `${n} está en la planificación y NO está en el roster`, n]);
+        `${n} está en la planificación${via} y NO está en el roster`, n]);
     });
   }
 
