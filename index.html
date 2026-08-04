@@ -2991,8 +2991,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <button class="btn btn-ghost btn-sm" id="rs-btn-grupos" onclick="rsToggleEspecial('grupos')">+ Grupos</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-cumples" onclick="rsToggleEspecial('cumples')">+ Cumples</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-taller" onclick="rsToggleEspecial('taller')">+ Taller</button>
-                <button class="btn btn-ghost btn-sm" id="rs-btn-resp1" style="display:none;" onclick="rsRestaurarResp('resp1')">+ Ignacio/Paula</button>
-                <button class="btn btn-ghost btn-sm" id="rs-btn-resp2" style="display:none;" onclick="rsRestaurarResp('resp2')">+ Ceci</button>
                 <span class="rs-toolbar-sep"></span>
                 <div class="rs-legend" id="rs-legend"></div>
               </div>
@@ -9908,26 +9906,14 @@ function rsEnsureFilasEspeciales(){
   // hace falta pulsar el botón de restaurar en la barra de arriba.
   if(!r1 && !RS_DIA.config.sin_resp1){ r1 = { tipo:'resp1', turno:'', nombre:'', slots:{} }; RS_DIA.filas.push(r1); }
   if(!r2 && !RS_DIA.config.sin_resp2){ r2 = { tipo:'resp2', turno:'', nombre:'', slots:{} }; RS_DIA.filas.push(r2); }
+  // La fila de Laia se quita con la ✕ de su propia fila, así que el botón solo
+  // hace falta para añadirla: cuando ya está puesta, se esconde.
   const btn = document.getElementById('rs-btn-laia');
-  if(btn) btn.textContent = RS_DIA.filas.some(f=>f.tipo==='laia') ? 'Quitar Laia' : '+ Laia';
+  if(btn) btn.style.display = RS_DIA.filas.some(f=>f.tipo==='laia') ? 'none' : '';
   Object.keys(RS_TIPO_ESPECIAL_CODE).forEach(tipo=>{
     const b = document.getElementById('rs-btn-'+tipo);
     if(b) b.textContent = RS_DIA.filas.some(f=>f.tipo===tipo) ? ('Quitar '+RS_ESPECIAL_LABEL[tipo]) : ('+ '+RS_ESPECIAL_LABEL[tipo]);
   });
-  const b1 = document.getElementById('rs-btn-resp1');
-  if(b1) b1.style.display = RS_DIA.config.sin_resp1 ? '' : 'none';
-  const b2 = document.getElementById('rs-btn-resp2');
-  if(b2) b2.style.display = RS_DIA.config.sin_resp2 ? '' : 'none';
-}
-/* Restaura (vuelve a crear) la fila de responsable 1 (Ignacio/Paula) o 2 (Ceci)
-   que se había quitado a propósito por vacaciones. */
-function rsRestaurarResp(tipo){
-  rsSnapshot();
-  RS_DIA.config['sin_'+tipo] = false;
-  RS_DIA.filas.unshift({ tipo, turno:'', nombre:'', slots:{} });
-  rsEnsureFilasEspeciales();
-  rsRenderGrid();
-  rsAutoGuardar();
 }
 /* Orden de visualización: Laia → Grupos → Cumpleaños → Taller (si existen) →
    resp1 → resp2 → el resto del staff. Devuelve los índices reales dentro de
@@ -9985,7 +9971,7 @@ function rsDelFila(i){
   const t = RS_DIA.filas[i]?.tipo;
   if(t==='resp1' || t==='resp2'){
     const quien = t==='resp1' ? 'Ignacio/Paula' : 'Ceci';
-    if(!confirm(`¿Quitar la fila de ${quien} de este día (p.ej. por vacaciones)? Podrás volver a añadirla con el botón "+ ${quien}" de la barra de arriba.`)) return;
+    if(!confirm(`¿Quitar la fila de ${quien} de este día (p.ej. por vacaciones)? Si te arrepientes, Ctrl+Z lo deshace.`)) return;
     rsSnapshot();
     RS_DIA.config['sin_'+t] = true;
     RS_DIA.filas.splice(i,1);
