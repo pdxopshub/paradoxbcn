@@ -10911,14 +10911,39 @@ function rsValidar(){
   // cajas descubiertas o duplicadas
   // Si en esa franja alguien tiene la celda negra (BRK), esa persona está
   // cubriendo el descanso de quien lleva la caja: no se cuenta como hueco.
+  /* Qué parte de la media hora ocupa realmente una fila: [desde, hasta] en
+     cuartos de hora (0, 1 ó 2). Dos personas en la misma caja dentro de la
+     misma media hora NO se solapan si una sale a y cuarto y la otra entra ahí:
+     pasa cuando un turno acaba en :15/:45 o cuando la celda se ha dividido a
+     mano con el clic derecho. Sin esto saltaba un falso "dos personas a la vez". */
+  const rsTramo = (f, ci) => {
+    const t = RS_SLOTS[ci];
+    let a = 0, b = 2;
+    if(f.divididas && f.divididas[t]) a = 1;      // dividida: solo la mitad derecha
+    const idx = rsRango(f.turno);
+    if(idx.length){
+      const { fracIni, fracFin } = rsFraccionesTurno(f.turno);
+      if(ci === idx[0] && fracIni === 0.5) a = Math.max(a, 1);
+      if(ci === idx[idx.length-1] && fracFin === 0.5) b = 1;
+    }
+    return [a, b];
+  };
   const revisaCaja=(puesto,label,desde,avisarHueco,hasta)=>{
     const huecos=[], dobles=[];
     const fin = (hasta===undefined) ? iCi : hasta;
     for(let ci=desde; ci<fin; ci++){
       const t=RS_SLOTS[ci];
-      const n=filas.filter(f=>f.slots[t]===puesto).length;
+      const enCaja = filas.filter(f=>f.slots[t]===puesto);
+      const n = enCaja.length;
       const hayBreaker = filas.some(f=>f.slots[t]==='BRK');
-      if(n===0){ if(!hayBreaker) huecos.push(t); } else if(n>1) dobles.push(t);
+      let solapan = false;
+      if(n > 1){
+        const tramos = enCaja.map(f=>rsTramo(f, ci));
+        for(let x=0; x<tramos.length && !solapan; x++)
+          for(let y=x+1; y<tramos.length; y++)
+            if(tramos[x][0] < tramos[y][1] && tramos[y][0] < tramos[x][1]){ solapan = true; break; }
+      }
+      if(n===0){ if(!hayBreaker) huecos.push(t); } else if(solapan) dobles.push(t);
     }
     if(avisarHueco && huecos.length) avisos.push(['err',`${label} sin cubrir`, huecos.join(', ')]);
     if(dobles.length) avisos.push(['err',`${label} con dos personas a la vez`, dobles.join(', ')]);
