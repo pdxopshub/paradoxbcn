@@ -10413,11 +10413,20 @@ function rsRenderHorasTotales(){
   // las celdas pintadas de la rejilla. Solo cuentan el staff y los tres
   // responsables (Ignacio/Paula/Ceci): Laia no suma, y Grupos/Cumpleaños/Taller
   // tampoco porque son eventos, no horas de nadie.
-  const totalMin = RS_DIA.filas
-    .filter(f => f.turno && !['grupos','cumples','taller','laia'].includes(f.tipo))
-    .reduce((acc, f) => acc + rsDuracionMinutos(f.turno), 0);
+  const cuentan = RS_DIA.filas
+    .filter(f => f.turno && !['grupos','cumples','taller','laia'].includes(f.tipo));
+  const totalMin = cuentan.reduce((acc, f) => acc + rsDuracionMinutos(f.turno), 0);
   const h = Math.floor(totalMin / 60), m = totalMin % 60;
   el.textContent = `${h}h ${String(m).padStart(2,'0')}min`;
+  // Desglose al pasar el ratón: así se ve de un vistazo qué turnos se están
+  // sumando y de dónde sale el total, sin tener que echar la cuenta a mano.
+  const fmt = min => {
+    const hh = Math.floor(min/60), mm = min%60;
+    return mm ? `${hh}h${String(mm).padStart(2,'0')}` : `${hh}h`;
+  };
+  el.title = cuentan
+    .map(f => `${f.nombre||'(sin nombre)'}  ${f.turno}  =  ${fmt(rsDuracionMinutos(f.turno))}`)
+    .join('\n') + `\n──────────\nTOTAL  ${fmt(totalMin)}`;
 }
 function rsRenderLeyenda(){
   const el = document.getElementById('rs-legend');
