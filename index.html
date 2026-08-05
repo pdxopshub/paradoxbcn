@@ -1258,11 +1258,15 @@
     body.rs-imprimiendo #rs-grid tr.rs-total td{background:#fff !important;color:#000 !important;}
     /* Franjas alternas muy suaves: ayudan a seguir la fila de cada persona sin
        cargar la hoja. Solo al imprimir. */
-    /* Las celdas de evento (Grupos/Cumpleaños/Taller) llevan su color en el
-       propio <td>: se excluyen para que la franja gris no las despinte. */
-    body.rs-imprimiendo #rs-grid tbody tr:nth-child(even):not(.rs-total) td:not(.rs-p-GR):not(.rs-p-CU):not(.rs-p-TA){background:#F1F1F1;}
-    body.rs-imprimiendo #rs-grid tbody tr:nth-child(even):not(.rs-total) td.rs-turno,
-    body.rs-imprimiendo #rs-grid tbody tr:nth-child(even):not(.rs-total) td.rs-nombre{background:#E8E8E8;}
+    /* Arranca en la columna de Nombre: la de Turno conserva su verde. Las de
+       evento (Grupos/Cumpleaños/Taller) llevan su color en el propio <td> y se
+       excluyen para que la franja no las despinte. */
+    body.rs-imprimiendo #rs-grid tbody tr:nth-child(even):not(.rs-total) td:not(.rs-turno):not(.rs-p-GR):not(.rs-p-CU):not(.rs-p-TA){background:#EDEDED;}
+    /* OJO: cada hueco de la rejilla lleva dentro un botón, y el botón sin puesto
+       es blanco, así que tapaba la franja y no se veía nada. En papel se pone
+       transparente para que se vea el gris de la fila por debajo. Donde SÍ hay
+       puesto, el botón conserva su color y manda sobre la franja. */
+    body.rs-imprimiendo #rs-grid .rs-slot.rs-p-{background:transparent !important;}
     /* Pie con los cambios de turno y las vacaciones del día. Solo existe
        mientras se imprime (lo crea y lo borra rsImprimir). Dos columnas: los
        cambios a la izquierda, las vacaciones a su derecha, cada anotación en
