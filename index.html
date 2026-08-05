@@ -1089,9 +1089,9 @@
      que marca el corte. El color sale de la clase rs-p-XX de cada mitad. */
   #rs-grid .rs-mitad{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0;}
   #rs-grid .rs-mitad-izq{left:0;right:50%;}
-  /* la línea del corte, del mismo grosor fino que el resto de la rejilla: sin
-     transparencia, que al caer en medio píxel se veía difuminada y más gorda */
-  #rs-grid .rs-mitad-der{left:50%;right:0;border-left:1px solid #000;}
+  /* Sin línea de separación: el cambio de color ya marca el corte. Cualquier
+     borde aquí se sumaba al del marco negro y se veía más gordo que el resto. */
+  #rs-grid .rs-mitad-der{left:50%;right:0;}
   /* en una celda partida no se escribe el código: partido por la línea queda
      ilegible. El color de cada mitad ya dice de qué puesto se trata. */
   #rs-grid td.rs-td-dividida .rs-slot{font-size:0;}
