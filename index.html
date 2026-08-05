@@ -10346,8 +10346,12 @@ function rsRenderHorasTotales(){
   rsRenderDuty();
   const el = document.getElementById('rs-horas-totales');
   if(!el) return;
+  // Se suman las horas escritas en la columna de turno (entrada → salida), no
+  // las celdas pintadas de la rejilla. Solo cuentan el staff y los tres
+  // responsables (Ignacio/Paula/Ceci): Laia no suma, y Grupos/Cumpleaños/Taller
+  // tampoco porque son eventos, no horas de nadie.
   const totalMin = RS_DIA.filas
-    .filter(f => f.tipo !== 'laia' && f.turno)
+    .filter(f => f.turno && !['grupos','cumples','taller','laia'].includes(f.tipo))
     .reduce((acc, f) => acc + rsDuracionMinutos(f.turno), 0);
   const h = Math.floor(totalMin / 60), m = totalMin % 60;
   el.textContent = `${h}h ${String(m).padStart(2,'0')}min`;
