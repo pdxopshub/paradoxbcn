@@ -1227,7 +1227,7 @@
     /* Los bordes gris claro de la rejilla casi no se ven impresos: se oscurecen
        un poco. Sin !important, para no pisar el recuadro negro del turno, que
        va en el style de cada celda. */
-    body.rs-imprimiendo #rs-grid td{border:1px solid #8C8C8C;}
+    body.rs-imprimiendo #rs-grid td{border:1px solid #BDBDBD;}
     /* En papel la cabecera también necesita sus líneas: en negro sobre negro no
        se distinguía dónde acababa una hora y empezaba la siguiente. */
     body.rs-imprimiendo #rs-grid th{border:1px solid #8C8C8C;}
@@ -1282,12 +1282,14 @@
     body.rs-imprimiendo #rs-grid td.rs-fill-prev .rs-slot,
     body.rs-imprimiendo #rs-grid td.rs-drop-over .rs-slot{background:inherit !important;}
 
-    /* TODAS las líneas del mismo grosor: 1px. El recuadro del turno se dibuja
-       con 2px porque en pantalla necesita peso, pero en papel esa diferencia
-       hacía que unos trazos se vieran en negrita y otros finos. Aquí solo se
-       fuerza el ANCHO: el color lo sigue poniendo cada celda (negro el turno,
-       gris la rejilla), así que se distingue igual sin trazos gordos. */
-    body.rs-imprimiendo #rs-grid td{border-width:1px !important;}
+    /* OJO, no bajar el recuadro del turno a 1px: con border-collapse, cuando dos
+       celdas vecinas llevan bordes del MISMO ancho el navegador se queda con el
+       de la celda de arriba o de la izquierda. A 1px ganaba el gris de la celda
+       de al lado y el recuadro salía negro por unos lados y gris por otros. Con
+       2px gana siempre por ser más ancho, y por eso el marco sale entero y
+       uniforme por las cuatro caras. Lo que se afina es la rejilla de alrededor,
+       para que el contraste no parezca negrita. */
+    /* (el color de la rejilla se fija arriba, en #BDBDBD) */
     /* Pie con los cambios de turno y las vacaciones del día. Solo existe
        mientras se imprime (lo crea y lo borra rsImprimir). Dos columnas: los
        cambios a la izquierda, las vacaciones a su derecha, cada anotación en
