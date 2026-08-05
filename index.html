@@ -1082,6 +1082,8 @@
      ella el recuadro negro del turno empieza y acaba justo donde empieza y
      acaba el color, con un borde real y del mismo grosor que los demás. */
   #rs-grid td.rs-cuarto-fuera{background:#fff;border:1px solid #C9CDD4;padding:0;}
+  /* Pie de impresión (cambios de turno + vacaciones): en pantalla no se ve. */
+  #rs-print-pie{display:none;}
   /* el botón va por encima del color, para que el texto siga leyéndose entero */
   #rs-grid td .rs-slot{position:relative;z-index:1;}
   /* Celda dividida en dos mitades (relevo a y cuarto / menos cuarto): a la
@@ -1221,6 +1223,11 @@
        un poco. Sin !important, para no pisar el recuadro negro del turno, que
        va en el style de cada celda. */
     body.rs-imprimiendo #rs-grid td{border:1px solid #8C8C8C;}
+    /* Pie con los cambios de turno y las vacaciones del día. Solo existe
+       mientras se imprime (lo crea y lo borra rsImprimir). */
+    body.rs-imprimiendo #rs-print-pie{display:block !important;margin-top:10px;
+      font-size:10.5px;line-height:1.5;color:#000;}
+    body.rs-imprimiendo #rs-print-pie b{font-size:11px;}
   }
 
   .rs-warn{display:flex;flex-direction:column;gap:6px;}
@@ -10831,11 +10838,31 @@ function rsImprimir(){
     st.textContent = '@page{size:A4 landscape;margin:16mm 18mm;}';
     document.head.appendChild(st);
   }
+  // Al imprimir solo se ve la rejilla, así que los cambios de turno y las
+  // vacaciones del día se cuelgan dentro de ella como pie: así salen debajo
+  // del horario y acompañan a la hoja. Se quita en cuanto acaba la impresión.
+  rsQuitarPieImpresion();
+  const wrap = document.querySelector('.rs-grid-wrap');
+  if(wrap){
+    const c = document.getElementById('rs-ctx-cambios');
+    const v = document.getElementById('rs-ctx-vac');
+    const pie = document.createElement('div');
+    pie.id = 'rs-print-pie';
+    pie.innerHTML =
+      `<div><b>Cambios de turno:</b> ${c ? c.innerHTML : '—'}</div>
+       <div><b>Vacaciones:</b> ${v ? v.innerHTML : '—'}</div>`;
+    wrap.appendChild(pie);
+  }
   document.body.classList.add('rs-imprimiendo');
   window.print();
 }
+function rsQuitarPieImpresion(){
+  const pie = document.getElementById('rs-print-pie');
+  if(pie) pie.remove();
+}
 window.addEventListener('afterprint', ()=>{
   document.body.classList.remove('rs-imprimiendo');
+  rsQuitarPieImpresion();
   const st = document.getElementById('rs-page-landscape');
   if(st) st.remove();
 });
