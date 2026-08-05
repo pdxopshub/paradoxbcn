@@ -10191,9 +10191,9 @@ function rsRenderGrid(){
         let borde = '';
         if(!v){
           if(dentro.has(ci)){
-            borde = 'border-top:1.5px solid #000;border-bottom:1.5px solid #000;';
-            if(ci===inicioRango) borde += 'border-left:1.5px solid #000;';
-            if(ci===finRango)    borde += 'border-right:1.5px solid #000;';
+            borde = 'border-top:2px solid #000;border-bottom:2px solid #000;';
+            if(ci===inicioRango) borde += 'border-left:2px solid #000;';
+            if(ci===finRango)    borde += 'border-right:2px solid #000;';
           }
           const seleccionada = (RS_SEL && RS_SEL.i===i && RS_SEL.ci===ci);
           out += `<td class="${seleccionada?'rs-selected':''}" colspan="2" data-fila="${i}" data-col="${ci}" style="${borde}"
@@ -10235,9 +10235,9 @@ function rsRenderGrid(){
           while(fin+1 < RS_SLOTS.length && (f.slots[RS_SLOTS[fin+1]]||'') === v) fin++;
           let bordeC = '';
           if(dentro.has(ci)){
-            bordeC = 'border-top:1.5px solid #000;border-bottom:1.5px solid #000;';
-            if(ci===inicioRango) bordeC += 'border-left:1.5px solid #000;';
-            if(fin===finRango)   bordeC += 'border-right:1.5px solid #000;';
+            bordeC = 'border-top:2px solid #000;border-bottom:2px solid #000;';
+            if(ci===inicioRango) bordeC += 'border-left:2px solid #000;';
+            if(fin===finRango)   bordeC += 'border-right:2px solid #000;';
           }
           const selC = (RS_SEL && RS_SEL.i===i && RS_SEL.ci>=ci && RS_SEL.ci<=fin);
           const handleC = selC ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${fin})"></span>` : '';
@@ -10273,9 +10273,9 @@ function rsRenderGrid(){
           // trabaja a medias, la celda ya viene recortada a su cuarto de hora
           // (rsCuartos), así que el recuadro empieza justo donde empieza el
           // color, sin ningún trozo blanco por dentro.
-          borde = 'border-top:1.5px solid #000;border-bottom:1.5px solid #000;';
-          if(ci===inicioRango) borde += 'border-left:1.5px solid #000;';
-          if(ci===finRango)    borde += 'border-right:1.5px solid #000;';
+          borde = 'border-top:2px solid #000;border-bottom:2px solid #000;';
+          if(ci===inicioRango) borde += 'border-left:2px solid #000;';
+          if(ci===finRango)    borde += 'border-right:2px solid #000;';
           if(q.parcial) claseParcial = ' rs-td-parcial';   // sin código: no cabe en media celda
         }
         // las mitades van posicionadas dentro de la celda, así que la celda
