@@ -1077,9 +1077,12 @@
      solo pintan color por dentro, sin tocar nunca la línea del contorno (de ahí
      top/bottom a 0: con valores negativos el color tapaba el borde y las celdas
      partidas se quedaban sin recuadro). */
-  /* Color del puesto limitado a la parte de la celda que se trabaja de verdad.
-     Lleva la clase rs-p-XX, de la que hereda el color de fondo. */
-  #rs-grid .rs-fondo-parcial{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0;}
+  /* Tapa en blanco el trozo de media hora que NO se trabaja. Se sale 1px por
+     arriba y por abajo para borrar ahí la línea del marco (que va colapsada a
+     caballo del canto), y su canto interior lleva el cierre vertical del turno.
+     z-index alto: tiene que quedar por encima del color y del propio borde. */
+  #rs-grid .rs-mascara{position:absolute;top:-1px;bottom:-1px;background:#fff;
+    pointer-events:none;z-index:3;}
   /* el botón va por encima del color, para que el texto siga leyéndose entero */
   #rs-grid td .rs-slot{position:relative;z-index:1;}
   /* Celda dividida en dos mitades (relevo a y cuarto / menos cuarto): a la
@@ -9773,25 +9776,30 @@ function rsFraccionesTurno(turno){
    Lo que sí cambia en las celdas de media hora a medias es el RELLENO: devuelve
    parcial/izq/der para pintar de color solo el trozo que se trabaja. */
 function rsMarcoTurno(ciA, ciB, inicioRango, finRango, fracIni, fracFin){
-  if(inicioRango===null) return { estilo:'', parcial:false, izq:'0', der:'0' };
+  if(inicioRango===null) return { estilo:'', parcial:false, mascara:'' };
   const esIni = (ciA===inicioRango), esFin = (ciB===finRango);
   let s = 'border-top:1.5px solid #000;border-bottom:1.5px solid #000;';
   if(esIni) s += 'border-left:1.5px solid #000;';
   if(esFin) s += 'border-right:1.5px solid #000;';
   const pIni = esIni ? fracIni : 0;
   const pFin = esFin ? fracFin : 1;
-  if(pIni<=0 && pFin>=1) return { estilo:s, parcial:false, izq:'0', der:'0' };
+  if(pIni<=0 && pFin>=1) return { estilo:s, parcial:false, mascara:'' };
+  // Media hora trabajada a medias. En vez de dibujar un marco propio (que nunca
+  // cuadraba de grosor con los bordes colapsados de la tabla), se deja el marco
+  // real del <td> y se TAPA EN BLANCO el trozo que no se trabaja. La máscara
+  // borra ahí la línea de arriba y abajo, y su canto interior hace de cierre
+  // vertical del turno. Así todas las líneas del marco son bordes de verdad.
   const n = ciB - ciA + 1;                       // nº de medias horas que abarca
-  return { estilo:s + 'position:relative;', parcial:true,
-    izq:(pIni * 100 / n).toFixed(3), der:((1 - pFin) * 100 / n).toFixed(3) };
-}
-/* Color del puesto en una celda que solo se trabaja a medias: en vez de teñir
-   la celda entera (que hacía dudar de si esa media hora estaba cubierta o no),
-   se pinta solo el trozo trabajado y el resto queda en blanco. El color sale
-   de la propia clase rs-p-XX, así que no hay que duplicar la paleta aquí. */
-function rsFondoParcial(puesto, izq, der){
-  if(!puesto) return '';
-  return `<span class="rs-fondo-parcial rs-p-${puesto}" style="left:${izq}%;right:${der}%;"></span>`;
+  let mascara = '';
+  if(pIni > 0){
+    const hasta = (100 - pIni * 100 / n).toFixed(3);
+    mascara += `<span class="rs-mascara" style="left:0;right:${hasta}%;border-right:1.5px solid #000;"></span>`;
+  }
+  if(pFin < 1){
+    const desde = (pFin * 100 / n + (n-1) * 100 / n).toFixed(3);
+    mascara += `<span class="rs-mascara" style="left:${desde}%;right:0;border-left:1.5px solid #000;"></span>`;
+  }
+  return { estilo:s + 'position:relative;', parcial:true, mascara };
 }
 
 /* ---------- carga ---------- */
@@ -10232,10 +10240,7 @@ function rsRenderGrid(){
           if(dentro.has(ci)){
             const mc = rsMarcoTurno(ci, fin, inicioRango, finRango, fracIni, fracFin);
             bordeC = mc.estilo;
-            if(mc.parcial){
-              fondoC = rsFondoParcial(RS_CONTADOR_CODE, mc.izq, mc.der);
-              bgC = 'background:transparent;';
-            }
+            if(mc.parcial) fondoC = mc.mascara;
           }
           const selC = (RS_SEL && RS_SEL.i===i && RS_SEL.ci>=ci && RS_SEL.ci<=fin);
           const handleC = selC ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${fin})"></span>` : '';
@@ -10269,9 +10274,8 @@ function rsRenderGrid(){
           // queda en blanco dentro del mismo recuadro.
           const mc = rsMarcoTurno(ci, ci, inicioRango, finRango, fracIni, fracFin);
           borde = mc.estilo;
-          if(mc.parcial && v && !dividida){
-            fondo = rsFondoParcial(esc(v), mc.izq, mc.der);
-            bgBoton = 'background:transparent;';
+          if(mc.parcial){
+            fondo = mc.mascara;
             claseParcial = ' rs-td-parcial';   // oculta el código: quedaría a caballo del corte
           }
         }
