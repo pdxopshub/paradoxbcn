@@ -1289,7 +1289,15 @@
        2px gana siempre por ser más ancho, y por eso el marco sale entero y
        uniforme por las cuatro caras. Lo que se afina es la rejilla de alrededor,
        para que el contraste no parezca negrita. */
-    /* (el color de la rejilla se fija arriba, en #BDBDBD) */
+    /* Separación entre medias horas DENTRO del turno: una línea clara que corta
+       el bloque de color, para poder contar las medias horas de un vistazo.
+       Va a 2px, el mismo ancho que el marco negro: cuando dos bordes que se
+       cruzan tienen anchos distintos, el navegador resuelve la esquina en
+       diagonal y aparece un "pico" en el canto del bloque. Igualando anchos,
+       la esquina sale limpia. El marco sigue siendo negro porque su borde va
+       en el style de la celda y manda sobre esta regla. */
+    body.rs-imprimiendo #rs-grid td:not(.rs-fuera-turno):not(.rs-col-acc):not(.rs-col-ultima){
+      border-left:2px solid #E6E6E6;border-right:2px solid #E6E6E6;}
     /* Pie con los cambios de turno y las vacaciones del día. Solo existe
        mientras se imprime (lo crea y lo borra rsImprimir). Dos columnas: los
        cambios a la izquierda, las vacaciones a su derecha, cada anotación en
