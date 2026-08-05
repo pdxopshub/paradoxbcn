@@ -1079,6 +1079,22 @@
   #rs-grid .rs-fondo-parcial{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0;}
   /* el botón va por encima del color, para que el texto siga leyéndose entero */
   #rs-grid td .rs-slot{position:relative;z-index:1;}
+  /* Celda dividida en dos mitades (relevo a y cuarto / menos cuarto): a la
+     izquierda el puesto que venía, a la derecha el nuevo, con una línea fina
+     que marca el corte. El color sale de la clase rs-p-XX de cada mitad. */
+  #rs-grid .rs-mitad{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0;}
+  #rs-grid .rs-mitad-izq{left:0;right:50%;}
+  #rs-grid .rs-mitad-der{left:50%;right:0;border-left:1px solid rgba(0,0,0,.5);}
+  /* el código del puesto nuevo se centra en su mitad, no en la celda entera */
+  #rs-grid td.rs-td-dividida .rs-slot{padding-left:50%;font-size:9px;overflow:hidden;}
+
+  .rs-menu{position:fixed;z-index:300;background:var(--surface);border:1px solid var(--line-strong);
+    border-radius:7px;box-shadow:0 6px 18px rgba(0,0,0,.20);padding:4px;min-width:132px;}
+  .rs-menu button{display:block;width:100%;text-align:left;border:0;background:transparent;
+    font-size:12px;font-weight:700;color:var(--text);padding:5px 9px;border-radius:5px;cursor:pointer;}
+  .rs-menu button:hover:not(:disabled){background:var(--panel);}
+  .rs-menu button:disabled{color:var(--text-soft);cursor:default;}
+  .rs-menu-hint{font-size:10.5px;color:var(--text-soft);padding:1px 9px 4px;white-space:nowrap;}
   /* Agarradera para reordenar la fila de turno arrastrándola arriba o abajo. */
   .rs-row-grip{display:inline-block;cursor:grab;color:var(--text-soft);font-size:13px;
     line-height:1;padding:0 3px;vertical-align:middle;user-select:none;}
@@ -10229,7 +10245,18 @@ function rsRenderGrid(){
         }
         const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : v;
         const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
-        let borde = '', overlay = '', fondo = '', bgBoton = '';
+        let borde = '', overlay = '', fondo = '', bgBoton = '', mitades = '';
+        // Celda dividida (clic derecho → "Dividir celda"): el relevo ocurre a
+        // y cuarto o menos cuarto dentro de esta media hora, así que la celda
+        // se parte en dos: izquierda el puesto que venía de la celda anterior,
+        // derecha el puesto nuevo. Evita que dos personas parezcan solaparse.
+        const dividida = !!(f.divididas && f.divididas[t]);
+        const vPrev = ci>0 ? (f.slots[RS_SLOTS[ci-1]]||'') : '';
+        if(dividida){
+          if(vPrev) mitades += `<span class="rs-mitad rs-mitad-izq rs-p-${esc(vPrev)}"></span>`;
+          if(v)     mitades += `<span class="rs-mitad rs-mitad-der rs-p-${esc(v)}"></span>`;
+          if(mitades) bgBoton = 'background:transparent;';
+        }
         if(dentro.has(ci)){
           // con border-collapse:collapse, el navegador se queda con el más
           // grueso en cada línea compartida: sale siempre este grosor, nunca
@@ -10239,16 +10266,20 @@ function rsRenderGrid(){
           // color del puesto se pinta solo en esa mitad.
           const mc = rsMarcoTurno(ci, ci, inicioRango, finRango, fracIni, fracFin);
           borde = mc.estilo; overlay = mc.overlay;
-          if(mc.parcial && v){
+          if(mc.parcial && v && !dividida){
             fondo = rsFondoParcial(esc(v), mc.izq, mc.der);
             bgBoton = 'background:transparent;';
           }
         }
+        // las mitades van posicionadas dentro de la celda, así que la celda
+        // dividida siempre necesita ser el contenedor de referencia
+        if(dividida) borde += 'position:relative;';
         const seleccionada = (RS_SEL && RS_SEL.i===i && RS_SEL.ci===ci);
         const handle = (seleccionada && v) ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${ci})"></span>` : '';
-        out += `<td class="${seleccionada?'rs-selected':''}" data-fila="${i}" data-col="${ci}" style="${borde}"
+        out += `<td class="${seleccionada?'rs-selected':''}${dividida?' rs-td-dividida':''}" data-fila="${i}" data-col="${ci}" style="${borde}"
+          oncontextmenu="rsMenuCelda(event,${i},${ci})"
           ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
-          ondrop="rsSlotDrop(event,${i},'${t}')">${fondo}${overlay}<button class="rs-slot rs-p-${esc(v)}" style="${bgBoton}${mal}"
+          ondrop="rsSlotDrop(event,${i},'${t}')">${mitades}${fondo}${overlay}<button class="rs-slot rs-p-${esc(v)}" style="${bgBoton}${mal}"
           draggable="${v ? 'true' : 'false'}" ondragstart="rsCellDragStart(event,${i},${ci},'${v}')"
           onmousedown="rsAltDragStart(event,${i},${ci})"
           onclick="rsSlotClick(event,${i},${ci})" title="${esc(v)}">${esc(txt)}${handle}</button></td>`;
@@ -10567,6 +10598,54 @@ function rsFillEnd(ev){
   });
   RS_SEL = { i, ci: RS_DRAG.origCi };
   RS_DRAG = null;
+  rsRenderGrid();
+  rsAutoGuardar();
+}
+/* Menú de clic derecho sobre una celda de la rejilla. De momento solo sirve
+   para dividir la celda en dos mitades: cuando alguien releva a otro a y
+   cuarto o menos cuarto, la media hora se reparte entre el puesto que traía
+   (mitad izquierda, heredado de la celda anterior) y el nuevo (mitad derecha).
+   Así no parece que dos personas estén a la vez en la misma caja. */
+function rsCerrarMenu(){
+  const m = document.getElementById('rs-menu');
+  if(m) m.remove();
+}
+function rsMenuCelda(ev, i, ci){
+  ev.preventDefault(); ev.stopPropagation();
+  rsCerrarMenu();
+  const f = RS_DIA.filas[i];
+  if(!f) return;
+  const t = RS_SLOTS[ci];
+  const dividida = !!(f.divididas && f.divididas[t]);
+  const vPrev = ci>0 ? (f.slots[RS_SLOTS[ci-1]]||'') : '';
+  const v = f.slots[t] || '';
+  const m = document.createElement('div');
+  m.id = 'rs-menu';
+  m.className = 'rs-menu';
+  if(dividida){
+    m.innerHTML = `<button onclick="rsDividirCelda(${i},${ci},false)">Unir celda</button>`;
+  } else if(!v && !vPrev){
+    m.innerHTML = `<button disabled>Nada que dividir</button>`;
+  } else {
+    const izq = vPrev ? (RS_ETIQ_PUESTO[vPrev]||vPrev) : '(vacío)';
+    const der = v ? (RS_ETIQ_PUESTO[v]||v) : '(vacío)';
+    m.innerHTML = `<button onclick="rsDividirCelda(${i},${ci},true)">Dividir celda</button>
+      <div class="rs-menu-hint">${esc(izq)} → ${esc(der)}</div>`;
+  }
+  document.body.appendChild(m);
+  m.style.left = Math.min(ev.clientX, window.innerWidth  - m.offsetWidth  - 6) + 'px';
+  m.style.top  = Math.min(ev.clientY, window.innerHeight - m.offsetHeight - 6) + 'px';
+  setTimeout(()=>document.addEventListener('click', rsCerrarMenu, { once:true }), 0);
+}
+function rsDividirCelda(i, ci, valor){
+  rsCerrarMenu();
+  const f = RS_DIA.filas[i];
+  if(!f) return;
+  rsSnapshot();
+  const t = RS_SLOTS[ci];
+  if(!f.divididas) f.divididas = {};
+  if(valor) f.divididas[t] = true; else delete f.divididas[t];
+  if(!Object.keys(f.divididas).length) delete f.divididas;
   rsRenderGrid();
   rsAutoGuardar();
 }
