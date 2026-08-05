@@ -3050,7 +3050,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                      bloque entero y Horas totales nunca queda solo arriba con Revisado. -->
                 <div style="display:flex;flex-wrap:wrap;gap:22px;">
                   <div id="rs-duty-box" style="display:none;"><b>DUTY:</b> <span id="rs-duty">—</span></div>
-                  <div><b>Horas totales:</b> <span id="rs-horas-totales">—</span></div>
+                  <div><b>Horas efectivas:</b> <span id="rs-horas-totales">—</span></div>
                   <div style="padding-left:22px;border-left:1.5px solid var(--line-strong);"><b>Cambios de turno:</b><div id="rs-ctx-cambios" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
                   <div style="padding-left:22px;border-left:1.5px solid var(--line-strong);"><b>Vacaciones:</b><div id="rs-ctx-vac" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
                 </div>
@@ -9623,6 +9623,9 @@ const RS_APERTURA = '1000', RS_CIERRE = '2000';   // franja en la que las cajas 
    predefinido, no editable libremente); Laia es una fila extra opcional que se
    puede añadir arriba del todo. */
 const RS_RESP_NOMBRES = ['Ignacio','Paula','Ceci'];
+/* Jornadas de 8h con media hora de descanso: esa media hora no es tiempo
+   trabajado, así que se descuenta del total de horas efectivas del día. */
+const RS_CON_DESCANSO = ['Ignacio','Paula'];
 const RS_ETIQ_PUESTO = { '1':'Caja 1','2':'Caja 2','0G':'Zero Gravity','F2':'Floor 2','AV':'Asist. visitante',
   'Admin':'Admin','Pompas':'Pompas','Greater':'Greater','Fliers':'Fliers','ARRG':'ARRG',
   'T':'Taller','DUTY':'Duty (responsable de sala)',
@@ -10413,7 +10416,15 @@ function rsRenderHorasTotales(){
   // tampoco porque son eventos, no horas de nadie.
   const cuentan = RS_DIA.filas
     .filter(f => f.turno && !['grupos','cumples','taller','laia'].includes(f.tipo));
-  const totalMin = cuentan.reduce((acc, f) => acc + rsDuracionMinutos(f.turno), 0);
+  // Horas EFECTIVAS: Ignacio y Paula hacen jornada de 8h con media hora de
+  // descanso que no es tiempo trabajado, así que se le resta a cada uno. El
+  // resto del staff hace turnos de 4h seguidas, sin descanso que descontar.
+  const efectivos = cuentan.map(f => {
+    const bruto = rsDuracionMinutos(f.turno);
+    const descanso = RS_CON_DESCANSO.includes(f.nombre) ? 30 : 0;
+    return { f, bruto, descanso, neto: bruto - descanso };
+  });
+  const totalMin = efectivos.reduce((acc, x) => acc + x.neto, 0);
   const h = Math.floor(totalMin / 60), m = totalMin % 60;
   el.textContent = `${h}h ${String(m).padStart(2,'0')}min`;
   // Desglose al pasar el ratón: así se ve de un vistazo qué turnos se están
@@ -10422,9 +10433,10 @@ function rsRenderHorasTotales(){
     const hh = Math.floor(min/60), mm = min%60;
     return mm ? `${hh}h${String(mm).padStart(2,'0')}` : `${hh}h`;
   };
-  el.title = cuentan
-    .map(f => `${f.nombre||'(sin nombre)'}  ${f.turno}  =  ${fmt(rsDuracionMinutos(f.turno))}`)
-    .join('\n') + `\n──────────\nTOTAL  ${fmt(totalMin)}`;
+  el.title = efectivos
+    .map(x => `${x.f.nombre||'(sin nombre)'}  ${x.f.turno}  =  ${fmt(x.neto)}`
+              + (x.descanso ? `   (${fmt(x.bruto)} − 30min de descanso)` : ''))
+    .join('\n') + `\n──────────\nTOTAL EFECTIVO  ${fmt(totalMin)}`;
 }
 function rsRenderLeyenda(){
   const el = document.getElementById('rs-legend');
