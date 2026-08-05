@@ -1198,8 +1198,14 @@
        totales / revisado por / cambios de turno. */
     body.rs-imprimiendo *{visibility:hidden;}
     body.rs-imprimiendo .rs-grid-wrap, body.rs-imprimiendo .rs-grid-wrap *{visibility:visible;}
+    /* Se reduce todo el bloque a escala. Al escalar (en vez de tocar tamaños de
+       letra y de celda uno a uno) se mantienen todas las proporciones ya
+       ajustadas, y de paso el recuadro negro del turno adelgaza en la misma
+       medida: 2px de pantalla se imprimen a ~1,6px. Este 0.82 es el único
+       número que hay que tocar para que salga más grande o más pequeño. */
     body.rs-imprimiendo .rs-grid-wrap{position:absolute;left:0;top:0;width:100%;
-      max-height:none !important;overflow:visible !important;border:none;}
+      max-height:none !important;overflow:visible !important;border:none;
+      transform:scale(0.82);transform-origin:top left;}
     body.rs-imprimiendo .rs-no-print{display:none !important;}
     body.rs-imprimiendo .rs-print-title{display:none !important;}
     body.rs-imprimiendo #rs-grid th,
