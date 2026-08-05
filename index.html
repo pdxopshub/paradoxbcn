@@ -1250,7 +1250,9 @@
     body.rs-imprimiendo #rs-grid td.rs-p-TA{border:1px solid #000 !important;}
     /* El cuarto de hora que queda fuera del turno no lleva línea propia: el
        borde del turno vecino ya cierra ahí, y con las dos se veía doble. */
-    body.rs-imprimiendo #rs-grid td.rs-cuarto-fuera{border:0 !important;background:transparent !important;}
+    /* Sin borde propio (el del turno vecino ya cierra ahí), pero SIN forzar el
+       fondo: así hereda la franja gris de la fila como cualquier otra celda. */
+    body.rs-imprimiendo #rs-grid td.rs-cuarto-fuera{border:0 !important;}
 
     /* --- Menos tinta y más legible ---
        La fila de totales, en pantalla negra, se imprime en blanco con el texto
@@ -9892,8 +9894,11 @@ function rsCuartos(ciA, ciB, dentro, inicioRango, finRango, fracIni, fracFin){
   const recortaFin = (ciB===finRango   && fracFin===0.5) ? 1 : 0;
   return {
     ancho: total - recortaIni - recortaFin,
-    antes:   recortaIni ? `<td class="rs-cuarto-fuera"></td>` : '',
-    despues: recortaFin ? `<td class="rs-cuarto-fuera"></td>` : '',
+    // lleva también rs-fuera-turno: al imprimir se tiñe con la franja gris de
+    // la fila igual que el resto de celdas que quedan fuera del turno, en vez
+    // de quedarse en blanco y hacer un hueco en medio de la línea gris.
+    antes:   recortaIni ? `<td class="rs-cuarto-fuera rs-fuera-turno"></td>` : '',
+    despues: recortaFin ? `<td class="rs-cuarto-fuera rs-fuera-turno"></td>` : '',
     parcial: !!(recortaIni || recortaFin)
   };
 }
