@@ -1072,7 +1072,12 @@
   /* Turnos que empiezan/acaban a y cuarto o menos cuarto: la celda es media
      hora, así que el marco negro se dibuja por dentro con la anchura exacta
      que corresponde en vez de rellenar la celda entera. */
-  #rs-grid .rs-turno-parcial{position:absolute;top:0;bottom:0;pointer-events:none;
+  /* OJO con el top/bottom negativos: con border-collapse el borde de las celdas
+     vecinas queda montado a caballo del canto (mitad fuera, mitad dentro). Si
+     esta banda se dibujara a top:0 su línea caería justo debajo de la del
+     vecino y en la unión se veía el doble de gruesa. Subiéndola 0,75px (medio
+     borde) las dos líneas coinciden y el grosor es el mismo en todo el marco. */
+  #rs-grid .rs-turno-parcial{position:absolute;top:-0.75px;bottom:-0.75px;pointer-events:none;
     border-top:1.5px solid #000;border-bottom:1.5px solid #000;z-index:2;}
   /* Color del puesto limitado a la parte de la celda que se trabaja de verdad.
      Lleva la clase rs-p-XX, de la que hereda el color de fondo. */
@@ -1084,9 +1089,12 @@
      que marca el corte. El color sale de la clase rs-p-XX de cada mitad. */
   #rs-grid .rs-mitad{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0;}
   #rs-grid .rs-mitad-izq{left:0;right:50%;}
-  #rs-grid .rs-mitad-der{left:50%;right:0;border-left:1px solid rgba(0,0,0,.5);}
-  /* el código del puesto nuevo se centra en su mitad, no en la celda entera */
-  #rs-grid td.rs-td-dividida .rs-slot{padding-left:50%;font-size:9px;overflow:hidden;}
+  /* la línea del corte, del mismo grosor fino que el resto de la rejilla: sin
+     transparencia, que al caer en medio píxel se veía difuminada y más gorda */
+  #rs-grid .rs-mitad-der{left:50%;right:0;border-left:1px solid #000;}
+  /* en una celda partida no se escribe el código: partido por la línea queda
+     ilegible. El color de cada mitad ya dice de qué puesto se trata. */
+  #rs-grid td.rs-td-dividida .rs-slot{font-size:0;}
 
   .rs-menu{position:fixed;z-index:300;background:var(--surface);border:1px solid var(--line-strong);
     border-radius:7px;box-shadow:0 6px 18px rgba(0,0,0,.20);padding:4px;min-width:132px;}
