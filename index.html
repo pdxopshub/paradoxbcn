@@ -2253,6 +2253,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
         <div class="navgroup ng-dia">
           <div class="navlabel">Día a día</div>
+          <button class="navitem" data-view="rosters" id="nav-rosters">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M7 13h3"/><path d="M14 13h3"/><path d="M7 17h3"/></svg>
+          Rosters
+        </button>
           <button class="navitem" data-view="recap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>
           Recap
@@ -2341,10 +2345,6 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <button class="navitem" data-view="sugerencias">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           Sugerencias STAFF
-        </button>
-          <button class="navitem" data-view="rosters" id="nav-rosters" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/><path d="M8 2v4"/><path d="M16 2v4"/><path d="M7 13h3"/><path d="M14 13h3"/><path d="M7 17h3"/></svg>
-          Rosters
         </button>
         </div>
       </nav>
@@ -3991,8 +3991,13 @@ const titles = {
   loomis:['Loomis','Gestión semanal del lunes'],
   rosters:['Rosters','Planificación semanal y reparto de puestos']
 };
-/* La pestaña Rosters solo la ve Ignacio */
-function rsPuedeVer(){ return currentProfile?.nombre === 'Ignacio'; }
+/* Rosters es público: lo ve todo el equipo. Dentro, dos cosas están limitadas:
+   - la sub-pestaña "Planificación semanal", que es la entrada de Laia;
+   - los avisos de la revisión que comparan con esa planificación, que solo
+     tienen sentido para quien monta el roster. */
+function rsPuedeVer(){ return true; }
+function rsPuedeVerPlan(){ return ['Ignacio','Laia'].includes(currentProfile?.nombre); }
+function rsAvisosPlan(){ return currentProfile?.nombre === 'Ignacio'; }
 function goView(v){
   const btn = document.querySelector('.navitem[data-view="'+v+'"]');
   document.querySelectorAll('.navitem').forEach(b=>b.classList.remove('active'));
@@ -4082,9 +4087,11 @@ function initApp(){
   if(appInitialised) return;
   appInitialised = true;
   initNav();
-  // Rosters: solo aparece en el menú si entra Ignacio
+  // Rosters lo ve todo el equipo; la Planificación semanal es de Laia e Ignacio
   const navRs = document.getElementById('nav-rosters');
   if(navRs) navRs.style.display = rsPuedeVer() ? '' : 'none';
+  const tabPlan = document.querySelector('[data-rstab="plan"]');
+  if(tabPlan) tabPlan.style.display = rsPuedeVerPlan() ? '' : 'none';
   document.querySelectorAll('[data-rstab]').forEach(b=>{
     b.addEventListener('click', ()=> rsTab(b.dataset.rstab));
   });
@@ -9925,6 +9932,9 @@ async function initRosters(){
   rsRenderHab();
 }
 function rsTab(t){
+  // La planificación semanal es de Laia e Ignacio: si llega aquí cualquier otro
+  // (por un enlace o un estado guardado), se le deja en el Roster del día.
+  if(t === 'plan' && !rsPuedeVerPlan()) t = 'dia';
   document.querySelectorAll('[data-rstab]').forEach(b=>b.classList.toggle('active', b.dataset.rstab===t));
   ['dia','plan','hab'].forEach(x=>{
     const el=document.getElementById('rs-sub-'+x);
@@ -11146,7 +11156,11 @@ function rsValidar(){
   // Descuadre con lo que pidió Laia, dicho por nombre y no por número: es
   // mucho más útil saber QUIÉN sobra o falta que cuántos. Las filas de
   // Grupos/Cumpleaños/Taller no son turnos de nadie, así que no entran.
-  const plan = RS_PLAN[rsFecha];
+  // Estos dos avisos ("Fuera de planificación" y "Falta en el roster") son solo
+  // para Ignacio: al resto del equipo no le aportan nada y llenaban la revisión
+  // de mensajes que no les tocaba resolver. Ojo, aquí NO vale rsPuedeVerPlan():
+  // Laia entra en la planificación pero estos descuadres no son cosa suya.
+  const plan = rsAvisosPlan() ? RS_PLAN[rsFecha] : null;
   if(plan){
     const enPlan = new Set(Object.keys(plan).filter(n=>(parseInt(plan[n],10)||0) > 0));
     // Un cambio de turno aprobado no se refleja en la planificación de Laia:
