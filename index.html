@@ -10946,8 +10946,20 @@ function rsImprimir(){
          <div>${v ? v.innerHTML : '—'}</div></div>`;
     wrap.appendChild(pie);
   }
+  // El nombre que propone el navegador al guardar como PDF sale del título de
+  // la página, así que se cambia justo antes de imprimir y se restaura después.
+  // Con guiones y no con barras: la barra es separador de carpetas y el sistema
+  // no la admite en un nombre de archivo (la convertiría en otro carácter).
+  if(RS_TITULO_PREVIO === null) RS_TITULO_PREVIO = document.title;
+  const d = (RS_DIA && RS_DIA.fecha) || rsFecha || '';
+  const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  document.title = m ? `ROSTER_${m[3]}-${m[2]}-${m[1].slice(2)}` : 'ROSTER';
   document.body.classList.add('rs-imprimiendo');
   window.print();
+}
+let RS_TITULO_PREVIO = null;
+function rsRestaurarTitulo(){
+  if(RS_TITULO_PREVIO !== null){ document.title = RS_TITULO_PREVIO; RS_TITULO_PREVIO = null; }
 }
 function rsQuitarPieImpresion(){
   const pie = document.getElementById('rs-print-pie');
@@ -10956,6 +10968,7 @@ function rsQuitarPieImpresion(){
 window.addEventListener('afterprint', ()=>{
   document.body.classList.remove('rs-imprimiendo');
   rsQuitarPieImpresion();
+  rsRestaurarTitulo();
   const st = document.getElementById('rs-page-landscape');
   if(st) st.remove();
 });
