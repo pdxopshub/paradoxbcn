@@ -1003,8 +1003,13 @@
      dibujar los dos bordes uno al lado del otro (que es lo que duplicaba
      el grosor del recuadro del turno). */
   #rs-grid{border-collapse:collapse;font-size:11px;}
+  /* La cabecera lleva borde propio: sin él, dos columnas seguidas se veían como
+     una sola mancha negra y no había línea que las separase. Solo se notaba en
+     las horas por las que no pasa ningún turno (las primeras y las últimas del
+     día), porque en el resto el recuadro negro del turno hacía de separador. */
   #rs-grid th{position:sticky;top:0;z-index:3;background:#1A1A1A;color:#fff;padding:5px 3px;
-    font-size:9.5px;font-weight:800;text-align:center;white-space:nowrap;min-width:34px;}
+    font-size:9.5px;font-weight:800;text-align:center;white-space:nowrap;min-width:34px;
+    border:1px solid #5A5A5A;}
   #rs-grid th.rs-h-turno{left:0;z-index:5;min-width:92px;}
   #rs-grid th.rs-h-nombre{left:92px;z-index:5;min-width:84px;}
   #rs-grid td{border:1px solid #C9CDD4;text-align:center;padding:0;height:21px;background:#fff;}
@@ -1223,11 +1228,18 @@
        un poco. Sin !important, para no pisar el recuadro negro del turno, que
        va en el style de cada celda. */
     body.rs-imprimiendo #rs-grid td{border:1px solid #8C8C8C;}
+    /* En papel la cabecera también necesita sus líneas: en negro sobre negro no
+       se distinguía dónde acababa una hora y empezaba la siguiente. */
+    body.rs-imprimiendo #rs-grid th{border:1px solid #8C8C8C;}
     /* Pie con los cambios de turno y las vacaciones del día. Solo existe
-       mientras se imprime (lo crea y lo borra rsImprimir). */
-    body.rs-imprimiendo #rs-print-pie{display:block !important;margin-top:10px;
-      font-size:10.5px;line-height:1.5;color:#000;}
-    body.rs-imprimiendo #rs-print-pie b{font-size:11px;}
+       mientras se imprime (lo crea y lo borra rsImprimir). Dos columnas: los
+       cambios a la izquierda, las vacaciones a su derecha, cada anotación en
+       su propia línea bajo el título. */
+    body.rs-imprimiendo #rs-print-pie{display:flex !important;gap:56px;margin-top:12px;
+      font-size:10.5px;line-height:1.6;color:#000;align-items:flex-start;}
+    body.rs-imprimiendo #rs-print-pie .rs-pie-col{min-width:190px;}
+    body.rs-imprimiendo #rs-print-pie .rs-pie-tit{font-weight:800;font-size:11px;
+      border-bottom:1px solid #8C8C8C;padding-bottom:2px;margin-bottom:4px;}
   }
 
   .rs-warn{display:flex;flex-direction:column;gap:6px;}
@@ -10849,8 +10861,10 @@ function rsImprimir(){
     const pie = document.createElement('div');
     pie.id = 'rs-print-pie';
     pie.innerHTML =
-      `<div><b>Cambios de turno:</b> ${c ? c.innerHTML : '—'}</div>
-       <div><b>Vacaciones:</b> ${v ? v.innerHTML : '—'}</div>`;
+      `<div class="rs-pie-col"><div class="rs-pie-tit">Cambios de turno</div>
+         <div>${c ? c.innerHTML : '—'}</div></div>
+       <div class="rs-pie-col"><div class="rs-pie-tit">Vacaciones</div>
+         <div>${v ? v.innerHTML : '—'}</div></div>`;
     wrap.appendChild(pie);
   }
   document.body.classList.add('rs-imprimiendo');
