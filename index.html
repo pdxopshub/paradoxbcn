@@ -1081,20 +1081,24 @@
     border-top:1.5px solid #000;border-bottom:1.5px solid #000;z-index:2;}
   /* Color del puesto limitado a la parte de la celda que se trabaja de verdad.
      Lleva la clase rs-p-XX, de la que hereda el color de fondo. */
-  #rs-grid .rs-fondo-parcial{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0;}
+  /* mismos -0,75px que la banda del marco: si el color se quedara en top:0 se
+     vería un pelo blanco entre el relleno y la línea negra, y parecía que el
+     contorno no encajaba con el color */
+  #rs-grid .rs-fondo-parcial{position:absolute;top:-0.75px;bottom:-0.75px;pointer-events:none;z-index:0;}
   /* el botón va por encima del color, para que el texto siga leyéndose entero */
   #rs-grid td .rs-slot{position:relative;z-index:1;}
   /* Celda dividida en dos mitades (relevo a y cuarto / menos cuarto): a la
      izquierda el puesto que venía, a la derecha el nuevo, con una línea fina
      que marca el corte. El color sale de la clase rs-p-XX de cada mitad. */
-  #rs-grid .rs-mitad{position:absolute;top:0;bottom:0;pointer-events:none;z-index:0;}
+  #rs-grid .rs-mitad{position:absolute;top:-0.75px;bottom:-0.75px;pointer-events:none;z-index:0;}
   #rs-grid .rs-mitad-izq{left:0;right:50%;}
   /* Sin línea de separación: el cambio de color ya marca el corte. Cualquier
      borde aquí se sumaba al del marco negro y se veía más gordo que el resto. */
   #rs-grid .rs-mitad-der{left:50%;right:0;}
   /* en una celda partida no se escribe el código: partido por la línea queda
      ilegible. El color de cada mitad ya dice de qué puesto se trata. */
-  #rs-grid td.rs-td-dividida .rs-slot{font-size:0;}
+  #rs-grid td.rs-td-dividida .rs-slot,
+  #rs-grid td.rs-td-parcial .rs-slot{font-size:0;}
 
   .rs-menu{position:fixed;z-index:300;background:var(--surface);border:1px solid var(--line-strong);
     border-radius:7px;box-shadow:0 6px 18px rgba(0,0,0,.20);padding:4px;min-width:132px;}
@@ -10253,7 +10257,7 @@ function rsRenderGrid(){
         }
         const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : v;
         const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
-        let borde = '', overlay = '', fondo = '', bgBoton = '', mitades = '';
+        let borde = '', overlay = '', fondo = '', bgBoton = '', mitades = '', claseParcial = '';
         // Celda dividida (clic derecho → "Dividir celda"): el relevo ocurre a
         // y cuarto o menos cuarto dentro de esta media hora, así que la celda
         // se parte en dos: izquierda el puesto que venía de la celda anterior,
@@ -10277,6 +10281,7 @@ function rsRenderGrid(){
           if(mc.parcial && v && !dividida){
             fondo = rsFondoParcial(esc(v), mc.izq, mc.der);
             bgBoton = 'background:transparent;';
+            claseParcial = ' rs-td-parcial';   // oculta el código: quedaría a caballo del corte
           }
         }
         // las mitades van posicionadas dentro de la celda, así que la celda
@@ -10284,7 +10289,7 @@ function rsRenderGrid(){
         if(dividida) borde += 'position:relative;';
         const seleccionada = (RS_SEL && RS_SEL.i===i && RS_SEL.ci===ci);
         const handle = (seleccionada && v) ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${ci})"></span>` : '';
-        out += `<td class="${seleccionada?'rs-selected':''}${dividida?' rs-td-dividida':''}" data-fila="${i}" data-col="${ci}" style="${borde}"
+        out += `<td class="${seleccionada?'rs-selected':''}${dividida?' rs-td-dividida':''}${claseParcial}" data-fila="${i}" data-col="${ci}" style="${borde}"
           oncontextmenu="rsMenuCelda(event,${i},${ci})"
           ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
           ondrop="rsSlotDrop(event,${i},'${t}')">${mitades}${fondo}${overlay}<button class="rs-slot rs-p-${esc(v)}" style="${bgBoton}${mal}"
