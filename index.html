@@ -14217,9 +14217,15 @@ function renderVacFiltro(){
 function vacDayMap(){
   const persona = document.getElementById('vac-filtro-persona')?.value || '';
   const map = {};
-  vacBloqueos.forEach(b=>{
-    map[b.fecha] = {cls:'bloq', txt:'Bloqueado: '+(b.motivo||'')};
-  });
+  // Mireia trabaja L-V con calendario de festivos propio, no el de sala: los
+  // bloqueos (pensados para no dejar la sala corta en temporada alta) no le
+  // aplican a ella. Se ocultan solo cuando su calendario está filtrado a ella;
+  // en la vista de "Todo el equipo" el bloqueo se sigue viendo con normalidad.
+  if(persona !== 'Mireia'){
+    vacBloqueos.forEach(b=>{
+      map[b.fecha] = {cls:'bloq', txt:'Bloqueado: '+(b.motivo||'')};
+    });
+  }
   vacSolicitudes.forEach(sol=>{
     if(sol.estado === 'rechazado') return;
     if(persona && sol.persona !== persona) return;
@@ -14362,7 +14368,7 @@ function openVacRequest(fecha){
         </div>
       </div>
     </div>`;
-  ['vq-desde','vq-hasta'].forEach(id=>{
+  ['vq-desde','vq-hasta','vq-persona'].forEach(id=>{
     document.getElementById(id).addEventListener('change', checkVacAviso);
   });
   checkVacAviso();
@@ -14375,10 +14381,14 @@ function checkVacAviso(){
   if(!a || !b || !av) return;
   if(b < a){ av.textContent = 'La fecha final es anterior a la inicial.'; return; }
   const dias = vacDaysBetween(a,b);
-  const bloqueados = dias.filter(f=> vacBloqueos.some(x=>x.fecha===f));
+  // El aviso de bloqueo es informativo, nunca impide enviar la solicitud (a
+  // veces se hacen excepciones y se aprueba igual). Mireia no tiene calendario
+  // de bloqueos, así que a ella ni se le avisa.
+  const personaSel = esStaff() ? (currentProfile?.nombre || '') : (document.getElementById('vq-persona')?.value || '');
+  const bloqueados = personaSel === 'Mireia' ? [] : dias.filter(f=> vacBloqueos.some(x=>x.fecha===f));
   const n = dias.length;
   av.textContent = bloqueados.length
-    ? `${n} día(s). Atención: ${bloqueados.length} está(n) bloqueado(s) (${bloqueados.join(', ')}).`
+    ? `${n} día(s). Atención: ${bloqueados.length} está(n) bloqueado(s) (${bloqueados.join(', ')}), pero se puede enviar igualmente.`
     : `${n} día(s) solicitados.`;
 }
 
