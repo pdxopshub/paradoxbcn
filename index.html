@@ -10740,7 +10740,10 @@ function rsRenderGrid(){
           ci = fin + 1;
           continue;
         }
-        const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : v;
+        // RS_CODIGO_VISIBLE corrige la ortografía de Greater→Greeter y Fliers→Flyers
+        // para lo que se ve; antes solo se aplicaba en la cápsula de la leyenda y la
+        // celda de la rejilla se quedaba con el código interno mal escrito.
+        const txt = (v in RS_ETIQUETA) ? RS_ETIQUETA[v] : (RS_CODIGO_VISIBLE[v] || v);
         const mal = (v && RS_HAB[v] && f.nombre && !rsPuede(f.nombre,v)) ? ';box-shadow:inset 0 0 0 2px #D93C46' : '';
         let borde = '', fondo = '', bgBoton = '', mitades = '', claseParcial = '';
         // Celda dividida (clic derecho → "Dividir celda"): el relevo ocurre a
@@ -10779,7 +10782,7 @@ function rsRenderGrid(){
           ondrop="rsSlotDrop(event,${i},'${t}')">${mitades}<button class="rs-slot rs-p-${esc(v)}" style="${bgBoton}${mal}"
           draggable="${v ? 'true' : 'false'}" ondragstart="rsCellDragStart(event,${i},${ci},'${v}')"
           onmousedown="rsAltDragStart(event,${i},${ci})"
-          onclick="rsSlotClick(event,${i},${ci})" title="${esc(v)}">${esc(txt)}${handle}</button></td>`
+          onclick="rsSlotClick(event,${i},${ci})" title="${esc(RS_CODIGO_VISIBLE[v]||v)}">${esc(txt)}${handle}</button></td>`
           + q.despues;
         ci++;
       }
