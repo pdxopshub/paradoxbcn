@@ -10099,11 +10099,67 @@ function rsUndo(){
   rsRenderGrid();
   rsAutoGuardar();
 }
+/* Portapapeles de una celda del roster: guarda el puesto copiado con Ctrl+C
+   para pegarlo con Ctrl+V en otra celda. null = nada copiado todavía (para
+   distinguir de "" = se copió una celda vacía, que también es un valor válido
+   a pegar). */
+let RS_CLIPBOARD = null;
+/* No se debe robar Delete/Ctrl+C/Ctrl+V mientras se está escribiendo en algún
+   campo de texto de la página (p.ej. "Revisado por"): solo actúan sobre la
+   celda seleccionada de la rejilla cuando el foco no está en un campo editable. */
+function rsCampoEditableActivo(){
+  const el = document.activeElement;
+  if(!el) return false;
+  const tag = el.tagName;
+  return tag==='INPUT' || tag==='TEXTAREA' || tag==='SELECT' || !!el.isContentEditable;
+}
+/* Vacía una celda del roster (y su división, si la tenía). Es lo que dispara
+   tanto la tecla Delete como "Borrar celda" del menú de clic derecho. */
+function rsBorrarCelda(i, ci){
+  const f = RS_DIA && RS_DIA.filas[i];
+  if(!f) return;
+  const t = RS_SLOTS[ci];
+  if(!f.slots[t] && !(f.divididas && f.divididas[t])) return;   // ya estaba vacía, no hay nada que deshacer
+  rsSnapshot();
+  delete f.slots[t];
+  if(f.divididas){ delete f.divididas[t]; if(!Object.keys(f.divididas).length) delete f.divididas; }
+  rsRenderGrid();
+  rsAutoGuardar();
+}
+function rsCopiarCeldaSel(){
+  if(!RS_SEL) return;
+  const f = RS_DIA && RS_DIA.filas[RS_SEL.i];
+  if(!f) return;
+  RS_CLIPBOARD = f.slots[RS_SLOTS[RS_SEL.ci]] || '';
+}
+function rsPegarCeldaSel(){
+  if(!RS_SEL || RS_CLIPBOARD===null) return;
+  const f = RS_DIA && RS_DIA.filas[RS_SEL.i];
+  if(!f) return;
+  rsSnapshot();
+  const t = RS_SLOTS[RS_SEL.ci];
+  if(RS_CLIPBOARD) f.slots[t] = RS_CLIPBOARD; else delete f.slots[t];
+  rsRenderGrid();
+  rsAutoGuardar();
+}
 document.addEventListener('keydown', function(ev){
   const key = (ev.key||'').toLowerCase();
-  if((ev.ctrlKey||ev.metaKey) && !ev.shiftKey && key==='z' && document.getElementById('rs-grid')){
+  const enGrid = !!document.getElementById('rs-grid');
+  if((ev.ctrlKey||ev.metaKey) && !ev.shiftKey && key==='z' && enGrid){
     ev.preventDefault();
     rsUndo();
+    return;
+  }
+  if(!enGrid || !RS_SEL || rsCampoEditableActivo()) return;
+  if(ev.key==='Delete' || ev.key==='Backspace'){
+    ev.preventDefault();
+    rsBorrarCelda(RS_SEL.i, RS_SEL.ci);
+  } else if((ev.ctrlKey||ev.metaKey) && key==='c'){
+    ev.preventDefault();
+    rsCopiarCeldaSel();
+  } else if((ev.ctrlKey||ev.metaKey) && key==='v'){
+    ev.preventDefault();
+    rsPegarCeldaSel();
   }
 });
 let rsFecha = null;
@@ -11105,15 +11161,19 @@ function rsMenuCelda(ev, i, ci){
   const m = document.createElement('div');
   m.id = 'rs-menu';
   m.className = 'rs-menu';
+  // "Borrar celda" solo tiene sentido si hay algo que borrar (valor propio o,
+  // en una dividida, cualquiera de las dos mitades).
+  const borrarBtn = (v || dividida)
+    ? `<button onclick="rsBorrarCelda(${i},${ci});rsCerrarMenu();">Borrar celda</button>` : '';
   if(dividida){
-    m.innerHTML = `<button onclick="rsDividirCelda(${i},${ci},false)">Unir celda</button>`;
+    m.innerHTML = `<button onclick="rsDividirCelda(${i},${ci},false)">Unir celda</button>` + borrarBtn;
   } else if(!v && !vPrev){
     m.innerHTML = `<button disabled>Nada que dividir</button>`;
   } else {
     const izq = vPrev ? (RS_ETIQ_PUESTO[vPrev]||vPrev) : '(vacío)';
     const der = v ? (RS_ETIQ_PUESTO[v]||v) : '(vacío)';
     m.innerHTML = `<button onclick="rsDividirCelda(${i},${ci},true)">Dividir celda</button>
-      <div class="rs-menu-hint">${esc(izq)} → ${esc(der)}</div>`;
+      <div class="rs-menu-hint">${esc(izq)} → ${esc(der)}</div>` + borrarBtn;
   }
   document.body.appendChild(m);
   m.style.left = Math.min(ev.clientX, window.innerWidth  - m.offsetWidth  - 6) + 'px';
