@@ -10025,9 +10025,16 @@ const RS_RESP_NOMBRES = ['Ignacio','Paula','Ceci'];
    trabajado, así que se descuenta del total de horas efectivas del día. */
 const RS_CON_DESCANSO = ['Ignacio','Paula'];
 const RS_ETIQ_PUESTO = { '1':'Caja 1','2':'Caja 2','0G':'Zero Gravity','F2':'Floor 2','AV':'Asist. visitante',
-  'Admin':'Admin','Pompas':'Pompas','Greater':'Greater','Fliers':'Fliers','ARRG':'ARRG',
+  'Admin':'Admin','Pompas':'Pompas','Greater':'Greeter','Fliers':'Flyers','ARRG':'ARRG',
   'T':'Taller','DUTY':'Duty (responsable de sala)',
   'BRK':'Breaker','DESC':'Descanso','OC':'Apertura/Cierre' };
+/* Greater/Fliers son los dos únicos puestos cuyo código interno es la palabra
+   completa (el resto son abreviaturas tipo '1', '0G', 'F2'), así que en la
+   leyenda se ve el código tal cual. Para corregir la ortografía visible sin
+   renombrar el código interno —que rompería turnos ya guardados en Supabase y
+   las columnas de habilitación greater/fliers de roster_staff— se usa este
+   mapa solo para el texto que se muestra. */
+const RS_CODIGO_VISIBLE = { Greater:'Greeter', Fliers:'Flyers' };
 /* "Coger contador": cápsula de leyenda especial (no es un puesto con
    habilitación); al arrastrarla a la rejilla se planta y se autorrellena
    hasta ocupar 3 medias horas seguidas, igual que Grupos/Cumpleaños/Taller. */
@@ -10894,7 +10901,7 @@ function rsRenderLeyenda(){
      aparece al pasar el ratón por encima, en el title. */
   let html = Object.keys(RS_ETIQ_PUESTO).map(p=>
     `<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')"
-      title="${esc(RS_ETIQ_PUESTO[p])}">${esc(p)}</span>`
+      title="${esc(RS_ETIQ_PUESTO[p])}">${esc(RS_CODIGO_VISIBLE[p]||p)}</span>`
   ).join('');
   // Grupos/Cumpleaños/Taller: solo aparecen en la leyenda mientras su fila
   // especial esté puesta en el roster del día.
@@ -11529,7 +11536,7 @@ function rsSetJustificado(clave, valor){
 /* ---------- habilitaciones ---------- */
 function rsRenderHab(){
   const cols=[['caja1','Caja 1'],['caja2','Caja 2'],['zerog','0G'],['floor2','F2'],['av','AV'],
-              ['admin','Admin'],['pompas','Pompas'],['greater','Greater'],['fliers','Fliers'],['arrg','ARRG'],
+              ['admin','Admin'],['pompas','Pompas'],['greater','Greeter'],['fliers','Flyers'],['arrg','ARRG'],
               ['duty','DUTY']];
   const head=document.getElementById('rs-hab-head');
   if(head) head.innerHTML = '<tr><th style="text-align:left;">Persona</th>' +
