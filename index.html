@@ -1197,6 +1197,14 @@
     background:#BBDCF4;}
   #rs-grid td.rs-fill-prev .rs-slot{background:rgba(28,110,164,.30);}
   #rs-grid td.rs-drop-over .rs-slot{background:rgba(28,110,164,.25);}
+  /* Selección múltiple (arrastrar varias celdas de la misma fila): se queda
+     marcada hasta que se rellena con una cápsula de la leyenda o se hace
+     clic en otro sitio, a diferencia de rs-fill-prev que solo dura mientras
+     se arrastra. */
+  #rs-grid td.rs-sel-multi{outline:2px dashed var(--accent);outline-offset:-2px;
+    background:rgba(28,110,164,.16);}
+  #rs-grid td.rs-sel-multi .rs-slot{background:rgba(28,110,164,.14);}
+  .rs-legend-chip.rs-sel-activa{box-shadow:0 0 0 2px var(--accent);}
   .rs-slot{position:relative;}
   .rs-fill-handle{position:absolute;right:-3px;bottom:-3px;width:8px;height:8px;
     background:var(--accent);border:1px solid #fff;border-radius:1px;cursor:crosshair;z-index:6;}
@@ -2379,11 +2387,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
           SPV
         </button>
-          <!-- Abre en ventana nueva (misma sesión) en vez de navegar dentro del Hub:
-               así se puede tener el roster o el SPV abiertos en una pestaña y las
-               estadísticas en otra al mismo tiempo. -->
-          <button class="navitem" onclick="abrirEstadisticasVisitantes()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/><path d="M15 3h6v6"/><path d="M21 3l-8 8"/></svg>
+          <button class="navitem" data-view="visitas">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
           Estadísticas
         </button>
           <button class="navitem" data-view="loomis">
@@ -2445,9 +2450,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <div class="section-title" style="margin-bottom:14px;">
             <span>Calendario de la semana</span>
             <div style="display:flex;align-items:center;gap:14px;">
-              <a href="#" onclick="abrirEstadisticasVisitantes();return false;"
-                 style="font-size:12px;font-weight:800;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:5px;"
-                 title="Abre en una ventana nueva">
+              <a href="#" onclick="goView('visitas');return false;"
+                 style="font-size:12px;font-weight:800;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:5px;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
                 Estadísticas de visitantes
               </a>
@@ -2759,9 +2763,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         </div>
       </div>
 
-      <!-- ============ ESTADÍSTICAS DE VISITANTES ============
-           No lleva botón en la barra lateral: se abre en una ventana nueva
-           desde el enlace del Resumen (abrirEstadisticasVisitantes()). -->
+      <!-- ============ ESTADÍSTICAS DE VISITANTES ============ -->
       <div class="view" id="view-visitas">
         <div class="card">
           <div class="section-title" style="margin-bottom:14px;">
@@ -3214,6 +3216,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <button class="btn btn-ghost btn-sm" id="rs-btn-taller" onclick="rsToggleEspecial('taller')">+ Taller</button>
                 <span class="rs-toolbar-sep"></span>
                 <div class="rs-legend" id="rs-legend"></div>
+                <span id="rs-sel-hint" class="hint" style="display:none;font-weight:800;color:var(--accent);"></span>
               </div>
               <div class="rs-grid-wrap">
                 <table id="rs-grid"><thead id="rs-grid-head"></thead><tbody id="rs-grid-body"></tbody></table>
@@ -4064,9 +4067,6 @@ async function afterLogin(user){
   updateUserChip();
   initApp();
   aplicarModoStaff();
-  // La ventana nueva de "Estadísticas de visitantes" llega con ?vista=visitas
-  // en la URL: en cuanto hay sesión, se salta directo ahí en vez de al Resumen.
-  if(new URLSearchParams(location.search).get('vista') === 'visitas') goView('visitas');
 }
 function currentRole(){ return currentProfile ? currentProfile.nombre : ''; }
 function isDirector(){ return currentProfile && currentProfile.rol === 'director'; }
@@ -4139,7 +4139,8 @@ const titles = {
   sugerencias:['Sugerencias STAFF','Buzón anónimo del equipo: seguimiento por mes'],
   recap:['Recap del día','Cierre diario: info general, rutinas y observaciones'],
   loomis:['Loomis','Gestión semanal del lunes'],
-  rosters:['Rosters','Planificación semanal y reparto de puestos']
+  rosters:['Rosters','Planificación semanal y reparto de puestos'],
+  visitas:['Estadísticas de visitantes','Diaria, semanal y mensual, comparado con el año pasado']
 };
 /* Rosters es público: lo ve todo el equipo. Dentro, dos cosas están limitadas:
    - la sub-pestaña "Planificación semanal", que es la entrada de Laia;
@@ -4458,26 +4459,16 @@ const DNAMES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sáb
 const MONTH_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 let weekOffset = 0; // 0 = semana actual, -1 = anterior, +1 = siguiente
 
-/* Abre la vista "Estadísticas de visitantes" en una pestaña/ventana nueva, en
-   vez de navegar dentro del Hub. La ventana nueva carga el mismo index.html
-   (misma sesión de Supabase, persistida en localStorage) con ?vista=visitas
-   en la URL; el arranque del login la detecta y salta directo a esa vista. */
-function abrirEstadisticasVisitantes(){
-  const u = new URL(location.href);
-  u.searchParams.set('vista', 'visitas');
-  window.open(u.toString(), '_blank');
-}
-
 /* ---------- Estadísticas de visitantes: diaria / semanal / mensual ----------
-   Misma fuente y mismo criterio de comparación que "Calendario de la semana"
-   del Resumen (tabla spv_days, LY = mismo día de la semana, 364 días antes),
-   solo que aquí se ve en tabla y con más histórico (día/semana/mes). */
+   Vista normal del Hub (como cualquier otra del menú, sin ventanas ni
+   pestañas nuevas). Misma fuente y mismo criterio de comparación que
+   "Calendario de la semana" del Resumen (tabla spv_days, LY = mismo día de
+   la semana, 364 días antes), solo que aquí se ve en tabla y con más
+   histórico (día/semana/mes). */
 let VIS_STATS_CACHE = [];
 let visStatsTab = 'diaria';
 let visStatsLoaded = false;
 async function visStatsInit(){
-  document.getElementById('page-title').textContent = 'Estadísticas de visitantes';
-  document.getElementById('today-date').textContent = '';
   if(!visStatsLoaded){
     visStatsLoaded = true;
     const y = new Date().getFullYear();
@@ -10161,6 +10152,22 @@ document.addEventListener('keydown', function(ev){
     rsUndo();
     return;
   }
+  if(enGrid && ev.key==='Escape' && RS_SEL_MULTI){
+    RS_SEL_MULTI = null;
+    rsRenderGrid();
+    return;
+  }
+  if(enGrid && RS_SEL_MULTI && RS_SEL_MULTI.cols.size && !rsCampoEditableActivo()
+     && (ev.key==='Delete' || ev.key==='Backspace')){
+    ev.preventDefault();
+    rsSnapshot();
+    const f = RS_DIA.filas[RS_SEL_MULTI.i];
+    RS_SEL_MULTI.cols.forEach(c=>{ delete f.slots[RS_SLOTS[c]]; });
+    RS_SEL_MULTI = null;
+    rsRenderGrid();
+    rsAutoGuardar();
+    return;
+  }
   if(!enGrid || !RS_SEL || rsCampoEditableActivo()) return;
   if(ev.key==='Delete' || ev.key==='Backspace'){
     ev.preventDefault();
@@ -10762,10 +10769,12 @@ function rsRenderGrid(){
         // dividida siempre necesita ser el contenedor de referencia
         if(dividida) borde += 'position:relative;';
         const seleccionada = (RS_SEL && RS_SEL.i===i && RS_SEL.ci===ci);
+        const enSelMulti = (RS_SEL_MULTI && RS_SEL_MULTI.i===i && RS_SEL_MULTI.cols.has(ci));
         const handle = (seleccionada && v) ? `<span class="rs-fill-handle" onmousedown="rsFillStart(event,${i},${ci})"></span>` : '';
         out += q.antes
-          + `<td class="${seleccionada?'rs-selected':''}${dividida?' rs-td-dividida':''}${claseParcial}${ci===RS_SLOTS.length-1?' rs-col-ultima':''}${dentro.has(ci)?'':' rs-fuera-turno'}" colspan="${q.ancho}" data-fila="${i}" data-col="${ci}" style="${borde}"
+          + `<td class="${seleccionada?'rs-selected':''}${enSelMulti?' rs-sel-multi':''}${dividida?' rs-td-dividida':''}${claseParcial}${ci===RS_SLOTS.length-1?' rs-col-ultima':''}${dentro.has(ci)?'':' rs-fuera-turno'}" colspan="${q.ancho}" data-fila="${i}" data-col="${ci}" style="${borde}"
           oncontextmenu="rsMenuCelda(event,${i},${ci})"
+          onmousedown="rsSelStart(event,${i},${ci})"
           ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
           ondrop="rsSlotDrop(event,${i},'${t}')">${mitades}<button class="rs-slot rs-p-${esc(v)}" style="${bgBoton}${mal}"
           draggable="${v ? 'true' : 'false'}" ondragstart="rsCellDragStart(event,${i},${ci},'${v}')"
@@ -10966,26 +10975,105 @@ function rsRenderLeyenda(){
   if(!el) return;
   /* Códigos cortos (1, 2, 0G...) en el chip; el significado completo solo
      aparece al pasar el ratón por encima, en el title. */
+  const haySeleccion = !!(RS_SEL_MULTI && RS_SEL_MULTI.cols.size);
   let html = Object.keys(RS_ETIQ_PUESTO).map(p=>
-    `<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')"
-      title="${esc(RS_ETIQ_PUESTO[p])}">${esc(RS_CODIGO_VISIBLE[p]||p)}</span>`
+    `<span class="rs-legend-chip rs-p-${p}${haySeleccion?' rs-sel-activa':''}" draggable="true" ondragstart="rsDragStart(event,'${p}')" onclick="rsLegendClick(event,'${p}')"
+      title="${esc(RS_ETIQ_PUESTO[p])}${haySeleccion?' — clic para rellenar la selección':''}">${esc(RS_CODIGO_VISIBLE[p]||p)}</span>`
   ).join('');
   // Grupos/Cumpleaños/Taller: solo aparecen en la leyenda mientras su fila
   // especial esté puesta en el roster del día.
   const tiposPresentes = new Set((RS_DIA?.filas||[]).map(f=>f.tipo));
   html += Object.entries(RS_TIPO_ESPECIAL_CODE)
     .filter(([tipo])=>tiposPresentes.has(tipo))
-    .map(([,p])=>`<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')"
+    .map(([,p])=>`<span class="rs-legend-chip rs-p-${p}" draggable="true" ondragstart="rsDragStart(event,'${p}')" onclick="rsLegendClick(event,'${p}')"
       title="${esc(RS_ETIQ_PUESTO_ESPECIAL[p])}">${esc(RS_ETIQ_PUESTO_ESPECIAL[p])}</span>`).join('');
-  html += `<span class="rs-legend-chip rs-p-${RS_CONTADOR_CODE}" draggable="true" ondragstart="rsDragStart(event,'${RS_CONTADOR_CODE}')"
+  html += `<span class="rs-legend-chip rs-p-${RS_CONTADOR_CODE}" draggable="true" ondragstart="rsDragStart(event,'${RS_CONTADOR_CODE}')" onclick="rsLegendClick(event,'${RS_CONTADOR_CODE}')"
       title="${esc(RS_CONTADOR_LABEL)}">${esc(RS_CONTADOR_LABEL)}</span>`;
   el.innerHTML = html;
+  const hint = document.getElementById('rs-sel-hint');
+  if(hint){
+    if(haySeleccion){
+      hint.textContent = `${RS_SEL_MULTI.cols.size} celda(s) seleccionada(s) · clic en un puesto para rellenar`;
+      hint.style.display = '';
+    } else {
+      hint.style.display = 'none';
+    }
+  }
 }
 /* Colocar un puesto en una celda: arrastrando desde la leyenda (copia),
    moviendo una celda que ya tenga uno puesto, con el tirador de autorelleno
    (clic para seleccionar + arrastrar el punto a lo largo de la fila, estilo
    Excel), o con Alt + arrastrar para copiar una celda concreta a otra. */
 let RS_SEL = null;      // {i, ci} celda seleccionada (muestra el tirador si tiene valor)
+/* Selección múltiple: arrastrar con el ratón (sin Alt) por varias celdas
+   SEGUIDAS de la misma fila las marca en azul; con la selección puesta, un
+   clic (no arrastre) en una cápsula de la leyenda rellena todas de golpe con
+   ese puesto, en vez de tener que ir celda a celda. */
+let RS_SEL_MULTI = null;      // {i, cols:Set<int>} rango confirmado
+let RS_SELDRAG = null;        // estado mientras se está arrastrando la selección
+function rsSelStart(ev, i, ci){
+  if(ev.altKey || ev.button !== 0) return;   // Alt+arrastrar sigue siendo "copiar celda"
+  // Si el arrastre empieza justo sobre una celda ya rellena (con puesto), esa
+  // celda es "draggable" y el navegador lo toma como el arrastre nativo de
+  // mover/copiar que ya existía: se le deja el gesto entero a ese mecanismo,
+  // si no, el arrastre nativo "roba" el mousemove/mouseup a mitad de camino y
+  // la selección se queda colgada. Empezar la selección desde una celda vacía
+  // y pasar por encima de celdas con puesto sí funciona sin problema.
+  if(ev.target && ev.target.draggable) return;
+  RS_SELDRAG = { i, origCi: ci, moved: false };
+  document.addEventListener('mousemove', rsSelMove);
+  document.addEventListener('mouseup', rsSelEnd);
+}
+function rsSelMove(ev){
+  if(!RS_SELDRAG) return;
+  const pos = rsCeldaBajoPuntero(ev.clientX, ev.clientY);
+  if(!pos || pos.i !== RS_SELDRAG.i) return;   // solo dentro de la misma fila
+  RS_SELDRAG.moved = true;
+  const a = Math.min(RS_SELDRAG.origCi, pos.ci), b = Math.max(RS_SELDRAG.origCi, pos.ci);
+  const cols = new Set();
+  for(let c=a; c<=b; c++) cols.add(c);
+  RS_SEL_MULTI = { i: RS_SELDRAG.i, cols };
+  document.querySelectorAll('#rs-grid td.rs-sel-multi').forEach(el=>el.classList.remove('rs-sel-multi'));
+  cols.forEach(c=>{
+    const td = document.querySelector(`#rs-grid td[data-fila="${RS_SELDRAG.i}"][data-col="${c}"]`);
+    if(td) td.classList.add('rs-sel-multi');
+  });
+}
+function rsSelEnd(ev){
+  document.removeEventListener('mousemove', rsSelMove);
+  document.removeEventListener('mouseup', rsSelEnd);
+  const huboArrastre = RS_SELDRAG && RS_SELDRAG.moved;
+  RS_SELDRAG = null;
+  if(!huboArrastre){
+    // No hubo arrastre real: es un clic normal en una celda, que ya gestiona
+    // rsSlotClick. Se cierra cualquier selección múltiple anterior.
+    if(RS_SEL_MULTI){ RS_SEL_MULTI = null; rsRenderGrid(); }
+    return;
+  }
+  rsRenderGrid();   // deja la selección pintada de forma consistente (rs-sel-multi por dato, no por clase suelta)
+}
+/* Clic (no arrastre) en una cápsula de la leyenda: si hay una selección
+   múltiple activa, rellena todas esas celdas con ese puesto de una vez.
+   Si no hay selección múltiple pero sí una celda sola seleccionada (clic
+   normal), rellena esa. Si no hay ninguna selección, no hace nada — para
+   colocar un puesto sin haber seleccionado antes se sigue pudiendo arrastrar
+   la cápsula directamente a la celda, como siempre. */
+function rsLegendClick(ev, puesto){
+  if(RS_SEL_MULTI && RS_SEL_MULTI.cols.size){
+    rsSnapshot();
+    const f = RS_DIA.filas[RS_SEL_MULTI.i];
+    RS_SEL_MULTI.cols.forEach(c=>{ f.slots[RS_SLOTS[c]] = puesto; });
+    RS_SEL = { i: RS_SEL_MULTI.i, ci: Math.min(...RS_SEL_MULTI.cols) };
+    RS_SEL_MULTI = null;
+    rsRenderGrid();
+    rsAutoGuardar();
+  } else if(RS_SEL){
+    rsSnapshot();
+    RS_DIA.filas[RS_SEL.i].slots[RS_SLOTS[RS_SEL.ci]] = puesto;
+    rsRenderGrid();
+    rsAutoGuardar();
+  }
+}
 let RS_STAFF_PICK_OPEN = null;  // índice de fila cuyo desplegable de nombre está abierto
 function rsStaffPickToggle(ev, i){
   ev.stopPropagation();
@@ -11103,6 +11191,7 @@ function rsAsegurarMinimo(i, t, puesto, minimo){
    el valor de la celda. */
 function rsSlotClick(ev, i, ci){
   RS_SEL = { i, ci };
+  RS_SEL_MULTI = null;
   rsRenderGrid();
 }
 function rsCeldaBajoPuntero(x, y){
