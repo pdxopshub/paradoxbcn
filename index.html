@@ -404,14 +404,23 @@
   .clmant-chk.rep.on{background:#F7CDAE;border-color:#B8542A;}
   tr.clmant-ok td{background:#EAF7EF!important;}
   .dash-warn-list{display:flex;flex-direction:column;gap:6px;}
-  .dash-warn-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#FBEEE4;border:1px solid #F0D3B8;border-radius:8px;font-size:12.5px;color:#7A4315;}
+  .dash-warn-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#FBEEE4;border:1px solid #F0D3B8;border-radius:8px;font-size:11.5px;color:#7A4315;}
   .dash-warn-row b{color:#5A3010;}
-  .dash-warn-tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:2px 6px;border-radius:10px;background:#B8542A;color:#fff;flex-shrink:0;}
+  .dash-warn-tag{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;padding:2px 6px;border-radius:10px;background:#B8542A;color:#fff;flex-shrink:0;}
   .dash-warn-row.info{background:#E9F0FF;border-color:#C3D6FF;color:#1E3A6E;}
   .dash-warn-row.info b{color:#0B2A5E;}
   .dash-warn-row.info .dash-warn-tag{background:#3B6BD9;}
+  /* Texto principal de la fila: se puede partir en varias líneas si hace
+     falta, pero la cantidad/nota de al lado NUNCA se parte (antes se veía
+     el "—" en una línea y el número solo debajo). */
+  .dash-warn-txt{flex:1;min-width:0;overflow-wrap:break-word;}
+  .dash-warn-qty{white-space:nowrap;font-size:10.5px;font-weight:700;opacity:.8;}
   /* La cápsula de FU grupos no debe crecer con el contenido: scroll interno si hay muchos tipos */
   #dash-fugrupos-list{max-height:150px;overflow-y:auto;padding-right:2px;}
+  /* Mensajes de "no hay nada" dentro de las cápsulas del Resumen: la letra por
+     defecto de .empty-state es demasiado grande para estas cápsulas pequeñas
+     y llegaba a tocar el borde redondeado. */
+  .dash-warn-list .empty-state{font-size:11.5px;line-height:1.5;}
   .mat-head{width:100%;box-sizing:border-box;background:transparent;border:none;
     font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;
     color:var(--text-soft);text-align:left;padding:2px 4px;}
@@ -968,6 +977,28 @@
   .rs-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
   .rs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
   .rs-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  /* Cápsula de fecha del roster: contorno azul y fondo suave cuando es el día
+     de hoy, para que se vea a simple vista en qué roster estamos. */
+  #rs-fecha{border:1.5px solid var(--line-strong);border-radius:8px;padding:6px 10px;
+    font-weight:700;font-size:13px;transition:border-color .15s,box-shadow .15s,background .15s;}
+  #rs-fecha.rs-fecha-hoy{border-color:var(--accent);border-width:2px;background:var(--accent-soft);
+    box-shadow:0 0 0 3px rgba(59,130,246,.12);}
+  .rs-hoy-badge{display:none;font-size:11px;font-weight:800;color:#fff;background:var(--accent);
+    border-radius:999px;padding:2px 9px;letter-spacing:.02em;}
+  #rs-fecha.rs-fecha-hoy ~ .rs-hoy-badge{display:inline-block;}
+  /* Icono (i) clickeable junto a "Horas totales" con el desglose que antes
+     solo se veía al pasar el ratón por encima (no servía en pantallas táctiles). */
+  .rs-info-btn{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+    border-radius:50%;border:1.5px solid var(--text-dim);color:var(--text-dim);background:transparent;
+    cursor:pointer;padding:0;flex:none;}
+  .rs-info-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .rs-info-pop{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:60;
+    background:var(--surface);border:1.5px solid var(--line-strong);border-radius:8px;
+    padding:10px 12px;font-size:12px;line-height:1.6;font-weight:600;color:var(--text-soft);
+    white-space:pre-line;min-width:230px;max-width:340px;box-shadow:0 8px 24px rgba(0,0,0,.14);}
+  .rs-info-pop.show{display:block;}
+  .rs-info-pop .rs-info-total{margin-top:6px;padding-top:6px;border-top:1.5px solid var(--line-strong);
+    font-weight:800;color:var(--text);}
 
   /* planificación semanal: tabla estrecha (ancho al contenido, no al 100%
      del panel) para que quede compacta y cómoda de leer aunque sobre hueco
@@ -2408,11 +2439,11 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
         <div class="grid" id="dash-caps-row" style="margin-top:14px;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch;">
           <div class="card" style="margin:0;">
-            <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>A reparar</span> <span class="hint">CL Mantenimiento</span></div>
+            <div class="section-title" style="margin-bottom:10px;cursor:pointer;" onclick="goToClTab('mant')" title="Ir a CL Mantenimiento"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>A reparar</span> <span class="hint">CL Mantenimiento</span></div>
             <div id="dash-reparaciones-list" class="dash-warn-list"></div>
           </div>
           <div class="card" style="margin:0;">
-            <div class="section-title" style="margin-bottom:10px;"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 002 1.58h9.78a2 2 0 002-1.58l1.65-7.42H5.12"/></svg>A comprar</span> <span class="hint">CL Materiales</span></div>
+            <div class="section-title" style="margin-bottom:10px;cursor:pointer;" onclick="goToClTab('materiales')" title="Ir a CL Materiales"><span class="dash-cap-label"><svg class="dash-cap-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 002 1.58h9.78a2 2 0 002-1.58l1.65-7.42H5.12"/></svg>A comprar</span> <span class="hint">CL Materiales</span></div>
             <div id="dash-compras-list" class="dash-warn-list"></div>
           </div>
           <div class="card" style="margin:0;">
@@ -2770,7 +2801,11 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           </div>
 
           <div class="rc-block" style="margin-bottom:10px;">
-            <div class="rc-cap-title">Tipo de entrada</div>
+            <div class="rc-cap-title" style="display:flex;align-items:center;gap:6px;">Tipo de entrada
+              <a href="https://partners.feverup.com/order-list?cityId=1005424&amp;planId=198039&amp;venueId=26234" target="_blank" rel="noopener" class="rc-review-link" title="Abrir listado de pedidos en Fever" style="display:inline-flex;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07L12.5 19.5"/></svg>
+              </a>
+            </div>
             <div class="rc-fields c2">
               <div class="rc-f"><label>Box Office</label><input type="number" id="rc-box-office" min="0" placeholder="0"></div>
               <div class="rc-f"><label>Fever</label><input type="number" id="rc-fever" min="0" placeholder="0"></div>
@@ -3102,6 +3137,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <button class="btn btn-ghost btn-sm" onclick="rsDay(-1)">‹</button>
                 <input type="date" id="rs-fecha" onchange="rsLoadDia()" style="width:auto;">
+                <span class="rs-hoy-badge">Hoy</span>
                 <button class="btn btn-ghost btn-sm" onclick="rsDay(1)">›</button>
                 <button class="btn btn-ghost btn-sm" onclick="rsDay(0)">Hoy</button>
                 <span class="hint" id="rs-dia-label"></span>
@@ -3143,7 +3179,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                      bloque entero y Horas totales nunca queda solo arriba con Revisado. -->
                 <div style="display:flex;flex-wrap:wrap;gap:22px;">
                   <div id="rs-duty-box" style="display:none;"><b>DUTY:</b> <span id="rs-duty">—</span></div>
-                  <div><b>Horas totales:</b> <span id="rs-horas-totales">—</span></div>
+                  <div style="position:relative;display:inline-flex;align-items:center;gap:5px;">
+                    <b>Horas totales:</b> <span id="rs-horas-totales">—</span>
+                    <button type="button" class="rs-info-btn" id="rs-horas-info-btn" onclick="rsToggleHorasInfo(event)" aria-label="Ver desglose de horas totales">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    </button>
+                    <div id="rs-horas-info-pop" class="rs-info-pop"></div>
+                  </div>
                   <div style="padding-left:22px;border-left:1.5px solid var(--line-strong);"><b>Cambios de turno:</b><div id="rs-ctx-cambios" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
                   <div style="padding-left:22px;border-left:1.5px solid var(--line-strong);"><b>Vacaciones:</b><div id="rs-ctx-vac" class="hint" style="margin-top:5px;font-size:12px;">—</div></div>
                 </div>
@@ -3624,7 +3666,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                 <button class="btn btn-ghost btn-sm" onclick="matAddItem()">+ Añadir material</button>
               </div>
               <div class="table-wrap"><table id="materiales-table" class="no-filter"><thead>
-                <tr><th>Material</th><th>Valor</th><th>🛒 Comprar</th><th></th></tr>
+                <tr><th>Material</th><th>Valor</th><th>🛒 Comprar</th><th>✓ Comprado</th><th></th></tr>
               </thead><tbody></tbody></table></div>
             </div>
             <div class="card mat-layout-lista">
@@ -4027,6 +4069,9 @@ function goView(v){
   if(v==='loomis') renderLoomis();
   if(v==='rosters'){
     if(!rsPuedeVer()){ goView('dashboard'); return; }
+    // Cada vez que se entra en Rosters se abre el día de hoy, no el último visitado.
+    rsFecha = rsIso(new Date());
+    const _rsf = document.getElementById('rs-fecha'); if(_rsf) _rsf.value = rsFecha;
     initRosters();
   }
   setTimeout(installTableFilters, 60);
@@ -10010,6 +10055,7 @@ function rsDay(delta){
 async function rsLoadDia(){
   const el=document.getElementById('rs-fecha');
   if(el && el.value) rsFecha = el.value;
+  if(el) el.classList.toggle('rs-fecha-hoy', rsFecha === rsIso(new Date()));
   RS_UNDO_STACK = [];
   RS_STAFF_PICK_OPEN = null;
   RS_CAMBIOS_DIA = [];   // se recargan al final, en rsCargarContexto
@@ -10571,10 +10617,35 @@ function rsRenderHorasTotales(){
     const hh = Math.floor(min/60), mm = min%60;
     return mm ? `${hh}h${String(mm).padStart(2,'0')}` : `${hh}h`;
   };
-  el.title = efectivos
+  const desgloseTxt = efectivos
     .map(x => `${x.f.nombre||'(sin nombre)'}  ${x.f.turno}  =  ${fmt(x.neto)}`
               + (x.descanso ? `   (${fmt(x.bruto)} − 30min de descanso)` : ''))
     .join('\n') + `\n──────────\nTOTAL  ${fmt(totalMin)}`;
+  el.title = desgloseTxt;
+  // Mismo desglose, pero como HTML para el popover que se abre al clicar el
+  // icono (i): el title solo funciona con ratón, esto también sirve en táctil.
+  RS_HORAS_DESGLOSE_HTML = efectivos.length
+    ? efectivos.map(x => `<div>${esc(x.f.nombre||'(sin nombre)')} · ${esc(x.f.turno||'')} = <b>${fmt(x.neto)}</b>`
+        + (x.descanso ? ` <span style="opacity:.7;">(${fmt(x.bruto)} − 30min descanso)</span>` : '') + `</div>`).join('')
+      + `<div class="rs-info-total">TOTAL&nbsp; ${fmt(totalMin)}</div>`
+    : '<div>Sin turnos con horas hoy.</div>';
+}
+let RS_HORAS_DESGLOSE_HTML = '';
+function rsToggleHorasInfo(ev){
+  if(ev) ev.stopPropagation();
+  const pop = document.getElementById('rs-horas-info-pop');
+  if(!pop) return;
+  const abrir = !pop.classList.contains('show');
+  document.querySelectorAll('.rs-info-pop.show').forEach(p=>p.classList.remove('show'));
+  if(abrir){
+    pop.innerHTML = RS_HORAS_DESGLOSE_HTML || '<div>Sin datos.</div>';
+    pop.classList.add('show');
+    document.addEventListener('click', rsCerrarHorasInfo, {once:true});
+  }
+}
+function rsCerrarHorasInfo(){
+  const pop = document.getElementById('rs-horas-info-pop');
+  if(pop) pop.classList.remove('show');
 }
 function rsRenderLeyenda(){
   const el = document.getElementById('rs-legend');
@@ -11922,6 +11993,12 @@ async function addDiegoTask(){
    CHECKLISTS — Mantenimiento (tabla checklist_mant) y
    Materiales (tabla libre guardada en pdxspot_kv)
    ============================================================ */
+/* Clic en "A reparar" / "A comprar" del Resumen: lleva directo a CL
+   Mantenimiento o CL Materiales, ya en la pestaña que toca. */
+function goToClTab(tab){
+  goView('clmant');
+  switchClTab(tab);
+}
 function switchClTab(tab){
   document.querySelectorAll('[data-cltab]').forEach(b=>b.classList.toggle('active', b.dataset.cltab===tab));
   document.getElementById('cl-sub-mant').style.display = tab==='mant' ? 'block':'none';
@@ -12055,10 +12132,10 @@ async function renderDashReparaciones(){
 async function renderDashCompras(){
   const el = document.getElementById('dash-compras-list');
   if(!el) return;
-  const { data } = await sb.from('checklist_materiales').select('seccion,item,nota').eq('comprar', true).order('orden');
+  const { data } = await sb.from('checklist_materiales').select('seccion,item,nota,comprado').eq('comprar', true).order('orden');
   const pend = data || [];
   el.innerHTML = pend.length
-    ? pend.map(it=>`<div class="dash-warn-row"><span class="dash-warn-tag">Comprar</span><b>${esc(it.item)}</b>${it.nota?' — '+esc(it.nota):''}</div>`).join('')
+    ? pend.map(it=>`<div class="dash-warn-row"${it.comprado?' style="opacity:.55;"':''}><span class="dash-warn-tag">${it.comprado?'Comprado':'Comprar'}</span><span class="dash-warn-txt"><b${it.comprado?' style="text-decoration:line-through;"':''}>${esc(it.item)}</b></span>${it.nota?`<span class="dash-warn-qty">${esc(it.nota)}</span>`:''}</div>`).join('')
     : '<div class="empty-state" style="padding:10px 0;">Nada marcado para comprar ahora mismo.</div>';
 }
 async function renderDashInfluencers(){
@@ -12167,25 +12244,28 @@ async function renderMateriales(){
   const { data, error } = await sb.from('checklist_materiales').select('*').order('orden');
   const tbody = document.querySelector('#materiales-table tbody');
   if(!tbody) return;
-  if(error){ tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
+  if(error){ tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);">Error: ${error.message}</td></tr>`; return; }
   MATCL_CACHE = data || [];
   let html = '';
   let seccionActual = null;
   MATCL_CACHE.forEach(it=>{
     if(it.seccion !== seccionActual){
       seccionActual = it.seccion;
-      html += `<tr class="mat-sec-row"><td colspan="4">${esc(seccionActual)}</td></tr>`;
+      html += `<tr class="mat-sec-row"><td colspan="5">${esc(seccionActual)}</td></tr>`;
     }
     html += `<tr>
-      <td class="mat-item">${esc(it.item)}</td>
+      <td class="mat-item"${it.comprado?' style="text-decoration:line-through;opacity:.5;"':''}>${esc(it.item)}</td>
       <td>${matValorCellHtml(it)}</td>
       <td>
         <button class="clmant-chk rep ${it.comprar?'on':''}" onclick="toggleMatComprar(${it.id})" title="Marcar si hay que comprarlo">${it.comprar?'🛒':''}</button>
       </td>
+      <td>
+        <button class="clmant-chk ok ${it.comprado?'on':''}" onclick="toggleMatComprado(${it.id})" title="Marcar como ya comprado">${it.comprado?'✓':''}</button>
+      </td>
       <td><button class="btn btn-ghost btn-sm" onclick="matDelItem(${it.id})" title="Eliminar material">✕</button></td>
     </tr>`;
   });
-  tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Sin materiales todavía.</td></tr>';
+  tbody.innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--text-soft);">Sin materiales todavía.</td></tr>';
   renderDashCompras();
   renderMatListaCompra();
 }
@@ -12194,8 +12274,8 @@ function renderMatListaCompra(){
   if(!el) return;
   const pend = MATCL_CACHE.filter(it=>it.comprar);
   el.innerHTML = pend.length
-    ? pend.map(it=>`<div class="dash-warn-row" style="cursor:pointer;" onclick="toggleMatComprar(${it.id})" title="Clic para quitar de la lista">
-        <span class="dash-warn-tag">Comprar</span><b>${esc(it.item)}</b> <span class="hint">${esc(it.seccion)}</span>
+    ? pend.map(it=>`<div class="dash-warn-row" style="cursor:pointer;${it.comprado?'opacity:.55;':''}" onclick="toggleMatComprar(${it.id})" title="Clic para quitar de la lista">
+        <span class="dash-warn-tag">${it.comprado?'Comprado':'Comprar'}</span><b${it.comprado?' style="text-decoration:line-through;"':''}>${esc(it.item)}</b> <span class="hint">${esc(it.seccion)}</span>
       </div>`).join('')
     : '<div class="empty-state" style="padding:10px 0;">Nada marcado para comprar todavía. Márcalo en la tabla de la izquierda.</div>';
 }
@@ -12209,6 +12289,16 @@ async function toggleMatComprar(id){
   const it = MATCL_CACHE.find(x=>x.id===id);
   if(!it) return;
   await sb.from('checklist_materiales').update({comprar: !it.comprar, updated_at: new Date().toISOString()}).eq('id', id);
+  renderMateriales();
+}
+/* Marca un material como ya comprado: se queda en la lista pero tachado,
+   distinto de desmarcar "Comprar" (que lo quita de la lista de la compra
+   directamente). Así se puede ver de un vistazo qué queda pendiente todavía
+   sin perder el pedido de la lista. */
+async function toggleMatComprado(id){
+  const it = MATCL_CACHE.find(x=>x.id===id);
+  if(!it) return;
+  await sb.from('checklist_materiales').update({comprado: !it.comprado, updated_at: new Date().toISOString()}).eq('id', id);
   renderMateriales();
 }
 async function saveMatNota(id, nota){
