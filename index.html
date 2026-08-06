@@ -2766,15 +2766,57 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <!-- ============ ESTADÍSTICAS DE VISITANTES ============ -->
       <div class="view" id="view-visitas">
         <div class="card">
-          <div class="section-title" style="margin-bottom:14px;">
-            <span>Estadísticas de visitantes</span>
-          </div>
           <div class="tab-strip" style="margin-bottom:14px;">
-            <button class="tab-btn active" data-vstab="diaria" onclick="visStatsTabSwitch('diaria')">Diaria</button>
-            <button class="tab-btn" data-vstab="semanal" onclick="visStatsTabSwitch('semanal')">Semanal</button>
-            <button class="tab-btn" data-vstab="mensual" onclick="visStatsTabSwitch('mensual')">Mensual</button>
+            <button class="tab-btn active" data-vmaintab="visitantes" onclick="visMainTabSwitch('visitantes')">Visitantes</button>
+            <button class="tab-btn" data-vmaintab="tienda" onclick="visMainTabSwitch('tienda')">Tienda</button>
+            <button class="tab-btn" data-vmaintab="posiciones" onclick="visMainTabSwitch('posiciones')">Posiciones</button>
           </div>
-          <div class="table-wrap"><table id="vis-stats-table"><thead></thead><tbody></tbody></table></div>
+
+          <div class="vis-panel" data-panel="visitantes">
+            <div class="section-title" style="margin-bottom:14px;">
+              <span>Estadísticas de visitantes</span>
+            </div>
+            <div class="tab-strip" style="margin-bottom:14px;">
+              <button class="tab-btn active" data-vstab="diaria" onclick="visStatsTabSwitch('diaria')">Diaria</button>
+              <button class="tab-btn" data-vstab="semanal" onclick="visStatsTabSwitch('semanal')">Semanal</button>
+              <button class="tab-btn" data-vstab="mensual" onclick="visStatsTabSwitch('mensual')">Mensual</button>
+            </div>
+            <div class="table-wrap"><table id="vis-stats-table"><thead></thead><tbody></tbody></table></div>
+          </div>
+
+          <div class="vis-panel" data-panel="tienda" style="display:none;">
+            <div class="section-title" style="margin-bottom:14px;">
+              <span>Tienda · ventas por persona y € / hora trabajada</span>
+            </div>
+            <div class="tab-strip" style="margin-bottom:14px;">
+              <button class="tab-btn active" data-vttab="diaria" onclick="visTiendaTabSwitch('diaria')">Diaria</button>
+              <button class="tab-btn" data-vttab="semanal" onclick="visTiendaTabSwitch('semanal')">Semanal</button>
+              <button class="tab-btn" data-vttab="mensual" onclick="visTiendaTabSwitch('mensual')">Mensual</button>
+            </div>
+            <div class="flex-between" style="margin-bottom:10px;">
+              <button class="btn btn-ghost btn-sm" onclick="visTiendaNav(-1)">← Anterior</button>
+              <div id="vis-tienda-periodo" style="font-weight:800;font-size:13px;"></div>
+              <button class="btn btn-ghost btn-sm" onclick="visTiendaNav(1)">Siguiente →</button>
+            </div>
+            <div class="table-wrap"><table id="vis-tienda-table"><thead></thead><tbody></tbody></table></div>
+          </div>
+
+          <div class="vis-panel" data-panel="posiciones" style="display:none;">
+            <div class="section-title" style="margin-bottom:14px;">
+              <span>% de posiciones trabajadas por persona</span>
+            </div>
+            <div class="tab-strip" style="margin-bottom:14px;">
+              <button class="tab-btn active" data-vptab="diaria" onclick="visPosTabSwitch('diaria')">Diaria</button>
+              <button class="tab-btn" data-vptab="semanal" onclick="visPosTabSwitch('semanal')">Semanal</button>
+              <button class="tab-btn" data-vptab="mensual" onclick="visPosTabSwitch('mensual')">Mensual</button>
+            </div>
+            <div class="flex-between" style="margin-bottom:10px;">
+              <button class="btn btn-ghost btn-sm" onclick="visPosNav(-1)">← Anterior</button>
+              <div id="vis-pos-periodo" style="font-weight:800;font-size:13px;"></div>
+              <button class="btn btn-ghost btn-sm" onclick="visPosNav(1)">Siguiente →</button>
+            </div>
+            <div class="table-wrap"><table id="vis-pos-table"><thead></thead><tbody></tbody></table></div>
+          </div>
         </div>
       </div>
 
@@ -4182,7 +4224,7 @@ function goView(v){
   if(v==='uniformes') renderUniformes();
   if(v==='sugerencias') renderSugerencias();
   if(v==='dashboard'){ refreshDashboard(); renderDashGrupos(); }
-  if(v==='visitas') visStatsInit();
+  if(v==='visitas') visMainInit();
   if(v==='recap'){ renderRecap(); maybeAutoOpenRecapInforme(); }
   if(v==='resenas') renderResenas();
   if(v==='marketing') renderMarketing();
@@ -4579,6 +4621,244 @@ function visStatsRenderMensual(){
     </tr>`;
   }
   document.querySelector('#vis-stats-table tbody').innerHTML = rows;
+}
+
+/* ============================================================
+   ESTADÍSTICAS — pestaña exterior (Visitantes / Tienda / Posiciones)
+   ============================================================ */
+let visMainTab = 'visitantes';
+function visMainInit(){
+  if(visMainTab==='tienda') visTiendaInit();
+  else if(visMainTab==='posiciones') visPosInit();
+  else visStatsInit();
+}
+function visMainTabSwitch(t){
+  visMainTab = t;
+  document.querySelectorAll('[data-vmaintab]').forEach(b=>b.classList.toggle('active', b.dataset.vmaintab===t));
+  document.querySelectorAll('.vis-panel').forEach(p=>p.style.display = (p.dataset.panel===t) ? '' : 'none');
+  visMainInit();
+}
+
+/* ============================================================
+   ESTADÍSTICAS — Tienda: ventas por persona (Recap.boutique) ÷
+   horas trabajadas ese mismo periodo (misma cuenta que "Horas
+   totales" de Rosters, vía rsDesgloseHoras).
+   ============================================================ */
+let VIS_TIENDA_CACHE = null;   // { recap:[{fecha,boutique}], roster:[{fecha,filas}] }
+let visTiendaLoaded = false;
+let visTiendaTab = 'diaria';
+let visTiendaOffset = 0;   // 0 = hoy / semana actual / mes actual
+
+async function visTiendaInit(){
+  if(!visTiendaLoaded){
+    visTiendaLoaded = true;
+    const y = new Date().getFullYear();
+    const desde = `${y-1}-01-01`;
+    const [{data:recapData}, {data:rosterData}] = await Promise.all([
+      sb.from('recap').select('fecha,boutique').gte('fecha', desde),
+      sb.from('roster_dias').select('fecha,filas').gte('fecha', desde)
+    ]);
+    VIS_TIENDA_CACHE = { recap: recapData||[], roster: rosterData||[] };
+  }
+  visTiendaRenderActive();
+}
+function visTiendaTabSwitch(t){
+  visTiendaTab = t;
+  visTiendaOffset = 0;
+  document.querySelectorAll('[data-vttab]').forEach(b=>b.classList.toggle('active', b.dataset.vttab===t));
+  visTiendaRenderActive();
+}
+function visTiendaNav(delta){
+  visTiendaOffset += delta;
+  visTiendaRenderActive();
+}
+function visTiendaRenderActive(){
+  if(visTiendaTab==='semanal') visTiendaRenderSemanal();
+  else if(visTiendaTab==='mensual') visTiendaRenderMensual();
+  else visTiendaRenderDiaria();
+}
+function visRosterFilasDe(fecha){
+  const r = VIS_TIENDA_CACHE.roster.find(x=>x.fecha===fecha);
+  if(!r) return [];
+  return (typeof r.filas==='string') ? JSON.parse(r.filas) : (r.filas||[]);
+}
+/* Horas netas de una persona en un día concreto, reutilizando exactamente la
+   misma lógica que "Horas totales" de Rosters (rsDesgloseHoras), para que
+   los números no puedan discrepar entre pestañas. */
+function visHorasPersonaMin(filas, nombre){
+  return rsDesgloseHoras(filas).filter(x=>x.f.nombre===nombre).reduce((a,x)=>a+x.neto,0);
+}
+function visTiendaFilasTabla(personasMap){
+  const rows = Object.entries(personasMap)
+    .filter(([,v])=>v.importe>0)
+    .sort((a,b)=>b[1].importe-a[1].importe)
+    .map(([nombre,v])=>{
+      const horas = v.min/60;
+      const eurH = horas>0 ? (v.importe/horas) : null;
+      return `<tr>
+        <td style="font-weight:700;">${esc(nombre)}</td>
+        <td style="font-weight:800;">${rcInfEur(v.importe)}</td>
+        <td class="hint">${v.min>0 ? (Math.floor(v.min/60)+'h '+String(v.min%60).padStart(2,'0')+'min') : '—'}</td>
+        <td>${eurH!=null ? eurH.toFixed(2).replace('.',',')+' €/h' : '—'}</td>
+      </tr>`;
+    }).join('');
+  return rows || '<tr><td colspan="4" class="empty-state">Sin ventas de tienda registradas en este periodo.</td></tr>';
+}
+function visTiendaSetHead(){
+  document.querySelector('#vis-tienda-table thead').innerHTML =
+    '<tr><th>Persona</th><th>Ventas</th><th>Horas</th><th>€ / hora</th></tr>';
+}
+function visTiendaAcumular(fechas){
+  const personasMap = {};
+  fechas.forEach(fecha=>{
+    const rec = VIS_TIENDA_CACHE.recap.find(r=>r.fecha===fecha);
+    const boutique = rec?.boutique || {};
+    const filas = visRosterFilasDe(fecha);
+    Object.entries(boutique).forEach(([nombre,importe])=>{
+      if(!personasMap[nombre]) personasMap[nombre] = {importe:0, min:0};
+      personasMap[nombre].importe += parseFloat(importe)||0;
+      personasMap[nombre].min += visHorasPersonaMin(filas, nombre);
+    });
+  });
+  return personasMap;
+}
+function visTiendaRenderDiaria(){
+  const hoy = todayIso();
+  const fecha = visIsoAdd(hoy, visTiendaOffset);
+  const periodoEl = document.getElementById('vis-tienda-periodo');
+  if(periodoEl) periodoEl.textContent = isoToLabelWithDow(fecha) + (fecha===hoy?' · hoy':'');
+  visTiendaSetHead();
+  document.querySelector('#vis-tienda-table tbody').innerHTML = visTiendaFilasTabla(visTiendaAcumular([fecha]));
+}
+function visTiendaRenderSemanal(){
+  const hoy = new Date();
+  const dow = hoy.getDay();
+  const monday0 = new Date(hoy); monday0.setDate(hoy.getDate() - (dow===0?6:dow-1) + visTiendaOffset*7);
+  const ini = `${monday0.getFullYear()}-${String(monday0.getMonth()+1).padStart(2,'0')}-${String(monday0.getDate()).padStart(2,'0')}`;
+  const fechas = []; for(let d=0; d<7; d++) fechas.push(visIsoAdd(ini,d));
+  const fin = fechas[6];
+  const periodoEl = document.getElementById('vis-tienda-periodo');
+  if(periodoEl) periodoEl.textContent = `${isoToLabel(ini)} – ${isoToLabel(fin)}` + (visTiendaOffset===0?' · esta semana':'');
+  visTiendaSetHead();
+  document.querySelector('#vis-tienda-table tbody').innerHTML = visTiendaFilasTabla(visTiendaAcumular(fechas));
+}
+function visTiendaRenderMensual(){
+  const hoy = new Date();
+  let mi = hoy.getMonth() + visTiendaOffset, anio = hoy.getFullYear();
+  while(mi<0){ mi+=12; anio--; }
+  while(mi>11){ mi-=12; anio++; }
+  const nd = new Date(anio, mi+1, 0).getDate();
+  const fechas = [];
+  for(let d=1; d<=nd; d++) fechas.push(`${anio}-${String(mi+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+  const periodoEl = document.getElementById('vis-tienda-periodo');
+  if(periodoEl) periodoEl.textContent = `${MONTH_SHORT[mi]} ${anio}` + (visTiendaOffset===0?' · este mes':'');
+  visTiendaSetHead();
+  document.querySelector('#vis-tienda-table tbody').innerHTML = visTiendaFilasTabla(visTiendaAcumular(fechas));
+}
+
+/* ============================================================
+   ESTADÍSTICAS — Posiciones: % del tiempo trabajado que cada
+   persona pasa en cada puesto del roster (slots de 30 min).
+   Se excluyen Descanso/Breaker/Apertura-Cierre/Contador por no
+   ser "una posición" — el resto (incl. Admin/Taller/Duty) sí cuenta.
+   ============================================================ */
+let VIS_POS_CACHE = null;   // [{fecha,filas}]
+let visPosLoaded = false;
+let visPosTab = 'diaria';
+let visPosOffset = 0;
+const VIS_POS_EXCLUIR = new Set(['BRK','DESC','OC','CONTADOR']);
+
+async function visPosInit(){
+  if(!visPosLoaded){
+    visPosLoaded = true;
+    const y = new Date().getFullYear();
+    const desde = `${y-1}-01-01`;
+    const { data } = await sb.from('roster_dias').select('fecha,filas').gte('fecha', desde);
+    VIS_POS_CACHE = data || [];
+  }
+  visPosRenderActive();
+}
+function visPosTabSwitch(t){
+  visPosTab = t;
+  visPosOffset = 0;
+  document.querySelectorAll('[data-vptab]').forEach(b=>b.classList.toggle('active', b.dataset.vptab===t));
+  visPosRenderActive();
+}
+function visPosNav(delta){
+  visPosOffset += delta;
+  visPosRenderActive();
+}
+function visPosRenderActive(){
+  if(visPosTab==='semanal') visPosRenderRango(visPosRangoSemana());
+  else if(visPosTab==='mensual') visPosRenderRango(visPosRangoMes());
+  else visPosRenderRango(visPosRangoDia());
+}
+function visPosRangoDia(){
+  const hoy = todayIso();
+  const fecha = visIsoAdd(hoy, visPosOffset);
+  return { fechas:[fecha], label: isoToLabelWithDow(fecha) + (fecha===hoy?' · hoy':'') };
+}
+function visPosRangoSemana(){
+  const hoy = new Date();
+  const dow = hoy.getDay();
+  const monday0 = new Date(hoy); monday0.setDate(hoy.getDate() - (dow===0?6:dow-1) + visPosOffset*7);
+  const ini = `${monday0.getFullYear()}-${String(monday0.getMonth()+1).padStart(2,'0')}-${String(monday0.getDate()).padStart(2,'0')}`;
+  const fechas = []; for(let d=0; d<7; d++) fechas.push(visIsoAdd(ini,d));
+  const fin = fechas[6];
+  return { fechas, label: `${isoToLabel(ini)} – ${isoToLabel(fin)}` + (visPosOffset===0?' · esta semana':'') };
+}
+function visPosRangoMes(){
+  const hoy = new Date();
+  let mi = hoy.getMonth() + visPosOffset, anio = hoy.getFullYear();
+  while(mi<0){ mi+=12; anio--; }
+  while(mi>11){ mi-=12; anio++; }
+  const nd = new Date(anio, mi+1, 0).getDate();
+  const fechas = [];
+  for(let d=1; d<=nd; d++) fechas.push(`${anio}-${String(mi+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+  return { fechas, label: `${MONTH_SHORT[mi]} ${anio}` + (visPosOffset===0?' · este mes':'') };
+}
+function visPosRenderRango(rango){
+  const periodoEl = document.getElementById('vis-pos-periodo');
+  if(periodoEl) periodoEl.textContent = rango.label;
+
+  const minutos = {};      // { nombre: { puesto: min } }
+  const puestosSet = new Set();
+  rango.fechas.forEach(fecha=>{
+    const dia = VIS_POS_CACHE.find(x=>x.fecha===fecha);
+    if(!dia) return;
+    const filas = (typeof dia.filas==='string') ? JSON.parse(dia.filas) : (dia.filas||[]);
+    filas.forEach(f=>{
+      if(!f.nombre || !f.turno || !f.slots || ['grupos','cumples','taller','laia'].includes(f.tipo)) return;
+      Object.values(f.slots).forEach(p=>{
+        if(!p || VIS_POS_EXCLUIR.has(p)) return;
+        minutos[f.nombre] = minutos[f.nombre] || {};
+        minutos[f.nombre][p] = (minutos[f.nombre][p]||0) + 30;
+        puestosSet.add(p);
+      });
+    });
+  });
+
+  const puestos = [...puestosSet].sort((a,b)=>(RS_ETIQ_PUESTO[a]||a).localeCompare(RS_ETIQ_PUESTO[b]||b,'es'));
+  const personas = Object.keys(minutos).sort((a,b)=>a.localeCompare(b,'es'));
+
+  document.querySelector('#vis-pos-table thead').innerHTML =
+    '<tr><th>Persona</th>' + puestos.map(p=>`<th title="${esc(RS_ETIQ_PUESTO[p]||p)}">${esc(RS_CODIGO_VISIBLE[p]||p)}</th>`).join('') + '</tr>';
+
+  if(!personas.length){
+    document.querySelector('#vis-pos-table tbody').innerHTML =
+      `<tr><td colspan="${puestos.length+1}" class="empty-state">Sin datos de roster en este periodo.</td></tr>`;
+    return;
+  }
+  document.querySelector('#vis-pos-table tbody').innerHTML = personas.map(nombre=>{
+    const fila = minutos[nombre];
+    const total = Object.values(fila).reduce((a,b)=>a+b,0);
+    return `<tr><td style="font-weight:700;">${esc(nombre)}</td>` +
+      puestos.map(p=>{
+        const min = fila[p]||0;
+        const pct = total>0 ? Math.round(min/total*100) : 0;
+        return `<td>${pct}%</td>`;
+      }).join('') + '</tr>';
+  }).join('');
 }
 
 function weekNav(delta){
