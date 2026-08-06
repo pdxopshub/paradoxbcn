@@ -2777,8 +2777,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <span>Estadísticas de visitantes</span>
             </div>
             <div class="tab-strip" style="margin-bottom:14px;">
-              <button class="tab-btn active" data-vstab="diaria" onclick="visStatsTabSwitch('diaria')">Diaria</button>
-              <button class="tab-btn" data-vstab="semanal" onclick="visStatsTabSwitch('semanal')">Semanal</button>
+              <button class="tab-btn active" data-vstab="semanal" onclick="visStatsTabSwitch('semanal')">Semanal</button>
               <button class="tab-btn" data-vstab="mensual" onclick="visStatsTabSwitch('mensual')">Mensual</button>
             </div>
             <div class="table-wrap"><table id="vis-stats-table"><thead></thead><tbody></tbody></table></div>
@@ -2789,11 +2788,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <span>Tienda · ventas por persona y € / hora trabajada</span>
             </div>
             <div class="tab-strip" style="margin-bottom:14px;">
-              <button class="tab-btn active" data-vttab="diaria" onclick="visTiendaTabSwitch('diaria')">Diaria</button>
-              <button class="tab-btn" data-vttab="semanal" onclick="visTiendaTabSwitch('semanal')">Semanal</button>
+              <button class="tab-btn active" data-vttab="total" onclick="visTiendaTabSwitch('total')">Total</button>
               <button class="tab-btn" data-vttab="mensual" onclick="visTiendaTabSwitch('mensual')">Mensual</button>
             </div>
-            <div class="flex-between" style="margin-bottom:10px;">
+            <div class="flex-between" id="vis-tienda-nav" style="margin-bottom:10px;display:none;">
               <button class="btn btn-ghost btn-sm" onclick="visTiendaNav(-1)">← Anterior</button>
               <div id="vis-tienda-periodo" style="font-weight:800;font-size:13px;"></div>
               <button class="btn btn-ghost btn-sm" onclick="visTiendaNav(1)">Siguiente →</button>
@@ -2806,11 +2804,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
               <span>% de posiciones trabajadas por persona</span>
             </div>
             <div class="tab-strip" style="margin-bottom:14px;">
-              <button class="tab-btn active" data-vptab="diaria" onclick="visPosTabSwitch('diaria')">Diaria</button>
-              <button class="tab-btn" data-vptab="semanal" onclick="visPosTabSwitch('semanal')">Semanal</button>
+              <button class="tab-btn active" data-vptab="total" onclick="visPosTabSwitch('total')">Total</button>
               <button class="tab-btn" data-vptab="mensual" onclick="visPosTabSwitch('mensual')">Mensual</button>
             </div>
-            <div class="flex-between" style="margin-bottom:10px;">
+            <div class="flex-between" id="vis-pos-nav" style="margin-bottom:10px;display:none;">
               <button class="btn btn-ghost btn-sm" onclick="visPosNav(-1)">← Anterior</button>
               <div id="vis-pos-periodo" style="font-weight:800;font-size:13px;"></div>
               <button class="btn btn-ghost btn-sm" onclick="visPosNav(1)">Siguiente →</button>
@@ -4508,7 +4505,7 @@ let weekOffset = 0; // 0 = semana actual, -1 = anterior, +1 = siguiente
    la semana, 364 días antes), solo que aquí se ve en tabla y con más
    histórico (día/semana/mes). */
 let VIS_STATS_CACHE = [];
-let visStatsTab = 'diaria';
+let visStatsTab = 'semanal';
 let visStatsLoaded = false;
 async function visStatsInit(){
   if(!visStatsLoaded){
@@ -4526,9 +4523,8 @@ function visStatsTabSwitch(t){
   visStatsRenderActive();
 }
 function visStatsRenderActive(){
-  if(visStatsTab==='semanal') visStatsRenderSemanal();
-  else if(visStatsTab==='mensual') visStatsRenderMensual();
-  else visStatsRenderDiaria();
+  if(visStatsTab==='mensual') visStatsRenderMensual();
+  else visStatsRenderSemanal();
 }
 function visMapaFechas(){
   const m = {};
@@ -4548,25 +4544,6 @@ function visPctHtml(actual, ly){
 function visStatsSetHead(cols){
   document.querySelector('#vis-stats-table thead').innerHTML =
     '<tr>' + cols.map(c=>`<th>${c}</th>`).join('') + '</tr>';
-}
-/* Diaria: últimos 30 días, cada uno contra el mismo día de la semana del año pasado. */
-function visStatsRenderDiaria(){
-  const m = visMapaFechas();
-  visStatsSetHead(['Día','Visitantes','LY','Var.']);
-  const hoyIso = todayIso();
-  let rows = '';
-  for(let i=0; i<30; i++){
-    const iso = visIsoAdd(hoyIso, -i);
-    const ly = lyIsoDow(iso);
-    const v = m[iso] ?? null, lv = m[ly] ?? null;
-    rows += `<tr>
-      <td>${isoToLabelWithDow(iso)}</td>
-      <td style="font-weight:800;">${v!=null ? v.toLocaleString('es-ES') : '–'}</td>
-      <td class="hint">${lv!=null ? lv.toLocaleString('es-ES') : '–'}</td>
-      <td>${visPctHtml(v, lv)}</td>
-    </tr>`;
-  }
-  document.querySelector('#vis-stats-table tbody').innerHTML = rows;
 }
 /* Semanal: últimas 12 semanas de lunes a domingo, sumadas, contra la misma semana del año pasado (-364 días exactos, así cae en el mismo día de la semana). */
 function visStatsRenderSemanal(){
@@ -4646,8 +4623,8 @@ function visMainTabSwitch(t){
    ============================================================ */
 let VIS_TIENDA_CACHE = null;   // { recap:[{fecha,boutique}], roster:[{fecha,filas}] }
 let visTiendaLoaded = false;
-let visTiendaTab = 'diaria';
-let visTiendaOffset = 0;   // 0 = hoy / semana actual / mes actual
+let visTiendaTab = 'total';
+let visTiendaOffset = 0;   // 0 = mes actual (solo aplica a la pestaña Mensual)
 
 async function visTiendaInit(){
   if(!visTiendaLoaded){
@@ -4666,6 +4643,8 @@ function visTiendaTabSwitch(t){
   visTiendaTab = t;
   visTiendaOffset = 0;
   document.querySelectorAll('[data-vttab]').forEach(b=>b.classList.toggle('active', b.dataset.vttab===t));
+  const nav = document.getElementById('vis-tienda-nav');
+  if(nav) nav.style.display = (t==='mensual') ? '' : 'none';
   visTiendaRenderActive();
 }
 function visTiendaNav(delta){
@@ -4673,9 +4652,8 @@ function visTiendaNav(delta){
   visTiendaRenderActive();
 }
 function visTiendaRenderActive(){
-  if(visTiendaTab==='semanal') visTiendaRenderSemanal();
-  else if(visTiendaTab==='mensual') visTiendaRenderMensual();
-  else visTiendaRenderDiaria();
+  if(visTiendaTab==='mensual') visTiendaRenderMensual();
+  else visTiendaRenderTotal();
 }
 function visRosterFilasDe(fecha){
   const r = VIS_TIENDA_CACHE.roster.find(x=>x.fecha===fecha);
@@ -4722,24 +4700,11 @@ function visTiendaAcumular(fechas){
   });
   return personasMap;
 }
-function visTiendaRenderDiaria(){
-  const hoy = todayIso();
-  const fecha = visIsoAdd(hoy, visTiendaOffset);
+function visTiendaRenderTotal(){
   const periodoEl = document.getElementById('vis-tienda-periodo');
-  if(periodoEl) periodoEl.textContent = isoToLabelWithDow(fecha) + (fecha===hoy?' · hoy':'');
+  if(periodoEl) periodoEl.textContent = 'Histórico completo';
   visTiendaSetHead();
-  document.querySelector('#vis-tienda-table tbody').innerHTML = visTiendaFilasTabla(visTiendaAcumular([fecha]));
-}
-function visTiendaRenderSemanal(){
-  const hoy = new Date();
-  const dow = hoy.getDay();
-  const monday0 = new Date(hoy); monday0.setDate(hoy.getDate() - (dow===0?6:dow-1) + visTiendaOffset*7);
-  const ini = `${monday0.getFullYear()}-${String(monday0.getMonth()+1).padStart(2,'0')}-${String(monday0.getDate()).padStart(2,'0')}`;
-  const fechas = []; for(let d=0; d<7; d++) fechas.push(visIsoAdd(ini,d));
-  const fin = fechas[6];
-  const periodoEl = document.getElementById('vis-tienda-periodo');
-  if(periodoEl) periodoEl.textContent = `${isoToLabel(ini)} – ${isoToLabel(fin)}` + (visTiendaOffset===0?' · esta semana':'');
-  visTiendaSetHead();
+  const fechas = VIS_TIENDA_CACHE.recap.map(r=>r.fecha);
   document.querySelector('#vis-tienda-table tbody').innerHTML = visTiendaFilasTabla(visTiendaAcumular(fechas));
 }
 function visTiendaRenderMensual(){
@@ -4764,9 +4729,19 @@ function visTiendaRenderMensual(){
    ============================================================ */
 let VIS_POS_CACHE = null;   // [{fecha,filas}]
 let visPosLoaded = false;
-let visPosTab = 'diaria';
-let visPosOffset = 0;
-const VIS_POS_EXCLUIR = new Set(['BRK','DESC','OC','CONTADOR']);
+let visPosTab = 'total';
+let visPosOffset = 0;   // 0 = mes actual (solo aplica a la pestaña Mensual)
+/* Únicas 6 posiciones que cuentan para este reparto (pedido explícitamente),
+   en este orden, con los mismos colores que usa la rejilla de Rosters
+   (.rs-p-1, .rs-p-2, .rs-p-0G, .rs-p-F2/.rs-p-AV, .rs-p-DUTY). */
+const VIS_POS_LISTA = [
+  { code:'1',    label:'Caja 1', bg:'#92D050', fg:'#123' },
+  { code:'2',    label:'Caja 2', bg:'#47D359', fg:'#123' },
+  { code:'0G',   label:'0G',     bg:'#DAF2D0', fg:'#123' },
+  { code:'F2',   label:'F2',     bg:'#12501A', fg:'#fff' },
+  { code:'AV',   label:'AV',     bg:'#12501A', fg:'#fff' },
+  { code:'DUTY', label:'DUTY',   bg:'#6B7280', fg:'#fff' },
+];
 
 async function visPosInit(){
   if(!visPosLoaded){
@@ -4782,6 +4757,8 @@ function visPosTabSwitch(t){
   visPosTab = t;
   visPosOffset = 0;
   document.querySelectorAll('[data-vptab]').forEach(b=>b.classList.toggle('active', b.dataset.vptab===t));
+  const nav = document.getElementById('vis-pos-nav');
+  if(nav) nav.style.display = (t==='mensual') ? '' : 'none';
   visPosRenderActive();
 }
 function visPosNav(delta){
@@ -4789,23 +4766,11 @@ function visPosNav(delta){
   visPosRenderActive();
 }
 function visPosRenderActive(){
-  if(visPosTab==='semanal') visPosRenderRango(visPosRangoSemana());
-  else if(visPosTab==='mensual') visPosRenderRango(visPosRangoMes());
-  else visPosRenderRango(visPosRangoDia());
+  if(visPosTab==='mensual') visPosRenderRango(visPosRangoMes());
+  else visPosRenderRango(visPosRangoTotal());
 }
-function visPosRangoDia(){
-  const hoy = todayIso();
-  const fecha = visIsoAdd(hoy, visPosOffset);
-  return { fechas:[fecha], label: isoToLabelWithDow(fecha) + (fecha===hoy?' · hoy':'') };
-}
-function visPosRangoSemana(){
-  const hoy = new Date();
-  const dow = hoy.getDay();
-  const monday0 = new Date(hoy); monday0.setDate(hoy.getDate() - (dow===0?6:dow-1) + visPosOffset*7);
-  const ini = `${monday0.getFullYear()}-${String(monday0.getMonth()+1).padStart(2,'0')}-${String(monday0.getDate()).padStart(2,'0')}`;
-  const fechas = []; for(let d=0; d<7; d++) fechas.push(visIsoAdd(ini,d));
-  const fin = fechas[6];
-  return { fechas, label: `${isoToLabel(ini)} – ${isoToLabel(fin)}` + (visPosOffset===0?' · esta semana':'') };
+function visPosRangoTotal(){
+  return { fechas: VIS_POS_CACHE.map(x=>x.fecha), label: 'Histórico completo' };
 }
 function visPosRangoMes(){
   const hoy = new Date();
@@ -4821,8 +4786,8 @@ function visPosRenderRango(rango){
   const periodoEl = document.getElementById('vis-pos-periodo');
   if(periodoEl) periodoEl.textContent = rango.label;
 
+  const codigosValidos = new Set(VIS_POS_LISTA.map(p=>p.code));
   const minutos = {};      // { nombre: { puesto: min } }
-  const puestosSet = new Set();
   rango.fechas.forEach(fecha=>{
     const dia = VIS_POS_CACHE.find(x=>x.fecha===fecha);
     if(!dia) return;
@@ -4830,33 +4795,34 @@ function visPosRenderRango(rango){
     filas.forEach(f=>{
       if(!f.nombre || !f.turno || !f.slots || ['grupos','cumples','taller','laia'].includes(f.tipo)) return;
       Object.values(f.slots).forEach(p=>{
-        if(!p || VIS_POS_EXCLUIR.has(p)) return;
+        if(!codigosValidos.has(p)) return;
         minutos[f.nombre] = minutos[f.nombre] || {};
         minutos[f.nombre][p] = (minutos[f.nombre][p]||0) + 30;
-        puestosSet.add(p);
       });
     });
   });
 
-  const puestos = [...puestosSet].sort((a,b)=>(RS_ETIQ_PUESTO[a]||a).localeCompare(RS_ETIQ_PUESTO[b]||b,'es'));
   const personas = Object.keys(minutos).sort((a,b)=>a.localeCompare(b,'es'));
 
   document.querySelector('#vis-pos-table thead').innerHTML =
-    '<tr><th>Persona</th>' + puestos.map(p=>`<th title="${esc(RS_ETIQ_PUESTO[p]||p)}">${esc(RS_CODIGO_VISIBLE[p]||p)}</th>`).join('') + '</tr>';
+    '<tr><th>Persona</th>' + VIS_POS_LISTA.map(p=>
+      `<th style="background:${p.bg};color:${p.fg};">${esc(p.label)}</th>`
+    ).join('') + '</tr>';
 
   if(!personas.length){
     document.querySelector('#vis-pos-table tbody').innerHTML =
-      `<tr><td colspan="${puestos.length+1}" class="empty-state">Sin datos de roster en este periodo.</td></tr>`;
+      `<tr><td colspan="${VIS_POS_LISTA.length+1}" class="empty-state">Sin datos de roster en este periodo.</td></tr>`;
     return;
   }
   document.querySelector('#vis-pos-table tbody').innerHTML = personas.map(nombre=>{
     const fila = minutos[nombre];
     const total = Object.values(fila).reduce((a,b)=>a+b,0);
     return `<tr><td style="font-weight:700;">${esc(nombre)}</td>` +
-      puestos.map(p=>{
-        const min = fila[p]||0;
+      VIS_POS_LISTA.map(p=>{
+        const min = fila[p.code]||0;
         const pct = total>0 ? Math.round(min/total*100) : 0;
-        return `<td>${pct}%</td>`;
+        const tinte = pct>0 ? p.bg+'26' : 'transparent';
+        return `<td style="background:${tinte};font-weight:${pct>0?800:400};">${pct}%</td>`;
       }).join('') + '</tr>';
   }).join('');
 }
