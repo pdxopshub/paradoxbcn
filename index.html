@@ -1840,6 +1840,31 @@
   .vac-req .vr-main{flex:1;min-width:190px;}
   .vac-req .vr-who{font-weight:700;font-size:13px;}
   .vac-req .vr-meta{font-size:11.5px;color:var(--text-dim);margin-top:2px;}
+
+  /* ── MODO STAFF (solo "Who is Off?", pensado para el móvil) ───────────── */
+  /* Con un solo apartado accesible, la barra lateral no aporta nada: se
+     esconde y la vista ocupa todo el ancho. En pantalla grande se mantiene
+     por si entran desde el ordenador. */
+  body.staff-only .sidebar{display:none;}
+  body.staff-only .main{width:100%;}
+  @media(max-width:760px){
+    body.staff-only .content{padding:12px 12px 28px;}
+    body.staff-only .topbar{padding:10px 12px;}
+    body.staff-only .card{padding:14px 12px;}
+    /* Los meses del calendario a una columna: en móvil, dos ya se comen el texto. */
+    body.staff-only .vac-year{grid-template-columns:1fr;gap:10px;}
+    body.staff-only .tab-strip{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    body.staff-only .tab-btn{white-space:nowrap;}
+    /* La fila de solicitud pasa a bloque: el botón cae debajo en vez de
+       comprimir el texto contra el borde. */
+    body.staff-only .vac-req{align-items:flex-start;}
+    body.staff-only .vac-req .vr-main{min-width:0;flex-basis:100%;}
+    body.staff-only .vac-req .btn{width:100%;}
+    /* La tabla de saldos es de 6 columnas: sin scroll horizontal se sale. */
+    body.staff-only .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    body.staff-only #vac-saldos-table{min-width:520px;}
+    body.staff-only .flex-between{flex-wrap:wrap;gap:10px;}
+  }
   table{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);}
   th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-soft);padding:9px 12px;background:var(--panel);border:1px solid var(--line);font-weight:800;white-space:nowrap;}
   td{padding:7px 8px;border:1px solid var(--line);vertical-align:middle;color:var(--text);}
@@ -2250,6 +2275,9 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
     <div id="login-step-user">
       <div style="font-size:12px;color:var(--text-soft);margin:2px 0 12px;">¿Quién eres?</div>
       <div id="login-users" class="login-users"></div>
+      <!-- El staff de sala no sale en los botones de arriba: entra con su email. -->
+      <button class="btn btn-ghost btn-sm" onclick="loginOtro()"
+              style="width:100%;justify-content:center;margin-top:10px;">Soy staff · entrar con mi email</button>
     </div>
 
     <!-- Paso 2: contraseña -->
@@ -2412,10 +2440,18 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <div class="card dash-week-card">
           <div class="section-title" style="margin-bottom:14px;">
             <span>Calendario de la semana</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <button class="btn btn-ghost btn-sm" onclick="weekNav(-1)">← Anterior</button>
-              <button class="btn btn-ghost btn-sm" onclick="weekNav(0)" id="week-today-btn" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);">Esta semana</button>
-              <button class="btn btn-ghost btn-sm" onclick="weekNav(+1)">Siguiente →</button>
+            <div style="display:flex;align-items:center;gap:14px;">
+              <a href="#" onclick="abrirEstadisticasVisitantes();return false;"
+                 style="font-size:12px;font-weight:800;color:var(--accent);text-decoration:none;display:flex;align-items:center;gap:5px;"
+                 title="Abre en una ventana nueva">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+                Estadísticas de visitantes
+              </a>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <button class="btn btn-ghost btn-sm" onclick="weekNav(-1)">← Anterior</button>
+                <button class="btn btn-ghost btn-sm" onclick="weekNav(0)" id="week-today-btn" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);">Esta semana</button>
+                <button class="btn btn-ghost btn-sm" onclick="weekNav(+1)">Siguiente →</button>
+              </div>
             </div>
           </div>
           <div class="grid grid-7" id="week-calendar" style="gap:10px;"></div>
@@ -2716,6 +2752,23 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             </div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- ============ ESTADÍSTICAS DE VISITANTES ============
+           No lleva botón en la barra lateral: se abre en una ventana nueva
+           desde el enlace del Resumen (abrirEstadisticasVisitantes()). -->
+      <div class="view" id="view-visitas">
+        <div class="card">
+          <div class="section-title" style="margin-bottom:14px;">
+            <span>Estadísticas de visitantes</span>
+          </div>
+          <div class="tab-strip" style="margin-bottom:14px;">
+            <button class="tab-btn active" data-vstab="diaria" onclick="visStatsTabSwitch('diaria')">Diaria</button>
+            <button class="tab-btn" data-vstab="semanal" onclick="visStatsTabSwitch('semanal')">Semanal</button>
+            <button class="tab-btn" data-vstab="mensual" onclick="visStatsTabSwitch('mensual')">Mensual</button>
+          </div>
+          <div class="table-wrap"><table id="vis-stats-table"><thead></thead><tbody></tbody></table></div>
         </div>
       </div>
 
@@ -3471,8 +3524,8 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <button class="tab-btn active" data-vtab="calendario">Calendario</button>
           <button class="tab-btn" data-vtab="solicitudes">Solicitudes</button>
           <button class="tab-btn" data-vtab="saldos">Saldos</button>
-          <button class="tab-btn" data-vtab="bloqueos">Días bloqueados</button>
-          <button class="tab-btn" data-vtab="bajas">Bajas</button>
+          <button class="tab-btn" data-vtab="bloqueos" data-solo-manager>Días bloqueados</button>
+          <button class="tab-btn" data-vtab="bajas" data-solo-manager>Bajas</button>
         </div>
 
         <!-- ---- Calendario ---- -->
@@ -3933,6 +3986,25 @@ function pickLoginUser(nombre){
   pass.value = '';
   setTimeout(()=> (u.email ? pass : emailEl).focus(), 60);
 }
+/* Entrada para quien no tiene botón propio en la pantalla de login (el staff
+   de sala): pide email y contraseña en vez de elegir de la lista. */
+function loginOtro(){
+  loginPicked = null;
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('login-step-user').style.display = 'none';
+  document.getElementById('login-step-pass').style.display = 'block';
+  document.getElementById('login-who').innerHTML =
+    '<div style="font-size:12.5px;font-weight:700;color:var(--text-soft);">Entrar con tu email</div>';
+  const emailEl = document.getElementById('login-email');
+  emailEl.type = 'email';
+  emailEl.value = '';
+  emailEl.placeholder = 'Tu email';
+  emailEl.className = 'lu-email-input';
+  emailEl.onkeydown = ev => { if(ev.key === 'Enter') document.getElementById('login-pass').focus(); };
+  const pass = document.getElementById('login-pass');
+  pass.value = '';
+  setTimeout(()=> emailEl.focus(), 60);
+}
 function loginBack(){
   loginPicked = null;
   document.getElementById('login-step-pass').style.display = 'none';
@@ -3980,9 +4052,34 @@ async function afterLogin(user){
   document.getElementById('app-root').style.display = 'flex';
   updateUserChip();
   initApp();
+  aplicarModoStaff();
+  // La ventana nueva de "Estadísticas de visitantes" llega con ?vista=visitas
+  // en la URL: en cuanto hay sesión, se salta directo ahí en vez de al Resumen.
+  if(new URLSearchParams(location.search).get('vista') === 'visitas') goView('visitas');
 }
 function currentRole(){ return currentProfile ? currentProfile.nombre : ''; }
 function isDirector(){ return currentProfile && currentProfile.rol === 'director'; }
+/* Cuentas de staff de sala: entran al mismo Hub pero solo ven "Who is Off?"
+   (calendario, sus solicitudes y su saldo). Se marca con rol='staff' en la
+   tabla profiles, así dar de alta o quitar a alguien no toca el código.
+   Los managers actuales (director, manager, supervisor, marketing) no llevan
+   ese rol, por lo que siguen viendo el Hub entero sin cambios. */
+function esStaff(){ return currentProfile?.rol === 'staff'; }
+/* Restringe el Hub a la vista de vacaciones. Se llama después del login. */
+function aplicarModoStaff(){
+  if(!esStaff()) return;
+  document.body.classList.add('staff-only');
+  // Solo queda navegable "Who is Off?"; el resto se oculta de la barra lateral.
+  document.querySelectorAll('#nav .navitem').forEach(b=>{
+    if(b.dataset.view !== 'vacaciones') b.style.display = 'none';
+  });
+  // Un grupo del menú que se quede sin botones visibles no debe dejar la etiqueta suelta.
+  document.querySelectorAll('#nav .navgroup').forEach(g=>{
+    const visibles = [...g.querySelectorAll('.navitem')].some(b=>b.style.display !== 'none');
+    if(!visibles) g.style.display = 'none';
+  });
+  goView('vacaciones');
+}
 function updateUserChip(){
   const av = document.getElementById('avatar');
   av.textContent = currentProfile.nombre[0];
@@ -4037,10 +4134,19 @@ const titles = {
    - la sub-pestaña "Planificación semanal", que es la entrada de Laia;
    - los avisos de la revisión que comparan con esa planificación, que solo
      tienen sentido para quien monta el roster. */
-function rsPuedeVer(){ return true; }
+/* Rosters es público para todo el equipo de gestión: Ignacio, Laia, Paula,
+   Ceci y Mireia. Antes era "return true" a secas (lo mismo en la práctica,
+   ya que solo estas cinco cuentas existen), pero se deja la lista explícita
+   para que quede claro, a simple vista, quién tiene acceso. */
+function rsPuedeVer(){
+  return ['Ignacio','Laia','Paula','Ceci','Mireia'].includes(currentProfile?.nombre);
+}
 function rsPuedeVerPlan(){ return ['Ignacio','Laia'].includes(currentProfile?.nombre); }
 function rsAvisosPlan(){ return currentProfile?.nombre === 'Ignacio'; }
 function goView(v){
+  // Las cuentas de staff solo tienen acceso a "Who is Off?": cualquier intento
+  // de ir a otra vista (enlace interno, estado guardado, consola) cae aquí.
+  if(esStaff() && v !== 'vacaciones') v = 'vacaciones';
   const btn = document.querySelector('.navitem[data-view="'+v+'"]');
   document.querySelectorAll('.navitem').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
@@ -4064,6 +4170,7 @@ function goView(v){
   if(v==='uniformes') renderUniformes();
   if(v==='sugerencias') renderSugerencias();
   if(v==='dashboard'){ refreshDashboard(); renderDashGrupos(); }
+  if(v==='visitas') visStatsInit();
   if(v==='recap'){ renderRecap(); maybeAutoOpenRecapInforme(); }
   if(v==='resenas') renderResenas();
   if(v==='marketing') renderMarketing();
@@ -4339,6 +4446,138 @@ async function fetchDashboardVisits(){
 const DNAMES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 const MONTH_SHORT = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 let weekOffset = 0; // 0 = semana actual, -1 = anterior, +1 = siguiente
+
+/* Abre la vista "Estadísticas de visitantes" en una pestaña/ventana nueva, en
+   vez de navegar dentro del Hub. La ventana nueva carga el mismo index.html
+   (misma sesión de Supabase, persistida en localStorage) con ?vista=visitas
+   en la URL; el arranque del login la detecta y salta directo a esa vista. */
+function abrirEstadisticasVisitantes(){
+  const u = new URL(location.href);
+  u.searchParams.set('vista', 'visitas');
+  window.open(u.toString(), '_blank');
+}
+
+/* ---------- Estadísticas de visitantes: diaria / semanal / mensual ----------
+   Misma fuente y mismo criterio de comparación que "Calendario de la semana"
+   del Resumen (tabla spv_days, LY = mismo día de la semana, 364 días antes),
+   solo que aquí se ve en tabla y con más histórico (día/semana/mes). */
+let VIS_STATS_CACHE = [];
+let visStatsTab = 'diaria';
+let visStatsLoaded = false;
+async function visStatsInit(){
+  document.getElementById('page-title').textContent = 'Estadísticas de visitantes';
+  document.getElementById('today-date').textContent = '';
+  if(!visStatsLoaded){
+    visStatsLoaded = true;
+    const y = new Date().getFullYear();
+    const { data } = await sb.from('spv_days').select('fecha,visitantes')
+      .gte('fecha', `${y-1}-01-01`).lte('fecha', `${y}-12-31`);
+    VIS_STATS_CACHE = data || [];
+  }
+  visStatsRenderActive();
+}
+function visStatsTabSwitch(t){
+  visStatsTab = t;
+  document.querySelectorAll('[data-vstab]').forEach(b=>b.classList.toggle('active', b.dataset.vstab===t));
+  visStatsRenderActive();
+}
+function visStatsRenderActive(){
+  if(visStatsTab==='semanal') visStatsRenderSemanal();
+  else if(visStatsTab==='mensual') visStatsRenderMensual();
+  else visStatsRenderDiaria();
+}
+function visMapaFechas(){
+  const m = {};
+  VIS_STATS_CACHE.forEach(r=>{ if(r.visitantes!=null) m[r.fecha] = r.visitantes; });
+  return m;
+}
+function visIsoAdd(iso, dias){
+  const d = new Date(iso+'T12:00:00');
+  d.setDate(d.getDate()+dias);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function visPctHtml(actual, ly){
+  if(actual==null || ly==null || ly<=0) return '<span class="hint">—</span>';
+  const pct = Math.round((actual-ly)/ly*100);
+  return `<span class="${pct>=0?'pct-up':'pct-down'}">${pct>=0?'↑':'↓'}${Math.abs(pct)}%</span>`;
+}
+function visStatsSetHead(cols){
+  document.querySelector('#vis-stats-table thead').innerHTML =
+    '<tr>' + cols.map(c=>`<th>${c}</th>`).join('') + '</tr>';
+}
+/* Diaria: últimos 30 días, cada uno contra el mismo día de la semana del año pasado. */
+function visStatsRenderDiaria(){
+  const m = visMapaFechas();
+  visStatsSetHead(['Día','Visitantes','LY','Var.']);
+  const hoyIso = todayIso();
+  let rows = '';
+  for(let i=0; i<30; i++){
+    const iso = visIsoAdd(hoyIso, -i);
+    const ly = lyIsoDow(iso);
+    const v = m[iso] ?? null, lv = m[ly] ?? null;
+    rows += `<tr>
+      <td>${isoToLabelWithDow(iso)}</td>
+      <td style="font-weight:800;">${v!=null ? v.toLocaleString('es-ES') : '–'}</td>
+      <td class="hint">${lv!=null ? lv.toLocaleString('es-ES') : '–'}</td>
+      <td>${visPctHtml(v, lv)}</td>
+    </tr>`;
+  }
+  document.querySelector('#vis-stats-table tbody').innerHTML = rows;
+}
+/* Semanal: últimas 12 semanas de lunes a domingo, sumadas, contra la misma semana del año pasado (-364 días exactos, así cae en el mismo día de la semana). */
+function visStatsRenderSemanal(){
+  const m = visMapaFechas();
+  visStatsSetHead(['Semana','Visitantes','LY','Var.']);
+  const hoy = new Date();
+  const dow = hoy.getDay();
+  const monday0 = new Date(hoy); monday0.setDate(hoy.getDate() - (dow===0?6:dow-1));
+  const mondayIso0 = `${monday0.getFullYear()}-${String(monday0.getMonth()+1).padStart(2,'0')}-${String(monday0.getDate()).padStart(2,'0')}`;
+  const sumSemana = ini => { let s=0, hay=false; for(let d=0; d<7; d++){ const v=m[visIsoAdd(ini,d)]; if(v!=null){ s+=v; hay=true; } } return hay ? s : null; };
+  let rows = '';
+  for(let i=0; i<12; i++){
+    const ini = visIsoAdd(mondayIso0, -7*i);
+    const fin = visIsoAdd(ini, 6);
+    const iniLy = visIsoAdd(ini, -364);
+    const v = sumSemana(ini), lv = sumSemana(iniLy);
+    rows += `<tr>
+      <td>${isoToLabel(ini)} – ${isoToLabel(fin)}</td>
+      <td style="font-weight:800;">${v!=null ? v.toLocaleString('es-ES') : '–'}</td>
+      <td class="hint">${lv!=null ? lv.toLocaleString('es-ES') : '–'}</td>
+      <td>${visPctHtml(v, lv)}</td>
+    </tr>`;
+  }
+  document.querySelector('#vis-stats-table tbody').innerHTML = rows;
+}
+/* Mensual: enero → mes actual del año en curso, cada mes contra el mismo mes del año pasado. */
+function visStatsRenderMensual(){
+  const m = visMapaFechas();
+  visStatsSetHead(['Mes','Visitantes','LY','Var.']);
+  const hoy = new Date();
+  const anio = hoy.getFullYear();
+  const mesActual = hoy.getMonth(); // 0-11
+  const diasEnMes = (y,mi) => new Date(y, mi+1, 0).getDate();
+  const sumMes = (y,mi) => {
+    let s=0, hay=false;
+    const nd = diasEnMes(y,mi);
+    for(let d=1; d<=nd; d++){
+      const iso = `${y}-${String(mi+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const v = m[iso];
+      if(v!=null){ s+=v; hay=true; }
+    }
+    return hay ? s : null;
+  };
+  let rows = '';
+  for(let mi=mesActual; mi>=0; mi--){
+    const v = sumMes(anio, mi), lv = sumMes(anio-1, mi);
+    rows += `<tr>
+      <td>${MONTH_SHORT[mi]} ${anio}</td>
+      <td style="font-weight:800;">${v!=null ? v.toLocaleString('es-ES') : '–'}</td>
+      <td class="hint">${lv!=null ? lv.toLocaleString('es-ES') : '–'}</td>
+      <td>${visPctHtml(v, lv)}</td>
+    </tr>`;
+  }
+  document.querySelector('#vis-stats-table tbody').innerHTML = rows;
+}
 
 function weekNav(delta){
   if(delta === 0) weekOffset = 0; else weekOffset += delta;
@@ -13908,6 +14147,15 @@ async function initVacaciones(){
       });
     });
   }
+  // Staff: Días bloqueados y Bajas son de gestión, no se les muestran. Si
+  // estaban en una de esas pestañas (por un clic previo), vuelven al calendario.
+  if(esStaff()){
+    document.querySelectorAll('[data-vtab][data-solo-manager]').forEach(b=>b.style.display='none');
+    const activa = document.querySelector('[data-vtab].active');
+    if(activa && activa.hasAttribute('data-solo-manager')){
+      document.querySelector('[data-vtab="calendario"]')?.click();
+    }
+  }
   await loadVacData();
   renderVacFiltro();
   renderVacCalendar();
@@ -14086,7 +14334,12 @@ function showVacDayInfo(fecha){
 function openVacRequest(fecha){
   const hoy = fecha || vacDateStr(new Date());
   const yo = currentProfile?.nombre || '';
-  const opts = EQUIPO_HUB.map(n=>`<option value="${n}" ${n===yo?'selected':''}>${n}</option>`).join('');
+  // Un staff solo puede pedir días para sí mismo: el desplegable se queda con
+  // su nombre y bloqueado, en vez de listar a todo el equipo.
+  const opts = esStaff()
+    ? `<option value="${esc(yo)}" selected>${esc(yo)}</option>`
+    : EQUIPO_HUB.map(n=>`<option value="${n}" ${n===yo?'selected':''}>${n}</option>`).join('');
+  const personaAttr = esStaff() ? ' disabled' : '';
   const tipos = Object.entries(VAC_TIPOS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   document.getElementById('modal-root').innerHTML = `
     <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
@@ -14094,7 +14347,7 @@ function openVacRequest(fecha){
         <div class="modal-head"><h2>Solicitar días</h2>
           <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
         <div class="modal-body">
-          <div class="field"><label>Persona</label><select id="vq-persona">${opts}</select></div>
+          <div class="field"><label>Persona</label><select id="vq-persona"${personaAttr}>${opts}</select></div>
           <div class="field-row">
             <div class="field"><label>Desde</label><input type="date" id="vq-desde" value="${hoy}"></div>
             <div class="field"><label>Hasta</label><input type="date" id="vq-hasta" value="${hoy}"></div>
@@ -14130,7 +14383,9 @@ function checkVacAviso(){
 }
 
 async function submitVacRequest(){
-  const persona = document.getElementById('vq-persona').value;
+  // Para un staff la persona es siempre él mismo, se ignore lo que llegue del
+  // desplegable (que además va bloqueado).
+  const persona = esStaff() ? (currentProfile?.nombre || '') : document.getElementById('vq-persona').value;
   const fi = document.getElementById('vq-desde').value;
   const ff = document.getElementById('vq-hasta').value;
   const tipo = document.getElementById('vq-tipo').value;
@@ -14162,17 +14417,40 @@ function renderVacSolicitudes(){
   const pend = document.getElementById('vac-pendientes');
   const hist = document.getElementById('vac-historial');
   if(!pend || !hist) return;
-  const p = vacSolicitudes.filter(s=>s.estado==='pendiente');
-  pend.innerHTML = p.length ? p.map(s=> vacReqRow(s, `
-      <div style="display:flex;gap:8px;">
+  // Staff: solo sus propias solicitudes. No aprueba ni rechaza (eso es de
+  // gestión), pero sí puede retirar una suya mientras siga pendiente.
+  const soloYo = esStaff();
+  const yo = currentProfile?.nombre || '';
+  const mias = s => !soloYo || s.persona === yo;
+
+  const p = vacSolicitudes.filter(s=>s.estado==='pendiente').filter(mias);
+  pend.innerHTML = p.length ? p.map(s=> vacReqRow(s, soloYo
+      ? `<button class="btn btn-danger btn-ghost btn-sm" onclick="cancelarVacSolicitud(${s.id})">Cancelar</button>`
+      : `<div style="display:flex;gap:8px;">
         <button class="btn btn-primary btn-sm" onclick="setVacEstado(${s.id},'aprobado')">Aprobar</button>
         <button class="btn btn-danger btn-ghost btn-sm" onclick="setVacEstado(${s.id},'rechazado')">Rechazar</button>
       </div>`)).join('')
-    : emptyState('No hay solicitudes pendientes','Todo al día.');
-  const h = vacSolicitudes.filter(s=>s.estado!=='pendiente').slice().reverse();
-  hist.innerHTML = h.length ? h.map(s=> vacReqRow(s, `
-      <button class="btn btn-danger btn-ghost btn-sm" onclick="deleteVacSolicitud(${s.id})">Eliminar</button>`)).join('')
-    : emptyState('Sin historial','Aún no se ha aprobado ni rechazado nada.');
+    : emptyState(soloYo ? 'No tienes solicitudes pendientes' : 'No hay solicitudes pendientes',
+                 soloYo ? 'Usa "+ Solicitar días" para pedir vacaciones o recuperación.' : 'Todo al día.');
+
+  const h = vacSolicitudes.filter(s=>s.estado!=='pendiente').filter(mias).slice().reverse();
+  hist.innerHTML = h.length ? h.map(s=> vacReqRow(s, soloYo ? ''
+      : `<button class="btn btn-danger btn-ghost btn-sm" onclick="deleteVacSolicitud(${s.id})">Eliminar</button>`)).join('')
+    : emptyState('Sin historial', soloYo ? 'Aquí verás tus días ya aprobados o rechazados.' : 'Aún no se ha aprobado ni rechazado nada.');
+}
+/* Un staff retira una solicitud suya que todavía nadie ha resuelto. Se
+   comprueba aquí y también en las políticas de Supabase, para que no dependa
+   solo del navegador. */
+async function cancelarVacSolicitud(id){
+  const s = vacSolicitudes.find(x=>x.id===id);
+  if(!s) return;
+  if(s.persona !== currentProfile?.nombre || s.estado !== 'pendiente'){
+    alert('Solo puedes cancelar solicitudes tuyas que sigan pendientes.');
+    return;
+  }
+  if(!confirm('¿Cancelar esta solicitud de días?')) return;
+  await sb.from('vac_solicitudes').delete().eq('id', id);
+  await initVacaciones();
 }
 
 async function setVacEstado(id, estado){
@@ -14190,7 +14468,13 @@ async function deleteVacSolicitud(id){
 function renderVacSaldos(){
   const tbody = document.querySelector('#vac-saldos-table tbody');
   if(!tbody) return;
-  tbody.innerHTML = EQUIPO_HUB.map(n=>{
+  // Staff: solo su propia fila, y los días totales/recuperación en texto (no
+  // editables: el saldo lo fija un manager).
+  const soloYo = esStaff();
+  // Se usa su nombre directamente, no un filtro sobre EQUIPO_HUB: si alguien
+  // todavía no está dado de alta en la tabla staff, igualmente ve su saldo.
+  const personas = soloYo ? [currentProfile?.nombre || ''] : EQUIPO_HUB;
+  tbody.innerHTML = personas.map(n=>{
     const saldo = vacSaldos.find(x=>x.persona===n && x.anio===vacYear) || {};
     const total = saldo.dias_totales ?? 30;
     const recu  = saldo.dias_recuperacion ?? 0;
@@ -14198,12 +14482,18 @@ function renderVacSaldos(){
                   && (s.fecha_inicio||'').startsWith(String(vacYear)));
     const usados = mias.filter(s=>s.estado==='aprobado').reduce((a,s)=>a+(s.dias||0),0);
     const pend   = mias.filter(s=>s.estado==='pendiente').reduce((a,s)=>a+(s.dias||0),0);
+    const celdaTotal = soloYo
+      ? `<td style="font-weight:700;">${total}</td>`
+      : `<td><input type="number" value="${total}" style="width:70px;" onchange="saveVacSaldo('${n}','dias_totales',this.value)"></td>`;
+    const celdaRecu = soloYo
+      ? `<td style="font-weight:700;">${recu}</td>`
+      : `<td><input type="number" value="${recu}" style="width:70px;" onchange="saveVacSaldo('${n}','dias_recuperacion',this.value)"></td>`;
     return `<tr>
       <td style="font-weight:700;color:${roleColors[n]||'var(--text)'}">${n}</td>
-      <td><input type="number" value="${total}" style="width:70px;" onchange="saveVacSaldo('${n}','dias_totales',this.value)"></td>
+      ${celdaTotal}
       <td>${usados}</td><td>${pend}</td>
       <td style="font-weight:800;">${total - usados - pend}</td>
-      <td><input type="number" value="${recu}" style="width:70px;" onchange="saveVacSaldo('${n}','dias_recuperacion',this.value)"></td>
+      ${celdaRecu}
     </tr>`;
   }).join('');
 }
