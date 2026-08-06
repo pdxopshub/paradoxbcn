@@ -3576,9 +3576,17 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
         <!-- ---- Saldos ---- -->
         <div class="vac-sub" id="vac-sub-saldos" style="display:none;">
           <div class="card">
-            <div class="section-title">Saldo de días <span class="hint">Días totales por año y consumo</span></div>
+            <div class="section-title">Saldo de días <span class="hint">Vacaciones en días · Recuperación en horas, convertida a días según lo que trabaja cada persona</span></div>
             <div class="table-wrap"><table id="vac-saldos-table"><thead>
-              <tr><th>Persona</th><th>Vacaciones año</th><th>Usados</th><th>Pendientes</th><th>Restantes</th><th>Recuperación</th></tr>
+              <tr>
+                <th rowspan="2" style="vertical-align:bottom;">Persona</th>
+                <th colspan="4">Vacaciones</th>
+                <th colspan="4">Recuperación (horas)</th>
+              </tr>
+              <tr>
+                <th>Total</th><th>Confir.</th><th>Pendientes</th><th>Restante</th>
+                <th>H. totales</th><th>H. confir.</th><th>H. restante</th><th>En días</th>
+              </tr>
             </thead><tbody></tbody></table></div>
           </div>
         </div>
@@ -14545,11 +14553,20 @@ async function deleteVacSolicitud(id){
   await initVacaciones();
 }
 
+/* Horas de recuperación → días: mismo criterio que la hoja "Vacaciones_2026"
+   de Laia. Cada persona divide sus horas restantes entre lo que trabaja al
+   día. Ignacio, Paula y Laia son jornada de 8h; Ceci 6,5h; el resto del
+   staff (y Roy) 4h. Mireia no acumula horas de recuperación: no tiene
+   jornada de sala que recuperar, así que ni se le muestra la columna. */
+const VAC_HORAS_DIA = { Ignacio:8, Paula:8, Laia:8, Ceci:6.5 };
+function vacHorasDiaDe(persona){ return VAC_HORAS_DIA[persona] ?? 4; }
+function vacTieneRecuperacion(persona){ return persona !== 'Mireia'; }
+
 function renderVacSaldos(){
   const tbody = document.querySelector('#vac-saldos-table tbody');
   if(!tbody) return;
-  // Staff: solo su propia fila, y los días totales/recuperación en texto (no
-  // editables: el saldo lo fija un manager).
+  // Staff: solo su propia fila, y todo en texto (no editable: el saldo lo
+  // fija un manager).
   const soloYo = esStaff();
   // Se usa su nombre directamente, no un filtro sobre EQUIPO_HUB: si alguien
   // todavía no está dado de alta en la tabla staff, igualmente ve su saldo.
@@ -14557,7 +14574,6 @@ function renderVacSaldos(){
   tbody.innerHTML = personas.map(n=>{
     const saldo = vacSaldos.find(x=>x.persona===n && x.anio===vacYear) || {};
     const total = saldo.dias_totales ?? 30;
-    const recu  = saldo.dias_recuperacion ?? 0;
     const mias = vacSolicitudes.filter(s=> s.persona===n && s.tipo!=='recuperacion'
                   && (s.fecha_inicio||'').startsWith(String(vacYear)));
     const usados = mias.filter(s=>s.estado==='aprobado').reduce((a,s)=>a+(s.dias||0),0);
@@ -14565,15 +14581,30 @@ function renderVacSaldos(){
     const celdaTotal = soloYo
       ? `<td style="font-weight:700;">${total}</td>`
       : `<td><input type="number" value="${total}" style="width:70px;" onchange="saveVacSaldo('${n}','dias_totales',this.value)"></td>`;
-    const celdaRecu = soloYo
-      ? `<td style="font-weight:700;">${recu}</td>`
-      : `<td><input type="number" value="${recu}" style="width:70px;" onchange="saveVacSaldo('${n}','dias_recuperacion',this.value)"></td>`;
+
+    let celdasRecu;
+    if(!vacTieneRecuperacion(n)){
+      celdasRecu = `<td class="hint">—</td><td class="hint">—</td><td class="hint">—</td><td class="hint">—</td>`;
+    } else {
+      const hTotal  = saldo.horas_recup_total  ?? 0;
+      const hConfir = saldo.horas_recup_confir ?? 0;
+      const hResto  = hTotal - hConfir;
+      const enDias  = Math.round((hResto / vacHorasDiaDe(n)) * 100) / 100;
+      celdasRecu = soloYo
+        ? `<td style="font-weight:700;">${hTotal}</td><td style="font-weight:700;">${hConfir}</td>
+           <td style="font-weight:700;">${hResto}</td><td style="font-weight:800;">${enDias}</td>`
+        : `<td><input type="number" step="0.5" value="${hTotal}" style="width:70px;" onchange="saveVacSaldo('${n}','horas_recup_total',this.value)"></td>
+           <td><input type="number" step="0.5" value="${hConfir}" style="width:70px;" onchange="saveVacSaldo('${n}','horas_recup_confir',this.value)"></td>
+           <td>${hResto}</td>
+           <td style="font-weight:800;">${enDias}</td>`;
+    }
+
     return `<tr>
       <td style="font-weight:700;color:${roleColors[n]||'var(--text)'}">${n}</td>
       ${celdaTotal}
       <td>${usados}</td><td>${pend}</td>
       <td style="font-weight:800;">${total - usados - pend}</td>
-      ${celdaRecu}
+      ${celdasRecu}
     </tr>`;
   }).join('');
 }
@@ -14582,8 +14613,9 @@ async function saveVacSaldo(persona, campo, valor){
   const row = { persona, anio: vacYear };
   row[campo] = parseFloat(valor) || 0;
   const prev = vacSaldos.find(x=>x.persona===persona && x.anio===vacYear) || {};
-  row.dias_totales       = campo==='dias_totales'       ? row[campo] : (prev.dias_totales ?? 30);
-  row.dias_recuperacion  = campo==='dias_recuperacion'  ? row[campo] : (prev.dias_recuperacion ?? 0);
+  row.dias_totales        = campo==='dias_totales'        ? row[campo] : (prev.dias_totales ?? 30);
+  row.horas_recup_total   = campo==='horas_recup_total'   ? row[campo] : (prev.horas_recup_total ?? 0);
+  row.horas_recup_confir  = campo==='horas_recup_confir'  ? row[campo] : (prev.horas_recup_confir ?? 0);
   await sb.from('vac_saldos').upsert(row, {onConflict:'persona,anio'});
   await loadVacData();
   renderVacSaldos();
