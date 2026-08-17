@@ -12411,19 +12411,32 @@ function depoSetDenom(key, val){
   depoAutoGuardar();
 }
 /* PDF: abre el diálogo de impresión del navegador (Guardar como PDF) mostrando
-   solo las dos tablas de Depósito Cajas, igual que el Excel que se manda por email. */
+   solo las dos tablas de Depósito Cajas, igual que el Excel que se manda por email.
+   El nombre que propone el navegador al guardar como PDF sale del título de la
+   página, así que se cambia justo antes de imprimir y se restaura después —
+   mismo patrón que usa el roster. Formato: Deposito_Cajas_10ago_16ago */
+const DEPO_MESES_ABR = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+let DEPO_TITULO_PREVIO = null;
 function depoImprimir(){
   const t = document.getElementById('depo-print-title');
+  const monday = new Date(loomisMonday);
+  const sunday = new Date(monday); sunday.setDate(sunday.getDate()+6);
   if(t){
-    const monday = new Date(loomisMonday);
-    const sunday = new Date(monday); sunday.setDate(sunday.getDate()+6);
     const fmt = d => d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
     t.textContent = `Depósito Cajas — ${fmt(monday)} a ${fmt(sunday)}`;
   }
+  if(DEPO_TITULO_PREVIO === null) DEPO_TITULO_PREVIO = document.title;
+  document.title = `Deposito_Cajas_${monday.getDate()}${DEPO_MESES_ABR[monday.getMonth()]}_${sunday.getDate()}${DEPO_MESES_ABR[sunday.getMonth()]}`;
   document.body.classList.add('depo-imprimiendo');
   window.print();
 }
-window.addEventListener('afterprint', ()=> document.body.classList.remove('depo-imprimiendo'));
+function depoRestaurarTitulo(){
+  if(DEPO_TITULO_PREVIO !== null){ document.title = DEPO_TITULO_PREVIO; DEPO_TITULO_PREVIO = null; }
+}
+window.addEventListener('afterprint', ()=>{
+  document.body.classList.remove('depo-imprimiendo');
+  depoRestaurarTitulo();
+});
 
 /* Ventanas de info: sustituyen a las antiguas cápsulas "Sobre de Loomis" y
    "Pantallazo SumUp", que ahora se abren como popup en vez de ocupar sitio
