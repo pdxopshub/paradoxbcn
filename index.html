@@ -2175,6 +2175,13 @@
     *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
     body.depo-imprimiendo *{visibility:hidden;}
     body.depo-imprimiendo #depo-print-stack, body.depo-imprimiendo #depo-print-stack *{visibility:visible;}
+    /* El sidebar (height:100vh) y el .app (min-height:100vh) seguían ocupando
+       una pantalla entera de alto aunque estuvieran en visibility:hidden —
+       eso es lo que generaba la segunda página en blanco al guardar el PDF.
+       Al quitarles esa altura, el documento impreso mide solo lo que ocupan
+       las dos tablas y entra en una única página. */
+    body.depo-imprimiendo .sidebar{display:none !important;}
+    body.depo-imprimiendo .app{display:block !important;min-height:0 !important;}
     /* Las dos tablas salen una debajo de otra, en el mismo orden que en
        pantalla, ocupando todo el ancho de la hoja. */
     body.depo-imprimiendo #depo-print-stack{position:absolute;left:0;top:0;width:100%;
