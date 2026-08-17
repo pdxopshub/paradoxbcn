@@ -1,8 +1,8 @@
 // PDX Ops Hub — service worker
 // A propósito NO guarda nada en caché: cada vez que abras la app instalada
-// pedirá siempre la versión más reciente de GitHub Pages. Así, cualquier
-// cambio que subamos al repositorio se ve reflejado sin tener que
-// reinstalar ni borrar caché a mano.
+// pedirá siempre la versión más reciente. Así, cualquier cambio que
+// despleguemos se ve reflejado sin tener que reinstalar ni borrar caché
+// a mano.
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
