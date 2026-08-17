@@ -734,6 +734,14 @@
   #staff-table th.g-fever{background:#EAF1FF;color:#12294D;}
   #staff-table th.g-sumup{background:#EFF0F3;color:#1B1F27;}
   #staff-table th.g-turnos{background:#1a1c20;color:#fff;}
+  #staff-table th.g-invit{background:#0f2a3d;color:#fff;}
+  #staff-table td.g-invit{background:rgba(15,42,61,.05);}
+  #staff-table .grp-row .grp-invit{background:#0f2a3d;color:#fff;}
+  #staff-table .invit-cell{padding:2px 4px!important;}
+  #staff-table .invit-cell input{width:100%;text-align:center;padding:3px 2px;border:1px solid transparent;
+    border-radius:5px;background:transparent;font-weight:800;font-size:12px;color:var(--text);}
+  #staff-table .invit-cell input:hover{border-color:var(--line-strong);}
+  #staff-table .invit-cell input:focus{outline:none;border-color:var(--accent);background:var(--surface);}
   #staff-table td.g-datos{background:rgba(42,53,71,.045);}
   #staff-table td.g-oper {background:rgba(74,46,99,.05);}
   #staff-table td.g-nfc  {background:rgba(14,107,73,.055);}
@@ -2636,6 +2644,11 @@
   .user-chip .uc-rol{font-size:10.5px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;}
   .user-chip .uc-logout{background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:10px;font-weight:700;padding:0;flex-shrink:0;}
   .user-chip .uc-logout:hover{color:var(--danger);}
+  .user-chip .uc-refresh{background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:14px;font-weight:700;
+    padding:0;flex-shrink:0;line-height:1;transition:transform .3s,color .12s;}
+  .user-chip .uc-refresh:hover{color:var(--accent);}
+  .user-chip .uc-refresh.spin{animation:uc-refresh-spin .6s linear;}
+  @keyframes uc-refresh-spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 
 
 /* ============ PDXspot (Grupos) — CSS scoped bajo #pdxspot-embed ============ */
@@ -2938,6 +2951,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <div class="user-chip">
         <div class="avatar" id="avatar">?</div>
         <div class="uc-name" id="uc-name">—</div>
+        <button class="uc-refresh" onclick="hubActualizar()" title="Recargar la última versión del Hub, sin cerrar sesión">⟳</button>
         <button class="uc-logout" onclick="doLogout()">Salir</button>
       </div>
     </div>
@@ -4664,11 +4678,10 @@ const IMPORT_SEED = [{"nombre": "Escuela English School Barcelona", "tipo": "Esc
    ============================================================ */
 const SUPABASE_URL = 'https://eztzftdqhxvmkqzstbfm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6dHpmdGRxaHh2bWtxenN0YmZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMDc2MzQsImV4cCI6MjA5OTc4MzYzNH0.WUwENBDXtLviMBcrlbWUwjU3rwCszGj8ZL8cs_HfTDI';
-// persistSession:false = evita usar localStorage (necesario para previsualizar dentro de Claude).
-// Una vez desplegado en GitHub Pages puedes cambiarlo a true para no tener que
-// iniciar sesión cada vez que se recarga la página.
+// persistSession:true — la sesión se guarda en localStorage, así que recargar
+// la página (o pulsar el botón de actualizar) no obliga a volver a hacer login.
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: { persistSession: false, autoRefreshToken: true }
+  auth: { persistSession: true, autoRefreshToken: true }
 });
 
 /* ============================================================
@@ -4900,6 +4913,17 @@ async function refreshEquipoHub(){
   const staffNames = (!error && data) ? data.map(s=>s.nombre).filter(Boolean) : [];
   const set = new Set([...USUARIOS_HUB.map(u=>u.nombre), ...staffNames]);
   EQUIPO_HUB = [...set].sort((a,b)=>a.localeCompare(b,'es'));
+}
+
+/* Botón ⟳ del sidebar: recarga la página pidiendo siempre la última versión
+   publicada (sin depender de la caché del navegador), sin tocar la sesión —
+   con persistSession:true el login sigue ahí después de recargar. */
+function hubActualizar(){
+  const btn = document.querySelector('.uc-refresh');
+  if(btn) btn.classList.add('spin');
+  const url = new URL(location.href);
+  url.searchParams.set('_r', Date.now());
+  setTimeout(()=>{ location.href = url.toString(); }, 150);
 }
 
 /* Try to resume an existing session on load (in case persistSession is later enabled) */
@@ -7018,6 +7042,9 @@ const STAFF_COL_LABELS = ['Nombre','Estado','Teléfono','Email','DNI','Cumpleañ
   'Cambios de turno · Ene','Cambios de turno · Feb','Cambios de turno · Mar','Cambios de turno · Abr',
   'Cambios de turno · May','Cambios de turno · Jun','Cambios de turno · Jul','Cambios de turno · Ago',
   'Cambios de turno · Sep','Cambios de turno · Oct','Cambios de turno · Nov','Cambios de turno · Dic',
+  'Invitaciones PDX · Ene','Invitaciones PDX · Feb','Invitaciones PDX · Mar','Invitaciones PDX · Abr',
+  'Invitaciones PDX · May','Invitaciones PDX · Jun','Invitaciones PDX · Jul','Invitaciones PDX · Ago',
+  'Invitaciones PDX · Sep','Invitaciones PDX · Oct','Invitaciones PDX · Nov','Invitaciones PDX · Dic',
   ''];
 /* Clave nueva: la anterior guardaba índices de las pestañas viejas y ocultaría
    columnas equivocadas ahora que todo va en una sola tabla. */
@@ -7281,11 +7308,37 @@ async function fetchStaffTurnosPorMes(anio){
   return out;
 }
 
+/* ---------- Invitaciones PDX por mes (módulo de columnas en Staff) ----------
+   A diferencia de Cambios de turno, esto NO se calcula solo: se escribe a
+   mano (entradas de Hotel Heroes u otras invitaciones que se le dan a cada
+   persona), una tabla por staff_id + año + mes. */
+async function fetchStaffInvitaciones(anio){
+  const { data, error } = await sb.from('staff_invitaciones').select('staff_id,mes,cantidad').eq('anio', anio);
+  if(error){ console.error('staff_invitaciones', error); return {}; }
+  const out = {};
+  (data||[]).forEach(r=>{
+    if(!out[r.staff_id]) out[r.staff_id] = Array(12).fill(0);
+    out[r.staff_id][r.mes] = r.cantidad;
+  });
+  return out;
+}
+async function stpGuardarInvitacion(inputEl){
+  const staffId = parseInt(inputEl.dataset.invStaff, 10);
+  const mes = parseInt(inputEl.dataset.invMes, 10);
+  const anio = parseInt(inputEl.dataset.invAnio, 10);
+  const val = inputEl.value === '' ? 0 : Math.max(0, parseInt(inputEl.value, 10) || 0);
+  const { error } = await sb.from('staff_invitaciones')
+    .upsert({staff_id: staffId, anio, mes, cantidad: val}, {onConflict: 'staff_id,anio,mes'});
+  if(error){ console.error('guardar invitación PDX', error); alert('No se pudo guardar: '+error.message); return; }
+  inputEl.value = val ? val : '';
+}
+
 /* Tabla única de Equipo: Datos + Operativa + Accesos en una sola rejilla con
    scroll lateral. Nombre y Estado quedan congelados a la izquierda (clases
    st-fix-1 / st-fix-2) para no perder de vista de quién es cada fila. */
-function staffColumns(turnosPorMes, anioTurnos){
+function staffColumns(turnosPorMes, anioTurnos, invitPorMes){
   turnosPorMes = turnosPorMes || {};
+  invitPorMes = invitPorMes || {};
   anioTurnos = anioTurnos || new Date().getFullYear();
   const nombre = {key:'nombre', th:'Nombre', sort:'nombre', w:230, cls:'st-fix-1', cell:s=>`
       <td class="nm st-fix-1"><div class="staff-name" onclick="openStaffModal(${s.id})">
@@ -7344,6 +7397,13 @@ function staffColumns(turnosPorMes, anioTurnos){
         return `<td class="turnos-cell${n>=2?' turnos-alto':''}">${n ? n : ''}</td>`;
       }
     })),
+    ...MESES_ABR_TURNOS.map((mes,i)=>({
+      key:'invit_m'+i, th:mes, w:44, grp:'invit', cell:s=>{
+        const n = (invitPorMes[s.id] && invitPorMes[s.id][i]) || 0;
+        return `<td class="invit-cell"><input type="number" min="0" value="${n?n:''}" placeholder="—"
+          data-inv-staff="${s.id}" data-inv-mes="${i}" data-inv-anio="${anioTurnos}" onchange="stpGuardarInvitacion(this)"></td>`;
+      }
+    })),
     borrar,
   ];
 
@@ -7357,6 +7417,7 @@ function staffColumns(turnosPorMes, anioTurnos){
       {span:2, cls:'grp-fever',   label:'FEVER'},
       {span:2, cls:'grp-sumup',   label:'SUMUP'},
       {span:12, cls:'grp-turnos', label:'CAMBIOS DE TURNO · '+anioTurnos},
+      {span:12, cls:'grp-invit',  label:'INVITACIONES PDX · '+anioTurnos},
       {span:1, cls:'grp-none',    label:''},
     ],
     cols
@@ -7769,7 +7830,9 @@ function cromosBindDragPaste(){
 async function renderStaffTable(){
   setTimeout(installTableFilters, 60);
   const anioTurnos = new Date().getFullYear();
-  const [all, turnosPorMes] = await Promise.all([fetchStaff(), fetchStaffTurnosPorMes(anioTurnos)]);
+  const [all, turnosPorMes, invitPorMes] = await Promise.all([
+    fetchStaff(), fetchStaffTurnosPorMes(anioTurnos), fetchStaffInvitaciones(anioTurnos)
+  ]);
   const modo = document.getElementById('staff-filtro-estado')?.value || 'activos';
   const list = all.filter(s=>{
     const act = s.activo !== false;
@@ -7777,7 +7840,7 @@ async function renderStaffTable(){
   });
   applyStaffSort(list);
 
-  const {grupos, cols} = staffColumns(turnosPorMes, anioTurnos);
+  const {grupos, cols} = staffColumns(turnosPorMes, anioTurnos, invitPorMes);
   const table = document.getElementById('staff-table');
   const thead = document.getElementById('staff-thead');
   const tbody = document.querySelector('#staff-table tbody');
