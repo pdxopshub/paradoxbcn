@@ -4836,35 +4836,12 @@ async function doLogout(){
   document.getElementById('login-pass').value = '';
   document.getElementById('login-pass').focus();
 }
-/* Refresco automático y silencioso del Hub: si alguien deja la pestaña
-   abierta todo el día (recepción, duty, staff...) nunca vería los cambios
-   que vamos publicando. Cada ~5 min comprobamos si ya han pasado ~4h desde
-   que se cargó la página; si es así y no hay nada en edición (ni un campo
-   con foco ni un modal abierto), recargamos pidiendo la versión más
-   reciente — sin tocar la sesión (persistSession:true) y sin que nadie lo
-   note. Si en ese momento alguien está trabajando, simplemente esperamos
-   al siguiente chequeo.*/
-const HUB_AUTOREFRESH_MS = 4 * 60 * 60 * 1000; // ~4 horas
-const HUB_AUTOREFRESH_CHECK_MS = 5 * 60 * 1000; // revisa cada 5 minutos
-const hubAutoRefreshDesde = Date.now();
-function hubHayAlgoEnEdicion(){
-  const el = document.activeElement;
-  if(el){
-    const tag = el.tagName;
-    if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable) return true;
-  }
-  if(document.querySelector('.modal-overlay.open')) return true;
-  return false;
-}
-function hubIniciarAutoRefresh(){
-  setInterval(()=>{
-    if(Date.now() - hubAutoRefreshDesde < HUB_AUTOREFRESH_MS) return;
-    if(hubHayAlgoEnEdicion()) return; // no molestar; se reintenta en el próximo chequeo
-    const url = new URL(location.href);
-    url.searchParams.set('_r', Date.now());
-    location.href = url.toString();
-  }, HUB_AUTOREFRESH_CHECK_MS);
-}
+/* Antes había aquí un refresco automático cada ~4h. Se ha quitado a
+   propósito: forzaba descargar el Hub entero (2,5 MB) en cada tablet
+   abierta aunque no hubiera ningún cambio que traer, y eso consumía
+   créditos de Netlify para nada. Ahora, cuando se publica algo nuevo,
+   basta con avisar al equipo de que pulsen el botón de actualizar del
+   menú lateral. */
 async function afterLogin(user){
   currentUser = user;
   const { data: profile, error } = await sb.from('profiles').select('nombre,rol').eq('id', user.id).single();
@@ -4877,7 +4854,6 @@ async function afterLogin(user){
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app-root').style.display = 'flex';
   updateUserChip();
-  hubIniciarAutoRefresh();
   // La cuenta DUTY no pasa por initApp(): ese arranque carga el Resumen, el
   // staff, la PDA… cosas que ni debe ver ni puede leer. Va directa al recap.
   if(esDuty()){ aplicarModoDuty(); return; }
@@ -4964,15 +4940,26 @@ async function refreshEquipoHub(){
   EQUIPO_HUB = [...set].sort((a,b)=>a.localeCompare(b,'es'));
 }
 
-/* Botón ⟳ del sidebar: recarga la página pidiendo siempre la última versión
-   publicada (sin depender de la caché del navegador), sin tocar la sesión —
-   con persistSession:true el login sigue ahí después de recargar. */
+/* Botón ⟳ del sidebar: trae siempre la última versión publicada, sin tocar
+   la sesión (con persistSession:true el login sigue ahí tras recargar).
+
+   Antes esto añadía un "?_r=<hora>" para saltarse la caché, pero eso obligaba
+   a descargar los 2,5 MB del Hub SIEMPRE, aunque no hubiera ningún cambio.
+   No hace falta: el servidor manda "max-age=0, must-revalidate" + ETag, así
+   que una recarga normal ya pregunta al servidor cada vez. Si no hay nada
+   nuevo responde "304 Not Modified" y no se descarga nada (0 bytes); si sí
+   lo hay, baja la versión nueva. Mismo resultado, sin gasto inútil. */
 function hubActualizar(){
   const btn = document.querySelector('.uc-refresh');
   if(btn) btn.classList.add('spin');
+  // De paso se limpia el "_r" que pudiera quedar de versiones anteriores.
   const url = new URL(location.href);
-  url.searchParams.set('_r', Date.now());
-  setTimeout(()=>{ location.href = url.toString(); }, 150);
+  url.searchParams.delete('_r');
+  const limpia = url.toString();
+  setTimeout(()=>{
+    if(limpia !== location.href) location.replace(limpia);
+    else location.reload();
+  }, 150);
 }
 
 /* Try to resume an existing session on load (in case persistSession is later enabled) */
