@@ -2971,6 +2971,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <button class="navitem" data-view="turnos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
           Cambios de turno
+          <span class="dot" id="turnos-dot"></span>
         </button>
           <button class="navitem" data-view="chat">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.9 8.9 0 01-4-.9L3 21l1.9-4.9A8.4 8.4 0 0112 3a8.4 8.4 0 019 8.5z"/></svg>
@@ -3190,6 +3191,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ INFORMES (solo Ignacio) ============ -->
       <div class="view" id="view-informes">
+        <div class="tab-strip inf-no-print" style="margin-bottom:14px;">
+          <button class="tab-btn active" data-inftab="resenas" onclick="infTabSwitch('resenas')">Reseñas</button>
+          <button class="tab-btn" data-inftab="tienda" onclick="infTabSwitch('tienda')">Tienda</button>
+        </div>
         <div id="inf-print-stack">
           <div id="inf-content"></div>
         </div>
@@ -3447,6 +3452,24 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 
       <!-- ============ CAMBIOS DE TURNO ============ -->
       <div class="view" id="view-turnos">
+
+        <!-- ---------- STAFF: autoservicio, solo lo suyo ---------- -->
+        <div id="turnos-staff-view" style="display:none;max-width:640px;">
+          <div class="card" style="margin-bottom:14px;">
+            <div class="section-title">Pedir un cambio de turno</div>
+            <div id="turno-block-1-staff" class="turno-block" style="margin-bottom:12px;"></div>
+            <div id="turno-block-2-staff" class="turno-block" style="margin-bottom:12px;"></div>
+            <div><label class="field-label">Motivo</label><input id="turno-motivo-staff" placeholder="Motivo (opcional)"></div>
+            <div style="margin-top:12px;"><button class="btn btn-primary" onclick="addTurnoRequestStaff()">Enviar solicitud</button></div>
+          </div>
+          <div class="card">
+            <div class="section-title">Mis solicitudes</div>
+            <div class="table-wrap"><table id="turnos-mias-table"><thead>
+              <tr><th>Con quién</th><th>Motivo</th><th>Turno / fecha</th><th>Estado</th></tr>
+            </thead><tbody></tbody></table></div>
+          </div>
+        </div>
+
         <div class="turnos-layout">
 
           <!-- ---------- IZQUIERDA: gestión ---------- -->
@@ -5026,9 +5049,10 @@ function aplicarModoDuty(){
 function aplicarModoStaff(){
   if(!esStaff()) return;
   document.body.classList.add('staff-only');
-  // Solo queda navegable "Who is Off?"; el resto se oculta de la barra lateral.
+  // Solo quedan navegables "Who is Off?" y "Cambios de turno" (para pedir
+  // los suyos); el resto se oculta de la barra lateral.
   document.querySelectorAll('#nav .navitem').forEach(b=>{
-    if(b.dataset.view !== 'vacaciones') b.style.display = 'none';
+    if(!['vacaciones','turnos'].includes(b.dataset.view)) b.style.display = 'none';
   });
   // Un grupo del menú que se quede sin botones visibles no debe dejar la etiqueta suelta.
   document.querySelectorAll('#nav .navgroup').forEach(g=>{
@@ -5385,9 +5409,9 @@ async function siProcesarCSV(){
   renderSoldItems();
 }
 function goView(v){
-  // Las cuentas de staff solo tienen acceso a "Who is Off?": cualquier intento
-  // de ir a otra vista (enlace interno, estado guardado, consola) cae aquí.
-  if(esStaff() && v !== 'vacaciones') v = 'vacaciones';
+  // Las cuentas de staff solo tienen acceso a "Who is Off?" y a "Cambios de
+  // turno" (para pedir los suyos): cualquier otro intento cae en vacaciones.
+  if(esStaff() && v !== 'vacaciones' && v !== 'turnos') v = 'vacaciones';
   // La cuenta DUTY, igual, pero encerrada en el Recap.
   if(esDuty() && v !== 'recap') v = 'recap';
   const btn = document.querySelector('.navitem[data-view="'+v+'"]');
@@ -5406,7 +5430,24 @@ function goView(v){
   if(v==='curriculums') renderCurriculums();
   if(v==='spv'){ renderSpvGrid(); renderCommissionHistory(); }
   if(v==='staff'){ stAplicarPermisos(); renderStaffTable(); if(stTab==='paises') stpInit(); }
-  if(v==='turnos') renderTurnos();
+  if(v==='turnos'){
+    const layoutEl = document.querySelector('.turnos-layout');
+    const staffEl = document.getElementById('turnos-staff-view');
+    if(esStaff()){
+      if(layoutEl) layoutEl.style.display = 'none';
+      if(staffEl) staffEl.style.display = 'block';
+      renderTurnosStaffView();
+    } else {
+      if(layoutEl) layoutEl.style.display = '';
+      if(staffEl) staffEl.style.display = 'none';
+      renderTurnos();
+      sb.from('turnos').select('id').order('id',{ascending:false}).limit(1).then(({data})=>{
+        const maxId = (data && data[0]) ? data[0].id : 0;
+        localStorage.setItem(notifSeenKey('turnos'), maxId);
+        document.getElementById('turnos-dot')?.classList.remove('show');
+      });
+    }
+  }
   if(v==='ev') renderEvTimeline();
   if(v==='diego') renderDiego();
   if(v==='cambiobanco') renderCambioBanco();
@@ -5416,7 +5457,7 @@ function goView(v){
   if(v==='visitas') visMainInit();
   if(v==='recap'){ renderRecap(); maybeAutoOpenRecapInforme(); }
   if(v==='resenas') renderResenas();
-  if(v==='informes'){ if(!esInformesAdmin()){ goView('dashboard'); return; } renderInformes(); }
+  if(v==='informes'){ if(!esInformesAdmin()){ goView('dashboard'); return; } infTabSwitch('resenas'); }
   if(v==='marketing') renderMarketing();
   if(v==='loomis') renderLoomis();
   if(v==='rosters'){
@@ -5541,6 +5582,7 @@ async function checkNotificaciones(){
     }catch(e){ /* si la tabla no responde, no rompemos el resto */ }
   }
   try{ await refreshDashboardRecapBadge(); }catch(e){ /* no romper el resto de notificaciones */ }
+  try{ await checkTurnosDot(); }catch(e){ /* no romper el resto de notificaciones */ }
 }
 async function marcarNotifVista(view){
   const cfg = NOTIF_FUENTES[view];
@@ -7010,6 +7052,8 @@ const INF_MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio
 let INF_TITULO_PREVIO = null;
 let INF_OBS_TIMER = null;
 let INF_ACTIVO_CACHE = null;
+let INF_OBS_KEY = null;
+let INF_PDF_FILENAME = null;
 
 function infMesKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
 function infMesLabel(mesKey){
@@ -7046,6 +7090,11 @@ async function renderInformes(){
     if(nuevo) activo = nuevo;
   }
   INF_ACTIVO_CACHE = activo;
+  INF_OBS_KEY = activo.mes_reportado;
+  {
+    const [yy,mm] = activo.mes_reportado.split('-').map(Number);
+    INF_PDF_FILENAME = `Informe_Reseñas_${INF_MESES_ABR[mm-1]}${String(yy).slice(2)}`;
+  }
 
   const { data: cacheRows } = await sb.from('reviews_cache').select('*');
   const cacheBySource = {};
@@ -7227,7 +7276,6 @@ function infPintar(el, activo, cacheBySource, staffRows, baseNfcById, obsTexto){
 
       <div class="inf-sec inf-espaciada">Observaciones de Ignacio</div>
       <div class="inf-obs">
-        <div class="inf-lbl">&#9998; Editable &mdash; solo tú lo ves y lo editas <span class="inf-guardado" id="inf-guardado">&#10003; guardado</span></div>
         <textarea id="inf-obs-texto" placeholder="Escribe aquí tus notas del mes: qué ha ido bien, qué vigilar, acciones para el mes que viene…" oninput="infGuardarObsDebounced()">${esc(obsTexto)}</textarea>
       </div>
 
@@ -7242,20 +7290,19 @@ function infGuardarObsDebounced(){
   INF_OBS_TIMER = setTimeout(infGuardarObs, 900);
 }
 async function infGuardarObs(){
-  if(!INF_ACTIVO_CACHE) return;
+  if(!INF_OBS_KEY) return;
   const txt = document.getElementById('inf-obs-texto')?.value || '';
   const { error } = await sb.from('informes_observaciones')
-    .upsert({ mes: INF_ACTIVO_CACHE.mes_reportado, texto: txt, actualizado_at: new Date().toISOString() });
+    .upsert({ mes: INF_OBS_KEY, texto: txt, actualizado_at: new Date().toISOString() });
   if(error){ console.error('informes: guardar observaciones', error); return; }
   const flag = document.getElementById('inf-guardado');
   if(flag){ flag.classList.add('on'); setTimeout(()=>flag.classList.remove('on'), 1600); }
 }
 
 function infDescargarPDF(){
-  if(!INF_ACTIVO_CACHE) return;
-  const [y,m] = INF_ACTIVO_CACHE.mes_reportado.split('-').map(Number);
+  if(!INF_PDF_FILENAME) return;
   if(INF_TITULO_PREVIO === null) INF_TITULO_PREVIO = document.title;
-  document.title = `Informe_Reseñas_${INF_MESES_ABR[m-1]}${String(y).slice(2)}`;
+  document.title = INF_PDF_FILENAME;
   document.body.classList.add('inf-imprimiendo');
   window.print();
 }
@@ -7266,6 +7313,140 @@ window.addEventListener('afterprint', ()=>{
   document.body.classList.remove('inf-imprimiendo');
   infRestaurarTitulo();
 });
+
+/* ---------- pestañas Reseñas / Tienda ---------- */
+let INF_TAB = 'resenas';
+function infTabSwitch(tab){
+  INF_TAB = tab;
+  document.querySelectorAll('[data-inftab]').forEach(b=>b.classList.toggle('active', b.dataset.inftab===tab));
+  if(tab === 'tienda') renderInformesTienda();
+  else renderInformes();
+}
+
+/* ============================================================
+   INFORMES — Tienda (ingresos por persona, mes pasado vs este mes)
+   Fuente: spv_entries (fecha, staff_nombre, importe) y spv_days
+   (fecha, visitantes) — las mismas tablas que ya alimentan SPV, así que
+   los números cuadran con lo que ya se ve ahí.
+   ============================================================ */
+function infMesRango(offsetMeses){
+  const hoy = new Date();
+  const ini = new Date(hoy.getFullYear(), hoy.getMonth()+offsetMeses, 1);
+  const fin = new Date(hoy.getFullYear(), hoy.getMonth()+offsetMeses+1, 1);
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return { desde: iso(ini), hasta: iso(fin) };
+}
+async function renderInformesTienda(){
+  const el = document.getElementById('inf-content');
+  el.innerHTML = '<div class="empty-state">Cargando informe…</div>';
+
+  const este = infMesRango(0), pasado = infMesRango(-1);
+
+  const [{data:entEste}, {data:entPasado}, {data:diasEste}, {data:diasPasado}] = await Promise.all([
+    sb.from('spv_entries').select('staff_nombre,importe').gte('fecha',este.desde).lt('fecha',este.hasta),
+    sb.from('spv_entries').select('staff_nombre,importe').gte('fecha',pasado.desde).lt('fecha',pasado.hasta),
+    sb.from('spv_days').select('visitantes').gte('fecha',este.desde).lt('fecha',este.hasta),
+    sb.from('spv_days').select('visitantes').gte('fecha',pasado.desde).lt('fecha',pasado.hasta),
+  ]);
+
+  const sumaPorPersona = rows => {
+    const m = {};
+    (rows||[]).forEach(r=>{ m[r.staff_nombre] = (m[r.staff_nombre]||0) + (Number(r.importe)||0); });
+    return m;
+  };
+  const esteM = sumaPorPersona(entEste), pasadoM = sumaPorPersona(entPasado);
+  const personas = [...new Set([...Object.keys(esteM), ...Object.keys(pasadoM)])]
+    .filter(n=> n && n!=='Nuevo')
+    .sort((a,b)=> (esteM[b]||0) - (esteM[a]||0));
+
+  const totEste = Object.values(esteM).reduce((a,v)=>a+v,0);
+  const totPasado = Object.values(pasadoM).reduce((a,v)=>a+v,0);
+  const totDiff = totEste - totPasado;
+
+  const sumVis = rows => (rows||[]).reduce((a,r)=>a+(r.visitantes||0),0);
+  const visEste = sumVis(diasEste), visPasado = sumVis(diasPasado);
+  const spvMedio = visEste ? (totEste/visEste/1.21) : 0;
+
+  const hoy = new Date();
+  const mesLabel = `${INF_MESES_LARGO[hoy.getMonth()].charAt(0).toUpperCase()+INF_MESES_LARGO[hoy.getMonth()].slice(1)} ${hoy.getFullYear()}`;
+  const nombreMesPasado = INF_MESES_LARGO[(hoy.getMonth()+11)%12];
+
+  INF_OBS_KEY = `${infMesKey(hoy)}-tienda`;
+  INF_PDF_FILENAME = `Informe_Tienda_${INF_MESES_ABR[hoy.getMonth()]}${String(hoy.getFullYear()).slice(2)}`;
+
+  const { data: obsRow } = await sb.from('informes_observaciones').select('*').eq('mes', INF_OBS_KEY).maybeSingle();
+
+  const n1 = v => Math.round(v).toLocaleString('es-ES');
+  const badgeIngresos = totDiff>0 ? `<span class="inf-badge up">&#8593; subida</span>` : (totDiff<0 ? `<span class="inf-badge down">&#8595; bajada</span>` : '');
+  const badgeVis = visEste>visPasado ? `<span class="inf-badge up">&#8593; subida</span>` : (visEste<visPasado ? `<span class="inf-badge down">&#8595; bajada</span>` : '');
+
+  const filasHtml = personas.map(p=>{
+    const a = pasadoM[p]||0, b = esteM[p]||0, d = b-a;
+    const dCls = d>0 ? 'inf-delta-pos' : (d<0 ? 'inf-delta-neg' : '');
+    const dTxt = d>0 ? '+'+n1(d)+'€' : n1(d)+'€';
+    return `<tr>
+      <td class="inf-strong">${esc(p)}</td>
+      <td class="inf-num">${n1(a)}€</td>
+      <td class="inf-num inf-strong">${n1(b)}€</td>
+      <td class="inf-num ${dCls}">${dTxt}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="inf-page">
+      <div class="inf-head">
+        <div class="inf-head-left">
+          <p class="inf-eyebrow">Informe mensual &middot; Tienda</p>
+          <h2>Informe de Tienda</h2>
+          <div class="inf-periodo">${esc(mesLabel)} &middot; 1 &rarr; hoy, comparado con ${esc(nombreMesPasado)}</div>
+        </div>
+        <div class="inf-head-right">
+          <div class="inf-wordmark">PARADOX<span>&middot;</span>MUSEUM</div>
+          <div class="inf-city">Barcelona &nbsp;/&nbsp; Ops Hub</div>
+          <div class="inf-rule"></div>
+        </div>
+      </div>
+
+      <div class="inf-kpis">
+        <div class="inf-kpi ${totDiff>=0?'pos':''}">
+          <div class="inf-lbl">Ingresos tienda este mes</div>
+          <div class="inf-val">${n1(totEste)}€</div>
+          <div class="inf-sub">${n1(totPasado)}€ el mes pasado</div>
+        </div>
+        <div class="inf-kpi">
+          <div class="inf-lbl">Visitantes este mes</div>
+          <div class="inf-val">${n1(visEste)}</div>
+          <div class="inf-sub">${n1(visPasado)} el mes pasado</div>
+        </div>
+        <div class="inf-kpi">
+          <div class="inf-lbl">SPV medio</div>
+          <div class="inf-val">${spvMedio.toFixed(2)}€</div>
+          <div class="inf-sub">gasto medio por visitante, sin IVA</div>
+        </div>
+      </div>
+
+      <div class="inf-notas">
+        <span class="inf-nota-item"><b>Ingresos</b> ${totDiff>0?'+':''}${n1(totDiff)}€ vs mes pasado</span> ${badgeIngresos}
+        <span class="inf-nota-item"><b>Visitantes</b> ${visEste-visPasado>0?'+':''}${n1(visEste-visPasado)} vs mes pasado</span> ${badgeVis}
+      </div>
+
+      <div class="inf-sec">Ventas por persona</div>
+      <table>
+        <thead><tr><th>Persona</th><th style="text-align:right">${esc(nombreMesPasado.charAt(0).toUpperCase()+nombreMesPasado.slice(1))}</th><th style="text-align:right">Este mes</th><th style="text-align:right">Diferencia</th></tr></thead>
+        <tbody>${filasHtml || '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Todavía no hay ventas registradas este mes.</td></tr>'}</tbody>
+        <tfoot><tr><td>TOTAL</td><td class="inf-num">${n1(totPasado)}€</td><td class="inf-num">${n1(totEste)}€</td><td class="inf-num">${totDiff>0?'+':''}${n1(totDiff)}€</td></tr></tfoot>
+      </table>
+
+      <div class="inf-sec inf-espaciada">Observaciones de Ignacio</div>
+      <div class="inf-obs">
+        <textarea id="inf-obs-texto" placeholder="Escribe aquí tus notas del mes: qué ha ido bien, qué vigilar, acciones para el mes que viene…" oninput="infGuardarObsDebounced()">${esc(obsRow?.texto || '')}</textarea>
+      </div>
+
+      <div class="inf-actions inf-no-print">
+        <button class="btn btn-primary" onclick="infDescargarPDF()">Descargar PDF</button>
+      </div>
+    </div>`;
+}
 
 async function renderResenas(){
   const el = document.getElementById('resenas-content');
@@ -9037,16 +9218,21 @@ function rsFmtTurnoBonito(turno){
   if(!m) return turno||'';
   return rsFmtHoraBonita(m[1]) + ' - ' + rsFmtHoraBonita(m[2]);
 }
-function buildTurnoBlock(prefix, label, staffNames){
+function buildTurnoBlock(prefix, label, staffNames, lockedName){
   // Mismos bloques de horario que en el roster (rsGenInicios/rsTurnoDesdeInicio):
   // se elige el turno entero, no la hora y los minutos por separado.
   const opts = rsGenInicios().map(c=>
     `<option value="${c}">${esc(rsFmtTurnoBonito(rsTurnoDesdeInicio(c)))}</option>`).join('');
+  // lockedName: para el autoservicio de staff, la persona que pide el cambio
+  // es siempre quien ha iniciado sesión — no un desplegable, un dato fijo.
+  const staffField = lockedName
+    ? `<div style="padding:8px 0 4px;font-weight:800;">${esc(lockedName)}</div><input type="hidden" id="${prefix}-staff" value="${esc(lockedName)}">`
+    : `<select id="${prefix}-staff">${staffNames.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('') || '<option value="">Añade staff primero</option>'}</select>`;
   return `
     <div class="turno-form-block" style="border:1px solid var(--line);border-radius:9px;padding:12px;background:var(--panel);">
       <div style="font-size:11.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">${label}</div>
       <div style="display:grid;grid-template-columns:1.6fr 1.3fr 1fr;gap:10px;align-items:end;">
-        <div><label class="field-label">Staff</label><select id="${prefix}-staff">${staffNames.map(n=>`<option value="${n}">${n}</option>`).join('') || '<option value="">Añade staff primero</option>'}</select></div>
+        <div><label class="field-label">Staff</label>${staffField}</div>
         <div><label class="field-label">Horario</label><select id="${prefix}-hora" style="padding-right:22px;">${opts}</select></div>
         <div><label class="field-label">Fecha del turno</label><input type="date" id="${prefix}-fecha" value="${todayIso()}"></div>
       </div>
@@ -9057,6 +9243,94 @@ async function renderTurnoBlocks(){
   const names = list.map(s=>s.nombre);
   document.getElementById('turno-block-1').innerHTML = buildTurnoBlock('tb1','Staff que pide cambiar su turno', names);
   document.getElementById('turno-block-2').innerHTML = buildTurnoBlock('tb2','Staff que le cambia el turno', names);
+}
+/* ---------- Autoservicio de staff: ellos son siempre quien pide (p1) ---------- */
+async function renderTurnoBlocksStaff(){
+  const list = await fetchStaff();
+  const yo = currentProfile?.nombre || '';
+  const names = list.map(s=>s.nombre).filter(n=> n !== yo);
+  document.getElementById('turno-block-1-staff').innerHTML = buildTurnoBlock('stb1','Tu turno que quieres ceder', [], yo);
+  document.getElementById('turno-block-2-staff').innerHTML = buildTurnoBlock('stb2','A quién se lo pides', names);
+}
+async function addTurnoRequestStaff(){
+  const p1 = readTurnoBlock('stb1');
+  const p2 = readTurnoBlock('stb2');
+  if(!p1.staff || !p2.staff || p1.staff === p2.staff){
+    alert('Elige a otra persona del equipo para el cambio.');
+    return;
+  }
+  const motivo = document.getElementById('turno-motivo-staff').value.trim();
+  const { error } = await sb.from('turnos').insert({
+    p1_staff:p1.staff, p1_hora:p1.hora, p1_fecha:p1.fechaIso,
+    p2_staff:p2.staff, p2_hora:p2.hora, p2_fecha:p2.fechaIso,
+    motivo, estado:'Pendiente', fecha_solicitud: todayIso()
+  });
+  if(error){ console.error('turnos: solicitud de staff', error); alert('No se pudo enviar la solicitud: '+error.message); return; }
+  document.getElementById('turno-motivo-staff').value = '';
+  await renderTurnosStaffMias();
+  alert('Solicitud enviada. Te avisaremos aquí en cuanto se apruebe o se rechace.');
+}
+async function renderTurnosStaffMias(){
+  const nombre = currentProfile?.nombre;
+  const tbody = document.querySelector('#turnos-mias-table tbody');
+  if(!tbody || !nombre) return;
+  const { data, error } = await sb.from('turnos').select('*')
+    .or(`p1_staff.eq.${nombre},p2_staff.eq.${nombre}`)
+    .order('created_at', {ascending:false});
+  if(error) console.error('turnos: mis solicitudes', error);
+  const list = data || [];
+  tbody.innerHTML = list.length ? list.map(t=>{
+    const soyP1 = t.p1_staff === nombre;
+    const otro = soyP1 ? t.p2_staff : t.p1_staff;
+    const miHora = soyP1 ? t.p1_hora : t.p2_hora;
+    const miFecha = soyP1 ? t.p1_fecha : t.p2_fecha;
+    const dt = miFecha ? new Date(miFecha+'T00:00:00') : null;
+    const fechaLbl = dt ? `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]}` : '—';
+    const pillCls = t.estado==='Aprobado' ? 'green' : (t.estado==='Rechazado' ? 'red' : 'amber');
+    return `<tr>
+      <td><b>${esc(otro||'—')}</b></td>
+      <td style="color:var(--text-soft);">${esc(t.motivo||'—')}</td>
+      <td style="color:var(--text-soft);">${esc(miHora||'')} · ${fechaLbl}</td>
+      <td><span class="pill ${pillCls}">${esc(t.estado)}</span></td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="4" style="text-align:center;color:var(--text-soft);">Todavía no has pedido ningún cambio.</td></tr>';
+}
+function notifSeenKeyTurnos(){ return `pdx_notif_seen_turnos_${currentProfile?.nombre || 'anon'}`; }
+async function marcarNotifTurnosVistaStaff(){
+  const nombre = currentProfile?.nombre;
+  if(!nombre) return;
+  const { data } = await sb.from('turnos').select('id').neq('estado','Pendiente')
+    .or(`p1_staff.eq.${nombre},p2_staff.eq.${nombre}`).order('id',{ascending:false}).limit(1);
+  const maxId = (data && data[0]) ? data[0].id : 0;
+  localStorage.setItem(notifSeenKeyTurnos(), maxId);
+  document.getElementById('turnos-dot')?.classList.remove('show');
+}
+/* Aviso (punto) en Cambios de turno: para managers, si hay solicitudes nuevas;
+   para staff, si alguna de las suyas se ha resuelto y todavía no la ha visto. */
+async function checkTurnosDot(){
+  const dot = document.getElementById('turnos-dot');
+  if(!dot) return;
+  try{
+    if(esStaff()){
+      const nombre = currentProfile?.nombre;
+      if(!nombre) return;
+      const { data } = await sb.from('turnos').select('id').neq('estado','Pendiente')
+        .or(`p1_staff.eq.${nombre},p2_staff.eq.${nombre}`).order('id',{ascending:false}).limit(1);
+      const maxId = (data && data[0]) ? data[0].id : 0;
+      const visto = parseInt(localStorage.getItem(notifSeenKeyTurnos()),10) || 0;
+      dot.classList.toggle('show', maxId > visto);
+    } else {
+      const { data } = await sb.from('turnos').select('id').order('id',{ascending:false}).limit(1);
+      const maxId = (data && data[0]) ? data[0].id : 0;
+      const visto = parseInt(localStorage.getItem(notifSeenKey('turnos')),10) || 0;
+      dot.classList.toggle('show', maxId > visto);
+    }
+  }catch(e){ /* si turnos no responde, no rompemos el resto de notificaciones */ }
+}
+async function renderTurnosStaffView(){
+  await renderTurnoBlocksStaff();
+  await renderTurnosStaffMias();
+  await marcarNotifTurnosVistaStaff();
 }
 function readTurnoBlock(prefix){
   const staff = document.getElementById(prefix+'-staff').value;
@@ -9283,6 +9557,79 @@ async function deleteTurno(id){
 async function resolveTurno(id, estado){
   await sb.from('turnos').update({estado}).eq('id', id);
   renderTurnos();
+  if(estado === 'Aprobado'){
+    const { data: t, error } = await sb.from('turnos').select('*').eq('id', id).single();
+    if(!error && t){
+      const { aplicados, pendientes } = await turnoAplicarAlRosterAuto(t);
+      if(aplicados.length || pendientes.length){
+        let msg = 'Cambio aprobado.';
+        if(aplicados.length) msg += '\n\nAplicado al roster automáticamente:\n· ' + aplicados.join('\n· ');
+        if(pendientes.length) msg += '\n\nRevisar a mano en Rosters:\n· ' + pendientes.join('\n· ');
+        alert(msg);
+      }
+    }
+  }
+}
+/* ── Cambio de turno aprobado → se aplica solo, sin preguntar ────────────
+   En cuanto se aprueba una solicitud, se sustituye directamente en
+   roster_dias (los dos días que toque, si el intercambio es entre fechas
+   distintas). Si algún día no tiene roster montado todavía, o no se
+   encuentra el turno de quien cede, no se toca nada — se queda para el
+   aviso de siempre dentro de Rosters, donde se puede aplicar a mano. */
+async function turnoAplicarAlRosterAuto(t){
+  if(!RS_STAFF.length){
+    try{
+      const { data } = await sb.from('roster_staff').select('*').eq('activo',true).order('orden');
+      RS_STAFF = data || [];
+    }catch(e){ /* si no carga, rsNombreCanonico se queda con el nombre tal cual */ }
+  }
+  const lados = [
+    { fecha:t.p1_fecha, cede:t.p1_staff, recibe:t.p2_staff, hora:t.p1_hora },
+    { fecha:t.p2_fecha, cede:t.p2_staff, recibe:t.p1_staff, hora:t.p2_hora },
+  ];
+  const aplicados = [], pendientes = [];
+  for(const lado of lados){
+    if(!lado.fecha || !lado.cede || !lado.recibe) continue;
+    const cede = rsNombreCanonico(lado.cede);
+    const recibe = rsNombreCanonico(lado.recibe);
+    let row = null;
+    try{
+      const { data } = await sb.from('roster_dias').select('*').eq('fecha', lado.fecha).maybeSingle();
+      row = data;
+    }catch(e){ row = null; }
+    if(!row){ pendientes.push(`${lado.fecha}: todavía no hay roster montado ese día.`); continue; }
+    let filas;
+    try{ filas = (typeof row.filas === 'string') ? JSON.parse(row.filas) : (row.filas || []); }
+    catch(e){ filas = []; }
+    const esFilaReal = f => !['grupos','cumples','taller'].includes(f.tipo);
+    if(filas.some(f=> f.nombre===recibe && esFilaReal(f))){
+      aplicados.push(`${lado.fecha}: ${recibe} ya estaba puesto/a.`);
+      continue;
+    }
+    const fila = filas.find(f=> f.nombre===cede && esFilaReal(f));
+    if(!fila){
+      pendientes.push(`${lado.fecha}: no encuentro el turno de ${cede} ese día — añade a ${recibe} a mano.`);
+      continue;
+    }
+    const turnoAntes = fila.turno;
+    const nuevoTurno = rsTurnoConNuevoInicio(fila.turno, lado.hora);
+    fila.nombre = recibe;
+    fila.turno = nuevoTurno;
+    try{
+      const { error } = await sb.from('roster_dias').update({ filas: JSON.stringify(filas) }).eq('fecha', lado.fecha);
+      if(error) throw error;
+      aplicados.push(`${lado.fecha}: ${recibe} sustituye a ${cede}` + (nuevoTurno!==turnoAntes ? ` (${turnoAntes||'—'} → ${nuevoTurno})` : '') + '.');
+      // Si es el día que está abierto ahora mismo en Rosters, se recarga para
+      // verlo reflejado sin tener que cambiar de fecha y volver.
+      if(typeof RS_DIA !== 'undefined' && RS_DIA && RS_DIA.fecha === lado.fecha && typeof rsLoadDia === 'function'){
+        rsLoadDia();
+      }
+    }catch(e){
+      console.error('turnos: aplicar al roster', e);
+      pendientes.push(`${lado.fecha}: no se pudo guardar el cambio — revísalo a mano.`);
+    }
+  }
+  return { aplicados, pendientes };
 }
 
 /* ============================================================
