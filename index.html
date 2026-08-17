@@ -667,9 +667,11 @@
   .stp-tabla td{padding:5px 10px;border-bottom:1px solid var(--line);font-size:13px;}
   .stp-tabla tr:nth-child(even) td{background:var(--panel);}
   .stp-tabla tr.stp-inactivo td{opacity:.5;}
-  .stp-tabla input.stp-pais-input{width:100%;min-width:160px;border:1px solid var(--line-strong);
+  .stp-tabla input.stp-pais-input,
+  .stp-tabla input.stp-nombre-input{width:100%;min-width:120px;border:1px solid var(--line-strong);
     border-radius:6px;padding:4px 8px;font-size:13px;background:var(--surface);color:var(--text);}
-  .stp-tabla input.stp-pais-input:focus{outline:none;border-color:var(--accent);}
+  .stp-tabla input.stp-pais-input:focus,
+  .stp-tabla input.stp-nombre-input:focus{outline:none;border-color:var(--accent);}
   .stp-tabla .stp-guardado{font-size:10px;color:var(--ok);margin-left:6px;opacity:0;transition:opacity .3s;}
   .stp-tabla .stp-guardado.on{opacity:1;}
   .staff-legend{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:10px;
@@ -3086,7 +3088,7 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
                para que al resto no le parpadee la pestaña antes de esconderse. -->
           <div class="tab-strip" style="margin-bottom:12px;flex:0 0 auto;display:none;">
             <button class="tab-btn active" data-sttab="tabla" onclick="stTabSwitch('tabla')">Tabla</button>
-            <button class="tab-btn" data-sttab="paises" onclick="stTabSwitch('paises')">🌍 Países</button>
+            <button class="tab-btn" data-sttab="paises" onclick="stTabSwitch('paises')">Países</button>
           </div>
 
           <div class="st-panel" data-stpanel="tabla">
@@ -3146,12 +3148,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
             <div class="stp-listado">
               <button class="btn btn-sm" id="stp-listado-toggle" onclick="stpToggleListado()">&#9662; Ver / editar listado de staff</button>
               <div id="stp-listado-body" style="display:none;">
-                <div class="stb-mid" style="margin:10px 0 12px;">
+                <div class="stb-mid" style="margin:10px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
                   <select id="stp-filtro-estado" onchange="stpRenderListado()">
                     <option value="activos">Solo activos</option>
                     <option value="inactivos">Solo no activos</option>
                     <option value="todos">Todos</option>
                   </select>
+                  <button class="btn btn-sm btn-primary" onclick="stpAnadirStaff()" title="Añade una persona solo a este listado de países (p.ej. ex trabajadores). No aparece en la tabla normal de Staff salvo que cambies su filtro a Todos/No activos.">+ Añadir staff</button>
                 </div>
                 <div id="stp-listado-tabla"></div>
                 <datalist id="stp-paises-datalist"></datalist>
@@ -8370,14 +8373,48 @@ function stpRenderListado(){
       <tbody>
         ${filas.map(s=>`
           <tr class="${s.activo?'':'stp-inactivo'}">
-            <td>${esc(s.nombre)}</td>
-            <td>${esc(s.apellido||'')}</td>
+            <td><input class="stp-nombre-input" data-id="${s.id}" value="${esc(s.nombre)}"
+              placeholder="Nombre" onchange="stpGuardarNombre(${s.id},'nombre',this)"></td>
+            <td><input class="stp-nombre-input" data-id="${s.id}" value="${esc(s.apellido||'')}"
+              placeholder="Apellido" onchange="stpGuardarNombre(${s.id},'apellido',this)"></td>
             <td><input class="stp-pais-input" list="stp-paises-datalist" value="${esc(s.pais_origen||'')}"
               onchange="stpGuardarPais(${s.id}, this)"></td>
             <td><span class="stp-guardado" id="stp-guardado-${s.id}">&#10003; guardado</span></td>
           </tr>`).join('')}
       </tbody>
     </table>`;
+}
+/* Botón "+ Añadir staff" del listado de Países: crea una fila nueva en la
+   misma tabla `staff` (no existe otra), pero con activo:false — así, por
+   defecto, NO aparece en la tabla normal de Staff (que por defecto filtra
+   "Solo activos"). Pensado para ex trabajadores: solo hace falta nombre y
+   país, el resto de campos (horas, turnos, tarjeta NFC…) se quedan vacíos.
+   Si alguna vez hace falta verla en la tabla normal, basta con cambiar su
+   filtro a "Todos" o "No activos". */
+async function stpAnadirStaff(){
+  const { data, error } = await sb.from('staff').insert({ nombre:'', apellido:'', activo:false }).select('id').single();
+  if(error){ console.error('añadir staff (países)', error); alert('No se pudo añadir: '+error.message); return; }
+  await stpCargar();
+  const filtroSel = document.getElementById('stp-filtro-estado');
+  if(filtroSel && filtroSel.value === 'activos') filtroSel.value = 'todos';
+  stpRenderListado();
+  stpRenderKpis();
+  stpRenderBars();
+  setTimeout(()=>{
+    const inp = document.querySelector(`.stp-nombre-input[data-id="${data.id}"]`);
+    if(inp) inp.focus();
+  }, 30);
+}
+async function stpGuardarNombre(id, campo, input){
+  const val = input.value.trim();
+  if(campo==='nombre' && !val){ alert('El nombre no puede quedar vacío.'); input.value = (STP_STAFF.find(x=>x.id===id)||{}).nombre||''; return; }
+  const { error } = await sb.from('staff').update({ [campo]: val }).eq('id', id);
+  if(error){ console.error('guardar '+campo, error); alert('No se pudo guardar: '+error.message); return; }
+  const s = STP_STAFF.find(x=>x.id===id);
+  if(s) s[campo] = val;
+  stpRenderBars();
+  const flag = document.getElementById('stp-guardado-'+id);
+  if(flag){ flag.classList.add('on'); setTimeout(()=>flag.classList.remove('on'), 1600); }
 }
 async function stpGuardarPais(id, input){
   const texto = input.value.trim();
