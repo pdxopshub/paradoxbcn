@@ -2810,6 +2810,110 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
 }
 #modal-root .row-del:hover{color:#D93C46; background:#FCE4E6;}
 #modal-root table{width:100%;}
+
+/* ============================================================
+   INFORMES (Reseñas) — pestaña solo Ignacio
+   ============================================================ */
+.inf-page{ max-width:900px; margin:0 auto; background:#fff; border-radius:14px;
+  border:1px solid var(--line); box-shadow:var(--shadow); padding:26px 30px; }
+.inf-head{ display:flex; align-items:center; justify-content:space-between;
+  border-bottom:3px solid #06222E; padding-bottom:10px; margin-bottom:16px; }
+.inf-head-left .inf-eyebrow{ font-weight:800; font-size:10px; letter-spacing:3px;
+  color:var(--accent); text-transform:uppercase; margin:0 0 4px; }
+.inf-head-left h2{ font-weight:800; font-size:22px; color:#06222E; margin:0; letter-spacing:-.2px; }
+.inf-head-left .inf-periodo{ font-size:12.5px; color:var(--text-soft); font-weight:600; margin-top:3px; }
+.inf-head-right{ text-align:right; }
+.inf-head-right .inf-wordmark{ font-weight:800; font-size:15px; letter-spacing:2px; color:#06222E; }
+.inf-head-right .inf-wordmark span{ color:var(--accent); }
+.inf-head-right .inf-city{ font-size:9px; font-weight:700; letter-spacing:2.5px; color:#8A93A6;
+  margin-top:2px; text-transform:uppercase; }
+.inf-head-right .inf-rule{ width:26px; height:2px; background:var(--accent-dark); margin:5px 0 0 auto; border-radius:3px; }
+
+.inf-kpis{ display:flex; gap:12px; margin-bottom:14px; }
+.inf-kpi{ flex:1; background:#F5F6F8; border:1px solid var(--line); border-left:4px solid var(--accent);
+  border-radius:10px; padding:10px 16px; }
+.inf-kpi.pos{ border-left-color:var(--success); }
+.inf-kpi .inf-lbl{ font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase;
+  color:#8A93A6; margin-bottom:5px; }
+.inf-kpi .inf-val{ font-weight:800; font-size:24px; color:#06222E; line-height:1; }
+.inf-kpi .inf-sub{ font-size:11px; color:var(--text-soft); margin-top:4px; }
+
+.inf-notas{ display:flex; justify-content:space-evenly; align-items:center; flex-wrap:wrap;
+  background:#F5F6F8; border-radius:10px; padding:10px 14px; margin-bottom:24px; font-size:13px; gap:10px; }
+.inf-notas .inf-nota-item{ display:flex; align-items:center; gap:6px; white-space:nowrap; }
+.inf-notas b{ color:#06222E; }
+.inf-badge{ display:inline-flex; align-items:center; gap:3px; font-weight:800; padding:1px 8px;
+  border-radius:20px; font-size:11.5px; white-space:nowrap; }
+.inf-badge.up{ background:var(--success-soft); color:var(--success); }
+.inf-badge.down{ background:var(--danger-soft); color:var(--danger); }
+
+.inf-sec{ font-weight:800; font-size:13.5px; color:#06222E; text-transform:uppercase;
+  letter-spacing:.8px; margin:0 0 8px; padding-left:10px; border-left:4px solid var(--accent-2); }
+.inf-sec.inf-espaciada{ margin-top:28px; }
+
+.inf-page table{ width:100%; border-collapse:collapse; margin-bottom:16px; font-size:12.5px; }
+.inf-page table.inf-compacta{ font-size:11px; }
+.inf-page thead th{ background:#06222E; color:#fff; font-weight:700; text-align:left;
+  padding:7px 11px; font-size:11px; letter-spacing:.3px; }
+.inf-page table.inf-compacta thead th{ padding:5px 10px; font-size:10px; }
+.inf-page thead th:first-child{ border-radius:8px 0 0 0; }
+.inf-page thead th:last-child{ border-radius:0 8px 0 0; text-align:right; }
+.inf-page tbody td{ padding:6px 11px; border-bottom:1px solid var(--line); }
+.inf-page table.inf-compacta tbody td{ padding:3.5px 10px; }
+.inf-page tbody tr:nth-child(even){ background:#F5F6F8; }
+.inf-page td.inf-num{ text-align:right; font-variant-numeric:tabular-nums; }
+.inf-page td.inf-strong{ font-weight:800; color:#06222E; }
+.inf-delta-pos{ color:var(--success); font-weight:800; }
+.inf-delta-neg{ color:var(--danger); font-weight:800; }
+.inf-page tfoot td{ background:#06222E; color:#fff; font-weight:800; padding:7px 11px; }
+.inf-page table.inf-compacta tfoot td{ padding:5px 10px; }
+.inf-page tfoot td:first-child{ border-radius:0 0 0 8px; }
+.inf-page tfoot td:last-child{ border-radius:0 0 8px 0; text-align:right; }
+
+.inf-rank-row td:first-child{ font-weight:800; color:var(--accent); }
+.inf-rank-row.inf-top3 td:first-child{ color:#fff; background:#0A2E3D; border-radius:6px 0 0 6px; text-align:center; }
+.inf-rank-row.inf-top3{ background:#EAF6FF; }
+.inf-rank-row.inf-top3 td:last-child{ border-radius:0 6px 6px 0; }
+
+.inf-obs{ border:1.5px dashed var(--accent-dark); background:#F8FCFF; border-radius:10px; padding:14px 18px; }
+.inf-obs .inf-lbl{ font-weight:800; font-size:11px; color:var(--accent); text-transform:uppercase;
+  letter-spacing:.8px; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.inf-obs textarea{ width:100%; min-height:170px; border:none; background:transparent; resize:vertical;
+  font-family:var(--font); font-size:13px; color:var(--text); line-height:1.55; outline:none; }
+.inf-obs .inf-guardado{ font-size:10.5px; color:var(--success); font-weight:700; opacity:0;
+  transition:opacity .3s ease; float:right; }
+.inf-obs .inf-guardado.on{ opacity:1; }
+
+.inf-actions{ display:flex; justify-content:flex-end; margin-top:18px; }
+
+@media print{
+  body.inf-imprimiendo *{visibility:hidden;}
+  body.inf-imprimiendo #inf-print-stack, body.inf-imprimiendo #inf-print-stack *{visibility:visible;}
+  body.inf-imprimiendo .sidebar{display:none !important;}
+  body.inf-imprimiendo .app{display:block !important;min-height:0 !important;}
+  body.inf-imprimiendo #inf-print-stack{position:absolute;left:0;top:0;width:100%;}
+  body.inf-imprimiendo{background:#fff !important;}
+  body.inf-imprimiendo .inf-page{max-width:none;border:none;box-shadow:none;border-radius:0;padding:6mm 9mm;}
+  body.inf-imprimiendo .inf-no-print{display:none !important;}
+  /* Metrica compacta para que quepa todo en una sola hoja A4, igual que la
+     propuesta ya aprobada. */
+  body.inf-imprimiendo .inf-head{padding-bottom:8px;margin-bottom:12px;}
+  body.inf-imprimiendo .inf-head-left h2{font-size:19px;}
+  body.inf-imprimiendo .inf-kpis{margin-bottom:12px;}
+  body.inf-imprimiendo .inf-kpi{padding:8px 14px;}
+  body.inf-imprimiendo .inf-kpi .inf-val{font-size:22px;}
+  body.inf-imprimiendo .inf-notas{padding:9px 14px;margin-bottom:22px;font-size:12px;}
+  body.inf-imprimiendo .inf-sec{font-size:13px;margin:0 0 7px;}
+  body.inf-imprimiendo .inf-sec.inf-espaciada{margin-top:26px;}
+  body.inf-imprimiendo .inf-page table{font-size:11px;margin-bottom:14px;}
+  body.inf-imprimiendo .inf-page table.inf-compacta{font-size:10px;}
+  body.inf-imprimiendo .inf-page thead th{padding:6px 10px;font-size:10px;}
+  body.inf-imprimiendo .inf-page table.inf-compacta thead th{padding:4px 9px;font-size:9px;}
+  body.inf-imprimiendo .inf-page tbody td{padding:5px 10px;}
+  body.inf-imprimiendo .inf-page table.inf-compacta tbody td{padding:2.5px 9px;}
+  body.inf-imprimiendo .inf-obs{padding:12px 16px;}
+  body.inf-imprimiendo .inf-obs textarea{min-height:150px;font-size:12px;}
+}
 </style>
 </head>
 <body>
@@ -2916,6 +3020,10 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
           <button class="navitem" data-view="resenas">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.5 7 1-5.2 5 1.3 7L12 18l-6.1 3.5 1.3-7L2 9.5l7-1z"/></svg>
           Reseñas
+        </button>
+          <button class="navitem" id="nav-informes" data-view="informes" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 12h6M9 16h6"/></svg>
+          Informes
         </button>
         </div>
         <div class="navgroup ng-dat">
@@ -3078,6 +3186,13 @@ table{width:auto;min-width:640px;border-collapse:collapse;table-layout:fixed;}#p
       <!-- ============ RESEÑAS ============ -->
       <div class="view" id="view-resenas">
         <div id="resenas-content" class="resenas-3col"></div>
+      </div>
+
+      <!-- ============ INFORMES (solo Ignacio) ============ -->
+      <div class="view" id="view-informes">
+        <div id="inf-print-stack">
+          <div id="inf-content"></div>
+        </div>
       </div>
 
       <!-- ============ STAFF ============ -->
@@ -4975,6 +5090,7 @@ const titles = {
   dashboard:['Resumen','Vista general del día'],
   spv:['SPV','Spend Per Visitor'],
   resenas:['Reseñas','Tripadvisor, Google, GetYourGuide y Fever'],
+  informes:['Informes','Informe mensual de reseñas y NFCards · solo Ignacio'],
   staff:['Staff','Equipo, accesos y NFCards'],
   ev:['Evaluaciones','Histórico por persona'],
   entrevistas:['Entrevistas','Candidatos'],
@@ -5010,6 +5126,8 @@ function rsPuedeVer(){
 function rsPuedeVerPlan(){ return ['Ignacio','Laia'].includes(currentProfile?.nombre); }
 function rsAvisosPlan(){ return currentProfile?.nombre === 'Ignacio'; }
 function rsPuedeVerModelos(){ return ['Ignacio','Laia'].includes(currentProfile?.nombre); }
+/* Informes: el informe mensual de reseñas es solo para Ignacio. */
+function esInformesAdmin(){ return currentProfile?.nombre === 'Ignacio'; }
 /* Sold Items: catálogo de ventas de tienda semanales. Solo Ignacio y Paula. */
 function siPuedeVer(){ return ['Ignacio','Paula'].includes(currentProfile?.nombre); }
 
@@ -5298,6 +5416,7 @@ function goView(v){
   if(v==='visitas') visMainInit();
   if(v==='recap'){ renderRecap(); maybeAutoOpenRecapInforme(); }
   if(v==='resenas') renderResenas();
+  if(v==='informes'){ if(!esInformesAdmin()){ goView('dashboard'); return; } renderInformes(); }
   if(v==='marketing') renderMarketing();
   if(v==='loomis') renderLoomis();
   if(v==='rosters'){
@@ -5374,6 +5493,8 @@ function initApp(){
   if(tabModelos) tabModelos.style.display = rsPuedeVerModelos() ? '' : 'none';
   const navSold = document.getElementById('nav-solditems');
   if(navSold) navSold.style.display = siPuedeVer() ? '' : 'none';
+  const navInformes = document.getElementById('nav-informes');
+  if(navInformes) navInformes.style.display = esInformesAdmin() ? '' : 'none';
   document.querySelectorAll('[data-rstab]').forEach(b=>{
     b.addEventListener('click', ()=> rsTab(b.dataset.rstab));
   });
@@ -6870,6 +6991,281 @@ function stepNum(id, dir){
   el.value = dec ? v.toFixed(dec) : Math.round(v);
   el.dispatchEvent(new Event('change', {bubbles:true}));
 }
+
+/* ============================================================
+   INFORMES (Reseñas) — informe mensual, solo Ignacio.
+   Guarda una "foto" (cierre) cada vez que se pasa de un mes a otro,
+   así el informe siguiente calcula solo, sin escribir nada a mano:
+   los valores de AHORA de este cierre pasan a ser el INICIO del
+   próximo, en cadena, para siempre.
+   ============================================================ */
+const INF_PLATAFORMAS = [
+  { key:'google',      source:'google',       label:'Google' },
+  { key:'fever',       source:'fever',        label:'Fever' },
+  { key:'tripadvisor', source:'tripadvisor',  label:'TripAdvisor' },
+  { key:'gyg',         source:'getyourguide', label:'GetYourGuide' },
+];
+const INF_MESES_ABR = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const INF_MESES_LARGO = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+let INF_TITULO_PREVIO = null;
+let INF_OBS_TIMER = null;
+let INF_ACTIVO_CACHE = null;
+
+function infMesKey(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function infMesLabel(mesKey){
+  const [y,m] = mesKey.split('-').map(Number);
+  const nombre = INF_MESES_LARGO[m-1] || '';
+  return `${nombre.charAt(0).toUpperCase()+nombre.slice(1)} ${y}`;
+}
+function infFmtFecha(iso){
+  return new Date(iso).toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
+}
+function infRankNum(str){
+  const m = /^#\s*(\d+)/.exec(str||'');
+  return m ? '#'+m[1] : (str||'');
+}
+
+async function renderInformes(){
+  const el = document.getElementById('inf-content');
+  el.innerHTML = '<div class="empty-state">Cargando informe…</div>';
+
+  let { data: activo, error: errC } = await sb.from('informes_cierres')
+    .select('*').eq('activo', true).maybeSingle();
+  if(errC || !activo){
+    el.innerHTML = '<div class="empty-state">No se ha podido cargar el informe.</div>';
+    console.error('informes: cierre activo', errC);
+    return;
+  }
+
+  // ¿Hemos entrado en un mes distinto al que cubre la línea base actual?
+  // Se cierra el periodo anterior con los valores de ahora mismo, y esa
+  // foto se convierte automáticamente en la línea base del nuevo informe.
+  const mesHoy = infMesKey(new Date());
+  if(mesHoy !== activo.mes_reportado){
+    const nuevo = await infCerrarPeriodo(activo, mesHoy);
+    if(nuevo) activo = nuevo;
+  }
+  INF_ACTIVO_CACHE = activo;
+
+  const { data: cacheRows } = await sb.from('reviews_cache').select('*');
+  const cacheBySource = {};
+  (cacheRows||[]).forEach(r => cacheBySource[r.source] = r);
+
+  const { data: staffRows } = await sb.from('staff')
+    .select('id,nombre,apellido,nfc_stats_web,nfc_visitas_iniciales')
+    .not('nfc_stats_web','is',null);
+
+  const { data: baseNfcRows } = await sb.from('informes_cierres_nfc')
+    .select('staff_id,valor').eq('cierre_id', activo.id);
+  const baseNfcById = {};
+  (baseNfcRows||[]).forEach(r => baseNfcById[r.staff_id] = Number(r.valor));
+
+  const { data: obsRow } = await sb.from('informes_observaciones')
+    .select('*').eq('mes', activo.mes_reportado).maybeSingle();
+
+  infPintar(el, activo, cacheBySource, staffRows||[], baseNfcById, obsRow?.texto || '');
+}
+
+async function infCerrarPeriodo(cierreAnterior, mesNuevo){
+  const { data: cacheRows } = await sb.from('reviews_cache').select('*');
+  const bySource = {};
+  (cacheRows||[]).forEach(r => bySource[r.source] = r);
+  const g = (src, campo) => bySource[src] ? bySource[src][campo] : null;
+
+  const payload = {
+    mes_reportado: mesNuevo,
+    fecha: new Date().toISOString(),
+    activo: true,
+    google_count: g('google','review_count'), google_rating: g('google','rating'),
+    fever_count: g('fever','review_count'), fever_rating: g('fever','rating'),
+    tripadvisor_count: g('tripadvisor','review_count'), tripadvisor_rating: g('tripadvisor','rating'),
+    tripadvisor_ranking: g('tripadvisor','ranking'),
+    gyg_count: g('getyourguide','review_count'), gyg_rating: g('getyourguide','rating'),
+  };
+
+  const { error: e1 } = await sb.from('informes_cierres').update({activo:false}).eq('id', cierreAnterior.id);
+  if(e1){ console.error('informes: desactivar cierre anterior', e1); return null; }
+  const { data: nuevo, error: e2 } = await sb.from('informes_cierres').insert(payload).select().single();
+  if(e2){ console.error('informes: crear nuevo cierre', e2); return null; }
+
+  const { data: staffRows } = await sb.from('staff').select('id,nfc_stats_web').not('nfc_stats_web','is',null);
+  const filas = (staffRows||[]).map(s => ({ cierre_id: nuevo.id, staff_id: s.id, valor: Number(s.nfc_stats_web)||0 }));
+  if(filas.length){
+    const { error: e3 } = await sb.from('informes_cierres_nfc').insert(filas);
+    if(e3) console.error('informes: guardar línea base NFC del cierre', e3);
+  }
+  return nuevo;
+}
+
+function infPintar(el, activo, cacheBySource, staffRows, baseNfcById, obsTexto){
+  // --- Reseñas por plataforma ---
+  const filas = INF_PLATAFORMAS.map(p=>{
+    const cache = cacheBySource[p.source] || {};
+    const inicio = Number(activo[p.key+'_count']) || 0;
+    const ahora = cache.review_count != null ? Number(cache.review_count) : inicio;
+    const notaInicio = activo[p.key+'_rating'] != null ? Number(activo[p.key+'_rating']) : null;
+    const notaAhora = cache.rating != null ? Number(cache.rating) : notaInicio;
+    let rankingHtml = '&mdash;';
+    if(p.key === 'tripadvisor'){
+      const rBase = activo.tripadvisor_ranking, rAhora = cache.ranking;
+      if(rBase && rAhora && infRankNum(rBase) !== infRankNum(rAhora)){
+        rankingHtml = `${esc(infRankNum(rBase))} &rarr; ${esc(rAhora)}`;
+      } else if(rAhora){
+        rankingHtml = esc(rAhora);
+      }
+    }
+    return {...p, inicio, ahora, notaInicio, notaAhora, rankingHtml};
+  });
+  const totalInicio = filas.reduce((a,f)=>a+f.inicio,0);
+  const totalAhora = filas.reduce((a,f)=>a+f.ahora,0);
+  const totalDiff = totalAhora - totalInicio;
+
+  // --- NFCards ---
+  const nfcFilas = staffRows.map(s=>{
+    const inicio = baseNfcById[s.id] != null ? baseNfcById[s.id] : (Number(s.nfc_visitas_iniciales)||0);
+    const ahora = Number(s.nfc_stats_web)||0;
+    return { nombre:s.nombre, apellido:s.apellido||'', inicio, ahora, ganadas: ahora-inicio };
+  }).sort((a,b)=> b.ganadas - a.ganadas);
+  const nfcTotal = nfcFilas.reduce((a,f)=>a+f.ahora,0);
+
+  const n1 = v => v.toLocaleString('es-ES');
+  const n1r = v => v==null ? '–' : Number(v).toLocaleString('es-ES',{minimumFractionDigits:1,maximumFractionDigits:1});
+
+  const periodo = `${infFmtFecha(activo.fecha)} &rarr; hoy`;
+  const mesLabel = infMesLabel(activo.mes_reportado);
+
+  const notasHtml = filas.map(f=>{
+    let badge = '';
+    if(f.notaInicio != null && f.notaAhora != null){
+      if(f.notaAhora > f.notaInicio) badge = `<span class="inf-badge up">&#8593; subida</span>`;
+      else if(f.notaAhora < f.notaInicio) badge = `<span class="inf-badge down">&#8595; bajada</span>`;
+    }
+    return `<span class="inf-nota-item"><b>${esc(f.label)}</b> ${n1r(f.notaAhora)}</span>${badge ? ' '+badge : ''}`;
+  }).join('');
+
+  const platRowsHtml = filas.map(f=>{
+    const diff = f.ahora - f.inicio;
+    const diffCls = diff>0 ? 'inf-delta-pos' : (diff<0 ? 'inf-delta-neg' : '');
+    const diffTxt = diff>0 ? '+'+n1(diff) : n1(diff);
+    let notaCls = 'inf-strong';
+    if(f.notaInicio != null && f.notaAhora != null){
+      if(f.notaAhora > f.notaInicio) notaCls = 'inf-delta-pos';
+      else if(f.notaAhora < f.notaInicio) notaCls = 'inf-delta-neg';
+    }
+    return `<tr>
+      <td class="inf-strong">${esc(f.label)}</td>
+      <td class="inf-num">${n1(f.inicio)}</td>
+      <td class="inf-num inf-strong">${n1(f.ahora)}</td>
+      <td class="inf-num ${diffCls}">${diffTxt}</td>
+      <td class="inf-num">${n1r(f.notaInicio)}</td>
+      <td class="inf-num ${notaCls}">${n1r(f.notaAhora)}</td>
+      <td style="text-align:right;">${f.rankingHtml}</td>
+    </tr>`;
+  }).join('');
+
+  const nfcRowsHtml = nfcFilas.map((f,i)=>{
+    const top3 = i<3 ? ' inf-top3' : '';
+    const diffTxt = f.ganadas>0 ? '+'+n1(f.ganadas) : n1(f.ganadas);
+    const diffCls = f.ganadas>0 ? 'inf-delta-pos' : '';
+    return `<tr class="inf-rank-row${top3}">
+      <td>${i+1}</td>
+      <td class="inf-strong">${esc(f.nombre)} ${esc(f.apellido)}</td>
+      <td class="inf-num">${n1(f.inicio)}</td>
+      <td class="inf-num inf-strong">${n1(f.ahora)}</td>
+      <td class="inf-num ${diffCls}">${diffTxt}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="inf-page">
+      <div class="inf-head">
+        <div class="inf-head-left">
+          <p class="inf-eyebrow">Informe mensual &middot; Reseñas</p>
+          <h2>Informe de Reseñas</h2>
+          <div class="inf-periodo">${esc(mesLabel)} &middot; ${periodo}</div>
+        </div>
+        <div class="inf-head-right">
+          <div class="inf-wordmark">PARADOX<span>&middot;</span>MUSEUM</div>
+          <div class="inf-city">Barcelona &nbsp;/&nbsp; Ops Hub</div>
+          <div class="inf-rule"></div>
+        </div>
+      </div>
+
+      <div class="inf-kpis">
+        <div class="inf-kpi pos">
+          <div class="inf-lbl">Reseñas nuevas</div>
+          <div class="inf-val">${totalDiff>0?'+':''}${n1(totalDiff)}</div>
+          <div class="inf-sub">${n1(totalInicio)} &rarr; ${n1(totalAhora)} en el periodo</div>
+        </div>
+        <div class="inf-kpi">
+          <div class="inf-lbl">Total acumulado</div>
+          <div class="inf-val">${n1(totalAhora)}</div>
+          <div class="inf-sub">en las 4 plataformas</div>
+        </div>
+        <div class="inf-kpi">
+          <div class="inf-lbl">Visitas NFCards</div>
+          <div class="inf-val">${n1(nfcTotal)}</div>
+          <div class="inf-sub">stats web, equipo completo</div>
+        </div>
+      </div>
+
+      <div class="inf-notas">${notasHtml}</div>
+
+      <div class="inf-sec">Reseñas por plataforma</div>
+      <table>
+        <thead><tr><th>Plataforma</th><th style="text-align:right">Inicio</th><th style="text-align:right">Ahora</th><th style="text-align:right">Diferencia</th><th style="text-align:right">Nota inicio</th><th style="text-align:right">Nota ahora</th><th>Ranking / nota</th></tr></thead>
+        <tbody>${platRowsHtml}</tbody>
+        <tfoot><tr><td>TOTAL</td><td class="inf-num">${n1(totalInicio)}</td><td class="inf-num">${n1(totalAhora)}</td><td class="inf-num">${totalDiff>0?'+':''}${n1(totalDiff)}</td><td></td><td></td><td></td></tr></tfoot>
+      </table>
+
+      <div class="inf-sec inf-espaciada">NFCards &mdash; Ranking de escaneos (Stats Web)</div>
+      <table class="inf-compacta">
+        <thead><tr><th style="width:22px;">#</th><th>Persona</th><th style="text-align:right">Inicio del periodo</th><th style="text-align:right">Stats Web (ahora)</th><th style="text-align:right">Ganadas</th></tr></thead>
+        <tbody>${nfcRowsHtml}</tbody>
+        <tfoot><tr><td></td><td>TOTAL</td><td></td><td class="inf-num">${n1(nfcTotal)}</td><td></td></tr></tfoot>
+      </table>
+
+      <div class="inf-sec inf-espaciada">Observaciones de Ignacio</div>
+      <div class="inf-obs">
+        <div class="inf-lbl">&#9998; Editable &mdash; solo tú lo ves y lo editas <span class="inf-guardado" id="inf-guardado">&#10003; guardado</span></div>
+        <textarea id="inf-obs-texto" placeholder="Escribe aquí tus notas del mes: qué ha ido bien, qué vigilar, acciones para el mes que viene…" oninput="infGuardarObsDebounced()">${esc(obsTexto)}</textarea>
+      </div>
+
+      <div class="inf-actions inf-no-print">
+        <button class="btn btn-primary" onclick="infDescargarPDF()">Descargar PDF</button>
+      </div>
+    </div>`;
+}
+
+function infGuardarObsDebounced(){
+  clearTimeout(INF_OBS_TIMER);
+  INF_OBS_TIMER = setTimeout(infGuardarObs, 900);
+}
+async function infGuardarObs(){
+  if(!INF_ACTIVO_CACHE) return;
+  const txt = document.getElementById('inf-obs-texto')?.value || '';
+  const { error } = await sb.from('informes_observaciones')
+    .upsert({ mes: INF_ACTIVO_CACHE.mes_reportado, texto: txt, actualizado_at: new Date().toISOString() });
+  if(error){ console.error('informes: guardar observaciones', error); return; }
+  const flag = document.getElementById('inf-guardado');
+  if(flag){ flag.classList.add('on'); setTimeout(()=>flag.classList.remove('on'), 1600); }
+}
+
+function infDescargarPDF(){
+  if(!INF_ACTIVO_CACHE) return;
+  const [y,m] = INF_ACTIVO_CACHE.mes_reportado.split('-').map(Number);
+  if(INF_TITULO_PREVIO === null) INF_TITULO_PREVIO = document.title;
+  document.title = `Informe_Reseñas_${INF_MESES_ABR[m-1]}${String(y).slice(2)}`;
+  document.body.classList.add('inf-imprimiendo');
+  window.print();
+}
+function infRestaurarTitulo(){
+  if(INF_TITULO_PREVIO !== null){ document.title = INF_TITULO_PREVIO; INF_TITULO_PREVIO = null; }
+}
+window.addEventListener('afterprint', ()=>{
+  document.body.classList.remove('inf-imprimiendo');
+  infRestaurarTitulo();
+});
 
 async function renderResenas(){
   const el = document.getElementById('resenas-content');
