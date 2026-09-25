@@ -1307,6 +1307,73 @@
   .colmenu-panel input{flex-shrink:0;margin:0;}
   /* ============ PLANDAY WIP ============ */
   .pd-sub{min-height:200px;}
+  /* Inicio: panel de control con cápsulas */
+  .pd-inicio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+  .pd-cap{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:16px 18px;}
+  .pd-cap-tit{font-weight:800;font-size:14px;display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .pd-cap-ic{font-style:normal;font-size:15px;}
+  .pd-cap-empty{color:var(--text-soft);font-size:13px;padding:6px 0;}
+  .pd-accion-row{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:9px;
+    background:var(--accent-soft);cursor:pointer;font-weight:700;font-size:13.5px;color:#1F3B78;
+    border:1px solid transparent;}
+  .pd-accion-row:hover{border-color:var(--accent);}
+  .pd-accion-badge{background:var(--accent);color:#fff;border-radius:20px;min-width:22px;height:22px;
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;padding:0 6px;}
+  .pd-accion-none{color:var(--text-soft);font-size:13px;padding:8px 0;}
+  .pd-not-form{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .pd-not-form input,.pd-not-form textarea{width:100%;border:1px solid var(--line-strong);border-radius:8px;
+    padding:8px 10px;font-size:13px;font-family:inherit;background:var(--surface);}
+  .pd-not-item{border-top:1px solid var(--line);padding:11px 0;}
+  .pd-not-item:first-child{border-top:none;}
+  .pd-not-tit{font-weight:800;font-size:13.5px;}
+  .pd-not-cuerpo{font-size:13px;color:var(--text);margin-top:2px;white-space:pre-wrap;line-height:1.4;}
+  .pd-not-meta{font-size:11px;color:var(--text-soft);margin-top:4px;display:flex;gap:8px;align-items:center;}
+  .pd-not-del{background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;font-weight:700;padding:0;}
+  .pd-not-search-row{margin-bottom:12px;}
+  .pd-not-search-row input{width:100%;border:1px solid var(--line-strong);border-radius:8px;
+    padding:8px 10px;font-size:13px;font-family:inherit;background:var(--surface);}
+  /* Informes: tarjetas */
+  .pd-inf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
+  .pd-inf-card{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:10px;}
+  .pd-inf-tit{font-weight:800;font-size:15px;}
+  .pd-inf-desc{font-size:13px;color:var(--text-soft);line-height:1.5;flex:1;}
+  /* Informes: formulario de configuración */
+  #pd-inf-detalle{max-width:640px;}
+  .pd-inf-back{background:none;border:none;color:var(--accent);font-weight:700;font-size:13px;cursor:pointer;padding:0;margin-bottom:6px;}
+  .pd-inf-h2{font-size:22px;font-weight:800;margin:0 0 18px;}
+  .pd-if-field{margin-bottom:18px;}
+  .pd-if-field > label{display:block;font-weight:700;font-size:13px;margin-bottom:6px;}
+  .pd-if-field select,.pd-if-field input[type="date"]{width:100%;border:1px solid var(--line-strong);border-radius:8px;
+    padding:9px 10px;font-size:13px;background:var(--surface);font-family:inherit;}
+  .pd-if-field select[multiple]{padding:4px;}
+  .pd-if-hint{font-size:11.5px;color:var(--text-soft);margin-top:5px;line-height:1.4;}
+  .pd-if-fechas{display:flex;gap:10px;}
+  .pd-if-fechas input{flex:1;}
+  .pd-if-dias{display:flex;gap:6px;flex-wrap:wrap;}
+  .pd-if-dia{width:40px;height:38px;border:1px solid var(--line-strong);border-radius:8px;background:var(--surface);
+    font-weight:700;font-size:13px;cursor:pointer;color:var(--text-soft);}
+  .pd-if-dia.active{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+  .pd-if-radio{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;margin-bottom:5px;cursor:pointer;}
+  .pd-if-radio input{width:auto;margin:0;}
+  .pd-if-switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;}
+  .pd-if-switch input{position:absolute;opacity:0;width:0;height:0;}
+  .pd-if-switch span{width:38px;height:22px;border-radius:20px;background:var(--line-strong);position:relative;transition:background .15s;flex:none;}
+  .pd-if-switch span::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s;}
+  .pd-if-switch input:checked + span{background:var(--accent);}
+  .pd-if-switch input:checked + span::after{left:18px;}
+  .pd-if-switch em{font-style:normal;font-weight:700;font-size:13px;}
+  /* Noticias en la vista de staff (Who is Off?) */
+  .vsc-not-box{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:12px 14px;margin-bottom:14px;}
+  .vsc-not-head{font-weight:800;font-size:13.5px;margin-bottom:8px;}
+  .vsc-not-item{border-top:1px solid var(--line);padding:8px 0;}
+  .vsc-not-item:first-of-type{border-top:none;}
+  .vsc-not-tit{font-weight:800;font-size:13px;}
+  .vsc-not-cuerpo{font-size:12.5px;white-space:pre-wrap;line-height:1.4;}
+  .vsc-not-meta{font-size:10.5px;color:var(--text-soft);margin-top:3px;}
+  .vsc-not-search-row{margin-bottom:10px;}
+  .vsc-not-search-row input{width:100%;border:1px solid var(--line-strong);border-radius:8px;
+    padding:7px 9px;font-size:12.5px;font-family:inherit;background:var(--surface);}
+  .vsc-not-empty{color:var(--text-soft);font-size:12.5px;padding:4px 0;}
   .pd-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
   .pd-viewtoggle{display:inline-flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;}
   .pd-vt-btn{border:none;background:var(--surface);padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;color:var(--text-soft);}
@@ -1386,6 +1453,16 @@
   .pd-shift[draggable="true"]{cursor:grab;}
   .pd-shift.pd-dragging{opacity:.35;}
   .pd-daycell.pd-drop-hover{outline:2px dashed var(--accent);outline-offset:-3px;background:var(--accent-soft);}
+  /* Menú del check de turno: Aprobar (verde) / Eliminar (rojo) */
+  .pd-check-menu{position:fixed;z-index:1200;background:var(--surface);border:1px solid var(--line-strong);
+    border-radius:9px;box-shadow:0 10px 28px rgba(0,0,0,.20);padding:5px;display:flex;flex-direction:column;
+    gap:2px;min-width:158px;}
+  .pd-check-menu button{border:none;background:none;text-align:left;padding:8px 11px;border-radius:6px;
+    font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .pd-check-menu .pd-cm-aprobar{color:#0E6B45;}
+  .pd-check-menu .pd-cm-aprobar:hover{background:#DCF3E7;}
+  .pd-check-menu .pd-cm-eliminar{color:#B4231F;}
+  .pd-check-menu .pd-cm-eliminar:hover{background:#FBE9E8;}
   /* Dropdown a medida de "Tipo de turno" con bolita de color, como en Planday */
   .pd-select-tipo{position:relative;}
   .pd-tipo-btn{width:100%;display:flex;align-items:center;gap:8px;border:1px solid var(--line-strong);
@@ -1979,6 +2056,22 @@
     display:flex;align-items:center;justify-content:center;font-size:10.5px;line-height:1;color:transparent;flex-shrink:0;}
   .rs-ok-laia.rs-ok-laia-on{border-color:#2E7D45;color:#2E7D45;background:#E7F5EB;}
   .rs-ok-laia.rs-ok-laia-on .rs-ok-laia-check{border-color:#2E7D45;background:#2E7D45;color:#fff;}
+  /* Candado manual: mismo estilo que la cápsula OK LAIA (para que se lean
+     como parte del mismo grupo de controles) pero en ámbar cuando está
+     puesto, para distinguirlo de un vistazo del verde de OK LAIA. Lo puede
+     poner o quitar cualquiera, no solo Laia. */
+  .rs-candado{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;
+    padding:6px 14px;border-radius:6px;border:1.5px solid var(--line-strong);color:var(--text-soft);
+    background:var(--panel);letter-spacing:.2px;user-select:none;cursor:pointer;}
+  .rs-candado.rs-candado-on{border-color:#B4770F;color:#B4770F;background:#FBF1DD;}
+  /* Candado del roster: en cuanto Laia marca OK LAIA, la rejilla del día deja
+     de aceptar clics/arrastres/escritura (el JS también bloquea el guardado
+     y la base de datos lo rechaza si algo se saltara esto). Sin aviso escrito
+     encima de la rejilla: las cápsulas "Bloqueado"/"OK LAIA" ya se ponen en
+     color y con eso basta para verlo. */
+  .rs-grid-wrap.rs-bloqueado :is(button,select,input,.rs-slot,.rs-fill-handle,.rs-staff-btn){
+    pointer-events:none !important;}
+  .rs-grid-wrap.rs-bloqueado select{cursor:default;}
   /* Cápsula de fecha del roster: contorno azul y fondo suave cuando es el día
      de hoy, para que se vea a simple vista en qué roster estamos. */
   #rs-fecha{border:1.5px solid var(--line-strong);border-radius:8px;padding:6px 30px 6px 10px;
@@ -2754,7 +2847,11 @@
        ve pero deja el hueco del tamaño original: una rejilla larga seguía
        ocupando el alto de dos hojas aunque se viera pequeña. zoom sí encoge
        la caja, así que lo que mide es lo que ocupa. */
-    body.rs-imprimiendo .rs-grid-wrap{position:static;width:auto;
+    /* width:fit-content encoge el contenedor hasta el ancho de su hijo más
+       ancho (la tabla). Así el pie de "Cambios de turno / Vacaciones", que
+       cuelga dentro, no puede pasar del borde derecho de la tabla: su línea se
+       corta justo donde acaba el roster. */
+    body.rs-imprimiendo .rs-grid-wrap{position:static;width:fit-content;
       max-height:none !important;overflow:visible !important;border:none;
       zoom:var(--rs-print-scale, 0.82);}
     /* El resto de impresiones del HUB (Depósito, Nóminas, Informes...) ya
@@ -2809,13 +2906,41 @@
     /* El tirador de arrastre ahora vive junto al nombre, ya no dentro de
        .rs-col-acc: se oculta aparte para que tampoco salga en papel. */
     body.rs-imprimiendo .rs-staff-pick .rs-row-grip{display:none !important;}
-    /* Los bordes gris claro de la rejilla casi no se ven impresos: se oscurecen
-       un poco. Sin !important, para no pisar el recuadro negro del turno, que
-       va en el style de cada celda. */
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td{border:1px solid #BDBDBD;}
-    /* En papel la cabecera también necesita sus líneas: en negro sobre negro no
-       se distinguía dónde acababa una hora y empezaba la siguiente. */
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) th{border:1px solid #8C8C8C;}
+    /* Contorno del turno EN PAPEL: rehecho de cero con border-collapse:separate
+       en vez de collapse. En "collapse" (el de pantalla) dos celdas vecinas
+       comparten y NEGOCIAN su línea — la más ancha o la que "gane" el empate
+       es la que se pinta — y esa negociación es justo lo que hacía que el
+       contorno saliera roto por un lado, doblado por otro o distinto de
+       grosor según la celda: cada intento de arreglarlo por ese camino
+       (reforzar con !important, capas ::after…) seguía dependiendo de quién
+       ganaba esa negociación. Con "separate" cada celda pinta EXACTAMENTE lo
+       que se le dice, sin negociar nada con la de al lado — dos celdas
+       vecinas nunca compiten por la misma línea, cada una tiene la suya.
+       Para no acabar con líneas dobles (cada celda pintando su propio borde
+       en el mismo sitio que la vecina), se sigue un convenio fijo: cada celda
+       SOLO dibuja su lado derecho y su lado inferior; el izquierdo y el
+       superior los pone siempre la celda de al lado/de arriba. Así cada
+       línea de la rejilla la pinta una única celda, nunca dos. */
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m){border-collapse:separate !important;border-spacing:0 !important;}
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td{border:0 !important;
+      border-right:1px solid #C9CDD4 !important;border-bottom:1px solid #C9CDD4 !important;}
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) th{border:0 !important;
+      border-right:1px solid #8C8C8C !important;border-bottom:1px solid #8C8C8C !important;}
+    /* El turno de una fila es SIEMPRE un único tramo seguido (de cuando entra
+       a cuando sale, sin huecos: rsRango rellena todo lo de en medio, incluido
+       un "desc." de por medio), así que TODAS sus celdas llevan rs-blkcell y
+       el contorno tiene que leerse como un solo bloque de principio a fin, sin
+       ninguna raya suelta entre "2", "desc.", "0G"… por dentro. Arriba/abajo
+       siempre en negro, y el lado derecho se ANULA (border-right:0) salvo en
+       la última celda del tramo (rs-blkR), que es la única que cierra el
+       rectángulo por la derecha. rs-blkL abre el rectángulo por la izquierda
+       en la primera celda. Como con "separate" cada celda pinta solo lo suyo,
+       esto es lo único que hace falta — nada de capas aparte ni z-index. */
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkcell{
+      border-top:2px solid #000 !important;border-bottom:2px solid #000 !important;
+      border-right:0 !important;}
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkL{border-left:2px solid #000 !important;}
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkR{border-right:2px solid #000 !important;}
     /* Contorno negro alrededor de toda la tabla, para que se vea como una
        hoja cerrada en vez de perderse contra el blanco de la página. */
     body.rs-imprimiendo :is(#rs-grid,#rs-grid-m){border:2px solid #000 !important;}
@@ -2837,16 +2962,15 @@
     body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) .rs-col-acc *{display:none !important;}
 
     /* --- Grosores ---
-       Las filas de Grupos/Cumpleaños/Taller llevan recuadro de 2px en las cuatro
-       caras y en papel salían mucho más gordas que el resto: se afinan a 1px. */
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-p-GR,
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-p-CU,
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-p-TA{border:1px solid #000 !important;}
-    /* El cuarto de hora que queda fuera del turno no lleva línea propia: el
-       borde del turno vecino ya cierra ahí, y con las dos se veía doble. */
-    /* Sin borde propio (el del turno vecino ya cierra ahí), pero SIN forzar el
-       fondo: así hereda la franja gris de la fila como cualquier otra celda. */
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-cuarto-fuera{border:0 !important;}
+       Grupos/Cumpleaños/Taller llevan las mismas clases rs-blkcell/rs-blkL/
+       rs-blkR que cualquier bloque de turno (son una sola celda fusionada,
+       así que les tocan las tres a la vez), así que ya salen con el mismo
+       contorno de 2px que el resto — nada que reforzar aparte. */
+    /* El cuarto de hora que queda fuera del turno sigue el mismo convenio de
+       "cada celda pinta solo su derecha y su abajo" que el resto de la
+       rejilla, para no acabar con una línea doble junto al turno vecino. */
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-cuarto-fuera{border:0 !important;
+      border-right:1px solid #C9CDD4 !important;border-bottom:1px solid #C9CDD4 !important;}
 
     /* --- Menos tinta y más legible ---
        La fila de totales, en pantalla negra, se imprime en blanco con el texto
@@ -4918,7 +5042,19 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
           <button class="tab-btn" data-pdtab="horas" onclick="plandayTab('horas')">Hoja de Horas</button>
           <button class="tab-btn" data-pdtab="config" onclick="plandayTab('config')">Configuración</button>
         </div>
-        <div id="pd-inicio" class="pd-sub"><div class="empty-state" style="padding:40px 0;">Inicio · próximamente.</div></div>
+        <div id="pd-inicio" class="pd-sub">
+          <div class="pd-inicio-grid">
+            <div class="pd-cap" id="pd-cap-acciones">
+              <div class="pd-cap-tit">Acciones pendientes</div>
+              <div class="pd-cap-body" id="pd-acciones-body"><div class="pd-cap-empty">Cargando…</div></div>
+            </div>
+            <div class="pd-cap" id="pd-cap-noticias">
+              <div class="pd-cap-tit">Noticias</div>
+              <div class="pd-not-search-row"><input type="text" id="pd-not-search" placeholder="Buscar en noticias…" oninput="plandayBuscarNoticias(this.value)"></div>
+              <div class="pd-cap-body" id="pd-noticias-body"><div class="pd-cap-empty">Cargando…</div></div>
+            </div>
+          </div>
+        </div>
         <div id="pd-planificacion" class="pd-sub" style="display:none;">
           <div class="pd-toolbar">
             <div class="pd-viewtoggle">
@@ -4936,7 +5072,23 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
           </div>
           <div id="pd-grid" class="pd-gridwrap"></div>
         </div>
-        <div id="pd-informes" class="pd-sub" style="display:none;"><div class="empty-state" style="padding:40px 0;">Informes · próximamente.</div></div>
+        <div id="pd-informes" class="pd-sub" style="display:none;">
+          <div id="pd-inf-lista">
+            <div class="pd-inf-grid">
+              <div class="pd-inf-card">
+                <div class="pd-inf-tit">Horas por empleado</div>
+                <div class="pd-inf-desc">Consulte cuántas horas trabajan los empleados en un periodo específico y en distintos grupos y departamentos. Este informe se descargará como archivo de Excel.</div>
+                <button class="btn btn-primary btn-sm" onclick="plandayAbrirInforme('horas')">Generar informe</button>
+              </div>
+              <div class="pd-inf-card">
+                <div class="pd-inf-tit">Turnos por empleado</div>
+                <div class="pd-inf-desc">Consulte cuántos turnos trabajan los empleados en un periodo específico y en distintos grupos y departamentos. Este informe se descargará como archivo de Excel.</div>
+                <button class="btn btn-primary btn-sm" onclick="plandayAbrirInforme('turnos')">Generar informe</button>
+              </div>
+            </div>
+          </div>
+          <div id="pd-inf-detalle" style="display:none;"></div>
+        </div>
         <div id="pd-horas" class="pd-sub" style="display:none;"><div class="empty-state" style="padding:40px 0;">Hoja de Horas · próximamente.</div></div>
         <div id="pd-config" class="pd-sub" style="display:none;"><div class="empty-state" style="padding:40px 0;">Configuración · próximamente.</div></div>
       </div>
@@ -5941,6 +6093,7 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
                 <span class="rs-toolbar-sep"></span>
                 <div class="rs-legend" id="rs-legend"></div>
                 <span id="rs-sel-hint" class="hint" style="display:none;font-weight:800;color:var(--accent);"></span>
+                <div id="rs-candado" class="rs-candado" style="display:none;" onclick="rsToggleCandado()" title="Bloquear/desbloquear este roster para que nadie lo toque ni sin querer"></div>
                 <div id="rs-ok-laia" class="rs-ok-laia" style="display:none;" onclick="rsToggleOkLaia()"></div>
               </div>
               <!-- Cambios de turno aprobados que aún no están reflejados en las
@@ -20919,12 +21072,26 @@ let RS_UNDO_STACK = { dia:[], mario:[] };
 let RS_UNDO_ULT_CTX = 'dia';   // dónde se tocó por última vez: es lo que deshace Ctrl+Z
 function rsSnapshot(){
   if(!RS_DIA) return;
+  // rsSnapshot() se llama al principio de prácticamente cualquier edición de
+  // la rejilla (clic, arrastre, borrar, cambiar nombre…), así que es el sitio
+  // de siempre para cortar en seco cualquier intento de tocar un día con el
+  // candado o el OK LAIA puestos: al lanzar el error, el resto de la función
+  // que llamó a rsSnapshot() (la que de verdad muta RS_DIA) nunca se ejecuta.
+  if(rsRosterBloqueado()){
+    if(typeof showSaveToast==='function') showSaveToast('Roster bloqueado: no se puede editar.', 'err');
+    throw new Error('roster bloqueado');
+  }
   const pila = RS_UNDO_STACK[RS_GRID_CTX] || (RS_UNDO_STACK[RS_GRID_CTX] = []);
   try{ pila.push(JSON.stringify(RS_DIA)); }catch(e){}
   if(pila.length>50) pila.shift();
   RS_UNDO_ULT_CTX = RS_GRID_CTX;
 }
 function rsUndo(){
+  // rsUndo() no pasa por rsSnapshot(), así que necesita su propio candado.
+  if(rsRosterBloqueado()){
+    if(typeof showSaveToast==='function') showSaveToast('Roster bloqueado: no se puede deshacer.', 'err');
+    return;
+  }
   const ctx = RS_UNDO_ULT_CTX;
   const pila = RS_UNDO_STACK[ctx] || [];
   if(!pila.length) return;
@@ -21499,6 +21666,7 @@ function rsAplicarModoUI(){
   const pegarBtn = document.getElementById('rs-btn-pegar-roster');
   if(pegarBtn) pegarBtn.style.display = enModelo ? 'none' : '';
   rsRenderOkLaia();
+  rsRenderCandado();
   rsRenderGridMario();
 }
 function rsCopiarPlantillaActual(){
@@ -22104,6 +22272,9 @@ function rsActualizarCalPickerAvisos(){
   const pop = document.getElementById('rs-cal-picker');
   if(pop && pop.style.display !== 'none') rsRenderCalPicker();
 }
+// Se incrementa en cada rsLoadDia(): permite descartar una carga que ya no es
+// la última que se pidió (ver comentario dentro de la función).
+let RS_LOAD_SEQ = 0;
 async function rsLoadDia(){
   // Ir a un día real siempre sale del modo "editar plantilla".
   if(RS_MODO === 'modelo'){ RS_MODO = 'dia'; RS_MODELO_CLAVE = null; RS_MODELO_NOMBRE = ''; }
@@ -22111,24 +22282,36 @@ async function rsLoadDia(){
   const el=document.getElementById('rs-fecha');
   if(el && el.value) rsFecha = el.value;
   if(el) el.classList.toggle('rs-fecha-hoy', rsFecha === rsIso(new Date()));
+  // Si se cambia de día varias veces seguidas y rápido (p.ej. moviéndose por
+  // el mini-calendario antes de que termine de cargar el anterior), cada clic
+  // lanza su propio rsLoadDia() en paralelo. Sin esto, la respuesta de un día
+  // que ya no se está mirando podía llegar tarde y pisar RS_DIA del día nuevo
+  // — y de ahí, el autoguardado la subía a Supabase encima de lo que hubiera.
+  // Con miSeq se descarta cualquier carga que ya no sea la última pedida.
+  const fechaCargada = rsFecha;
+  const miSeq = ++RS_LOAD_SEQ;
   RS_UNDO_STACK = { dia:[], mario:[] };
   RS_UNDO_ULT_CTX = 'dia';
   RS_SEL_CTX = 'dia';
   RS_STAFF_PICK_OPEN = null;
   RS_STAFF_PICK_CTX = 'dia';
   RS_CAMBIOS_DIA = [];   // se recargan al final, en rsCargarContexto
-  await rsAsegurarPlanCargado(rsFecha);
-  RS_DIA = { fecha: rsFecha, config:{}, filas:[], revisado_por:'', ok_laia:false };
+  await rsAsegurarPlanCargado(fechaCargada);
+  if(miSeq !== RS_LOAD_SEQ) return;   // se pidió otro día mientras esto cargaba
+  RS_DIA = { fecha: fechaCargada, config:{}, filas:[], revisado_por:'', ok_laia:false, bloqueado:false };
   try{
-    const {data} = await sb.from('roster_dias').select('*').eq('fecha',rsFecha).single();
+    const {data} = await sb.from('roster_dias').select('*').eq('fecha',fechaCargada).single();
+    if(miSeq !== RS_LOAD_SEQ) return;   // idem: esta respuesta ya no es del día actual
     if(data){
       RS_DIA.config = (typeof data.config==='string') ? JSON.parse(data.config) : (data.config||{});
       RS_DIA.filas  = (typeof data.filas ==='string') ? JSON.parse(data.filas)  : (data.filas ||[]);
       RS_DIA.revisado_por = data.revisado_por || '';
       RS_DIA.ok_laia = !!data.ok_laia;
+      RS_DIA.bloqueado = !!data.bloqueado;
     }
   }catch(e){}
-  const d = new Date(rsFecha+'T12:00:00');
+  if(miSeq !== RS_LOAD_SEQ) return;
+  const d = new Date(fechaCargada+'T12:00:00');
   const finde = (d.getDay()===0 || d.getDay()===6);
   if(RS_DIA.config.caja1  === undefined) RS_DIA.config.caja1  = finde;   // entre semana por defecto cerrada
   if(RS_DIA.config.pompas === undefined) RS_DIA.config.pompas = finde;   // pompas solo findes
@@ -22140,6 +22323,7 @@ async function rsLoadDia(){
   // Los cambios de turno aprobados se cargan ANTES de sincronizar el staff:
   // quien cede su turno no debe volver a salir con una fila vacía en el roster.
   await rsCargarCambiosDia();
+  if(miSeq !== RS_LOAD_SEQ) return;
   const eraNuevo = RS_DIA.filas.length === 0;
   if(eraNuevo) rsFilasDesdePlan();
   // Si el día ya existía (no era nuevo) pero alguien se marcó como que
@@ -22191,7 +22375,10 @@ function rsSetRevisadoPor(val){ RS_DIA.revisado_por = val; rsAutoGuardar(); }
 /* "OK LAIA": el último visto bueno antes de subir el roster a Planday.
    Solo lo ven Ignacio y Laia; solo Laia puede marcarlo o desmarcarlo — a
    Ignacio le sirve para saber de un vistazo si ya está todo revisado. No
-   sale en Modelos (esos no se suben a Planday, son plantillas). */
+   sale en Modelos (esos no se suben a Planday, son plantillas). Además de su
+   significado propio, tener el OK LAIA puesto también bloquea la edición
+   (ver rsRosterBloqueado) — así un día ya aprobado nunca se puede tocar sin
+   querer. */
 function rsPuedeVerOkLaia(){ return ['Ignacio','Laia'].includes(currentProfile?.nombre); }
 function rsPuedeMarcarOkLaia(){ return currentProfile?.nombre === 'Laia'; }
 function rsRenderOkLaia(){
@@ -22206,11 +22393,61 @@ function rsRenderOkLaia(){
     ? (ok ? 'Ya has dado el OK. Clic para quitarlo.' : 'Márcalo cuando este roster esté visto y listo para subir a Planday.')
     : (ok ? 'Laia ha dado el OK: listo para subir a Planday.' : 'Laia todavía no ha dado el OK para subir este roster a Planday.');
   el.innerHTML = `<span class="rs-ok-laia-check">${ok?'✓':''}</span>OK LAIA`;
+  rsAplicarBloqueoVisual();
 }
+/* Candado manual: aparte del OK LAIA (que solo pone Laia), cualquiera puede
+   bloquear o desbloquear un día en cualquier momento — pensado para
+   protegerlo mientras se está terminando, sin tener que esperar al visto
+   bueno de Laia. Mismo mecanismo de protección que el OK LAIA (ver
+   rsRosterBloqueado). No sale en Modelos. */
+function rsRenderCandado(){
+  const el = document.getElementById('rs-candado');
+  if(!el) return;
+  if(RS_MODO === 'modelo'){ el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  const on = !!(RS_DIA && RS_DIA.bloqueado);
+  el.classList.toggle('rs-candado-on', on);
+  el.title = on ? 'Roster bloqueado. Clic para desbloquearlo.' : 'Clic para bloquear este roster (nadie podrá editarlo hasta que lo desbloquees).';
+  el.innerHTML = `<span class="rs-ok-laia-check">${on?'✓':''}</span>${on?'Bloqueado':'Bloquear'}`;
+  rsAplicarBloqueoVisual();
+}
+/* Candado real del roster: mientras el candado manual o el OK LAIA estén
+   puestos, la rejilla del día (no las plantillas) deja de aceptar clics/
+   arrastres/escritura, y se avisa arriba del porqué. rsSnapshot()/rsUndo()
+   cortan además cualquier intento de editar por teclado o atajos, y
+   rsSaveDia() nunca manda nada al servidor mientras esté bloqueado (salvo el
+   propio clic de quitar el candado o el OK LAIA). La base de datos lo exige
+   igual aunque algo se saltara todo esto. */
+function rsRosterBloqueado(){
+  return RS_MODO !== 'modelo' && RS_GRID_CTX === 'dia'
+    && !!(RS_DIA && (RS_DIA.bloqueado || RS_DIA.ok_laia));
+}
+function rsAplicarBloqueoVisual(){
+  const wrap = document.querySelector('.rs-grid-wrap');
+  if(!wrap) return;
+  const bloqueado = rsRosterBloqueado();
+  wrap.classList.toggle('rs-bloqueado', bloqueado);
+  // Sin aviso escrito encima de la rejilla: las propias cápsulas "Bloqueado"/
+  // "OK LAIA" ya se ponen en color cuando están activas, y basta para verlo.
+  const banner = document.getElementById('rs-bloqueado-banner');
+  if(banner) banner.remove();
+}
+// Se pone a true justo antes de un guardado que SOLO cambia el candado o el
+// OK LAIA (nunca el contenido), para que rsSaveDia() lo deje pasar aunque el
+// día siga bloqueado. Se consume (vuelve a false) en cuanto se usa.
+let RS_TOGGLE_BLOQUEO_EN_CURSO = false;
 function rsToggleOkLaia(){
   if(!rsPuedeMarcarOkLaia()) return;
   RS_DIA.ok_laia = !RS_DIA.ok_laia;
   rsRenderOkLaia();
+  RS_TOGGLE_BLOQUEO_EN_CURSO = true;
+  rsAutoGuardar();
+}
+function rsToggleCandado(){
+  if(!RS_DIA) return;
+  RS_DIA.bloqueado = !RS_DIA.bloqueado;
+  rsRenderCandado();
+  RS_TOGGLE_BLOQUEO_EN_CURSO = true;
   rsAutoGuardar();
 }
 
@@ -23508,14 +23745,16 @@ function rsRenderGrid(){
         const t = RS_SLOTS[ci];
         const v = f.slots[t] || '';
         let borde = '';
+        let blkClsE = '';
         if(!v){
           if(dentro.has(ci)){
             borde = 'border-top:2px solid #000;border-bottom:2px solid #000;';
-            if(ci===inicioRango) borde += 'border-left:2px solid #000;';
-            if(ci===finRango)    borde += 'border-right:2px solid #000;';
+            blkClsE = ' rs-blkcell';
+            if(ci===inicioRango){ borde += 'border-left:2px solid #000;';  blkClsE += ' rs-blkL'; }
+            if(ci===finRango){    borde += 'border-right:2px solid #000;'; blkClsE += ' rs-blkR'; }
           }
           const seleccionada = (SEL && SEL.i===i && SEL.ci===ci);
-          out += `<td class="${seleccionada?'rs-selected':''}${ci===RS_SLOTS.length-1?' rs-col-ultima':''}${dentro.has(ci)?'':' rs-fuera-turno'} ${rsClaseLinea(ci, aperturaCi, cierreCi)}" colspan="2" data-fila="${i}" data-col="${ci}" style="${borde}"
+          out += `<td class="${seleccionada?'rs-selected':''}${blkClsE}${ci===RS_SLOTS.length-1?' rs-col-ultima':''}${dentro.has(ci)?'':' rs-fuera-turno'} ${rsClaseLinea(ci, aperturaCi, cierreCi)}" colspan="2" data-fila="${i}" data-col="${ci}" style="${borde}"
             ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
             ondrop="rsSlotDrop(event,${i},'${t}')"><button class="rs-slot" onclick="rsSlotClick(event,${i},${ci})"></button></td>`;
           ci++;
@@ -23532,7 +23771,7 @@ function rsRenderGrid(){
         // Tirador de arrastre (estilo Excel) en la esquina: coge el valor de la
         // última media hora de la tanda y lo extiende arrastrando, igual que en
         // las celdas normales de la rejilla.
-        out += `<td class="rs-p-${esc(v)} ${rsClaseLinea(ci, aperturaCi, cierreCi)}" colspan="${(fin-ci+1)*2}" data-fila="${i}" data-col="${ci}" style="position:relative;${borde}"
+        out += `<td class="rs-p-${esc(v)} rs-blkcell rs-blkL rs-blkR ${rsClaseLinea(ci, aperturaCi, cierreCi)}" colspan="${(fin-ci+1)*2}" data-fila="${i}" data-col="${ci}" style="position:relative;${borde}"
           draggable="true" ondragstart="rsCellDragStart(event,${i},${ci},'${v}')"
           ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)" ondrop="rsSlotDrop(event,${i},'${t}')">
           <input type="text" class="rs-especial-in" value="${esc(texto)}" placeholder="p.ej. 35 PAX"
@@ -23553,10 +23792,12 @@ function rsRenderGrid(){
           let fin = ci;
           while(fin+1 < RS_SLOTS.length && (f.slots[RS_SLOTS[fin+1]]||'') === v) fin++;
           let bordeC = '';
+          let blkClsC = '';
           if(dentro.has(ci)){
             bordeC = 'border-top:2px solid #000;border-bottom:2px solid #000;';
-            if(ci===inicioRango) bordeC += 'border-left:2px solid #000;';
-            if(fin===finRango)   bordeC += 'border-right:2px solid #000;';
+            blkClsC = ' rs-blkcell';
+            if(ci===inicioRango){ bordeC += 'border-left:2px solid #000;';  blkClsC += ' rs-blkL'; }
+            if(fin===finRango){   bordeC += 'border-right:2px solid #000;'; blkClsC += ' rs-blkR'; }
           }
           const selC = (SEL && SEL.i===i && SEL.ci>=ci && SEL.ci<=fin);
           const pintC = complCss(complPintura(ci, fin), true);
@@ -23565,7 +23806,7 @@ function rsRenderGrid(){
           const lcC = rsClaseLinea(ci, aperturaCi, cierreCi);
           const antesC = !!(q.antes && lcC);
           out += (antesC ? q.antes.replace('class="', `class="${lcC} `) : q.antes)
-            + `<td class="rs-td-contador${selC?' rs-selected':''} ${antesC?'':lcC}" colspan="${q.ancho}" data-fila="${i}" data-col="${ci}" style="${bordeC}"
+            + `<td class="rs-td-contador${selC?' rs-selected':''}${blkClsC} ${antesC?'':lcC}" colspan="${q.ancho}" data-fila="${i}" data-col="${ci}" style="${bordeC}"
             onmousedown="rsSelStart(event,${i},${ci})"
             ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)"
             ondrop="rsSlotDrop(event,${i},'${t}')"><button class="rs-slot rs-p-${RS_CONTADOR_CODE}${pintC.cls}" style="${pintC.style}"
@@ -23649,14 +23890,16 @@ function rsRenderGrid(){
           }
         }
         const q = rsCuartos(ci, ci, dentro, inicioRango, finRango, fracIni, fracFin);
+        let blkCls = '';
         if(dentro.has(ci)){
           // El marco son los bordes del propio <td>. Si la media hora solo se
           // trabaja a medias, la celda ya viene recortada a su cuarto de hora
           // (rsCuartos), así que el recuadro empieza justo donde empieza el
           // color, sin ningún trozo blanco por dentro.
           borde = 'border-top:2px solid #000;border-bottom:2px solid #000;';
-          if(ci===inicioRango) borde += 'border-left:2px solid #000;';
-          if(ci===finRango)    borde += 'border-right:2px solid #000;';
+          blkCls = ' rs-blkcell';
+          if(ci===inicioRango){ borde += 'border-left:2px solid #000;';  blkCls += ' rs-blkL'; }
+          if(ci===finRango){    borde += 'border-right:2px solid #000;'; blkCls += ' rs-blkR'; }
           if(q.parcial) claseParcial = ' rs-td-parcial';   // sin código: no cabe en media celda
         }
         // las mitades van posicionadas dentro de la celda, así que la celda
@@ -23672,7 +23915,7 @@ function rsRenderGrid(){
         const lineaCls = rsClaseLinea(ci, aperturaCi, cierreCi);
         const conLineaAntes = !!(q.antes && lineaCls);
         out += (conLineaAntes ? q.antes.replace('class="', `class="${lineaCls} `) : q.antes)
-          + `<td class="${seleccionada?'rs-selected':''}${enSelMulti?' rs-sel-multi':''}${partida?' rs-td-dividida':''}${claseParcial}${ci===RS_SLOTS.length-1?' rs-col-ultima':''}${dentro.has(ci)?'':' rs-fuera-turno'} ${conLineaAntes?'':lineaCls}" colspan="${q.ancho}" data-fila="${i}" data-col="${ci}" style="${borde}"
+          + `<td class="${seleccionada?'rs-selected':''}${enSelMulti?' rs-sel-multi':''}${partida?' rs-td-dividida':''}${claseParcial}${blkCls}${ci===RS_SLOTS.length-1?' rs-col-ultima':''}${dentro.has(ci)?'':' rs-fuera-turno'} ${conLineaAntes?'':lineaCls}" colspan="${q.ancho}" data-fila="${i}" data-col="${ci}" style="${borde}"
           oncontextmenu="rsMenuCelda(event,${i},${ci})"
           onmousedown="rsSelStart(event,${i},${ci})"
           ${v==='OC'?`ondblclick="rsEditarTextoOC(event,${i},${ci})"`:''}
@@ -23881,7 +24124,7 @@ function rsRenderGrid(){
   // la división real. Midiendo cuando el navegador ya ha terminado la maqueta,
   // la medida es la definitiva.
   rsProgramarLineas(aperturaCi, cierreCi, ctx);
-  if(!enMarioCtx) rsRenderOkLaia();
+  if(!enMarioCtx){ rsRenderOkLaia(); rsRenderCandado(); }
 }
 /* Pinta las líneas cuando el navegador ha terminado de maquetar, y deja
    apuntado el último valor para poder repintarlas si algo cambia después
@@ -24226,6 +24469,13 @@ function pdMinContables(persona, min){
   if(PD_MEDIA_DESCANSO.has(persona) && min >= 480) return min - 30;
   return min;
 }
+/* ¿Este bloque cuenta como un turno en el recuento "X turnos"? Un turno de
+   trabajo normal sí. Una ausencia de vacaciones (Paid holiday) no; pero la
+   recuperación (Paid absence) SÍ cuenta como turno, a petición. */
+function pdCuentaComoTurno(s){
+  if(s.origen !== 'vac') return true;
+  return s.tipo === 'Paid absence (recuperación)';
+}
 /* Nombres tal y como los usamos en el HUB para la columna de staff: nombre +
    UN solo apellido, con tildes. Para el equipo activo se fija a mano (así los
    apellidos compuestos con partícula —"de Benito", "De Medeiros"— y las tildes
@@ -24350,6 +24600,395 @@ function plandayTab(t){
     if(el) el.style.display = (k===t) ? '' : 'none';
   });
   if(t==='planificacion') plandayCargar();
+  if(t==='inicio') plandayInicio();
+  if(t==='informes') plandayInformesInit();
+}
+/* Al entrar en la pestaña Informes se muestra la lista de tipos de informe. */
+function plandayInformesInit(){
+  const lista = document.getElementById('pd-inf-lista');
+  const det = document.getElementById('pd-inf-detalle');
+  if(lista) lista.style.display = '';
+  if(det){ det.style.display = 'none'; det.innerHTML = ''; }
+}
+function plandayCerrarInforme(){ plandayInformesInit(); }
+/* Lista de staff para los selectores del informe (y de paso rellena
+   PD_STAFF_APELLIDO por si se entra a Informes sin pasar por Planificación). */
+async function plandayStaffLista(){
+  let st = [];
+  try{ st = await nomStaffActivo(); }catch(e){}
+  (st||[]).forEach(s=>{ if(s.nombre && s.apellido) PD_STAFF_APELLIDO[s.nombre] = s.apellido; });
+  return Array.from(new Set([...RS_RESP_NOMBRES, ...((st||[]).map(s=>s.nombre))]))
+    .filter(n=>n && !PD_EXCLUIR.has(n))
+    .sort((a,b)=>{
+      const ia=PD_ORDEN_PDX.indexOf(a), ib=PD_ORDEN_PDX.indexOf(b);
+      if(ia>=0 && ib>=0) return ia-ib;
+      if(ia>=0) return -1; if(ib>=0) return 1;
+      return a.localeCompare(b,'es');
+    });
+}
+/* Abre el formulario de configuración de un informe (Horas o Turnos), con las
+   mismas opciones que Planday. */
+async function plandayAbrirInforme(tipo){
+  const det = document.getElementById('pd-inf-detalle');
+  const lista = document.getElementById('pd-inf-lista');
+  if(!det) return;
+  const titulo = tipo==='horas' ? 'Horas por empleado' : 'Turnos por empleado';
+  const esHoras = tipo==='horas';
+  const staff = await plandayStaffLista();
+  const optsEmpleados = staff.map(n=>`<option value="${esc(n)}">${esc(pdNombreStaffCol(n))}</option>`).join('');
+  const optsGrupos = PD_GRUPOS.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('');
+  const optsTipos = PD_TIPOS.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  const dsemana = ['L','M','X','J','V','S','D'];
+  const hoy = rsIso(new Date());
+  const primerDia = rsIso(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  det.innerHTML = `
+    <button class="pd-inf-back" onclick="plandayCerrarInforme()">‹ Informes</button>
+    <h2 class="pd-inf-h2">${esc(titulo)}</h2>
+
+    <div class="pd-if-field">
+      <label>Seleccionar empleados a través de</label>
+      <select id="pd-if-modo" onchange="plandayInfModoCambia()">
+        <option value="empleados">Lista de empleados</option>
+        <option value="grupos">Lista de grupos / departamentos</option>
+      </select>
+      <div class="pd-if-hint">Seleccione a los empleados y sus turnos u horas de una lista de empleados, una lista de departamentos o una lista de grupo de empleados.</div>
+      <select id="pd-if-seleccion" multiple size="5" style="margin-top:8px;">
+        <optgroup label="Empleados" id="pd-if-og-emp">${optsEmpleados}</optgroup>
+        <optgroup label="Grupos" id="pd-if-og-gru" style="display:none;">${optsGrupos}</optgroup>
+      </select>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Intervalo de fechas</label>
+      <div class="pd-if-fechas">
+        <input type="date" id="pd-if-desde" value="${primerDia}" placeholder="Fecha de inicio">
+        <input type="date" id="pd-if-hasta" value="${hoy}" placeholder="Fecha final">
+      </div>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Días de trabajo</label>
+      <div class="pd-if-dias" id="pd-if-dias">
+        ${dsemana.map((d,i)=>`<button type="button" class="pd-if-dia active" data-dow="${i}" onclick="this.classList.toggle('active')">${d}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Incluir tipos de turnos</label>
+      <select id="pd-if-tipos" multiple size="5">${optsTipos}</select>
+      <div class="pd-if-hint">Si no seleccionas ninguno, se incluyen todos.</div>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Estado</label>
+      <label class="pd-if-radio"><input type="radio" name="pd-if-estado" value="todo" checked> Todo</label>
+      <label class="pd-if-radio"><input type="radio" name="pd-if-estado" value="aprobado"> Aprobado</label>
+      <label class="pd-if-radio"><input type="radio" name="pd-if-estado" value="noaprobado"> No aprobado</label>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Incluir turnos normales</label>
+      <label class="pd-if-switch"><input type="checkbox" id="pd-if-normales" checked><span></span><em>Sí</em></label>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Restar descansos</label>
+      <label class="pd-if-switch"><input type="checkbox" id="pd-if-descansos"><span></span><em>No</em></label>
+      <div class="pd-if-hint">Si activas esto, a Ignacio y Paula se les descuenta la media hora de descanso (8h → 7h30).</div>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Incluir ${esHoras?'las horas':'los turnos'} solo si la duración del turno es</label>
+      <select id="pd-if-dur">
+        <option value="">Sin especificar</option>
+        <option value=">=240">4 horas o más</option>
+        <option value="<240">Menos de 4 horas</option>
+        <option value=">=360">6 horas o más</option>
+        <option value=">=450">7h30 o más</option>
+      </select>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Incluir ${esHoras?'las horas':'los turnos'} solo si el número de turnos por empleado es</label>
+      <select id="pd-if-nturnos">
+        <option value="">Sin especificar</option>
+        <option value="1">1 o más</option>
+        <option value="5">5 o más</option>
+        <option value="10">10 o más</option>
+        <option value="20">20 o más</option>
+      </select>
+    </div>
+
+    <div class="pd-if-field">
+      <label>Incluir a todos los empleados</label>
+      <label class="pd-if-switch"><input type="checkbox" id="pd-if-todos" checked><span></span><em>Sí</em></label>
+      <div class="pd-if-hint">Si está activo, salen todos los empleados (aunque tengan 0) y se ignora la selección de arriba.</div>
+    </div>
+
+    <div style="margin-top:18px;">
+      <button class="btn btn-primary" onclick="plandayGenerarInforme('${tipo}')">Descargar informe</button>
+    </div>`;
+  // Los interruptores muestran Sí/No según su estado.
+  det.querySelectorAll('.pd-if-switch input').forEach(chk=>{
+    const em = chk.parentElement.querySelector('em');
+    chk.addEventListener('change', ()=>{ em.textContent = chk.checked ? 'Sí' : 'No'; });
+  });
+  if(lista) lista.style.display = 'none';
+  det.style.display = '';
+}
+function plandayInfModoCambia(){
+  const modo = document.getElementById('pd-if-modo')?.value;
+  const emp = document.getElementById('pd-if-og-emp');
+  const gru = document.getElementById('pd-if-og-gru');
+  const sel = document.getElementById('pd-if-seleccion');
+  if(sel) Array.from(sel.options).forEach(o=>o.selected=false);
+  if(emp) emp.style.display = modo==='empleados' ? '' : 'none';
+  if(gru) gru.style.display = modo==='grupos' ? '' : 'none';
+}
+/* ===================== INICIO: panel de control ===================== */
+async function plandayInicio(){
+  plandayInicioAcciones();
+  plandayCargarNoticias();
+}
+/* Acciones pendientes: nº de solicitudes de intercambio (turnos 'Pendiente').
+   Al pulsar, lleva a la pestaña "Cambios de turno" del HUB para aprobarlas. */
+async function plandayInicioAcciones(){
+  const el = document.getElementById('pd-acciones-body');
+  if(!el) return;
+  let n = 0;
+  try{
+    const { data } = await sb.from('turnos').select('id').eq('estado','Pendiente');
+    n = (data||[]).length;
+  }catch(e){ console.error('planday acciones', e); }
+  if(!n){
+    el.innerHTML = `<div class="pd-accion-none">No hay solicitudes de intercambio pendientes.</div>`;
+    return;
+  }
+  const txt = n===1 ? '1 solicitud de intercambio' : `${n} solicitudes de intercambio`;
+  el.innerHTML = `<div class="pd-accion-row" onclick="goView('turnos')">
+      <span class="pd-accion-badge">${n}</span>
+      <span>${txt}</span>
+      <span style="margin-left:auto;color:var(--accent);">Revisar ›</span>
+    </div>`;
+}
+/* ===================== INICIO: Noticias ===================== */
+let PD_NOT_TIMER = null;
+function plandayBuscarNoticias(v){
+  clearTimeout(PD_NOT_TIMER);
+  PD_NOT_TIMER = setTimeout(()=>{ plandayCargarNoticias(v||''); }, 250);
+}
+async function plandayCargarNoticias(query){
+  const el = document.getElementById('pd-noticias-body');
+  if(!el) return;
+  const puedeEscribir = esManagerRol();
+  const q = (query||'').trim().replace(/[,()%]/g,'').slice(0,80);
+  let lista = [];
+  try{
+    let req = sb.from('planday_noticias').select('*').order('created_at', {ascending:false});
+    if(q){
+      req = req.or(`titulo.ilike.%${q}%,cuerpo.ilike.%${q}%,autor.ilike.%${q}%`).limit(300);
+    } else {
+      req = req.limit(30);
+    }
+    const { data } = await req;
+    lista = data || [];
+  }catch(e){ console.error('planday noticias', e); }
+  let html = '';
+  if(puedeEscribir){
+    html += `<div class="pd-not-form">
+        <input type="text" id="pd-not-titulo" placeholder="Título (opcional)" maxlength="120">
+        <textarea id="pd-not-cuerpo" rows="2" placeholder="Escribe una noticia para el equipo…"></textarea>
+        <div><button class="btn btn-primary btn-sm" onclick="plandayPublicarNoticia()">Publicar noticia</button></div>
+      </div>`;
+  }
+  if(!lista.length){
+    html += `<div class="pd-cap-empty">${q?'No se han encontrado noticias.':'Todavía no hay noticias.'}</div>`;
+  } else {
+    html += lista.map(n=>{
+      const fecha = plandayFechaNoticia(n.created_at);
+      const del = puedeEscribir ? `<button class="pd-not-del" onclick="plandayBorrarNoticia(${n.id})">Eliminar</button>` : '';
+      return `<div class="pd-not-item">
+          ${n.titulo ? `<div class="pd-not-tit">${esc(n.titulo)}</div>` : ''}
+          <div class="pd-not-cuerpo">${esc(n.cuerpo||'')}</div>
+          <div class="pd-not-meta"><span>${esc(n.autor||'')}</span><span>·</span><span>${esc(fecha)}</span>${del?'<span>·</span>':''}${del}</div>
+        </div>`;
+    }).join('');
+  }
+  el.innerHTML = html;
+}
+function plandayFechaNoticia(ts){
+  if(!ts) return '';
+  const d = new Date(ts);
+  if(isNaN(d)) return '';
+  return d.toLocaleDateString('es-ES',{day:'numeric',month:'short'}) + ' ' + d.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+}
+async function plandayPublicarNoticia(){
+  const tituloEl = document.getElementById('pd-not-titulo');
+  const cuerpoEl = document.getElementById('pd-not-cuerpo');
+  const titulo = (tituloEl?.value || '').trim();
+  const cuerpo = (cuerpoEl?.value || '').trim();
+  if(!cuerpo){ alert('Escribe el texto de la noticia.'); return; }
+  const { error } = await sb.from('planday_noticias').insert({
+    titulo: titulo || null, cuerpo, autor: currentProfile?.nombre || ''
+  });
+  if(error){ console.error('publicar noticia', error); alert('No se pudo publicar: '+error.message); return; }
+  if(tituloEl) tituloEl.value = '';
+  if(cuerpoEl) cuerpoEl.value = '';
+  plandayCargarNoticias();
+}
+async function plandayBorrarNoticia(id){
+  if(!confirm('¿Eliminar esta noticia?')) return;
+  const { error } = await sb.from('planday_noticias').delete().eq('id', id);
+  if(error){ console.error('borrar noticia', error); alert('No se pudo eliminar.'); return; }
+  plandayCargarNoticias();
+}
+/* ===================== INFORMES (Excel) ===================== */
+/* Recolecta todos los turnos (roster + manuales + vac de managers) de un
+   periodo, un registro por turno, con datos crudos para poder filtrar luego:
+   {persona, grupo, tipo, fecha, dow(0=Lun..6=Dom), minRaw, aprobado, esTurno}. */
+async function plandayRecolectarInforme(desde, hasta){
+  if(!Object.keys(RS_FESTIVOS_NOMBRE).length) await rsCargarFestivos();
+  const [rd, mn, ov, vac] = await Promise.all([
+    sb.from('roster_dias').select('fecha,ok_laia,filas').gte('fecha',desde).lte('fecha',hasta),
+    sb.from('planday_turnos').select('*').gte('fecha',desde).lte('fecha',hasta),
+    sb.from('planday_overrides').select('*').gte('fecha',desde).lte('fecha',hasta),
+    sb.from('vac_solicitudes').select('persona,tipo,estado,fecha_inicio,fecha_fin')
+      .lte('fecha_inicio',hasta).gte('fecha_fin',desde).eq('estado','aprobado'),
+  ]);
+  const ovMap = {};
+  (ov.data||[]).forEach(r=>{ ovMap[r.fecha+'|'+r.persona+'|'+r.turno] = { tipo:r.tipo, grupo:r.grupo, aprobado:!!r.aprobado }; });
+  const dowDe = iso => (new Date(iso+'T12:00:00').getDay()+6)%7;
+  const reg = [];
+  (rd.data||[]).forEach(r=>{
+    const filas = (typeof r.filas==='string') ? JSON.parse(r.filas) : (r.filas||[]);
+    const festivo = !!RS_FESTIVOS_NOMBRE[r.fecha];
+    (filas||[]).forEach(f=>{
+      if(!f || !f.nombre || !f.turno) return;
+      if(PD_EXCLUIR.has(f.nombre)) return;
+      if(['grupos','cumples','taller'].includes(f.tipo)) return;
+      if(['Grupos','Cumpleaños','Taller','Grupo'].includes(f.nombre)) return;
+      const o = ovMap[r.fecha+'|'+f.nombre+'|'+f.turno];
+      const grupo = (o && o.grupo) ? o.grupo : pdGrupoDefault(f.nombre);
+      const tipo = (o && o.tipo) ? o.tipo : (festivo ? 'Bank Holiday worked' : 'Floor');
+      reg.push({ persona:f.nombre, grupo, tipo, fecha:r.fecha, dow:dowDe(r.fecha),
+        minRaw: rsDuracionMinutos(f.turno), aprobado: !!(o && o.aprobado), esTurno:true });
+    });
+  });
+  (mn.data||[]).forEach(m=>{
+    if(PD_EXCLUIR.has(m.persona)) return;
+    const turno = pdHhmmACode(m.desde)+'-'+pdHhmmACode(m.hasta);
+    reg.push({ persona:m.persona, grupo:m.grupo||pdGrupoDefault(m.persona), tipo:m.tipo||'Floor',
+      fecha:m.fecha, dow:dowDe(m.fecha), minRaw: rsDuracionMinutos(turno), aprobado:!!m.aprobado, esTurno:true });
+  });
+  (vac.data||[]).forEach(v=>{
+    if(!RS_RESP_NOMBRES.includes(v.persona)) return;
+    if(v.tipo!=='vacaciones' && v.tipo!=='recuperacion') return;
+    const tipo = v.tipo==='recuperacion' ? 'Paid absence (recuperación)' : 'Paid holiday';
+    const esTurno = v.tipo==='recuperacion';
+    const fin = new Date((v.fecha_fin>hasta?hasta:v.fecha_fin)+'T12:00:00');
+    const ini = new Date((v.fecha_inicio<desde?desde:v.fecha_inicio)+'T12:00:00');
+    for(let d=new Date(ini); d<=fin; d.setDate(d.getDate()+1)){
+      const iso = rsIso(d);
+      reg.push({ persona:v.persona, grupo:tipo, tipo, fecha:iso, dow:dowDe(iso),
+        minRaw: Math.round(vacHorasDiaDe(v.persona)*60), aprobado:false, esTurno });
+    }
+  });
+  return reg;
+}
+async function plandayGenerarInforme(tipo){   // 'horas' | 'turnos'
+  const val = id => document.getElementById(id);
+  const desde = val('pd-if-desde')?.value;
+  const hasta = val('pd-if-hasta')?.value;
+  if(!desde || !hasta){ alert('Elige el intervalo de fechas.'); return; }
+  if(desde > hasta){ alert('La fecha de inicio no puede ser posterior a la final.'); return; }
+  if(typeof XLSX === 'undefined'){ alert('No se pudo cargar el generador de Excel.'); return; }
+  const esHoras = tipo==='horas';
+  // --- Lee los filtros del formulario ---
+  const modo = val('pd-if-modo')?.value || 'empleados';
+  const seleccion = Array.from(val('pd-if-seleccion')?.selectedOptions || []).map(o=>o.value);
+  const diasOn = new Set(Array.from(document.querySelectorAll('#pd-if-dias .pd-if-dia.active')).map(b=>+b.dataset.dow));
+  const tiposSel = new Set(Array.from(val('pd-if-tipos')?.selectedOptions || []).map(o=>o.value));
+  const estado = (document.querySelector('input[name="pd-if-estado"]:checked')?.value) || 'todo';
+  const incluirNormales = !!val('pd-if-normales')?.checked;
+  const restarDescansos = !!val('pd-if-descansos')?.checked;
+  const durFiltro = val('pd-if-dur')?.value || '';
+  const minNTurnos = parseInt(val('pd-if-nturnos')?.value || '', 10);
+  const incluirTodos = !!val('pd-if-todos')?.checked;
+
+  let reg;
+  try{ reg = await plandayRecolectarInforme(desde, hasta); }
+  catch(e){ console.error('informe', e); alert('No se pudieron cargar los datos.'); return; }
+
+  const staffTodos = await plandayStaffLista();
+  const durOk = (m)=>{
+    if(!durFiltro) return true;
+    if(durFiltro.startsWith('>=')) return m >= +durFiltro.slice(2);
+    if(durFiltro.startsWith('<'))  return m <  +durFiltro.slice(1);
+    return true;
+  };
+  // Universo de empleados a mostrar.
+  let universo;
+  if(incluirTodos) universo = staffTodos.slice();
+  else if(modo==='empleados' && seleccion.length) universo = seleccion.slice();
+  else universo = staffTodos.slice();
+  const universoSet = new Set(universo);
+
+  // --- Filtra los registros ---
+  const filtrados = reg.filter(r=>{
+    if(!diasOn.has(r.dow)) return false;
+    if(tiposSel.size && !tiposSel.has(r.tipo)) return false;
+    if(!incluirNormales && r.tipo==='Floor') return false;
+    if(estado==='aprobado' && !r.aprobado) return false;
+    if(estado==='noaprobado' && r.aprobado) return false;
+    if(!durOk(r.minRaw)) return false;
+    if(modo==='grupos' && !incluirTodos && seleccion.length && !seleccion.includes(r.grupo)) return false;
+    if(!incluirTodos && modo==='empleados' && seleccion.length && !universoSet.has(r.persona)) return false;
+    return true;
+  });
+
+  // Nº de turnos por empleado (para el filtro "número de turnos por empleado").
+  const nTurnosEmp = {};
+  filtrados.forEach(r=>{ if(r.esTurno) nTurnosEmp[r.persona] = (nTurnosEmp[r.persona]||0)+1; });
+
+  const valorDe = (r)=>{
+    if(esHoras){ const m = restarDescansos ? pdMinContables(r.persona, r.minRaw) : r.minRaw; return m/60; }
+    return r.esTurno ? 1 : 0;
+  };
+  const porEmp = {}, porEmpGrupo = {};
+  filtrados.forEach(r=>{
+    porEmp[r.persona] = (porEmp[r.persona]||0) + valorDe(r);
+    const k = r.persona+'||'+r.grupo;
+    porEmpGrupo[k] = (porEmpGrupo[k]||0) + valorDe(r);
+  });
+
+  const ordenar = (a,b)=>{
+    const ia=PD_ORDEN_PDX.indexOf(a), ib=PD_ORDEN_PDX.indexOf(b);
+    if(ia>=0 && ib>=0) return ia-ib;
+    if(ia>=0) return -1; if(ib>=0) return 1;
+    return a.localeCompare(b,'es');
+  };
+  // Empleados a listar: el universo (si "incluir a todos") o solo los que tienen datos.
+  let empleados = incluirTodos ? universo.slice() : Object.keys(porEmp);
+  // Filtro por número de turnos por empleado.
+  if(!isNaN(minNTurnos)) empleados = empleados.filter(p=> (nTurnosEmp[p]||0) >= minNTurnos);
+  empleados = empleados.filter(p=>!PD_EXCLUIR.has(p)).sort(ordenar);
+
+  const nombreVal = esHoras ? 'Horas' : 'Turnos';
+  const fmt = v => esHoras ? Math.round((v||0)*100)/100 : Math.round(v||0);
+  const filas1 = [['Empleado', nombreVal]];
+  empleados.forEach(p=> filas1.push([pdNombreStaffCol(p), fmt(porEmp[p])]));
+  const filas2 = [['Empleado', 'Grupo o puesto', nombreVal]];
+  empleados.forEach(p=>{
+    const claves = Object.keys(porEmpGrupo).filter(k=>k.startsWith(p+'||'))
+      .sort((a,b)=> a.split('||')[1].localeCompare(b.split('||')[1],'es'));
+    if(!claves.length && incluirTodos) filas2.push([pdNombreStaffCol(p), '—', 0]);
+    claves.forEach(k=> filas2.push([pdNombreStaffCol(p), k.split('||')[1], fmt(porEmpGrupo[k])]));
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(filas1), 'Por empleado');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(filas2), 'Por grupo');
+  XLSX.writeFile(wb, `Planday_${esHoras?'Horas':'Turnos'}_${desde}_a_${hasta}.xlsx`);
 }
 function plandaySetVista(v){
   PD_VISTA = v;
@@ -24562,19 +25201,18 @@ function plandayRender(dias){
     personasSet.add(m.persona);
     if(turnosDia[m.fecha]!==undefined){ turnosDia[m.fecha]++; totalMinDia[m.fecha]+=pdMinContables(m.persona, s.min); }
   });
-  // Vacaciones/recuperación de los managers: no es un turno trabajado (no
-  // cuenta en "nº de turnos" ni suma turnosDia/totalMinDia de la cabecera),
-  // pero SÍ suma a su propio total de horas del día — su jornada completa
-  // (7h30) cuenta igual que si hubiera trabajado. Se pinta como Paid holiday
-  // / Paid absence.
+  // Vacaciones/recuperación de los managers: suma sus horas del día (jornada
+  // completa, 7h30) al total. Paid absence (recuperación) además CUENTA como un
+  // turno (a petición); Paid holiday (vacaciones) no cuenta como turno.
   (PD_VAC||[]).forEach(v=>{
     const s = { persona:v.persona, turno:'', tipo:v.tipo, festivo:false,
       min: Math.round(vacHorasDiaDe(v.persona)*60), origen:'vac', aprobado:false };
     (porPF[v.persona+'|'+v.fecha] = porPF[v.persona+'|'+v.fecha] || []).push(s);
     personasSet.add(v.persona);
-    // El total del día (fila fija de abajo) SÍ suma estas horas, aunque no
-    // sea un turno trabajado (no se cuenta en "X turnos" de la cabecera).
-    if(totalMinDia[v.fecha]!==undefined) totalMinDia[v.fecha] += s.min;
+    if(totalMinDia[v.fecha]!==undefined){
+      totalMinDia[v.fecha] += s.min;
+      if(pdCuentaComoTurno(s)) turnosDia[v.fecha]++;
+    }
   });
   const personas = [...personasSet];
   if(PD_ORDEN==='alfa'){
@@ -24615,7 +25253,7 @@ function plandayRender(dias){
       const shifts = porPF[p+'|'+iso] || [];
       const publicado = PD_ROSTER[iso]?.ok_laia;
       shifts.forEach(s=>{
-        if(s.origen==='vac'){ totalMin += s.min; return; }   // suma horas, no cuenta como turno
+        if(s.origen==='vac'){ totalMin += s.min; if(pdCuentaComoTurno(s)) nTurnos++; return; }
         totalMin+=pdMinContables(p, s.min); nTurnos++;
       });
       const inner = shifts.map(s=>{
@@ -24638,16 +25276,13 @@ function plandayRender(dias){
         const abrir = s.origen==='manual'
           ? ` onclick="plandayEditarTurno(${s.id})"`
           : ` onclick="plandayEditarRosterTurno('${iso}','${esc(s.persona)}','${esc(s.turno)}')"`;
-        const chkClick = s.origen==='manual'
-          ? `plandayToggleAprobadoManual(event,${s.id})`
-          : `plandayToggleAprobadoRoster(event,'${iso}','${esc(s.persona)}','${esc(s.turno)}')`;
         const si = PD_DRAGITEMS.length;
         PD_DRAGITEMS.push({ persona:p, fecha:iso, turno:s.turno, tipo:s.tipo, grupo:s.grupo,
           aprobado:aprobadoAhora, min:s.min, origen:s.origen, id:(s.id!=null?s.id:null) });
         return `<div class="${cls}" draggable="true" data-si="${si}" ondragstart="plandayDragStart(event,${si})" ondragend="plandayDragEnd(event)"${abrir}>`
           + `<span class="pd-shift-hora">${esc(pdTurnoLabel(s.turno))}</span>`
           + `<span class="pd-shift-tag"><span class="pd-tipo-dot-mini" style="background:${dotColor}"></span>${esc(tag)}</span>`
-          + `<span class="pd-shift-chk${aprobadoAhora?' on':''}" title="${aprobadoAhora?'Aprobado: ha trabajado este turno':'Marcar como trabajado'}" onclick="${chkClick}">${aprobadoAhora?'✓':''}</span>`
+          + `<span class="pd-shift-chk${aprobadoAhora?' on':''}" title="${aprobadoAhora?'Aprobado: ha trabajado este turno':'Marcar / gestionar este turno'}" onclick="plandayAbrirCheckMenu(event,${si})">${aprobadoAhora?'✓':''}</span>`
           + `</div>`;
       }).join('');
       // El "+" pequeño de arriba a la derecha (para añadir un turno extra a una
@@ -24793,6 +25428,84 @@ async function plandayToggleAprobadoRoster(ev, fecha, persona, turno){
   const ok = await pdOverrideGuardarParcial(fecha, persona, turno, { aprobado: !actual.aprobado });
   if(ok) plandayRender(plandayDias());
 }
+/* Menú del check de cada turno: al pulsar el cuadradito de abajo-derecha, sale
+   arriba un menú con "Aprobar" (verde) y "Eliminar turno" (rojo). */
+function plandayCerrarCheckMenu(){ document.getElementById('pd-check-menu')?.remove(); }
+function plandayAbrirCheckMenu(ev, si){
+  ev.stopPropagation();
+  const d = PD_DRAGITEMS[si];
+  if(!d) return;
+  plandayCerrarCheckMenu();
+  const menu = document.createElement('div');
+  menu.id = 'pd-check-menu';
+  menu.className = 'pd-check-menu';
+  const aprobarLabel = d.aprobado ? '✓ Quitar aprobación' : '✓ Aprobar';
+  menu.innerHTML =
+    `<button class="pd-cm-aprobar" onclick="plandayCheckAprobar(${si})">${aprobarLabel}</button>`
+    + `<button class="pd-cm-eliminar" onclick="plandayCheckEliminar(${si})">Eliminar turno</button>`;
+  document.body.appendChild(menu);
+  const r = ev.currentTarget.getBoundingClientRect();
+  const mh = menu.offsetHeight, mw = menu.offsetWidth;
+  let top = r.top - mh - 6;                 // por defecto, encima del check
+  if(top < 6) top = r.bottom + 6;           // si no cabe arriba, debajo
+  let left = r.right - mw;                   // alineado a la derecha del check
+  if(left < 6) left = 6;
+  menu.style.top = top + 'px';
+  menu.style.left = left + 'px';
+  setTimeout(()=>document.addEventListener('click', plandayCheckMenuFuera, true), 0);
+}
+function plandayCheckMenuFuera(ev){
+  const menu = document.getElementById('pd-check-menu');
+  if(menu && !menu.contains(ev.target)){
+    plandayCerrarCheckMenu();
+    document.removeEventListener('click', plandayCheckMenuFuera, true);
+  }
+}
+async function plandayCheckAprobar(si){
+  const d = PD_DRAGITEMS[si];
+  plandayCerrarCheckMenu();
+  document.removeEventListener('click', plandayCheckMenuFuera, true);
+  if(!d) return;
+  if(d.origen==='manual' && d.id!=null){
+    const t = PD_MANUAL.find(x=>x.id===d.id);
+    const nuevo = t ? !t.aprobado : true;
+    const { error } = await sb.from('planday_turnos').update({ aprobado:nuevo, updated_at:new Date().toISOString() }).eq('id', d.id);
+    if(error){ console.error('planday aprobar', error); return; }
+    if(t) t.aprobado = nuevo;
+    plandayRender(plandayDias());
+  } else {
+    const actual = PD_OVERRIDES[pdApKey(d.fecha,d.persona,d.turno)] || {};
+    const ok = await pdOverrideGuardarParcial(d.fecha, d.persona, d.turno, { aprobado: !actual.aprobado });
+    if(ok) plandayRender(plandayDias());
+  }
+}
+async function plandayCheckEliminar(si){
+  const d = PD_DRAGITEMS[si];
+  plandayCerrarCheckMenu();
+  document.removeEventListener('click', plandayCheckMenuFuera, true);
+  if(!d) return;
+  if(d.origen==='manual' && d.id!=null){
+    const { error } = await sb.from('planday_turnos').delete().eq('id', d.id);
+    if(error){ console.error('planday borrar turno', error); alert('No se pudo eliminar.'); return; }
+    plandayCargar();
+  } else {
+    await plandayBorrarRosterTurno(d.fecha, d.persona, d.turno);
+  }
+}
+/* Elimina un turno que viene del roster: quita esa fila del roster de ese día
+   (y su override, si tenía). Es lo mismo que quitar a esa persona de ese día. */
+async function plandayBorrarRosterTurno(fecha, persona, turno){
+  const reg = PD_ROSTER[fecha];
+  if(!reg){ alert('Ese día no tiene roster montado.'); return; }
+  const idx = (reg.filas||[]).findIndex(f=> f && f.nombre===persona && f.turno===turno);
+  if(idx < 0){ alert('No se encontró ese turno en el roster.'); return; }
+  reg.filas.splice(idx, 1);
+  const { error } = await sb.from('roster_dias')
+    .update({ filas: reg.filas, updated_at:new Date().toISOString() }).eq('fecha', fecha);
+  if(error){ console.error('planday borrar roster turno', error); alert('No se pudo eliminar.'); return; }
+  delete PD_OVERRIDES[pdApKey(fecha, persona, turno)];
+  plandayCargar();
+}
 /* Clic en un turno del roster: abre una ventana para editar su tipo, grupo y
    si está aprobado (el horario en sí viene del roster y no se toca aquí). */
 function plandayEditarRosterTurno(fecha, persona, turno){
@@ -24829,11 +25542,17 @@ function plandayEditarRosterTurno(fecha, persona, turno){
             <input type="checkbox" id="pd-f-aprobado" ${aprobadoIni?'checked':''} style="width:auto;"> Aprobar turno para la nómina</label></div>
         </div>
         <div class="modal-foot">
+          <button class="btn btn-ghost" style="color:var(--danger);margin-right:auto;" onclick="plandayEliminarDesdeModal('${esc(fecha)}','${esc(persona)}','${esc(turno)}')">Eliminar</button>
           <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
           <button class="btn btn-primary" onclick="plandayGuardarOverride('${esc(fecha)}','${esc(persona)}','${esc(turno)}')">Guardar</button>
         </div>
       </div>
     </div>`;
+}
+async function plandayEliminarDesdeModal(fecha, persona, turno){
+  if(!confirm('¿Eliminar este turno del roster de ese día?')) return;
+  closeModal();
+  await plandayBorrarRosterTurno(fecha, persona, turno);
 }
 async function plandayGuardarOverride(fecha, persona, turno){
   const grupo = document.getElementById('pd-f-grupo')?.value;
@@ -26516,11 +27235,34 @@ async function rsSaveDia(){
     if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none',2200); }
     return;
   }
-  await sb.from('roster_dias').upsert(
-    { fecha: rsFecha, config: dia.config, filas: dia.filas,
+  // Guardar SIEMPRE con la fecha del propio día que se está guardando (dia.fecha),
+  // nunca con la variable global rsFecha: si el usuario ya ha cambiado de día
+  // (navegación rápida por el calendario) mientras este guardado esperaba su
+  // turno, rsFecha ya apunta a OTRO día y este guardado escribiría los datos
+  // equivocados encima de esa otra fecha.
+  // Si el día tiene el candado o el OK LAIA puestos, no se manda nada al
+  // servidor — salvo que este guardado sea justo el que ha lanzado el propio
+  // clic de poner/quitar el candado o el OK LAIA (RS_TOGGLE_BLOQUEO_EN_CURSO).
+  // La base de datos rechaza igualmente cualquier guardado que se saltara
+  // este candado por cualquier otro camino (ver migraciones
+  // roster_dias_lock_ok_laia / roster_dias_candado_manual).
+  const eraToggleBloqueo = RS_TOGGLE_BLOQUEO_EN_CURSO;
+  RS_TOGGLE_BLOQUEO_EN_CURSO = false;
+  if((dia.ok_laia || dia.bloqueado) && !eraToggleBloqueo){
+    console.warn('Guardado omitido: roster de', dia.fecha, 'bloqueado.');
+    return;
+  }
+  const { error } = await sb.from('roster_dias').upsert(
+    { fecha: dia.fecha, config: dia.config, filas: dia.filas,
       revisado_por: dia.revisado_por || null, ok_laia: !!dia.ok_laia,
+      bloqueado: !!dia.bloqueado,
       updated_at:new Date().toISOString() },
     { onConflict:'fecha' });
+  if(error){
+    console.error('rsSaveDia', error);
+    if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar el roster: '+(error.message||'error desconocido'), 'err');
+    return;
+  }
   const b=document.getElementById('rs-saved');
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none',2200); }
 }
@@ -26555,11 +27297,11 @@ function rsImprimir(){
     st.id = 'rs-page-landscape';
     // Márgenes amplios a los lados: el navegador reduce la tabla para que
     // quepa en el área imprimible, así sale más pequeña y con aire alrededor.
-    // Arriba e izquierda llevan 30mm (3cm) de más a propósito: la tabla salía
-    // pegada a la esquina superior izquierda de la hoja, y se pidió bajarla y
-    // moverla hacia la derecha. Los márgenes son asimétricos (margin-top /
-    // margin-left más grandes que abajo/derecha) precisamente para eso.
-    st.textContent = '@page{size:A4 landscape;margin-top:40mm;margin-left:38mm;margin-bottom:10mm;margin-right:8mm;}';
+    // Arriba e izquierda llevan mucho margen a propósito (la tabla salía pegada
+    // a la esquina superior izquierda). Abajo y a la derecha el margen es más
+    // pequeño para dejar crecer la tabla un poco más (se pidió "un pelín más
+    // grande" manteniendo los márgenes de arriba y del lado izquierdo).
+    st.textContent = '@page{size:A4 landscape;margin-top:40mm;margin-left:38mm;margin-bottom:6mm;margin-right:5mm;}';
     document.head.appendChild(st);
   }
   // Al imprimir solo se ve la rejilla, así que los cambios de turno y las
@@ -26649,23 +27391,29 @@ function rsAjustarParaImprimir(){
   // ancho (que quepan todas las horas) Y por alto (que quepan tabla + pie en
   // una sola hoja): se usa la más pequeña de las dos para que nunca salte a
   // una 2ª página.
-  // Márgenes del @page (ver rsImprimir): 38mm izquierda / 8mm derecha,
-  // 40mm arriba / 10mm abajo — asimétricos a propósito, para separar la tabla
+  // Márgenes del @page (ver rsImprimir): 38mm izquierda / 5mm derecha,
+  // 40mm arriba / 6mm abajo — asimétricos a propósito, para separar la tabla
   // de la esquina superior izquierda de la hoja.
-  const anchoUtil = (297 - 38 - 8) * 3.7795;
+  const anchoUtil = (297 - 38 - 5) * 3.7795;
   // Del alto útil se descuenta el título del día que va encima de la tabla,
   // para que tabla + título quepan en la misma hoja.
   const tit = document.getElementById('rs-print-title');
   const altoTitulo = tit ? (tit.offsetHeight || 26) + 8 : 0;
-  const altoUtil  = (210 - 40 - 10) * 3.7795 - altoTitulo;
+  const altoUtil  = (210 - 40 - 6) * 3.7795 - altoTitulo;
   const anchoTabla = tabla.scrollWidth || tabla.offsetWidth;
   const altoWrap   = wrap.scrollHeight || wrap.offsetHeight;
-  // 0.98 de colchón: la maqueta de pantalla y la de papel no son idénticas
+  // El ancho del pie NO se fija aquí a mano: esta medida se toma con la maqueta
+  // de PANTALLA (el @media print aún no está activo), así que no coincide con
+  // el ancho real de la tabla al imprimir. De limitar el pie se encarga el CSS
+  // con .rs-grid-wrap{width:fit-content}, que el navegador calcula ya en papel.
+  const pie = document.getElementById('rs-print-pie');
+  if(pie) pie.style.removeProperty('width');
+  // 0.99 de colchón: la maqueta de pantalla y la de papel no son idénticas
   // (las columnas fijas dejan de serlo, desaparece la columna de acciones…),
   // así que se deja un pelín de aire para que un par de píxeles de diferencia
   // no empujen una segunda hoja.
-  const escalaAncho = anchoTabla > 0 ? (anchoUtil / anchoTabla) * 0.98 : 1;
-  const escalaAlto  = altoWrap  > 0 ? (altoUtil  / altoWrap)   * 0.98 : 1;
+  const escalaAncho = anchoTabla > 0 ? (anchoUtil / anchoTabla) * 0.99 : 1;
+  const escalaAlto  = altoWrap  > 0 ? (altoUtil  / altoWrap)   * 0.99 : 1;
   // Sin tope superior: la tabla se agranda hasta llenar el ancho del folio
   // (lo que pidió Ignacio), salvo que por alto no quepa en una hoja — entonces
   // manda el alto. El tope de 1.8 es solo para que un roster con poquísimas
@@ -30242,6 +30990,7 @@ function renderVacStaffHome(){
 
   root.innerHTML = `
     <div class="vsc-wrap">
+      <div id="vsc-noticias"></div>
       <div class="vsc-head">
         <button class="btn btn-ghost btn-sm" onclick="vscChangeMonth(-1)">‹</button>
         <div class="vsc-year">${meses[vscMonth]} ${vscYear}</div>
@@ -30264,6 +31013,46 @@ function renderVacStaffHome(){
         <button class="btn btn-primary btn-sm" onclick="openVacRequest()">+ Solicitar días</button>
       </div>
     </div>`;
+  renderVscNoticias();
+}
+/* Noticias (solo lectura) para el staff, arriba de su calendario de Who is Off. */
+let VSC_NOT_TIMER = null;
+function vscBuscarNoticias(v){
+  clearTimeout(VSC_NOT_TIMER);
+  VSC_NOT_TIMER = setTimeout(()=>{ renderVscNoticiasList(v||''); }, 250);
+}
+async function renderVscNoticias(){
+  const el = document.getElementById('vsc-noticias');
+  if(!el) return;
+  if(!document.getElementById('vsc-not-search')){
+    el.innerHTML = `<div class="vsc-not-box">
+        <div class="vsc-not-head">Noticias</div>
+        <div class="vsc-not-search-row"><input type="text" id="vsc-not-search" placeholder="Buscar en noticias…" oninput="vscBuscarNoticias(this.value)"></div>
+        <div id="vsc-noticias-list"></div>
+      </div>`;
+  }
+  renderVscNoticiasList('');
+}
+async function renderVscNoticiasList(query){
+  const listEl = document.getElementById('vsc-noticias-list');
+  if(!listEl) return;
+  const q = (query||'').trim().replace(/[,()%]/g,'').slice(0,80);
+  let lista = [];
+  try{
+    let req = sb.from('planday_noticias').select('*').order('created_at',{ascending:false});
+    req = q ? req.or(`titulo.ilike.%${q}%,cuerpo.ilike.%${q}%,autor.ilike.%${q}%`).limit(100) : req.limit(10);
+    const { data } = await req;
+    lista = data || [];
+  }catch(e){ return; }
+  if(!lista.length){
+    listEl.innerHTML = `<div class="vsc-not-empty">${q?'No se han encontrado noticias.':'Todavía no hay noticias.'}</div>`;
+    return;
+  }
+  listEl.innerHTML = lista.map(n=>`<div class="vsc-not-item">
+      ${n.titulo?`<div class="vsc-not-tit">${esc(n.titulo)}</div>`:''}
+      <div class="vsc-not-cuerpo">${esc(n.cuerpo||'')}</div>
+      <div class="vsc-not-meta">${esc(n.autor||'')} · ${esc(plandayFechaNoticia(n.created_at))}</div>
+    </div>`).join('');
 }
 
 function vscDayClick(fecha){
