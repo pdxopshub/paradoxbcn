@@ -1320,15 +1320,30 @@
   .pd-navweek{font-weight:800;font-size:12.5px;color:var(--text-soft);padding:0 2px;}
   .pd-navsep{color:var(--line-strong);font-size:12px;padding:0 6px;}
   .pd-rango{font-weight:800;font-size:12.5px;text-align:center;padding:0 8px 0 2px;white-space:nowrap;}
-  .pd-gridwrap{overflow:auto;max-height:calc(100vh - 280px);border:1px solid var(--line-strong);border-radius:10px;background:var(--surface);}
+  .pd-gridwrap{overflow:auto;max-height:calc(100vh - 190px);border:1px solid var(--line-strong);border-radius:10px;background:var(--surface);}
   .pd-table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px;}
   .pd-table th,.pd-table td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top;}
   .pd-table thead th{position:sticky;top:0;z-index:3;background:var(--panel);padding:7px 6px;text-align:center;font-size:11.5px;font-weight:800;}
   .pd-table thead th.pd-hoy{color:var(--accent);}
-  .pd-th-nom{position:sticky;left:0;z-index:6;background:#CBD1DA;min-width:190px;width:190px;text-align:left!important;padding-left:12px!important;}
-  .pd-nom-cell{position:sticky;left:0;z-index:2;background:#DADFE6;min-width:190px;width:190px;padding:8px 12px;}
-  .pd-nom-nombre{font-weight:800;font-size:14px;color:var(--text);}
-  .pd-nom-horas{font-size:10px;color:var(--text-soft);margin-top:3px;font-weight:600;}
+  .pd-th-nom{position:sticky;left:0;top:0;z-index:8;background:#CBD1DA;min-width:190px;width:190px;text-align:left!important;padding:7px 10px!important;}
+  /* Esquina STAFF: el título arriba y el selector de orden (PDX / A-Z) debajo.
+     Al ser sticky arriba-izquierda, no desaparece al hacer scroll ni a la
+     derecha (vista Mes) ni hacia abajo. */
+  .pd-corner{display:flex;flex-direction:column;gap:6px;}
+  .pd-corner-title{font-size:11.5px;font-weight:800;}
+  .pd-ordtoggle{display:inline-flex;border:1px solid var(--line-strong);border-radius:7px;overflow:hidden;align-self:flex-start;}
+  .pd-ordtoggle button{border:none;background:var(--surface);padding:3px 9px;font-size:10.5px;font-weight:700;
+    cursor:pointer;color:var(--text-soft);}
+  .pd-ordtoggle button.active{background:var(--accent);color:#fff;}
+  .pd-nom-cell{position:sticky;left:0;z-index:2;background:#DADFE6;min-width:190px;width:190px;padding:9px 12px;
+    border-bottom:2px solid #BFC7D3;}
+  /* Nombre del staff: azul marino elegante, algo más oscuro, algo más pequeño. */
+  .pd-nom-nombre{font-weight:700;font-size:12.5px;color:#152C52;letter-spacing:.1px;}
+  /* Vacaciones / recuperación de los managers: bloque sin horas, solo el tipo. */
+  .pd-shift.pd-vac{cursor:default;}
+  .pd-shift.pd-vac .pd-shift-tag{opacity:1;font-weight:700;}
+  /* Horas y nº de turnos: más pequeños y más transparentes. */
+  .pd-nom-horas{font-size:8.5px;color:#1B2A4A;opacity:.5;margin-top:3px;font-weight:600;}
   .pd-table tbody tr:nth-child(even) td{background:var(--panel);}
   .pd-table tbody tr:nth-child(even) td.pd-nom-cell{background:#DADFE6;}
   .pd-daycol{min-width:150px;}
@@ -1360,19 +1375,30 @@
   .pd-add-btn-big{top:50%;left:50%;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;font-size:17px;}
   .pd-add-btn-sm{right:3px;top:3px;width:16px;height:16px;border-radius:50%;font-size:12px;opacity:.4;}
   .pd-daycell:hover .pd-add-btn-sm{opacity:1;}
-  /* Fila de totales al pie de la tabla */
-  .pd-total-row td{background:#1A1A1A!important;color:#fff!important;font-weight:800;text-align:center;}
-  .pd-total-row td.pd-total-label{text-align:left;padding-left:12px;}
+  /* Fila de totales: fija abajo (sticky bottom) mientras se hace scroll de los
+     turnos. La celda "Total" de la izquierda es a la vez sticky-left y
+     sticky-bottom, así que lleva el z-index más alto para quedar por encima. */
+  .pd-total-row td{background:#1A1A1A!important;color:#fff!important;font-weight:800;text-align:center;
+    position:sticky;bottom:0;z-index:4;}
+  .pd-total-row td.pd-total-label{text-align:left;padding-left:12px;left:0;z-index:7;}
+  /* Arrastrar turnos: la celda destino se resalta y el turno arrastrado se
+     ve semitransparente. */
+  .pd-shift[draggable="true"]{cursor:grab;}
+  .pd-shift.pd-dragging{opacity:.35;}
+  .pd-daycell.pd-drop-hover{outline:2px dashed var(--accent);outline-offset:-3px;background:var(--accent-soft);}
   /* Dropdown a medida de "Tipo de turno" con bolita de color, como en Planday */
   .pd-select-tipo{position:relative;}
   .pd-tipo-btn{width:100%;display:flex;align-items:center;gap:8px;border:1px solid var(--line-strong);
     border-radius:8px;background:var(--surface);padding:8px 10px;font-size:13px;cursor:pointer;text-align:left;}
   .pd-tipo-btn .pd-tipo-caret{margin-left:auto;color:var(--text-soft);font-size:10px;}
   .pd-tipo-dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.15);}
-  .pd-tipo-menu{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:40;background:var(--surface);
-    border:1px solid var(--line-strong);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.14);
-    max-height:340px;overflow:visible;padding:4px;}
-  .pd-tipo-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:12px;cursor:pointer;line-height:1.3;}
+  /* El menú se despliega HACIA ARRIBA (drop-up): el campo "Tipo de turno" está
+     al final del modal, así que abriéndolo hacia arriba caben las 10 opciones a
+     la vista sin tener que hacer scroll del modal. */
+  .pd-tipo-menu{position:absolute;bottom:calc(100% + 4px);top:auto;left:0;right:0;z-index:40;background:var(--surface);
+    border:1px solid var(--line-strong);border-radius:8px;box-shadow:0 -8px 24px rgba(0,0,0,.18);
+    max-height:none;overflow:visible;padding:4px;}
+  .pd-tipo-opt{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px;font-size:11.5px;cursor:pointer;line-height:1.2;}
   .pd-tipo-opt:hover{background:var(--panel);}
   .pd-modal-fechatitulo{font-size:12.5px;color:var(--text-soft);margin:-6px 0 10px;}
 
@@ -6022,6 +6048,11 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
               <button class="btn btn-primary btn-sm" onclick="rsNuevoModelo('WE')">+ Nueva plantilla WE</button>
             </div>
             <div id="rs-modelos-list-we" style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;"></div>
+            <div class="rs-head" style="margin-bottom:6px;">
+              <div class="section-title" style="margin-bottom:0;font-size:12.5px;color:#8A5A00;">Lunes</div>
+              <button class="btn btn-primary btn-sm" onclick="rsNuevoModelo('LUNES')">+ Nueva plantilla Lunes</button>
+            </div>
+            <div id="rs-modelos-list-lunes" style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;"></div>
             <div id="rs-modelos-otros-wrap" style="display:none;">
               <div class="section-title" style="margin-bottom:6px;font-size:12.5px;color:var(--text-soft);">Otras plantillas</div>
               <div id="rs-modelos-list-otros" style="display:flex;flex-direction:column;gap:8px;"></div>
@@ -7111,7 +7142,7 @@ async function doLogout(){
    menú lateral. */
 async function afterLogin(user){
   currentUser = user;
-  const { data: profile, error } = await sb.from('profiles').select('nombre,rol').eq('id', user.id).single();
+  const { data: profile, error } = await sb.from('profiles').select('nombre,rol,foto').eq('id', user.id).single();
   if(error || !profile){
     document.getElementById('login-err').textContent = 'Tu cuenta existe pero no tiene perfil asignado en la tabla profiles. Pide que te vinculen el nombre.';
     await sb.auth.signOut();
@@ -7157,27 +7188,27 @@ function aplicarModoDuty(){
   document.querySelectorAll('#recap-cerrado-por option').forEach(o=>{
     if(o.value && !o.value.startsWith('DUTY')) o.remove();
   });
-  // Como la barra lateral se va, el botón de salir se pone en la cabecera.
-  // OJO: va dentro de #hub-badges-group (el mismo grupo fijo de "Conectado a
-  // Supabase" / "⬇ Backup"), NO como hijo suelto de .topbar — ese grupo es
-  // position:fixed y tapaba por completo cualquier botón que se añadiera
-  // directamente al topbar (quedaba invisible detrás, aunque existía en el
-  // DOM y funcionaba si se le hacía clic a ciegas).
-  const badges = document.getElementById('hub-badges-group');
-  if(badges && !document.getElementById('duty-logout')){
-    const salir = document.createElement('button');
-    salir.id = 'duty-logout';
-    salir.className = 'proto-badge';
-    salir.textContent = 'Salir';
-    salir.style.cssText = 'background:var(--panel);color:var(--text-soft);border-color:var(--line-strong);cursor:pointer;font-size:10.5px;font-weight:800;padding:5px 11px;';
-    salir.onclick = doLogout;
-    badges.appendChild(salir);
-  }
   const t = document.getElementById('page-title');
   const s = document.getElementById('today-date');
   if(t) t.textContent = titles.recap[0];
   if(s) s.textContent = titles.recap[1];
   goView('recap');
+  // El botón de "Salir" va en la barra superior VISIBLE (hub2), no en
+  // #hub-badges-group: ese grupo queda oculto por la clase staff-only que se
+  // acaba de poner (display:none !important), así que un Salir metido ahí no
+  // se veía nunca. Además, en DUTY se borra la barra lateral y con ella la
+  // ficha de usuario que llevaba el Salir normal. goView('recap') ya ha
+  // pintado la barra hub2, así que aquí ya existe .hub2-bar-right.
+  const barra = document.querySelector('#hub2-bar .hub2-bar-right') || document.getElementById('hub2-bar');
+  if(barra && !document.getElementById('duty-logout')){
+    const salir = document.createElement('button');
+    salir.id = 'duty-logout';
+    salir.className = 'hub2-search';
+    salir.textContent = 'Salir';
+    salir.style.cssText = 'cursor:pointer;font-weight:800;';
+    salir.onclick = doLogout;
+    barra.appendChild(salir);
+  }
 }
 /* Restringe el Hub a la vista de vacaciones. Se llama después del login. */
 function aplicarModoStaff(){
@@ -7205,7 +7236,9 @@ const AVATAR_FOTOS = {
 };
 function updateUserChip(){
   const av = document.getElementById('avatar');
-  const foto = AVATAR_FOTOS[currentProfile.nombre];
+  // La foto propia (profiles.foto, que cada uno puede cambiar) manda sobre la
+  // foto fija de código (AVATAR_FOTOS).
+  const foto = currentProfile.foto || AVATAR_FOTOS[currentProfile.nombre];
   if(foto){
     av.textContent = '';
     av.style.background = 'transparent';
@@ -7215,9 +7248,106 @@ function updateUserChip(){
     av.textContent = currentProfile.nombre[0];
     av.style.background = roleColors[currentProfile.nombre] || 'var(--accent)';
   }
-  document.getElementById('uc-name').textContent = currentProfile.nombre;
+  // Al clicar en el avatar o el nombre se abre "Editar perfil" (cambiar foto).
+  av.style.cursor = 'pointer';
+  av.title = 'Editar perfil';
+  av.onclick = abrirEditarPerfil;
+  const nomEl = document.getElementById('uc-name');
+  nomEl.textContent = currentProfile.nombre;
+  nomEl.style.cursor = 'pointer';
+  nomEl.title = 'Editar perfil';
+  nomEl.onclick = abrirEditarPerfil;
   const rolEl = document.getElementById('uc-rol');
   if(rolEl) rolEl.textContent = '';
+}
+/* ---------- Editar perfil (cambiar foto) ----------
+   Cada usuario puede cambiar su propia foto de perfil. La foto se guarda como
+   un data URI pequeño (JPEG 96×96, recortado a cuadrado) en profiles.foto, así
+   no depende de ningún almacenamiento de archivos aparte. */
+function abrirEditarPerfil(){
+  if(!currentProfile) return;
+  const foto = currentProfile.foto || AVATAR_FOTOS[currentProfile.nombre] || '';
+  const inicial = esc((currentProfile.nombre||'?')[0]||'?');
+  const preview = foto
+    ? `<img src="${foto}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : inicial;
+  document.getElementById('modal-root').innerHTML = `
+    <div class="modal-overlay open" onclick="if(event.target===this) closeModal()">
+      <div class="modal" style="max-width:400px;">
+        <div class="modal-head"><h2>Editar perfil</h2>
+          <button class="icon-btn" onclick="closeModal()">${closeIcon()}</button></div>
+        <div class="modal-body">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+            <div id="perfil-foto-prev" style="width:110px;height:110px;border-radius:50%;overflow:hidden;
+              background:${roleColors[currentProfile.nombre]||'var(--accent)'};color:#fff;display:flex;
+              align-items:center;justify-content:center;font-size:44px;font-weight:800;">${preview}</div>
+            <div style="font-weight:700;">${esc(currentProfile.nombre||'')}</div>
+            <input type="file" id="perfil-foto-input" accept="image/*" style="display:none;" onchange="perfilFotoElegida(event)">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('perfil-foto-input').click()">Cambiar foto…</button>
+              ${foto?`<button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="perfilQuitarFoto()">Quitar foto</button>`:''}
+            </div>
+            <div id="perfil-foto-msg" style="font-size:12px;color:var(--text-soft);min-height:16px;text-align:center;"></div>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" id="perfil-guardar-btn" onclick="perfilGuardar()">Guardar</button>
+        </div>
+      </div>
+    </div>`;
+  PERFIL_FOTO_NUEVA = undefined;   // undefined = sin cambios; null = quitar; string = nueva
+}
+let PERFIL_FOTO_NUEVA = undefined;
+function perfilFotoElegida(ev){
+  const file = ev.target.files && ev.target.files[0];
+  if(!file) return;
+  const msg = document.getElementById('perfil-foto-msg');
+  if(msg) msg.textContent = 'Procesando imagen…';
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const N = 96;
+      const canvas = document.createElement('canvas');
+      canvas.width = N; canvas.height = N;
+      const ctx = canvas.getContext('2d');
+      // Recorte cuadrado centrado (cover).
+      const lado = Math.min(img.width, img.height);
+      const sx = (img.width - lado)/2, sy = (img.height - lado)/2;
+      ctx.drawImage(img, sx, sy, lado, lado, 0, 0, N, N);
+      PERFIL_FOTO_NUEVA = canvas.toDataURL('image/jpeg', 0.7);
+      const prev = document.getElementById('perfil-foto-prev');
+      if(prev) prev.innerHTML = `<img src="${PERFIL_FOTO_NUEVA}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      if(msg) msg.textContent = 'Foto lista. Pulsa Guardar.';
+    };
+    img.onerror = ()=>{ if(msg) msg.textContent = 'No se pudo leer la imagen.'; };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function perfilQuitarFoto(){
+  PERFIL_FOTO_NUEVA = null;
+  const prev = document.getElementById('perfil-foto-prev');
+  if(prev) prev.textContent = (currentProfile.nombre||'?')[0]||'?';
+  const msg = document.getElementById('perfil-foto-msg');
+  if(msg) msg.textContent = 'Se quitará la foto. Pulsa Guardar.';
+}
+async function perfilGuardar(){
+  if(PERFIL_FOTO_NUEVA === undefined){ closeModal(); return; }   // nada que cambiar
+  const btn = document.getElementById('perfil-guardar-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Guardando…'; }
+  const { error } = await sb.from('profiles').update({ foto: PERFIL_FOTO_NUEVA }).eq('id', currentUser.id);
+  if(error){
+    console.error('perfil foto', error);
+    const msg = document.getElementById('perfil-foto-msg');
+    if(msg){ msg.textContent = 'No se pudo guardar: ' + error.message; msg.style.color = 'var(--danger)'; }
+    if(btn){ btn.disabled = false; btn.textContent = 'Guardar'; }
+    return;
+  }
+  currentProfile.foto = PERFIL_FOTO_NUEVA;
+  updateUserChip();
+  closeModal();
 }
 const roleColors = {Laia:'#33C98B', Ignacio:'#F2913D', Paula:'#FF4FA0', Ceci:'#4D8DF6', Mireia:'#F2D64B'};
 let EQUIPO_HUB = ['Laia','Ignacio','Paula','Ceci','Mireia'];
@@ -7935,7 +8065,7 @@ const HUB2_BLOQUES = {
   spv:'Informes y Stats', loomis:'Informes y Stats', visitas:'Informes y Stats',
   clmant:'Informes y Stats', uniformes:'Informes y Stats', informes:'Informes y Stats',
   resenas:'Informes y Stats', nominas:'Informes y Stats', facturacion:'Informes y Stats',
-  planday:'Informes y Stats',
+  planday:'Planday WIP',
 };
 function hub2Bloque(v){
   const el = document.getElementById('hub2-blk');
@@ -8243,11 +8373,15 @@ async function renderDashTeamToday(){
   if(!el) return;
   const hoy = todayIso();
 
+  // No mostrar en el Resumen a quien ya no está activo (p.ej. Constanza).
+  if(!RS_STAFF_ACTIVOS.size) await rsCargarBajasStaff();
+  const dashActivo = p => !p || !RS_STAFF_DE_BAJA.has(p);
+
   let fueraHoy = [];
   try{
     const { data } = await sb.from('vac_solicitudes').select('*')
       .lte('fecha_inicio', hoy).gte('fecha_fin', hoy).eq('estado','aprobado');
-    fueraHoy = (data||[]).filter(s=> s.tipo==='vacaciones' || s.tipo==='recuperacion');
+    fueraHoy = (data||[]).filter(s=> (s.tipo==='vacaciones' || s.tipo==='recuperacion') && dashActivo(s.persona));
   }catch(e){ fueraHoy = []; }
 
   let cambiosHoy = [];
@@ -8262,7 +8396,7 @@ async function renderDashTeamToday(){
   let bajasHoy = [];
   try{
     const { data } = await sb.from('vac_bajas').select('*').lte('fecha_inicio', hoy).gte('fecha_fin', hoy);
-    bajasHoy = data || [];
+    bajasHoy = (data || []).filter(b=> dashActivo(b.persona));
   }catch(e){ bajasHoy = []; }
 
   if(!fueraHoy.length && !cambiosHoy.length && !bajasHoy.length){
@@ -20750,8 +20884,10 @@ let RS_MODELO_TIPO = null;     // 'WD' | 'WE' | null, mientras se edita una plan
    "Modelo WE (...)...") para poder agruparlas y fijarles el horario sin
    depender de la fecha real del día que esté puesta en rsFecha. */
 function rsTipoModelo(nombre){
-  const m = /^Modelo\s+(WD|WE)\b/i.exec((nombre||'').trim());
-  return m ? m[1].toUpperCase() : null;
+  const m = /^Modelo\s+(WD|WE|Lunes)\b/i.exec((nombre||'').trim());
+  if(!m) return null;
+  const t = m[1].toUpperCase();
+  return t === 'LUNES' ? 'LUNES' : t;
 }
 let RS_PLANTILLA_CLIPBOARD = null;   // filas copiadas de una plantilla, listas para pegar en un día
 /* Cambios de turno aprobados del día que se está viendo: [{cede, recibe}].
@@ -21176,16 +21312,20 @@ function rsPintarModeloCard(m, esPrimero, esUltimo){
 function rsRenderModelosList(){
   const elWd = document.getElementById('rs-modelos-list-wd');
   const elWe = document.getElementById('rs-modelos-list-we');
+  const elLunes = document.getElementById('rs-modelos-list-lunes');
   const elOtrosWrap = document.getElementById('rs-modelos-otros-wrap');
   const elOtros = document.getElementById('rs-modelos-list-otros');
   if(!elWd || !elWe) return;
   const wd = ROSTER_MODELOS.filter(m=>rsTipoModelo(m.nombre)==='WD');
   const we = ROSTER_MODELOS.filter(m=>rsTipoModelo(m.nombre)==='WE');
+  const lunes = ROSTER_MODELOS.filter(m=>rsTipoModelo(m.nombre)==='LUNES');
   const otros = ROSTER_MODELOS.filter(m=>!rsTipoModelo(m.nombre));
   elWd.innerHTML = wd.length ? wd.map((m,i)=>rsPintarModeloCard(m, i===0, i===wd.length-1)).join('')
     : emptyState('Sin plantillas WD', 'Pulsa "+ Nueva plantilla WD" para crear la primera.');
   elWe.innerHTML = we.length ? we.map((m,i)=>rsPintarModeloCard(m, i===0, i===we.length-1)).join('')
     : emptyState('Sin plantillas WE', 'Pulsa "+ Nueva plantilla WE" para crear la primera.');
+  if(elLunes) elLunes.innerHTML = lunes.length ? lunes.map((m,i)=>rsPintarModeloCard(m, i===0, i===lunes.length-1)).join('')
+    : emptyState('Sin plantillas Lunes', 'Pulsa "+ Nueva plantilla Lunes" para crear la primera.');
   if(otros.length){
     elOtrosWrap.style.display = '';
     elOtros.innerHTML = otros.map((m,i)=>rsPintarModeloCard(m, i===0, i===otros.length-1)).join('');
@@ -21227,6 +21367,8 @@ function rsSlugModelo(nombre){
 async function rsNuevoModelo(tipo){
   const plantillaBase = tipo==='WE'
     ? 'Modelo WE (Sábado, Domingo y festivos) Visitantes: 300-600'
+    : tipo==='LUNES'
+    ? 'Modelo Lunes (Lunes) Visitantes: 0-150'
     : 'Modelo WD (Lunes - Viernes) Visitantes: 0-150';
   const nombre = (prompt('Nombre de la nueva plantilla:', plantillaBase)||'').trim();
   if(!nombre) return;
@@ -21309,12 +21451,12 @@ function rsCerrarModelo(silencioso){
    azulado para WE). Si el nombre no encaja con el patrón esperado, se
    muestra tal cual, en negrita. */
 function rsFormatModeloLabel(nombre){
-  const m = /^Modelo\s+(WD|WE)\s*\(([^)]+)\)\s*Visitantes:?\s*([\d.,]+\s*-\s*[\d.,]+)$/i.exec((nombre||'').trim());
+  const m = /^Modelo\s+(WD|WE|Lunes)\s*\(([^)]+)\)\s*Visitantes:?\s*([\d.,]+\s*-\s*[\d.,]+)$/i.exec((nombre||'').trim());
   if(!m) return `<b style="color:var(--text);">${esc(nombre||'')}</b>`;
-  const tipo = m[1].toUpperCase();
+  const tipo = m[1].toUpperCase() === 'LUNES' ? 'Lunes' : m[1].toUpperCase();
   const dias = m[2].replace(/\s*-\s*/g, ' a ');
   const rango = m[3].replace(/\s*-\s*/g, '-');
-  const colorTipo = tipo === 'WD' ? '#2563A6' : '#0E7C66';
+  const colorTipo = tipo === 'WD' ? '#2563A6' : (tipo === 'WE' ? '#0E7C66' : '#8A5A00');
   return `<b style="color:${colorTipo};">${esc(tipo)}</b>` +
     `<span style="color:var(--text-soft);"> · </span>` +
     `<b style="color:var(--text);">(${esc(dias)})</b>` +
@@ -22376,11 +22518,17 @@ async function rsCargarContexto(){
   rsRenderAvisoCambios();
   rsValidar();
 
+  // Quien ya no está activo en la pestaña Staff (p.ej. Constanza, que ya no
+  // trabaja aquí) no debe salir de vacaciones/baja en el pie del roster. Se
+  // asegura de tener cargada la lista de inactivos antes de filtrar.
+  if(!RS_STAFF_ACTIVOS.size) await rsCargarBajasStaff();
+  const rsActivo = p => !p || !RS_STAFF_DE_BAJA.has(p);
+
   let fuera = [];
   try{
     const { data } = await sb.from('vac_solicitudes').select('*')
       .lte('fecha_inicio', fecha).gte('fecha_fin', fecha).eq('estado','aprobado');
-    fuera = (data||[]).filter(s=> s.tipo==='vacaciones' || s.tipo==='recuperacion').map(s=>{
+    fuera = (data||[]).filter(s=> (s.tipo==='vacaciones' || s.tipo==='recuperacion') && rsActivo(s.persona)).map(s=>{
       const lbl = (typeof VAC_TIPOS!=='undefined' && VAC_TIPOS[s.tipo]?.label) || s.tipo;
       return `<b>${esc(s.persona||'?')}</b> (${esc(lbl)})`;
     });
@@ -22390,8 +22538,9 @@ async function rsCargarContexto(){
   RS_BAJAS_DIA = [];
   try{
     const { data } = await sb.from('vac_bajas').select('*').lte('fecha_inicio', fecha).gte('fecha_fin', fecha);
-    bajas = (data||[]).map(b=> `<b>${esc(b.persona||'?')}</b> (baja)`);
-    RS_BAJAS_DIA = (data||[]).map(b=> rsNombreCanonico(b.persona)).filter(Boolean);
+    const bajasAct = (data||[]).filter(b=> rsActivo(b.persona));
+    bajas = bajasAct.map(b=> `<b>${esc(b.persona||'?')}</b> (baja)`);
+    RS_BAJAS_DIA = bajasAct.map(b=> rsNombreCanonico(b.persona)).filter(Boolean);
   }catch(e){}
   // Las bajas llegan de Supabase después de pintar la rejilla: hay que
   // repintarla para que los turnos afectados salgan en blanco.
@@ -24055,6 +24204,61 @@ const PD_EXCLUIR = new Set(['Laia','Mireia']);
    —tipo, grupo y si está aprobado (check verde)— sin tocar el roster en sí. */
 let PD_OVERRIDES = {};            // 'fecha|persona|turno' -> {tipo,grupo,aprobado}
 let PD_CEDENTES = {};             // fecha -> Set de nombres que ceden su turno ese día (no salen)
+/* Orden de la columna de staff: 'pdx' (orden fijo del equipo) o 'alfa'. */
+let PD_ORDEN = 'pdx';
+/* Vacaciones / recuperación aprobadas de los managers (Ignacio, Paula, Ceci)
+   para pintarlas en la planificación: [{persona, fecha, tipo}]. */
+let PD_VAC = [];
+/* Arrastrar turnos: PD_DRAGITEMS guarda, por render, los datos de cada turno
+   pintado (indexado por data-si); PD_DRAG es el turno que se está arrastrando. */
+let PD_DRAGITEMS = [];
+let PD_DRAG = null;
+/* Orden PDX: el orden en el que Ignacio quiere ver al equipo. Quien no esté en
+   la lista cae al final, por alfabético. */
+const PD_ORDEN_PDX = ['Ignacio','Paula','Ceci','Marina','Mario','Alma','Grace','Aitana','Laura','Ana','Emma','Neus','Andrea'];
+/* Ignacio y Paula descansan media hora en su turno de día completo: trabajan
+   8h pero se cuentan 7h30 en el total (esos 30 min de descanso no cuentan).
+   El umbral (>=480 min) evita restar en turnos cortos y deja el resultado en
+   7h30 tanto si el turno viene guardado como 8h (480) como si ya viene como
+   7h30 (450, por debajo del umbral). */
+const PD_MEDIA_DESCANSO = new Set(['Ignacio','Paula']);
+function pdMinContables(persona, min){
+  if(PD_MEDIA_DESCANSO.has(persona) && min >= 480) return min - 30;
+  return min;
+}
+/* Nombres tal y como los usamos en el HUB para la columna de staff: nombre +
+   UN solo apellido, con tildes. Para el equipo activo se fija a mano (así los
+   apellidos compuestos con partícula —"de Benito", "De Medeiros"— y las tildes
+   —Fernández, Álvarez, Benítez— salen bien). Para el resto se calcula desde la
+   tabla staff quedándose con el primer apellido. */
+const PD_NOMBRE_DISPLAY = {
+  Ignacio: 'Ignacio de Benito',
+  Paula:   'Paula Fernández',
+  Ceci:    'Ceci De Medeiros',
+  Marina:  'Marina Álvarez',
+  Mario:   'Mario Saravia',
+  Alma:    'Alma Benítez',
+  Grace:   'Grace David',
+  Aitana:  'Aitana Arellano',
+  Laura:   'Laura Noya',
+  Ana:     'Ana Aranda',
+  Emma:    'Emma Onrubia',
+  Neus:    'Neus Liria',
+  Andrea:  'Andrea Torres',
+};
+const PD_PARTICULAS = new Set(['de','del','la','las','los','van','von','di','da','dos','das','der','den','san','santa']);
+function pdPrimerApellido(ape){
+  const toks = String(ape||'').trim().split(/\s+/).filter(Boolean);
+  if(!toks.length) return '';
+  const out = [toks[0]];
+  if(PD_PARTICULAS.has(toks[0].toLowerCase()) && toks[1]) out.push(toks[1]);
+  return out.join(' ');
+}
+function pdNombreStaffCol(nombre){
+  if(PD_NOMBRE_DISPLAY[nombre]) return PD_NOMBRE_DISPLAY[nombre];
+  const ape = pdPrimerApellido(PD_STAFF_APELLIDO[nombre] || '');
+  return ape ? `${nombre} ${ape}` : nombre;
+}
 function pdApKey(fecha, persona, turno){ return fecha+'|'+persona+'|'+turno; }
 /* Tipo de turno: mismo vocabulario y colores que Planday (pantallazo de Ignacio). */
 const PD_TIPO_COLORES = {
@@ -24096,6 +24300,14 @@ function pdNombreCompleto(nombre){
 }
 /* Management Group = los 3 responsables; el resto, Staff Group (por defecto). */
 function pdGrupoDefault(persona){ return RS_RESP_NOMBRES.includes(persona) ? 'Management Group' : 'Staff Group'; }
+/* Grupos/puestos posibles en el desplegable "Grupo o puesto" del modal de
+   turno. Los de Staff (Bday, Duty, Floor, School Workshop, Team Building) son
+   los mismos que se manejan en Planday. */
+const PD_GRUPOS = ['Management Group','Staff Group','Bday','Duty','Floor','School Workshop','Team Building'];
+function pdGrupoOpciones(sel){
+  const lista = PD_GRUPOS.includes(sel) ? PD_GRUPOS : [sel, ...PD_GRUPOS];
+  return lista.map(g=>`<option value="${esc(g)}" ${g===sel?'selected':''}>${esc(g)}</option>`).join('');
+}
 /* Bloques de horario ya hechos, los mismos que se usan en los rosters: para
    managers, los dos bloques fijos de 7,5h (apertura/cierre); para el resto
    del staff, todos los turnos de 4h posibles cada 15 min (930→1330, 945→1345…
@@ -24151,6 +24363,12 @@ function plandayHoy(){
   const hoy = new Date();
   PD_ANCHOR = (PD_VISTA==='semana') ? rsMondayOf(hoy) : new Date(hoy.getFullYear(), hoy.getMonth(), 1);
   plandayCargar();
+}
+/* Cambia el orden de la columna de staff (no hace falta recargar datos, solo
+   repintar). */
+function plandaySetOrden(o){
+  PD_ORDEN = o;
+  plandayRender(plandayDias());   // el propio render marca el botón activo en la esquina
 }
 function plandayNav(delta){
   if(PD_VISTA==='semana'){ const d=new Date(PD_ANCHOR); d.setDate(d.getDate()+7*delta); PD_ANCHOR=rsMondayOf(d); }
@@ -24225,17 +24443,27 @@ async function pdAutoAplicarCambios(filasRows, desde, hasta){
 async function plandayCargar(){
   const cont = document.getElementById('pd-grid');
   if(!cont) return;
+  // Al arrastrar/copiar turnos se llama a esto una y otra vez para refrescar:
+  // guardamos la posición de scroll ANTES de vaciar la tabla (el aviso
+  // "Cargando…" es mucho más bajo que la tabla llena, así que sin esto el
+  // navegador recorta el scroll a 0 y la vista salta arriba del todo cada vez).
+  const scrollGuardado = cont.scrollTop;
+  const scrollLeftGuardado = cont.scrollLeft;
   cont.innerHTML = '<div class="empty-state" style="padding:30px 0;">Cargando…</div>';
   const dias = plandayDias();
   const desde = rsIso(dias[0]), hasta = rsIso(dias[dias.length-1]);
   if(!Object.keys(RS_FESTIVOS_NOMBRE).length) await rsCargarFestivos();
-  PD_ROSTER = {}; PD_MANUAL = []; PD_OVERRIDES = {};
+  PD_ROSTER = {}; PD_MANUAL = []; PD_OVERRIDES = {}; PD_VAC = [];
   try{
-    const [rd, mn, st, ov] = await Promise.all([
+    const [rd, mn, st, ov, vac] = await Promise.all([
       sb.from('roster_dias').select('fecha,ok_laia,filas').gte('fecha',desde).lte('fecha',hasta),
       sb.from('planday_turnos').select('*').gte('fecha',desde).lte('fecha',hasta),
       nomStaffActivo(),
       sb.from('planday_overrides').select('*').gte('fecha',desde).lte('fecha',hasta),
+      // Vacaciones/recuperación aprobadas que solapan el periodo (para los 3
+      // managers): salen en la planificación como Paid holiday / Paid absence.
+      sb.from('vac_solicitudes').select('persona,tipo,estado,fecha_inicio,fecha_fin')
+        .lte('fecha_inicio',hasta).gte('fecha_fin',desde).eq('estado','aprobado'),
     ]);
     const filasRows = (rd.data||[]).map(r=>({
       fecha: r.fecha, ok_laia: !!r.ok_laia,
@@ -24253,8 +24481,24 @@ async function plandayCargar(){
     (st||[]).forEach(s=>{ if(s.nombre && s.apellido) PD_STAFF_APELLIDO[s.nombre] = s.apellido; });
     PD_STAFF_NOMBRES = Array.from(new Set([...RS_RESP_NOMBRES, ...((st||[]).map(s=>s.nombre))]))
       .filter(n=>!PD_EXCLUIR.has(n));
+    // Vacaciones/recuperación de los 3 managers, desplegadas día a día dentro
+    // del periodo. Solo para ellos: el resto del staff no se pide que salga.
+    PD_VAC = [];
+    const rangoIso = dias.map(d=>rsIso(d));
+    (vac.data||[]).forEach(v=>{
+      if(!RS_RESP_NOMBRES.includes(v.persona)) return;
+      if(v.tipo!=='vacaciones' && v.tipo!=='recuperacion') return;
+      const tipo = v.tipo==='recuperacion' ? 'Paid absence (recuperación)' : 'Paid holiday';
+      rangoIso.forEach(iso=>{
+        if(iso>=v.fecha_inicio && iso<=v.fecha_fin) PD_VAC.push({ persona:v.persona, fecha:iso, tipo });
+      });
+    });
   }catch(e){ console.error('planday cargar', e); }
   plandayRender(dias);
+  // Se restaura la posición de scroll guardada al principio, ya con la tabla
+  // llena otra vez (mismo tamaño que antes, así que esta vez sí se respeta).
+  cont.scrollTop = scrollGuardado;
+  cont.scrollLeft = scrollLeftGuardado;
 }
 /* Turnos que salen del roster de un día concreto (uno por fila con nombre y turno). */
 function plandayShiftsDeRoster(fecha){
@@ -24298,13 +24542,15 @@ function plandayRender(dias){
   }
   const porPF = {};          // 'persona|fecha' -> [shifts]
   const personasSet = new Set();
+  // Siempre aparece TODO el staff activo (aunque no tenga turnos esa semana).
+  (PD_STAFF_NOMBRES||[]).forEach(n=>{ if(!PD_EXCLUIR.has(n)) personasSet.add(n); });
   const turnosDia = {}, totalMinDia = {};
   dias.forEach(d=>{ const iso=rsIso(d); turnosDia[iso]=0; totalMinDia[iso]=0; });
   dias.forEach(d=>{
     const iso=rsIso(d);
     plandayShiftsDeRoster(iso).forEach(s=>{
       (porPF[s.persona+'|'+iso] = porPF[s.persona+'|'+iso] || []).push(s);
-      personasSet.add(s.persona); turnosDia[iso]++; totalMinDia[iso]+=s.min;
+      personasSet.add(s.persona); turnosDia[iso]++; totalMinDia[iso]+=pdMinContables(s.persona, s.min);
     });
   });
   PD_MANUAL.forEach(m=>{
@@ -24314,17 +24560,40 @@ function plandayRender(dias){
       min: rsDuracionMinutos(turno), origen:'manual', aprobado:!!m.aprobado, id:m.id, grupo:m.grupo };
     (porPF[m.persona+'|'+m.fecha] = porPF[m.persona+'|'+m.fecha] || []).push(s);
     personasSet.add(m.persona);
-    if(turnosDia[m.fecha]!==undefined){ turnosDia[m.fecha]++; totalMinDia[m.fecha]+=s.min; }
+    if(turnosDia[m.fecha]!==undefined){ turnosDia[m.fecha]++; totalMinDia[m.fecha]+=pdMinContables(m.persona, s.min); }
   });
-  const orden = ['Ignacio','Paula','Ceci','Marina','Mario','Alma','Aitana','Laura','Ana','Emma','Neus','Andrea'];
-  const personas = [...personasSet].sort((a,b)=>{
-    const ia=orden.indexOf(a), ib=orden.indexOf(b);
-    if(ia>=0 && ib>=0) return ia-ib;
-    if(ia>=0) return -1; if(ib>=0) return 1;
-    return a.localeCompare(b,'es');
+  // Vacaciones/recuperación de los managers: no es un turno trabajado (no
+  // cuenta en "nº de turnos" ni suma turnosDia/totalMinDia de la cabecera),
+  // pero SÍ suma a su propio total de horas del día — su jornada completa
+  // (7h30) cuenta igual que si hubiera trabajado. Se pinta como Paid holiday
+  // / Paid absence.
+  (PD_VAC||[]).forEach(v=>{
+    const s = { persona:v.persona, turno:'', tipo:v.tipo, festivo:false,
+      min: Math.round(vacHorasDiaDe(v.persona)*60), origen:'vac', aprobado:false };
+    (porPF[v.persona+'|'+v.fecha] = porPF[v.persona+'|'+v.fecha] || []).push(s);
+    personasSet.add(v.persona);
+    // El total del día (fila fija de abajo) SÍ suma estas horas, aunque no
+    // sea un turno trabajado (no se cuenta en "X turnos" de la cabecera).
+    if(totalMinDia[v.fecha]!==undefined) totalMinDia[v.fecha] += s.min;
   });
+  const personas = [...personasSet];
+  if(PD_ORDEN==='alfa'){
+    personas.sort((a,b)=>a.localeCompare(b,'es'));
+  } else {
+    personas.sort((a,b)=>{
+      const ia=PD_ORDEN_PDX.indexOf(a), ib=PD_ORDEN_PDX.indexOf(b);
+      if(ia>=0 && ib>=0) return ia-ib;
+      if(ia>=0) return -1; if(ib>=0) return 1;
+      return a.localeCompare(b,'es');
+    });
+  }
+  PD_DRAGITEMS = [];
   const hoyIso = rsIso(new Date());
-  let head = '<tr><th class="pd-th-nom">Staff</th>';
+  const cornerToggle = `<div class="pd-ordtoggle">`
+    + `<button class="${PD_ORDEN==='pdx'?'active':''}" onclick="plandaySetOrden('pdx')">Orden PDX</button>`
+    + `<button class="${PD_ORDEN==='alfa'?'active':''}" onclick="plandaySetOrden('alfa')">A-Z</button>`
+    + `</div>`;
+  let head = `<tr><th class="pd-th-nom"><div class="pd-corner"><span class="pd-corner-title">Staff</span>${cornerToggle}</div></th>`;
   dias.forEach(d=>{
     const iso=rsIso(d);
     const festivo = RS_FESTIVOS_NOMBRE[iso];
@@ -24345,8 +24614,19 @@ function plandayRender(dias){
       const iso=rsIso(d);
       const shifts = porPF[p+'|'+iso] || [];
       const publicado = PD_ROSTER[iso]?.ok_laia;
-      shifts.forEach(s=>{ totalMin+=s.min; nTurnos++; });
+      shifts.forEach(s=>{
+        if(s.origen==='vac'){ totalMin += s.min; return; }   // suma horas, no cuenta como turno
+        totalMin+=pdMinContables(p, s.min); nTurnos++;
+      });
       const inner = shifts.map(s=>{
+        // Vacaciones/recuperación: bloque solo con el tipo, sin horas, sin
+        // check y sin arrastrar (no es un turno de trabajo).
+        if(s.origen==='vac'){
+          const dc = PD_TIPO_COLORES[s.tipo] || '#999';
+          return `<div class="pd-shift pd-vac" style="background:${dc}22;border-left-color:${dc};">`
+            + `<span class="pd-shift-tag"><span class="pd-tipo-dot-mini" style="background:${dc}"></span>${esc(s.tipo)}</span>`
+            + `</div>`;
+        }
         let cls='pd-shift';
         const aprobadoAhora = !!s.aprobado;
         if(aprobadoAhora) cls += ' pd-aprobado';
@@ -24361,23 +24641,112 @@ function plandayRender(dias){
         const chkClick = s.origen==='manual'
           ? `plandayToggleAprobadoManual(event,${s.id})`
           : `plandayToggleAprobadoRoster(event,'${iso}','${esc(s.persona)}','${esc(s.turno)}')`;
-        return `<div class="${cls}"${abrir}>`
+        const si = PD_DRAGITEMS.length;
+        PD_DRAGITEMS.push({ persona:p, fecha:iso, turno:s.turno, tipo:s.tipo, grupo:s.grupo,
+          aprobado:aprobadoAhora, min:s.min, origen:s.origen, id:(s.id!=null?s.id:null) });
+        return `<div class="${cls}" draggable="true" data-si="${si}" ondragstart="plandayDragStart(event,${si})" ondragend="plandayDragEnd(event)"${abrir}>`
           + `<span class="pd-shift-hora">${esc(pdTurnoLabel(s.turno))}</span>`
           + `<span class="pd-shift-tag"><span class="pd-tipo-dot-mini" style="background:${dotColor}"></span>${esc(tag)}</span>`
           + `<span class="pd-shift-chk${aprobadoAhora?' on':''}" title="${aprobadoAhora?'Aprobado: ha trabajado este turno':'Marcar como trabajado'}" onclick="${chkClick}">${aprobadoAhora?'✓':''}</span>`
           + `</div>`;
       }).join('');
-      const addBtn = shifts.length
-        ? `<button type="button" class="pd-add-btn pd-add-btn-sm" title="Añadir otro turno" onclick="plandayNuevoTurno('${esc(p)}','${iso}')">+</button>`
-        : `<button type="button" class="pd-add-btn pd-add-btn-big" title="Añadir turno" onclick="plandayNuevoTurno('${esc(p)}','${iso}')">+</button>`;
-      celdas += `<td class="pd-daycell">${inner}${addBtn}</td>`;
+      // El "+" pequeño de arriba a la derecha (para añadir un turno extra a una
+      // celda que ya tenía uno) se quita: quedaba encima del turno y molestaba
+      // al arrastrar/copiar. Solo queda el "+" grande y centrado en celdas
+      // vacías, para dar de alta el primer turno del día.
+      const addBtn = shifts.length ? '' :
+        `<button type="button" class="pd-add-btn pd-add-btn-big" title="Añadir turno" onclick="plandayNuevoTurno('${esc(p)}','${iso}')">+</button>`;
+      celdas += `<td class="pd-daycell" data-p="${esc(p)}" data-f="${iso}" ondragover="plandayDragOver(event)" ondragleave="plandayDragLeave(event)" ondrop="plandayDrop(event)">${inner}${addBtn}</td>`;
     });
-    body += `<tr><td class="pd-nom-cell"><div class="pd-nom-nombre">${esc(pdNombreCompleto(p))}</div><div class="pd-nom-horas">${pdHm(totalMin)} · ${nTurnos} turnos</div></td>${celdas}</tr>`;
+    body += `<tr><td class="pd-nom-cell"><div class="pd-nom-nombre">${esc(pdNombreStaffCol(p))}</div><div class="pd-nom-horas">${pdHm(totalMin)} · ${nTurnos} turnos</div></td>${celdas}</tr>`;
   });
   if(!personas.length) body = `<tr><td class="pd-nom-cell"></td><td class="pd-daycell" colspan="${dias.length}" style="padding:20px;color:var(--text-soft);">No hay turnos en este periodo.</td></tr>`;
   const footCeldas = dias.map(d=>`<td>${pdHm(totalMinDia[rsIso(d)]||0)}</td>`).join('');
   const foot = `<tr class="pd-total-row"><td class="pd-nom-cell pd-total-label">Total</td>${footCeldas}</tr>`;
   cont.innerHTML = `<table class="pd-table"><thead>${head}</thead><tbody>${body}</tbody><tfoot>${foot}</tfoot></table>`;
+}
+/* ---------- Arrastrar y soltar turnos ----------
+   Se puede coger un turno y soltarlo en otra celda (otra persona u otro día).
+   Por defecto MUEVE (se quita de origen y aparece en destino); con la tecla
+   Option/Alt pulsada, COPIA (el de origen se queda). */
+function plandayDragStart(ev, si){
+  PD_DRAG = PD_DRAGITEMS[si] || null;
+  if(!PD_DRAG) return;
+  try{ ev.dataTransfer.effectAllowed = 'copyMove'; ev.dataTransfer.setData('text/plain', String(si)); }catch(e){}
+  ev.currentTarget.classList.add('pd-dragging');
+}
+function plandayDragEnd(ev){
+  ev.currentTarget.classList.remove('pd-dragging');
+  document.querySelectorAll('.pd-daycell.pd-drop-hover').forEach(c=>c.classList.remove('pd-drop-hover'));
+}
+function plandayDragOver(ev){
+  if(!PD_DRAG) return;
+  ev.preventDefault();
+  try{ ev.dataTransfer.dropEffect = ev.altKey ? 'copy' : 'move'; }catch(e){}
+  ev.currentTarget.classList.add('pd-drop-hover');
+}
+function plandayDragLeave(ev){ ev.currentTarget.classList.remove('pd-drop-hover'); }
+async function plandayDrop(ev){
+  ev.preventDefault();
+  const cell = ev.currentTarget;
+  cell.classList.remove('pd-drop-hover');
+  const d = PD_DRAG; PD_DRAG = null;
+  if(!d) return;
+  const destP = cell.dataset.p, destF = cell.dataset.f;
+  if(!destP || !destF) return;
+  if(d.persona===destP && d.fecha===destF) return;   // mismo sitio, nada que hacer
+  await plandayMoverTurno(d, destP, destF, ev.altKey);
+}
+/* Crea un turno manual (planday_turnos) en el destino a partir de un turno
+   arrastrado. */
+async function pdCrearManual(destP, destF, d){
+  const m = String(d.turno||'').match(/(\d{3,4})\s*-\s*(\d{3,4})/);
+  const fila = { persona:destP, fecha:destF,
+    desde: m ? pdFmtHora(m[1]) : null, hasta: m ? pdFmtHora(m[2]) : null,
+    tipo: d.tipo||'Floor', grupo: d.grupo||pdGrupoDefault(destP), aprobado: !!d.aprobado };
+  const { error } = await sb.from('planday_turnos').insert(fila);
+  if(error) throw error;
+}
+async function plandayMoverTurno(d, destP, destF, copiar){
+  try{
+    if(!copiar && d.origen==='manual' && d.id!=null){
+      // Mover la fila manual existente a la nueva persona/fecha.
+      const { error } = await sb.from('planday_turnos')
+        .update({ persona:destP, fecha:destF, updated_at:new Date().toISOString() }).eq('id', d.id);
+      if(error) throw error;
+    } else if(!copiar && d.origen==='roster' && d.fecha===destF){
+      // Mover dentro del MISMO día: se renombra la fila del roster (igual que un
+      // cambio de turno). Quien recibe pasa a tener esa fila; quien la cede,
+      // desaparece de ese día.
+      const reg = PD_ROSTER[d.fecha];
+      const fila = reg && (reg.filas||[]).find(f=>f && f.nombre===d.persona && f.turno===d.turno);
+      if(fila){
+        fila.nombre = destP;
+        const { error } = await sb.from('roster_dias')
+          .update({ filas: reg.filas, updated_at:new Date().toISOString() }).eq('fecha', d.fecha);
+        if(error) throw error;
+      } else {
+        await pdCrearManual(destP, destF, d);
+      }
+    } else {
+      // Copia (cualquier origen) o mover un turno del roster a OTRO día:
+      // se crea un turno manual en el destino…
+      await pdCrearManual(destP, destF, d);
+      // …y, si era mover (no copiar) desde el roster, se quita la fila de origen.
+      if(!copiar && d.origen==='roster'){
+        const reg = PD_ROSTER[d.fecha];
+        if(reg){
+          const idx = (reg.filas||[]).findIndex(f=>f && f.nombre===d.persona && f.turno===d.turno);
+          if(idx>=0){
+            reg.filas.splice(idx,1);
+            await sb.from('roster_dias')
+              .update({ filas: reg.filas, updated_at:new Date().toISOString() }).eq('fecha', d.fecha);
+          }
+        }
+      }
+    }
+    await plandayCargar();
+  }catch(e){ console.error('planday mover turno', e); alert('No se pudo mover el turno.'); }
 }
 /* El ojito publica/oculta un día: escribe ok_laia en el roster de ese día (el
    mismo campo que el botón OK LAIA del roster). Si ese día no tiene roster, no
@@ -24443,10 +24812,7 @@ function plandayEditarRosterTurno(fecha, persona, turno){
           <div class="field"><label>Horario (viene del roster)</label>
             <div style="padding:8px 10px;border:1px solid var(--line-strong);border-radius:8px;background:var(--panel);font-weight:700;">${esc(pdTurnoLabel(turno))}</div></div>
           <div class="field"><label>Grupo o puesto</label>
-            <select id="pd-f-grupo">
-              <option value="Management Group" ${grupoIni==='Management Group'?'selected':''}>Management Group</option>
-              <option value="Staff Group" ${grupoIni==='Staff Group'?'selected':''}>Staff Group</option>
-            </select></div>
+            <select id="pd-f-grupo">${pdGrupoOpciones(grupoIni)}</select></div>
           <div class="field">
             <label>Tipo de turno</label>
             <div class="pd-select-tipo" id="pd-tipo-wrap">
@@ -24510,10 +24876,7 @@ function plandayModalTurno(tt){
             <div class="field"><label>Hasta</label><input type="time" id="pd-f-hasta" value="${esc(t.hasta||'')}"></div>
           </div>
           <div class="field"><label>Grupo o puesto</label>
-            <select id="pd-f-grupo">
-              <option value="Management Group" ${grupoIni==='Management Group'?'selected':''}>Management Group</option>
-              <option value="Staff Group" ${grupoIni==='Staff Group'?'selected':''}>Staff Group</option>
-            </select></div>
+            <select id="pd-f-grupo">${pdGrupoOpciones(grupoIni)}</select></div>
           <div class="field">
             <label>Tipo de turno</label>
             <div class="pd-select-tipo" id="pd-tipo-wrap">
@@ -26192,7 +26555,11 @@ function rsImprimir(){
     st.id = 'rs-page-landscape';
     // Márgenes amplios a los lados: el navegador reduce la tabla para que
     // quepa en el área imprimible, así sale más pequeña y con aire alrededor.
-    st.textContent = '@page{size:A4 landscape;margin:10mm 8mm;}';
+    // Arriba e izquierda llevan 30mm (3cm) de más a propósito: la tabla salía
+    // pegada a la esquina superior izquierda de la hoja, y se pidió bajarla y
+    // moverla hacia la derecha. Los márgenes son asimétricos (margin-top /
+    // margin-left más grandes que abajo/derecha) precisamente para eso.
+    st.textContent = '@page{size:A4 landscape;margin-top:40mm;margin-left:38mm;margin-bottom:10mm;margin-right:8mm;}';
     document.head.appendChild(st);
   }
   // Al imprimir solo se ve la rejilla, así que los cambios de turno y las
@@ -26278,17 +26645,19 @@ function rsAjustarParaImprimir(){
   // medidas reales del contenido (tabla + pie de Cambios/Vacaciones).
   wrap.style.setProperty('--rs-print-scale', '1');
   void wrap.offsetWidth;              // fuerza el recálculo de la maqueta
-  // A4 apaisada = 297x210mm; el @page deja 16mm arriba/abajo y 18mm a los
-  // lados. 1mm ≈ 3.7795px CSS. Se calcula la escala por ancho (que quepan
-  // todas las horas) Y por alto (que quepan tabla + pie en una sola hoja):
-  // se usa la más pequeña de las dos para que nunca salte a una 2ª página.
-  // Márgenes del @page: 8mm a los lados, 10mm arriba/abajo (ver rsImprimir).
-  const anchoUtil = (297 - 8*2) * 3.7795;
+  // A4 apaisada = 297x210mm. 1mm ≈ 3.7795px CSS. Se calcula la escala por
+  // ancho (que quepan todas las horas) Y por alto (que quepan tabla + pie en
+  // una sola hoja): se usa la más pequeña de las dos para que nunca salte a
+  // una 2ª página.
+  // Márgenes del @page (ver rsImprimir): 38mm izquierda / 8mm derecha,
+  // 40mm arriba / 10mm abajo — asimétricos a propósito, para separar la tabla
+  // de la esquina superior izquierda de la hoja.
+  const anchoUtil = (297 - 38 - 8) * 3.7795;
   // Del alto útil se descuenta el título del día que va encima de la tabla,
   // para que tabla + título quepan en la misma hoja.
   const tit = document.getElementById('rs-print-title');
   const altoTitulo = tit ? (tit.offsetHeight || 26) + 8 : 0;
-  const altoUtil  = (210 - 10*2) * 3.7795 - altoTitulo;
+  const altoUtil  = (210 - 40 - 10) * 3.7795 - altoTitulo;
   const anchoTabla = tabla.scrollWidth || tabla.offsetWidth;
   const altoWrap   = wrap.scrollHeight || wrap.offsetHeight;
   // 0.98 de colchón: la maqueta de pantalla y la de papel no son idénticas
@@ -29946,6 +30315,17 @@ async function loadVacData(){
   vacSaldos         = r3.data || [];
   vacBajas          = r4.data || [];
   vacImportadasPlan = r5.data || [];
+  // Quita de "Who is Off?" a quien ya no está activo. refreshEquipoHub()
+  // (arriba, en el mismo Promise.all) deja EQUIPO_HUB con el staff activo +
+  // los usuarios de gestión; si alguien se marca inactivo en la pestaña Staff
+  // (p.ej. Constanza, que ya no trabaja aquí), sus vacaciones/bajas dejan de
+  // aparecer aquí solas, sin tener que borrar nada a mano. Los saldos NO se
+  // filtran: interesa conservar el histórico de días de quien se fue.
+  const activos = new Set(EQUIPO_HUB);
+  const sigueActivo = p => !p || activos.has(p);
+  vacSolicitudes    = vacSolicitudes.filter(s=>sigueActivo(s.persona));
+  vacBajas          = vacBajas.filter(b=>sigueActivo(b.persona));
+  vacImportadasPlan = vacImportadasPlan.filter(v=>sigueActivo(v.persona));
 }
 
 function vacDateStr(d){
@@ -31695,7 +32075,7 @@ window.addEventListener('afterprint', ()=>{
    (el código de permisos sigue tocando esos mismos botones). Aquí solo se
    dibuja ese menú de otra forma: bloques arriba, pestañas del bloque debajo.
    ============================================================================ */
-const HUB2_ORDEN_BLOQUES = ['Operaciones','Marketing','Groups & Sales','Informes y Stats'];
+const HUB2_ORDEN_BLOQUES = ['Operaciones','Marketing','Groups & Sales','Informes y Stats','Planday WIP'];
 const HUB2_DESTACADAS = ['nominas','facturacion'];
 let HUB2_BLK = 'Operaciones';
 let HUB2_CMD_SEL = 0, HUB2_CMD_RES = [];
@@ -31786,6 +32166,10 @@ function hub2PintarTabs(vistaActiva){
   }
   const cont = document.getElementById('hub2-tabs');
   const lista = hub2ItemsVisibles(HUB2_BLK);
+  // Si el bloque solo tiene una pestaña (p.ej. Planday WIP), la subbarra de
+  // pestañas repetiría el nombre del bloque sin aportar nada: se oculta y el
+  // bloque abre su única pantalla directamente.
+  sub.classList.toggle('hub2-oculta', lista.length <= 1);
   const normales = lista.filter(i=>!HUB2_DESTACADAS.includes(i.view));
   const favs = lista.filter(i=>HUB2_DESTACADAS.includes(i.view));
   const pinta = (i)=>{
