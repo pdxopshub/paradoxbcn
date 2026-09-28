@@ -6197,10 +6197,10 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
             </div>
           </div>
 
-          <div class="card" id="rs-warns-card">
-            <div class="section-title" style="margin-bottom:10px;">Revisión <span class="hint" id="rs-warn-count"></span></div>
-            <div class="rs-warn" id="rs-warns"></div>
-          </div>
+          <!-- Cápsula "Revisión" eliminada a petición de Ignacio (28/9): las
+               validaciones siguen calculándose sin problema (rsValidar sale
+               solo si no encuentra el contenedor), pero ya no se muestra la
+               tarjeta grande debajo del roster. -->
         </div>
 
         <!-- ---------- MODELOS ROSTERS (solo Ignacio y Laia) ---------- -->
@@ -14187,7 +14187,7 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.09.28e-PDX.BARCELONA';
+const HUB_VERSION = 'v26.09.28g-PDX.BARCELONA';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = HUB_VERSION; b.title = 'Versión del HUB que estás usando ahora mismo'; }
@@ -21720,23 +21720,45 @@ function rsCopiarRosterDia(){
 }
 /* Al pegar solo se quieren los horarios y la estructura de posiciones
    (turnos, puestos por franja, mitades de 15 min...), nunca los nombres del
-   roster de origen. Pero tampoco hay que vaciar los nombres: los que ya
-   estaban puestos en el día de destino se mantienen tal cual, emparejando
-   cada fila por su posición en la lista (fila 1 con fila 1, fila 2 con fila
-   2...) y quedándose con el horario/estructura de la copia pero el nombre
-   que ya hubiera en esa fila del día de destino. Si el día de destino tenía
-   menos filas que la plantilla, las filas de más se pegan sin nombre. Las
-   filas estructurales fijas (Laia, Grupos, Cumpleaños) siempre conservan su
-   propia etiqueta, tanto si viene de la copia como si ya estaba puesta. */
+   roster de origen. Los nombres salen de quién trabaja de verdad ese día en
+   el día de destino, pero emparejados POR TIPO DE FILA (no a ciegas por
+   posición, que mezclaba responsables con staff):
+     · Filas de responsable (resp1/resp2) de la plantilla → el responsable
+       que le toca a esa franja ese día. Se coge primero del propio día de
+       destino (si ya estaba puesto) y, si no, del patrón mañana/tarde
+       (rsPatronDelDia): resp1 = quien abre, resp2 = quien cierra.
+     · Filas de staff normal → los nombres de staff del día de destino, en
+       orden (Ana, Neus...). Cada fila de staff de la plantilla se rellena
+       con el siguiente staff de la cola; si sobran filas de plantilla,
+       quedan sin nombre; si sobran nombres, se quedan fuera (la plantilla
+       define cuántas posiciones hay).
+     · Filas estructurales fijas (Laia, Grupos, Cumpleaños, Taller) conservan
+       su propia etiqueta. */
 function rsMezclarNombresRoster(filasCopiadas, filasActuales){
-  const ETIQUETAS_FIJAS = ['laia','grupos','cumples'];
-  return (filasCopiadas||[]).map((f, idx)=>{
+  const ETIQUETAS_FIJAS = ['laia','grupos','cumples','taller'];
+  // 1) Recoger, del día de destino, los responsables por su fila y el staff
+  //    normal en una cola por orden de aparición.
+  const nombreResp = {};   // { resp1:'Ignacio', resp2:'Paula' }
+  const colaStaff = [];    // ['Ana','Neus',...]
+  (filasActuales||[]).forEach(f=>{
+    if(!f) return;
+    if(f.tipo==='resp1' || f.tipo==='resp2'){ if(f.nombre) nombreResp[f.tipo] = f.nombre; }
+    else if(!ETIQUETAS_FIJAS.includes(f.tipo) && f.nombre) colaStaff.push(f.nombre);
+  });
+  // 2) Patrón de responsables del día, como respaldo si el destino aún no los
+  //    tenía puestos (p.ej. día recién abierto o vacío).
+  let patron = null;
+  try{ if(RS_DIA && RS_DIA.fecha) patron = rsPatronDelDia(RS_DIA.fecha); }catch(e){}
+  // 3) Reconstruir desde la plantilla poniendo el nombre correcto por tipo.
+  let iStaff = 0;
+  return (filasCopiadas||[]).map(f=>{
     const copia = JSON.parse(JSON.stringify(f));
-    if(!ETIQUETAS_FIJAS.includes(copia.tipo)){
-      const actual = (filasActuales||[])[idx];
-      const nombreActual = (actual && !ETIQUETAS_FIJAS.includes(actual.tipo)) ? (actual.nombre||'') : '';
-      copia.nombre = nombreActual;
+    if(ETIQUETAS_FIJAS.includes(copia.tipo)) return copia;           // etiqueta fija
+    if(copia.tipo==='resp1' || copia.tipo==='resp2'){
+      copia.nombre = nombreResp[copia.tipo] || (patron ? (patron[copia.tipo]||'') : '') || '';
+      return copia;
     }
+    copia.nombre = colaStaff[iStaff++] || '';                        // fila de staff
     return copia;
   });
 }
@@ -23675,6 +23697,26 @@ function rsRenderChartTurnos(){
   ctx.fillText(`${max} a las ${rsSlotHora(slots[idxMax])}`, x(idxMax) + (idxMax > n*0.75 ? -6 : 6), Math.max(12, y(max)-8));
 }
 window.addEventListener('resize', () => { if(RS_MODO==='dia') rsRenderChartTurnos(); });
+/* Color real (hex/rgb) de un puesto, leído del propio CSS (clase rs-p-XX) una
+   sola vez y cacheado. Sirve para pintar las celdas divididas con un degradado
+   en el FONDO del botón (como una celda entera) en vez de con capas .rs-mitad
+   superpuestas: así el color abraza el marco negro exactamente igual que una
+   celda normal y desaparecen los recortes/tiras blancas de los cuartos
+   partidos, sobre todo en el primer y último cuarto del turno. */
+let RS_COLOR_PUESTO_CACHE = {};
+function rsColorPuesto(cls){
+  if(!cls) return 'transparent';
+  if(cls in RS_COLOR_PUESTO_CACHE) return RS_COLOR_PUESTO_CACHE[cls];
+  const probe = document.createElement('span');
+  probe.className = 'rs-p-' + cls;
+  probe.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;';
+  document.body.appendChild(probe);
+  let c = getComputedStyle(probe).backgroundColor || 'transparent';
+  probe.remove();
+  if(c === 'rgba(0, 0, 0, 0)') c = 'transparent';
+  RS_COLOR_PUESTO_CACHE[cls] = c;
+  return c;
+}
 function rsRenderGrid(){
   // Esta misma función pinta las DOS rejillas: la del día/plantilla y la del
   // segundo roster de la plantilla ("Roster con Mario"). RS_GRID_CTX dice
@@ -23903,6 +23945,8 @@ function rsRenderGrid(){
         const partida = !!medias || dividida;
         const vPrev = ci>0 ? (f.slots[RS_SLOTS[ci-1]]||'') : '';
         if(medias){
+          const clsIzq = medias.izq ? (rsAdminReunion(f.nombre,medias.izq)?RS_ADMIN_OFF_CLASE:medias.izq) : '';
+          const clsDer = medias.der ? (rsAdminReunion(f.nombre,medias.der)?RS_ADMIN_OFF_CLASE:medias.der) : '';
           ['izq','der'].forEach(lado=>{
             const code = medias[lado] || '';
             const cls  = code ? (rsAdminReunion(f.nombre,code)?RS_ADMIN_OFF_CLASE:code) : '';
@@ -23913,17 +23957,23 @@ function rsRenderGrid(){
             // en el relevo automático (que nunca muestra texto).
             if(tCode.length > 3) tCode = '';
             const sel = (SELH && SELH.i===i && SELH.ci===ci && SELH.lado===lado) ? ' rs-mitad-sel' : '';
-            mitades += `<span class="rs-mitad rs-mitad-int rs-mitad-${lado==='izq'?'izq':'der'}${code?(' rs-p-'+esc(cls)):' rs-mitad-vacia'}${sel}"`
+            // La capa .rs-mitad ya NO pinta el color de fondo (background
+            // transparente): solo capta clics/arrastres, la selección y el
+            // codiguito. El color lo pinta el botón con el degradado de abajo,
+            // que abraza el marco igual que una celda entera.
+            mitades += `<span class="rs-mitad rs-mitad-int rs-mitad-${lado==='izq'?'izq':'der'}${code?(' rs-p-'+esc(cls)):' rs-mitad-vacia'}${sel}" style="background:transparent;"`
               + ` onmousedown="event.stopPropagation()" onclick="rsSelHalf(event,${i},${ci},'${lado}')"`
               + ` oncontextmenu="rsMenuCelda(event,${i},${ci})"`
               + ` ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)" ondrop="rsDropHalf(event,${i},${ci},'${lado}')"`
               + ` title="${esc(code ? (RS_CODIGO_VISIBLE[code]||code) : 'Media hora vacía')}">${esc(tCode)}</span>`;
           });
-          bgBoton = 'background:transparent;';
+          bgBoton = `background:linear-gradient(90deg,${rsColorPuesto(clsIzq)} 0 50%,${rsColorPuesto(clsDer)} 50% 100%);`;
         } else if(dividida){
-          if(vPrev) mitades += `<span class="rs-mitad rs-mitad-izq rs-p-${esc(rsAdminReunion(f.nombre,vPrev)?RS_ADMIN_OFF_CLASE:vPrev)}"></span>`;
-          if(v)     mitades += `<span class="rs-mitad rs-mitad-der rs-p-${esc(vCls)}"></span>`;
-          if(mitades) bgBoton = 'background:transparent;';
+          // Color de cada cuarto pintado en el fondo del botón (degradado), no en
+          // capas superpuestas: así llega al marco negro sin dejar tira blanca.
+          const clsIzq = vPrev ? (rsAdminReunion(f.nombre,vPrev)?RS_ADMIN_OFF_CLASE:vPrev) : '';
+          const clsDer = v ? vCls : '';
+          if(vPrev || v) bgBoton = `background:linear-gradient(90deg,${rsColorPuesto(clsIzq)} 0 50%,${rsColorPuesto(clsDer)} 50% 100%);`;
           // Si la celda anterior TAMBIÉN está dividida, su cuarto derecho y el
           // cuarto izquierdo de esta celda son, por construcción, el mismo
           // puesto (vPrev = lo que hay guardado en esa celda anterior), así
