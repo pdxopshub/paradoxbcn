@@ -1434,7 +1434,22 @@
     border:1.5px solid rgba(0,0,0,.28);background:rgba(255,255,255,.7);cursor:pointer;
     display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;line-height:1;color:#fff;}
   .pd-shift-chk.on{background:var(--ok);border-color:var(--ok);}
+  .pd-shift-chk.sel{background:var(--accent);border-color:var(--accent);}
   .pd-shift-chk:hover{border-color:var(--accent);}
+  /* Bulk bar para aprobación masiva en Planday WIP */
+  #pd-bulk-bar{display:none;align-items:center;gap:8px;flex-wrap:wrap;
+    background:#EEF3FB;border:1.5px solid var(--accent);border-radius:9px;
+    padding:8px 12px;margin:0 0 8px 0;font-size:12.5px;}
+  #pd-bulk-bar.show{display:flex;}
+  #pd-bulk-count{font-weight:800;color:var(--accent-dark);}
+  .pd-bulk-aprobar{background:#DCF3E7;color:#0E6B45;border:1px solid #8ACFAF;border-radius:6px;
+    padding:4px 12px;font-weight:800;cursor:pointer;font-size:12px;}
+  .pd-bulk-aprobar:hover{background:#B8E4CB;}
+  .pd-bulk-eliminar{background:#FBE9E8;color:#B4231F;border:1px solid #F0B4B2;border-radius:6px;
+    padding:4px 12px;font-weight:800;cursor:pointer;font-size:12px;}
+  .pd-bulk-eliminar:hover{background:#F5CECC;}
+  .pd-bulk-desel{background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:12px;margin-left:4px;}
+  .pd-bulk-desel:hover{color:var(--text);}
   /* Botón "+" para añadir turno directamente sobre la celda */
   .pd-add-btn{position:absolute;border:none;background:var(--accent);color:#fff;cursor:pointer;
     display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .12s;font-weight:800;}
@@ -5057,6 +5072,12 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
               <span class="pd-rango" id="pd-rango"></span>
               <button class="pd-navarrow" onclick="plandayNav(1)">›</button>
             </div>
+          </div>
+          <div id="pd-bulk-bar">
+            <span id="pd-bulk-count"></span>
+            <button class="pd-bulk-aprobar" onclick="plandayBulkAprobar()">✓ Aprobar seleccionados</button>
+            <button class="pd-bulk-eliminar" onclick="plandayBulkEliminar()">✕ Eliminar seleccionados</button>
+            <button class="pd-bulk-desel" onclick="plandayDeseleccionar()">Deseleccionar todo</button>
           </div>
           <div id="pd-grid" class="pd-gridwrap"></div>
         </div>
@@ -14159,7 +14180,7 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.07.27-PDX.BARCELONA';
+const HUB_VERSION = 'v26.09.28-PDX.BARCELONA';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = HUB_VERSION; b.title = 'Versión del HUB que estás usando ahora mismo'; }
@@ -14251,8 +14272,14 @@ async function syncRecapReviewToCache(source, count){
    Nunca puede borrar el resto de columnas del día (a diferencia del
    guardado de payload completo, que escribía TODAS las columnas). */
 async function saveRecapField(campos){
+  const me = currentProfile?.nombre || '';
   const payload = { fecha: recapDate, ...campos, updated_at: new Date().toISOString() };
-  if(!recapData || !recapData.autor) payload.autor = currentProfile?.nombre || '';
+  if(!recapData || !recapData.autor) payload.autor = me;
+  // Si el recap aún no tiene leido_por (fila recién creada), iniciarlo con [autor]
+  // para que el autoguardado no marque el recap como "nuevo" para todo el mundo.
+  // Solo se pone si no hay leido_por ya guardado: así no pisamos el estado de
+  // los demás usuarios cuando ellos ya han marcado como leído.
+  if(!recapData?.leido_por) payload.leido_por = [me];
   const { error } = await sb.from('recap').upsert(payload, {onConflict:'fecha'});
   if(error) console.error('[RECAP] Error guardando campo:', campos, error);
   else recapData = { ...recapData, ...payload };
@@ -24256,13 +24283,19 @@ function rsHorasDiaMin(filas){
    en horas+minutos. */
 function rcParseHorasMin(v){
   if(v == null || v === '') return null;
-  const s = String(v).trim().replace(/[hH]|'/g, '').trim();
-  const m = s.match(/^(\d+)(?:[,.:](\d{1,2}))?$/);
-  if(!m) return null;
-  const h = parseInt(m[1], 10) || 0;
-  let min = m[2] ? parseInt(m[2], 10) : 0;
-  if(min > 59) min = 59;
-  return h + min/60;
+  const raw = String(v).trim();
+  // Formato con 'h' explícita: "43h 30'" / "43h30'" / "43h"
+  const mH = raw.match(/^(\d+)\s*[hH]\s*(\d{1,2})['´]?\s*$/);
+  if(mH){ const h=parseInt(mH[1],10), min=Math.min(parseInt(mH[2],10),59); return h+min/60; }
+  const mHSolo = raw.match(/^(\d+)\s*[hH]\s*$/);
+  if(mHSolo) return parseInt(mHSolo[1],10);
+  // Separador , : .  → "43,30" / "43:30" / "43.30"
+  const mSep = raw.match(/^(\d+)[,:.\/](\d{1,2})$/);
+  if(mSep){ const h=parseInt(mSep[1],10), min=Math.min(parseInt(mSep[2],10),59); return h+min/60; }
+  // Solo número entero
+  const mN = raw.match(/^(\d+)$/);
+  if(mN) return parseInt(mN[1],10);
+  return null;
 }
 function rcFormatHorasMin(decimal){
   if(decimal == null || decimal === '') return '';
@@ -24442,6 +24475,7 @@ let PD_VAC = [];
 /* Arrastrar turnos: PD_DRAGITEMS guarda, por render, los datos de cada turno
    pintado (indexado por data-si); PD_DRAG es el turno que se está arrastrando. */
 let PD_DRAGITEMS = [];
+let PD_SELECCIONADOS = new Set(); // índices de PD_DRAGITEMS seleccionados para bulk action
 let PD_DRAG = null;
 /* Orden PDX: el orden en el que Ignacio quiere ver al equipo. Quien no esté en
    la lista cae al final, por alfabético. */
@@ -24737,26 +24771,107 @@ async function plandayInicio(){
   plandayInicioAcciones();
   plandayCargarNoticias();
 }
-/* Acciones pendientes: nº de solicitudes de intercambio (turnos 'Pendiente').
-   Al pulsar, lleva a la pestaña "Cambios de turno" del HUB para aprobarlas. */
+/* Acciones pendientes: solicitudes de intercambio + turnos de hoy sin aprobar. */
 async function plandayInicioAcciones(){
   const el = document.getElementById('pd-acciones-body');
   if(!el) return;
-  let n = 0;
+  el.innerHTML = '<div class="pd-accion-none">Cargando…</div>';
+
+  // 1. Intercambios pendientes
+  let nTurnos = 0;
   try{
     const { data } = await sb.from('turnos').select('id').eq('estado','Pendiente');
-    n = (data||[]).length;
-  }catch(e){ console.error('planday acciones', e); }
-  if(!n){
-    el.innerHTML = `<div class="pd-accion-none">No hay solicitudes de intercambio pendientes.</div>`;
-    return;
-  }
-  const txt = n===1 ? '1 solicitud de intercambio' : `${n} solicitudes de intercambio`;
-  el.innerHTML = `<div class="pd-accion-row" onclick="goView('turnos')">
-      <span class="pd-accion-badge">${n}</span>
+    nTurnos = (data||[]).length;
+  }catch(e){ console.error('planday acciones intercambios', e); }
+
+  // 2. Turnos de HOY sin aprobar (del roster + manuales)
+  const hoy = todayIsoStr;
+  let sinAprobar = [];
+  try{
+    const [{ data: rDia }, { data: ovData }, { data: manData }, { data: vacData }] = await Promise.all([
+      sb.from('roster_dias').select('filas').eq('fecha', hoy).maybeSingle(),
+      sb.from('planday_overrides').select('*').eq('fecha', hoy),
+      sb.from('planday_turnos').select('*').eq('fecha', hoy).eq('aprobado', false),
+      sb.from('vac_solicitudes').select('persona,tipo').eq('fecha_inicio', hoy).eq('estado','aprobado'),
+    ]);
+    const ovMap = {};
+    (ovData||[]).forEach(o=>{ ovMap[o.persona+'|'+o.turno] = o; });
+    const conVacHoy = new Set((vacData||[]).filter(v=>v.tipo==='vacaciones'||v.tipo==='recuperacion').map(v=>v.persona));
+    // Turnos del roster
+    (rDia?.filas||[]).forEach(f=>{
+      if(!f?.nombre || !f?.turno) return;
+      if(conVacHoy.has(f.nombre)) return;
+      const ov = ovMap[f.nombre+'|'+f.turno];
+      if(ov?.aprobado) return;  // ya aprobado
+      sinAprobar.push({ origen:'roster', persona:f.nombre, turno:f.turno, id:null });
+    });
+    // Turnos manuales sin aprobar
+    (manData||[]).forEach(m=>{
+      const turno = pdHhmmACode(m.desde)+'-'+pdHhmmACode(m.hasta);
+      sinAprobar.push({ origen:'manual', persona:m.persona, turno, id:m.id });
+    });
+  }catch(e){ console.error('planday acciones turnos hoy', e); }
+
+  let html = '';
+  // Intercambios
+  if(nTurnos){
+    const txt = nTurnos===1 ? '1 solicitud de intercambio' : `${nTurnos} solicitudes de intercambio`;
+    html += `<div class="pd-accion-row" onclick="goView('turnos')">
+      <span class="pd-accion-badge">${nTurnos}</span>
       <span>${txt}</span>
       <span style="margin-left:auto;color:var(--accent);">Revisar ›</span>
     </div>`;
+  }
+  // Turnos hoy sin aprobar
+  if(sinAprobar.length){
+    const n = sinAprobar.length;
+    const txt = n===1 ? '1 turno de hoy sin aprobar' : `${n} turnos de hoy sin aprobar`;
+    html += `<div class="pd-accion-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;width:100%;">
+        <span class="pd-accion-badge" style="background:#F2913D;">${n}</span>
+        <span>${txt}</span>
+        <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="plandayTab('planificacion')">Ver en Planday ›</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;padding-left:4px;width:100%;">
+        ${sinAprobar.slice(0,8).map(s=>`<div style="display:flex;align-items:center;gap:6px;font-size:12px;">
+          <span style="font-weight:700;color:var(--text);">${esc(s.persona)}</span>
+          <span style="color:var(--text-soft);">${esc(s.turno||'')}</span>
+          <button class="btn btn-sm" style="margin-left:auto;padding:2px 9px;font-size:11px;background:#DCF3E7;color:#0E6B45;border:1px solid #8ACFAF;"
+            onclick="plandayAccionAprobarUno(event,'${s.origen}','${esc(s.persona)}','${esc(s.turno||'')}',${s.id??'null'},'${hoy}')">Aprobar</button>
+        </div>`).join('')}
+        ${sinAprobar.length>8?`<div style="font-size:11px;color:var(--text-soft);padding-top:2px;">+${sinAprobar.length-8} más en Planday WIP</div>`:''}
+      </div>
+    </div>`;
+  }
+  if(!html){
+    html = `<div class="pd-accion-none">Sin intercambios pendientes ni turnos de hoy por aprobar.</div>`;
+  }
+  el.innerHTML = html;
+}
+/* Aprobar un turno de hoy directamente desde Acciones pendientes. */
+async function plandayAccionAprobarUno(ev, origen, persona, turno, id, fecha){
+  ev.stopPropagation();
+  const btn = ev.currentTarget;
+  btn.disabled = true; btn.textContent = '…';
+  try{
+    if(origen==='manual' && id!=null){
+      const { error } = await sb.from('planday_turnos').update({ aprobado:true, updated_at:new Date().toISOString() }).eq('id', id);
+      if(error) throw error;
+    } else {
+      const { data: ov } = await sb.from('planday_overrides').select('*').eq('fecha',fecha).eq('persona',persona).eq('turno',turno).maybeSingle();
+      const fila = { fecha, persona, turno, tipo:ov?.tipo||null, grupo:ov?.grupo||null, aprobado:true, updated_at:new Date().toISOString() };
+      const { error } = await sb.from('planday_overrides').upsert(fila,{onConflict:'fecha,persona,turno'});
+      if(error) throw error;
+    }
+    btn.textContent = '✓';
+    btn.style.background = '#B8E4CB';
+    // Recargar acciones para reflejar el cambio
+    setTimeout(plandayInicioAcciones, 600);
+  }catch(e){
+    console.error('aprobar desde acciones', e);
+    btn.textContent = 'Error';
+    btn.disabled = false;
+  }
 }
 /* ===================== INICIO: Noticias ===================== */
 let PD_NOT_TIMER = null;
@@ -25133,10 +25248,13 @@ function plandayShiftsDeRoster(fecha){
   const festivo = !!RS_FESTIVOS_NOMBRE[fecha];
   const out = [];
   const cedentes = PD_CEDENTES[fecha];
+  // Personas con vacaciones o recuperación ese día: no añadir su fila del roster
+  const conVac = new Set((PD_VAC||[]).filter(v=>v.fecha===fecha).map(v=>v.persona));
   (reg.filas||[]).forEach(f=>{
     if(!f || !f.nombre || !f.turno) return;
     if(PD_EXCLUIR.has(f.nombre)) return;
     if(cedentes && cedentes.has(f.nombre)) return;   // ese día cedió su turno: no sale
+    if(conVac.has(f.nombre)) return;                 // tiene vac/recup ese día: su fila no va al Planday
     if(['grupos','cumples','taller'].includes(f.tipo)) return;
     if(['Grupos','Cumpleaños','Taller','Grupo'].includes(f.nombre)) return;
     const ov = PD_OVERRIDES[pdApKey(fecha, f.nombre, f.turno)];
@@ -25213,6 +25331,8 @@ function plandayRender(dias){
     });
   }
   PD_DRAGITEMS = [];
+  PD_SELECCIONADOS = new Set();
+  pdActualizarBulkBar();
   const hoyIso = rsIso(new Date());
   const cornerToggle = `<div class="pd-ordtoggle">`
     + `<button class="${PD_ORDEN==='pdx'?'active':''}" onclick="plandaySetOrden('pdx')">Orden PDX</button>`
@@ -25269,7 +25389,7 @@ function plandayRender(dias){
         return `<div class="${cls}" draggable="true" data-si="${si}" ondragstart="plandayDragStart(event,${si})" ondragend="plandayDragEnd(event)"${abrir}>`
           + `<span class="pd-shift-hora">${esc(pdTurnoLabel(s.turno))}</span>`
           + `<span class="pd-shift-tag"><span class="pd-tipo-dot-mini" style="background:${dotColor}"></span>${esc(tag)}</span>`
-          + `<span class="pd-shift-chk${aprobadoAhora?' on':''}" title="${aprobadoAhora?'Aprobado: ha trabajado este turno':'Marcar / gestionar este turno'}" onclick="plandayAbrirCheckMenu(event,${si})">${aprobadoAhora?'✓':''}</span>`
+          + `<span class="pd-shift-chk${aprobadoAhora?' on':''}" title="${aprobadoAhora?'Aprobado':'Seleccionar para aprobar/eliminar en bloque'}" onclick="plandayToggleSeleccion(event,${si})">${aprobadoAhora?'✓':''}</span>`
           + `</div>`;
       }).join('');
       // El "+" pequeño de arriba a la derecha (para añadir un turno extra a una
@@ -25417,6 +25537,66 @@ async function plandayToggleAprobadoRoster(ev, fecha, persona, turno){
 }
 /* Menú del check de cada turno: al pulsar el cuadradito de abajo-derecha, sale
    arriba un menú con "Aprobar" (verde) y "Eliminar turno" (rojo). */
+/* ---------- Selección múltiple (bulk) ---------- */
+function plandayToggleSeleccion(ev, si){
+  ev.stopPropagation();
+  const el = ev.currentTarget;
+  const d = PD_DRAGITEMS[si];
+  if(!d) return;
+  if(PD_SELECCIONADOS.has(si)){
+    PD_SELECCIONADOS.delete(si);
+    el.classList.remove('sel');
+  } else {
+    PD_SELECCIONADOS.add(si);
+    el.classList.add('sel');
+  }
+  pdActualizarBulkBar();
+}
+function pdActualizarBulkBar(){
+  const bar = document.getElementById('pd-bulk-bar');
+  const cnt = document.getElementById('pd-bulk-count');
+  if(!bar) return;
+  const n = PD_SELECCIONADOS.size;
+  bar.classList.toggle('show', n > 0);
+  if(cnt) cnt.textContent = `${n} turno${n===1?'':'s'} seleccionado${n===1?'':'s'}`;
+}
+function plandayDeseleccionar(){
+  PD_SELECCIONADOS.clear();
+  document.querySelectorAll('.pd-shift-chk.sel').forEach(el=>el.classList.remove('sel'));
+  pdActualizarBulkBar();
+}
+async function plandayBulkAprobar(){
+  if(!PD_SELECCIONADOS.size) return;
+  const items = [...PD_SELECCIONADOS].map(si=>PD_DRAGITEMS[si]).filter(Boolean);
+  const btn = document.querySelector('#pd-bulk-bar .pd-bulk-aprobar');
+  if(btn){ btn.disabled=true; btn.textContent='Aprobando…'; }
+  for(const d of items){
+    if(d.origen==='manual' && d.id!=null){
+      await sb.from('planday_turnos').update({ aprobado:true, updated_at:new Date().toISOString() }).eq('id', d.id);
+      const t = PD_MANUAL.find(x=>x.id===d.id); if(t) t.aprobado = true;
+    } else {
+      await pdOverrideGuardarParcial(d.fecha, d.persona, d.turno, { aprobado: true });
+    }
+  }
+  plandayRender(plandayDias());
+}
+async function plandayBulkEliminar(){
+  if(!PD_SELECCIONADOS.size) return;
+  const items = [...PD_SELECCIONADOS].map(si=>PD_DRAGITEMS[si]).filter(Boolean);
+  if(!confirm(`¿Eliminar ${items.length} turno${items.length===1?'':'s'}? Esta acción no se puede deshacer.`)) return;
+  const btn = document.querySelector('#pd-bulk-bar .pd-bulk-eliminar');
+  if(btn){ btn.disabled=true; btn.textContent='Eliminando…'; }
+  for(const d of items){
+    if(d.origen==='manual' && d.id!=null){
+      await sb.from('planday_turnos').delete().eq('id', d.id);
+    } else {
+      await plandayBorrarRosterTurno(d.fecha, d.persona, d.turno);
+      return; // plandayBorrarRosterTurno ya llama a plandayCargar()
+    }
+  }
+  plandayCargar();
+}
+
 function plandayCerrarCheckMenu(){ document.getElementById('pd-check-menu')?.remove(); }
 function plandayAbrirCheckMenu(ev, si){
   ev.stopPropagation();
