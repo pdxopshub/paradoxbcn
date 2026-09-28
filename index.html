@@ -2906,41 +2906,32 @@
     /* El tirador de arrastre ahora vive junto al nombre, ya no dentro de
        .rs-col-acc: se oculta aparte para que tampoco salga en papel. */
     body.rs-imprimiendo .rs-staff-pick .rs-row-grip{display:none !important;}
-    /* Contorno del turno EN PAPEL: rehecho de cero con border-collapse:separate
-       en vez de collapse. En "collapse" (el de pantalla) dos celdas vecinas
-       comparten y NEGOCIAN su línea — la más ancha o la que "gane" el empate
-       es la que se pinta — y esa negociación es justo lo que hacía que el
-       contorno saliera roto por un lado, doblado por otro o distinto de
-       grosor según la celda: cada intento de arreglarlo por ese camino
-       (reforzar con !important, capas ::after…) seguía dependiendo de quién
-       ganaba esa negociación. Con "separate" cada celda pinta EXACTAMENTE lo
-       que se le dice, sin negociar nada con la de al lado — dos celdas
-       vecinas nunca compiten por la misma línea, cada una tiene la suya.
-       Para no acabar con líneas dobles (cada celda pintando su propio borde
-       en el mismo sitio que la vecina), se sigue un convenio fijo: cada celda
-       SOLO dibuja su lado derecho y su lado inferior; el izquierdo y el
-       superior los pone siempre la celda de al lado/de arriba. Así cada
-       línea de la rejilla la pinta una única celda, nunca dos. */
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m){border-collapse:separate !important;border-spacing:0 !important;}
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td{border:0 !important;
-      border-right:1px solid #C9CDD4 !important;border-bottom:1px solid #C9CDD4 !important;}
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) th{border:0 !important;
-      border-right:1px solid #8C8C8C !important;border-bottom:1px solid #8C8C8C !important;}
-    /* El turno de una fila es SIEMPRE un único tramo seguido (de cuando entra
-       a cuando sale, sin huecos: rsRango rellena todo lo de en medio, incluido
-       un "desc." de por medio), así que TODAS sus celdas llevan rs-blkcell y
-       el contorno tiene que leerse como un solo bloque de principio a fin, sin
-       ninguna raya suelta entre "2", "desc.", "0G"… por dentro. Arriba/abajo
-       siempre en negro, y el lado derecho se ANULA (border-right:0) salvo en
-       la última celda del tramo (rs-blkR), que es la única que cierra el
-       rectángulo por la derecha. rs-blkL abre el rectángulo por la izquierda
-       en la primera celda. Como con "separate" cada celda pinta solo lo suyo,
-       esto es lo único que hace falta — nada de capas aparte ni z-index. */
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkcell{
-      border-top:2px solid #000 !important;border-bottom:2px solid #000 !important;
-      border-right:0 !important;}
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkL{border-left:2px solid #000 !important;}
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkR{border-right:2px solid #000 !important;}
+    /* Contorno del turno EN PAPEL: EXACTAMENTE el mismo modelo que en pantalla.
+       No se toca nada aquí a propósito — la rejilla se imprime heredando el
+       border-collapse:collapse de la regla de pantalla.
+
+       Por qué: durante un tiempo esto forzaba border-collapse:separate, y ese
+       era el origen de todo lo que se veía mal en la hoja:
+         · Con "separate" cada celda dibuja su PROPIO borde. Donde acaba un
+           turno y empieza el siguiente se pintaban dos líneas de 2px pegadas
+           una a otra, así que el contorno salía el doble de gordo en unos
+           sitios y de 2px en otros.
+         · La hoja además se imprime con un zoom fraccionario (lo calcula
+           rsAjustarParaImprimir para que quepa el ancho del folio). Con
+           "separate" cada celda redondea su propia caja a píxeles por su
+           cuenta, el error se va acumulando a lo largo de la fila y las
+           columnas acaban desalineadas entre filas: de ahí los escalones y
+           los trozos de contorno que faltaban.
+         · Y el border-right:0 que llevaban las celdas de dentro del bloque
+           borraba las divisiones interiores, que en pantalla sí están.
+
+       Con "collapse" cada línea compartida entre dos celdas se dibuja UNA
+       sola vez, así que no hay líneas dobles ni deriva de redondeo: el
+       contorno del turno sale con el mismo grosor por las cuatro caras y sin
+       huecos, que es justo como se ve en la pantalla del roster. El borde
+       negro de 2px del bloque y el gris de 1px de la rejilla siguen puestos
+       en el propio <td> por el render de la tabla; a 2px contra 1px el negro
+       gana siempre el empate, por eso el marco sale entero. */
     /* Contorno negro alrededor de toda la tabla, para que se vea como una
        hoja cerrada en vez de perderse contra el blanco de la página. */
     body.rs-imprimiendo :is(#rs-grid,#rs-grid-m){border:2px solid #000 !important;}
@@ -2966,11 +2957,8 @@
        rs-blkR que cualquier bloque de turno (son una sola celda fusionada,
        así que les tocan las tres a la vez), así que ya salen con el mismo
        contorno de 2px que el resto — nada que reforzar aparte. */
-    /* El cuarto de hora que queda fuera del turno sigue el mismo convenio de
-       "cada celda pinta solo su derecha y su abajo" que el resto de la
-       rejilla, para no acabar con una línea doble junto al turno vecino. */
-    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-cuarto-fuera{border:0 !important;
-      border-right:1px solid #C9CDD4 !important;border-bottom:1px solid #C9CDD4 !important;}
+    /* El cuarto de hora que queda fuera del turno se imprime con el mismo
+       borde gris de 1px que tiene en pantalla: no necesita regla propia. */
 
     /* --- Menos tinta y más legible ---
        La fila de totales, en pantalla negra, se imprime en blanco con el texto
@@ -22411,16 +22399,15 @@ function rsRenderCandado(){
   el.innerHTML = `<span class="rs-ok-laia-check">${on?'✓':''}</span>${on?'Bloqueado':'Bloquear'}`;
   rsAplicarBloqueoVisual();
 }
-/* Candado real del roster: mientras el candado manual o el OK LAIA estén
-   puestos, la rejilla del día (no las plantillas) deja de aceptar clics/
-   arrastres/escritura, y se avisa arriba del porqué. rsSnapshot()/rsUndo()
-   cortan además cualquier intento de editar por teclado o atajos, y
-   rsSaveDia() nunca manda nada al servidor mientras esté bloqueado (salvo el
-   propio clic de quitar el candado o el OK LAIA). La base de datos lo exige
-   igual aunque algo se saltara todo esto. */
+/* Candado real del roster: SOLO el candado manual (bloqueado) bloquea la
+   edición. El OK LAIA sirve para publicar el roster al staff pero NO impide
+   editar: en cuanto se quita el candado, todos pueden editar aunque el OK LAIA
+   siga activo. rsSnapshot()/rsUndo() cortan cualquier intento de editar
+   mientras haya candado, y rsSaveDia() nunca manda nada al servidor mientras
+   esté bloqueado (salvo el propio clic de poner/quitar el candado). */
 function rsRosterBloqueado(){
   return RS_MODO !== 'modelo' && RS_GRID_CTX === 'dia'
-    && !!(RS_DIA && (RS_DIA.bloqueado || RS_DIA.ok_laia));
+    && !!(RS_DIA && RS_DIA.bloqueado);
 }
 function rsAplicarBloqueoVisual(){
   const wrap = document.querySelector('.rs-grid-wrap');
@@ -27240,15 +27227,16 @@ async function rsSaveDia(){
   // (navegación rápida por el calendario) mientras este guardado esperaba su
   // turno, rsFecha ya apunta a OTRO día y este guardado escribiría los datos
   // equivocados encima de esa otra fecha.
-  // Si el día tiene el candado o el OK LAIA puestos, no se manda nada al
+  // Si el día tiene el candado (bloqueado) puesto, no se manda nada al
   // servidor — salvo que este guardado sea justo el que ha lanzado el propio
-  // clic de poner/quitar el candado o el OK LAIA (RS_TOGGLE_BLOQUEO_EN_CURSO).
+  // clic de poner/quitar el candado (RS_TOGGLE_BLOQUEO_EN_CURSO).
+  // El OK LAIA ya NO bloquea el guardado: solo el candado manual lo hace.
   // La base de datos rechaza igualmente cualquier guardado que se saltara
-  // este candado por cualquier otro camino (ver migraciones
-  // roster_dias_lock_ok_laia / roster_dias_candado_manual).
+  // este candado por cualquier otro camino (ver migración
+  // roster_dias_candado_manual).
   const eraToggleBloqueo = RS_TOGGLE_BLOQUEO_EN_CURSO;
   RS_TOGGLE_BLOQUEO_EN_CURSO = false;
-  if((dia.ok_laia || dia.bloqueado) && !eraToggleBloqueo){
+  if(dia.bloqueado && !eraToggleBloqueo){
     console.warn('Guardado omitido: roster de', dia.fecha, 'bloqueado.');
     return;
   }
