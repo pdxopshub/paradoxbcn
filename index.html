@@ -1320,9 +1320,11 @@
   .pd-accion-badge{background:var(--accent);color:#fff;border-radius:20px;min-width:22px;height:22px;
     display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;padding:0 6px;}
   .pd-accion-none{color:var(--text-soft);font-size:13px;padding:8px 0;}
-  .pd-not-form{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .pd-not-new-box{background:rgba(59,130,246,.07);border:1.5px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:16px;}
+  .pd-not-new-label{font-weight:800;font-size:11.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+  .pd-not-form{display:flex;flex-direction:column;gap:8px;}
   .pd-not-form input,.pd-not-form textarea{width:100%;border:1px solid var(--line-strong);border-radius:8px;
-    padding:8px 10px;font-size:13px;font-family:inherit;background:var(--surface);}
+    padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg,#fff);}
   .pd-not-item{border-top:1px solid var(--line);padding:11px 0;}
   .pd-not-item:first-child{border-top:none;}
   .pd-not-tit{font-weight:800;font-size:13.5px;}
@@ -1332,6 +1334,11 @@
   .pd-not-search-row{margin-bottom:12px;}
   .pd-not-search-row input{width:100%;border:1px solid var(--line-strong);border-radius:8px;
     padding:8px 10px;font-size:13px;font-family:inherit;background:var(--surface);}
+  .pd-not-pag{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 0 2px;border-top:1px solid var(--line);margin-top:4px;}
+  .pd-not-pag button{background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:3px 12px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .pd-not-pag button:disabled{opacity:.35;cursor:default;}
+  .pd-not-pag-info{font-size:12px;color:var(--text-soft);}
+  .pd-not-pag button:not(:disabled):hover{background:var(--accent);color:#fff;border-color:var(--accent);}
   /* Informes: tarjetas */
   .pd-inf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
   .pd-inf-card{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:10px;}
@@ -2050,7 +2057,7 @@
     font-size:14px;padding:4px 6px;border-radius:6px;line-height:1;}
   .rs-modelo-actions button:hover{background:var(--panel);color:var(--text);}
   .rs-modelo-actions button.rs-modelo-del:hover{color:#c0392b;}
-  .rs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+.rs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
   .rs-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   /* Cápsulas discretas de Copiar/Pegar roster: solo texto, sin iconos, más
      pequeñas que los botones normales, a la izquierda de Imprimir (que queda
@@ -14180,7 +14187,7 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.09.28-PDX.BARCELONA';
+const HUB_VERSION = 'v26.09.28e-PDX.BARCELONA';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = HUB_VERSION; b.title = 'Versión del HUB que estás usando ahora mismo'; }
@@ -21682,6 +21689,12 @@ function rsAplicarModoUI(){
   if(pegarBtn) pegarBtn.style.display = enModelo ? 'none' : '';
   rsRenderOkLaia();
   rsRenderCandado();
+  // rsRenderOkLaia y rsRenderCandado hacen return temprano en modo modelo sin
+  // llamar a rsAplicarBloqueoVisual. Si el día anterior estaba bloqueado, la
+  // clase rs-bloqueado sigue en el grid wrapper y el modelo queda ineditable.
+  // Forzar aquí la reevaluación garantiza que la clase se quite al entrar en
+  // un modelo (rsRosterBloqueado() devuelve false en modo modelo).
+  rsAplicarBloqueoVisual();
   rsRenderGridMario();
 }
 function rsCopiarPlantillaActual(){
@@ -22035,7 +22048,10 @@ function rsRenderPlan(mantenerScroll){
       // Suma a todos los que se ven en la tabla, incluida Laia cuando tiene
       // turno ese día (así el headcount coincide con la gente que realmente
       // trabaja). Quien está de baja no cuenta porque ni sale en la tabla.
-      const n = plantilla.reduce((a,s)=>a+rsPlanValor(s.nombre, iso),0);
+      // Quien tiene vacaciones o recuperación ese día NO cuenta como turno:
+      // en Planificación del HUB solo se cuentan los turnos de trabajo real
+      // (en Planday WIP sí cuentan, pero eso es otra vista).
+      const n = plantilla.reduce((a,s)=> a + (rsPlanVac(s.nombre, iso) ? 0 : rsPlanValor(s.nombre, iso)), 0);
       tot += `<td class="${sepSi(di,si).trim()}" data-tot="${iso}">${n||''}</td>`;
     });
   });
@@ -22374,8 +22390,26 @@ function rsSincronizarStaffDesdePlan(){
   let cambiado = false;
   const excluir = new Set(RS_RESP_NOMBRES.concat(['Laia']));
   const cedentes = rsCedentesPuros();   // quien cedió su turno ese día no vuelve a salir
+  // Limpieza automática: si alguien tiene vacaciones/recuperación ese día y le
+  // quedó una fila de staff VACÍA (fantasma de una sincronización anterior),
+  // se quita sola — sin tener que borrarla a mano. Solo se eliminan filas sin
+  // turno y sin nada escrito; nunca se toca una fila con datos reales.
+  const antes = RS_DIA.filas.length;
+  RS_DIA.filas = RS_DIA.filas.filter(f=>{
+    if(f.tipo || !f.nombre) return true;
+    if(!rsPlanVac(f.nombre, RS_DIA.fecha)) return true;
+    const vacia = !f.turno
+      && !Object.values(f.slots||{}).some(Boolean)
+      && !Object.values(f.textos||{}).some(Boolean)
+      && !f.aviso;
+    return !vacia;
+  });
+  if(RS_DIA.filas.length !== antes) cambiado = true;
   RS_STAFF.forEach(s=>{
     if(excluir.has(s.nombre) || RS_STAFF_DE_BAJA.has(s.nombre) || cedentes.has(s.nombre)) return;
+    // Vacaciones/recuperación ese día: no se repone su fila. Así, si se borra
+    // la fila fantasma de alguien que está de vac/recup, no vuelve a salir.
+    if(rsPlanVac(s.nombre, RS_DIA.fecha)) return;
     const deseadas = parseInt(plan[s.nombre],10) || 0;
     if(!deseadas) return;
     const actuales = RS_DIA.filas.filter(f=>!f.tipo && f.nombre===s.nombre).length;
@@ -22931,6 +22965,9 @@ function rsFilasDesdePlan(){
   const cedentes = rsCedentesPuros();   // quien cedió su turno ese día no vuelve a salir
   RS_STAFF.forEach(s=>{
     if(excluir.has(s.nombre) || cedentes.has(s.nombre)) return;
+    // Vacaciones/recuperación ese día: no se puede contar con esa persona,
+    // así que NO se le crea fila en el roster (aunque el plan la marque).
+    if(rsPlanVac(s.nombre, rsFecha)) return;
     const n = parseInt(plan[s.nombre],10) || 0;
     for(let i=0;i<n;i++) RS_DIA.filas.push({ turno:'', nombre:s.nombre, slots:{} });
   });
@@ -24490,12 +24527,11 @@ function pdMinContables(persona, min){
   if(PD_MEDIA_DESCANSO.has(persona) && min >= 480) return min - 30;
   return min;
 }
-/* ¿Este bloque cuenta como un turno en el recuento "X turnos"? Un turno de
-   trabajo normal sí. Una ausencia de vacaciones (Paid holiday) no; pero la
-   recuperación (Paid absence) SÍ cuenta como turno, a petición. */
+/* ¿Este bloque cuenta como un turno en el recuento "X turnos"?
+   Solo los turnos de trabajo real (origen !== 'vac').
+   Ni vacaciones ni recuperación suman al contador de la planificación. */
 function pdCuentaComoTurno(s){
-  if(s.origen !== 'vac') return true;
-  return s.tipo === 'Paid absence (recuperación)';
+  return s.origen !== 'vac';
 }
 /* Nombres tal y como los usamos en el HUB para la columna de staff: nombre +
    UN solo apellido, con tildes. Para el equipo activo se fija a mano (así los
@@ -24875,9 +24911,16 @@ async function plandayAccionAprobarUno(ev, origen, persona, turno, id, fecha){
 }
 /* ===================== INICIO: Noticias ===================== */
 let PD_NOT_TIMER = null;
+let PD_NOT_PAGE = 0;
 function plandayBuscarNoticias(v){
   clearTimeout(PD_NOT_TIMER);
+  PD_NOT_PAGE = 0;
   PD_NOT_TIMER = setTimeout(()=>{ plandayCargarNoticias(v||''); }, 250);
+}
+function plandayNotPag(dir){
+  const q = (document.getElementById('pd-not-search')?.value||'');
+  PD_NOT_PAGE += dir;
+  plandayCargarNoticias(q);
 }
 async function plandayCargarNoticias(query){
   const el = document.getElementById('pd-noticias-body');
@@ -24886,27 +24929,30 @@ async function plandayCargarNoticias(query){
   const q = (query||'').trim().replace(/[,()%]/g,'').slice(0,80);
   let lista = [];
   try{
-    let req = sb.from('planday_noticias').select('*').order('created_at', {ascending:false});
-    if(q){
-      req = req.or(`titulo.ilike.%${q}%,cuerpo.ilike.%${q}%,autor.ilike.%${q}%`).limit(300);
-    } else {
-      req = req.limit(30);
-    }
+    let req = sb.from('planday_noticias').select('*').order('created_at',{ascending:false}).limit(300);
+    if(q) req = req.or(`titulo.ilike.%${q}%,cuerpo.ilike.%${q}%,autor.ilike.%${q}%`);
     const { data } = await req;
     lista = data || [];
   }catch(e){ console.error('planday noticias', e); }
+  const PER_PAGE = 10;
+  const totalPag = Math.max(1, Math.ceil(lista.length / PER_PAGE));
+  if(PD_NOT_PAGE >= totalPag) PD_NOT_PAGE = totalPag - 1;
+  const pagina = lista.slice(PD_NOT_PAGE * PER_PAGE, (PD_NOT_PAGE + 1) * PER_PAGE);
   let html = '';
   if(puedeEscribir){
-    html += `<div class="pd-not-form">
-        <input type="text" id="pd-not-titulo" placeholder="Título (opcional)" maxlength="120">
-        <textarea id="pd-not-cuerpo" rows="2" placeholder="Escribe una noticia para el equipo…"></textarea>
-        <div><button class="btn btn-primary btn-sm" onclick="plandayPublicarNoticia()">Publicar noticia</button></div>
+    html += `<div class="pd-not-new-box">
+        <div class="pd-not-new-label">✏️ Nueva noticia</div>
+        <div class="pd-not-form">
+          <input type="text" id="pd-not-titulo" placeholder="Título (opcional)" maxlength="120">
+          <textarea id="pd-not-cuerpo" rows="3" placeholder="Escribe una noticia para el equipo…"></textarea>
+          <div><button class="btn btn-primary btn-sm" onclick="plandayPublicarNoticia()">Publicar noticia</button></div>
+        </div>
       </div>`;
   }
   if(!lista.length){
     html += `<div class="pd-cap-empty">${q?'No se han encontrado noticias.':'Todavía no hay noticias.'}</div>`;
   } else {
-    html += lista.map(n=>{
+    html += pagina.map(n=>{
       const fecha = plandayFechaNoticia(n.created_at);
       const del = puedeEscribir ? `<button class="pd-not-del" onclick="plandayBorrarNoticia(${n.id})">Eliminar</button>` : '';
       return `<div class="pd-not-item">
@@ -24915,6 +24961,13 @@ async function plandayCargarNoticias(query){
           <div class="pd-not-meta"><span>${esc(n.autor||'')}</span><span>·</span><span>${esc(fecha)}</span>${del?'<span>·</span>':''}${del}</div>
         </div>`;
     }).join('');
+    if(totalPag > 1){
+      html += `<div class="pd-not-pag">
+          <button onclick="plandayNotPag(-1)" ${PD_NOT_PAGE===0?'disabled':''}>‹ Anterior</button>
+          <span class="pd-not-pag-info">Pág. ${PD_NOT_PAGE+1} / ${totalPag} · ${lista.length} noticias</span>
+          <button onclick="plandayNotPag(1)" ${PD_NOT_PAGE>=totalPag-1?'disabled':''}>Siguiente ›</button>
+        </div>`;
+    }
   }
   el.innerHTML = html;
 }
