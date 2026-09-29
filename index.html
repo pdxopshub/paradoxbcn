@@ -14187,7 +14187,7 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.09.28g-PDX.BARCELONA';
+const HUB_VERSION = 'v26.09.29a-PDX.BARCELONA';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = HUB_VERSION; b.title = 'Versión del HUB que estás usando ahora mismo'; }
@@ -22351,18 +22351,40 @@ async function rsLoadDia(){
   RS_CAMBIOS_DIA = [];   // se recargan al final, en rsCargarContexto
   await rsAsegurarPlanCargado(fechaCargada);
   if(miSeq !== RS_LOAD_SEQ) return;   // se pidió otro día mientras esto cargaba
-  RS_DIA = { fecha: fechaCargada, config:{}, filas:[], revisado_por:'', ok_laia:false, bloqueado:false };
-  try{
-    const {data} = await sb.from('roster_dias').select('*').eq('fecha',fechaCargada).single();
-    if(miSeq !== RS_LOAD_SEQ) return;   // idem: esta respuesta ya no es del día actual
-    if(data){
-      RS_DIA.config = (typeof data.config==='string') ? JSON.parse(data.config) : (data.config||{});
-      RS_DIA.filas  = (typeof data.filas ==='string') ? JSON.parse(data.filas)  : (data.filas ||[]);
-      RS_DIA.revisado_por = data.revisado_por || '';
-      RS_DIA.ok_laia = !!data.ok_laia;
-      RS_DIA.bloqueado = !!data.bloqueado;
-    }
-  }catch(e){}
+  RS_DIA = { fecha: fechaCargada, config:{}, filas:[], revisado_por:'', ok_laia:false, bloqueado:false,
+             _ver:null, cargaOk:false, existiaEnBD:false };
+  // Lectura con reintentos. CLAVE contra el borrado accidental: si la lectura
+  // falla (red, timeout…), NO se puede dar el día por "nuevo" y repoblarlo desde
+  // Planificación — eso subiría un esqueleto vacío encima del trabajo real que
+  // hay en la BD. Solo se continúa si la lectura ha ido bien. Con .maybeSingle()
+  // se distingue "el día no existe" (data null, sin error) de "no se ha podido
+  // leer" (error): lo primero es un día nuevo de verdad; lo segundo, cortar.
+  let lecturaOk = false, filaBD = null;
+  for(let intento=0; intento<3 && !lecturaOk; intento++){
+    const { data, error } = await sb.from('roster_dias').select('*').eq('fecha',fechaCargada).maybeSingle();
+    if(miSeq !== RS_LOAD_SEQ) return;   // ya se pidió otro día: esta respuesta sobra
+    if(!error){ lecturaOk = true; filaBD = data || null; break; }
+    await new Promise(r=>setTimeout(r, 350));
+    if(miSeq !== RS_LOAD_SEQ) return;
+  }
+  if(!lecturaOk){
+    // No se pudo leer el día: no se repuebla ni se guarda NADA, para no pisar la
+    // BD con un estado vacío. Se avisa y se deja el día marcado como no cargado
+    // (rsSaveDia se niega a guardar mientras cargaOk sea false).
+    RS_DIA.cargaOk = false;
+    if(typeof showSaveToast==='function') showSaveToast('No se ha podido cargar el roster del '+fechaCargada+'. Revisa la conexión y vuelve a abrir el día. No se ha tocado ni guardado nada.', 'err');
+    return;
+  }
+  if(filaBD){
+    RS_DIA.config = (typeof filaBD.config==='string') ? JSON.parse(filaBD.config) : (filaBD.config||{});
+    RS_DIA.filas  = (typeof filaBD.filas ==='string') ? JSON.parse(filaBD.filas)  : (filaBD.filas ||[]);
+    RS_DIA.revisado_por = filaBD.revisado_por || '';
+    RS_DIA.ok_laia = !!filaBD.ok_laia;
+    RS_DIA.bloqueado = !!filaBD.bloqueado;
+    RS_DIA._ver = filaBD.updated_at || null;   // versión cargada, para el control de concurrencia
+    RS_DIA.existiaEnBD = true;
+  }
+  RS_DIA.cargaOk = true;
   if(miSeq !== RS_LOAD_SEQ) return;
   const d = new Date(fechaCargada+'T12:00:00');
   const finde = (d.getDay()===0 || d.getDay()===6);
@@ -22377,7 +22399,9 @@ async function rsLoadDia(){
   // quien cede su turno no debe volver a salir con una fila vacía en el roster.
   await rsCargarCambiosDia();
   if(miSeq !== RS_LOAD_SEQ) return;
-  const eraNuevo = RS_DIA.filas.length === 0;
+  // "Nuevo" = no había fila en la BD (no simplemente "filas vacías"): así, si un
+  // día existente llegara con filas vacías por lo que sea, NO se repuebla a ciegas.
+  const eraNuevo = !RS_DIA.existiaEnBD;
   if(eraNuevo) rsFilasDesdePlan();
   // Si el día ya existía (no era nuevo) pero alguien se marcó como que
   // trabaja en Planificación DESPUÉS de crear el roster de ese día, su fila
@@ -27486,56 +27510,105 @@ function rsAltDragEnd(ev){
   rsRenderGrid();
   rsAutoGuardar();
 }
-async function rsSaveDia(){
-  // OJO: si el guardado se dispara mientras se está ejecutando algo en la
-  // rejilla del segundo roster, RS_DIA apunta a ESE roster. Lo que se guarda
-  // como día/plantilla tiene que ser siempre el de verdad, así que se coge de
-  // RS_DIA_REAL cuando estamos dentro de rsMx.
-  const dia = (RS_GRID_CTX === 'mario' && RS_DIA_REAL) ? RS_DIA_REAL : RS_DIA;
-  const filasMario = RS_MARIO_DIA ? RS_MARIO_DIA.filas : [];
-  if(RS_MODO === 'modelo'){
-    if(!RS_MODELO_CLAVE) return;
+async function rsSaveDia(snap){
+  // El guardado puede venir de un "snapshot" tomado por rsAutoGuardar en el
+  // momento en que se pidió (para que un autoguardado rezagado suba SIEMPRE el
+  // día que se estaba editando y no el que haya en pantalla ahora), o directo
+  // desde el estado actual si no se pasa snapshot.
+  const dia         = snap ? snap.dia         : ((RS_GRID_CTX === 'mario' && RS_DIA_REAL) ? RS_DIA_REAL : RS_DIA);
+  const filasMario  = snap ? snap.filasMario  : (RS_MARIO_DIA ? RS_MARIO_DIA.filas : []);
+  const modo        = snap ? snap.modo        : RS_MODO;
+  const modeloClave = snap ? snap.modeloClave : RS_MODELO_CLAVE;
+  if(!dia) return;
+  if(modo === 'modelo'){
+    if(!modeloClave) return;
     await sb.from('roster_modelos').update(
       { config: dia.config, filas: dia.filas,
         filas_mario: filasMario, updated_at:new Date().toISOString() })
-      .eq('clave', RS_MODELO_CLAVE);
-    const mm = ROSTER_MODELOS.find(m=>m.clave===RS_MODELO_CLAVE);
+      .eq('clave', modeloClave);
+    const mm = ROSTER_MODELOS.find(m=>m.clave===modeloClave);
     if(mm){ mm.filas = dia.filas; mm.filas_mario = filasMario; }
     const b=document.getElementById('rs-saved');
     if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none',2200); }
     return;
   }
-  // Guardar SIEMPRE con la fecha del propio día que se está guardando (dia.fecha),
-  // nunca con la variable global rsFecha: si el usuario ya ha cambiado de día
-  // (navegación rápida por el calendario) mientras este guardado esperaba su
-  // turno, rsFecha ya apunta a OTRO día y este guardado escribiría los datos
-  // equivocados encima de esa otra fecha.
   // Si el día tiene el candado (bloqueado) puesto, no se manda nada al
   // servidor — salvo que este guardado sea justo el que ha lanzado el propio
   // clic de poner/quitar el candado (RS_TOGGLE_BLOQUEO_EN_CURSO).
-  // El OK LAIA ya NO bloquea el guardado: solo el candado manual lo hace.
-  // La base de datos rechaza igualmente cualquier guardado que se saltara
-  // este candado por cualquier otro camino (ver migración
-  // roster_dias_candado_manual).
   const eraToggleBloqueo = RS_TOGGLE_BLOQUEO_EN_CURSO;
   RS_TOGGLE_BLOQUEO_EN_CURSO = false;
   if(dia.bloqueado && !eraToggleBloqueo){
     console.warn('Guardado omitido: roster de', dia.fecha, 'bloqueado.');
     return;
   }
-  const { error } = await sb.from('roster_dias').upsert(
-    { fecha: dia.fecha, config: dia.config, filas: dia.filas,
-      revisado_por: dia.revisado_por || null, ok_laia: !!dia.ok_laia,
-      bloqueado: !!dia.bloqueado,
-      updated_at:new Date().toISOString() },
-    { onConflict:'fecha' });
-  if(error){
-    console.error('rsSaveDia', error);
-    if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar el roster: '+(error.message||'error desconocido'), 'err');
+  // ===== SALVAGUARDAS ANTI-BORRADO (concurrencia) =====
+  // (1) Si el día no se cargó bien de la BD, no se guarda NADA encima: una
+  //     lectura fallida nunca puede acabar pisando el trabajo real.
+  if(dia.cargaOk === false){ console.warn('Guardado omitido: día', dia.fecha, 'sin carga válida.'); return; }
+  // (2) Nunca se sube un roster completamente vacío por autoguardado: un día
+  //     real siempre tiene al menos las filas de responsables. filas=[] solo
+  //     ocurre en un estado intermedio de carga o por un fallo, y subirlo
+  //     borraría el día. Es justo lo que pasó el 23 de octubre.
+  if(!Array.isArray(dia.filas) || dia.filas.length === 0){
+    console.warn('Guardado omitido: filas vacías en', dia.fecha, '(salvaguarda anti-borrado).');
     return;
   }
+  const nowIso = new Date().toISOString();
+  const payload = { fecha: dia.fecha, config: dia.config, filas: dia.filas,
+      revisado_por: dia.revisado_por || null, ok_laia: !!dia.ok_laia,
+      bloqueado: !!dia.bloqueado, updated_at: nowIso };
+  // ===== CONTROL DE CONCURRENCIA OPTIMISTA =====
+  // Solo se escribe si en la BD sigue estando la MISMA versión (updated_at) que
+  // teníamos al cargar. Si otro usuario u otra pestaña guardó por medio, el
+  // update no encuentra ninguna fila que cumpla la condición y NO se pisa su
+  // trabajo: se recarga su versión y se avisa (rsResolverConflictoGuardado).
+  try{
+    if(dia.existiaEnBD && dia._ver){
+      const { data:rows, error } = await sb.from('roster_dias').update(payload)
+        .eq('fecha', dia.fecha).eq('updated_at', dia._ver).select('updated_at');
+      if(error){ console.error('rsSaveDia update', error); if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar: '+(error.message||'error'), 'err'); return; }
+      if(!rows || rows.length === 0){ await rsResolverConflictoGuardado(dia); return; }
+      dia._ver = rows[0].updated_at;
+    } else {
+      const { data:rows, error } = await sb.from('roster_dias').insert(payload).select('updated_at');
+      if(error){
+        if(error.code === '23505' || /duplicate|conflict/i.test(error.message||'')){ await rsResolverConflictoGuardado(dia); return; }
+        console.error('rsSaveDia insert', error); if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar: '+(error.message||'error'), 'err'); return;
+      }
+      dia.existiaEnBD = true;
+      if(rows && rows[0]) dia._ver = rows[0].updated_at;
+    }
+  }catch(e){ console.error('rsSaveDia', e); if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar el roster.', 'err'); return; }
   const b=document.getElementById('rs-saved');
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none',2200); }
+}
+/* Conflicto de guardado: otro usuario (u otra pestaña del mismo usuario) guardó
+   este día entre que lo cargamos y ahora. NO se pisa su trabajo: se lee la
+   versión del servidor y, si el usuario sigue viendo justo ese día, se recarga
+   la rejilla con la última versión y se avisa. Si ya se ha ido a otro día, solo
+   se actualiza la versión conocida del snapshot (sin tocar la pantalla). */
+async function rsResolverConflictoGuardado(dia){
+  try{
+    const { data } = await sb.from('roster_dias').select('*').eq('fecha', dia.fecha).maybeSingle();
+    if(!data) return;
+    if(RS_DIA && RS_DIA === dia){
+      RS_DIA.config = (typeof data.config==='string') ? JSON.parse(data.config) : (data.config||{});
+      RS_DIA.filas  = (typeof data.filas ==='string') ? JSON.parse(data.filas)  : (data.filas ||[]);
+      RS_DIA.revisado_por = data.revisado_por || '';
+      RS_DIA.ok_laia = !!data.ok_laia;
+      RS_DIA.bloqueado = !!data.bloqueado;
+      RS_DIA._ver = data.updated_at || null;
+      RS_DIA.existiaEnBD = true;
+      rsEnsureFilasEspeciales();
+      rsRenderGrid();
+      if(typeof rsRenderCandado==='function') rsRenderCandado();
+      if(typeof rsRenderOkLaia==='function') rsRenderOkLaia();
+      if(typeof showSaveToast==='function') showSaveToast('Otro usuario estaba editando este mismo día a la vez. Se ha recargado con la última versión guardada para no perder el trabajo de nadie — revisa tu último cambio por si hay que repetirlo.', 'err');
+    } else {
+      dia._ver = data.updated_at || null;
+      dia.existiaEnBD = true;
+    }
+  }catch(e){ console.error('rsResolverConflictoGuardado', e); }
 }
 /* Autoguardado: cualquier cambio en la rejilla se guarda solo, sin tener que
    pulsar "Guardar" (con un pequeño retardo para no disparar una llamada por
@@ -27543,8 +27616,19 @@ async function rsSaveDia(){
 let RS_AUTOSAVE_TIMER = null;
 function rsAutoGuardar(){
   clearTimeout(RS_AUTOSAVE_TIMER);
+  // Se captura AHORA qué se está editando (día, rejilla, objeto). Si antes de que
+  // salte el temporizador el usuario cambia de día —o la carga del nuevo día deja
+  // RS_DIA en un estado intermedio vacío—, este guardado seguirá subiendo el día
+  // que se estaba editando, con SU objeto, y nunca un estado vacío del día nuevo.
+  // Esto es lo que evitaba que, al ir de un día a otro y volver, se vaciara.
+  const snap = {
+    dia: (RS_GRID_CTX === 'mario' && RS_DIA_REAL) ? RS_DIA_REAL : RS_DIA,
+    filasMario: RS_MARIO_DIA ? RS_MARIO_DIA.filas : [],
+    modo: RS_MODO,
+    modeloClave: RS_MODELO_CLAVE
+  };
   RS_AUTOSAVE_TIMER = setTimeout(async ()=>{
-    try{ await rsSaveDia(); }catch(e){ console.error(e); }
+    try{ await rsSaveDia(snap); }catch(e){ console.error(e); }
   }, 500);
 }
 /* Imprimir: abre el diálogo de impresión del navegador mostrando solo la
