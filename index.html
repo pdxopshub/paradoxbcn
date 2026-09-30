@@ -1320,11 +1320,9 @@
   .pd-accion-badge{background:var(--accent);color:#fff;border-radius:20px;min-width:22px;height:22px;
     display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;padding:0 6px;}
   .pd-accion-none{color:var(--text-soft);font-size:13px;padding:8px 0;}
-  .pd-not-new-box{background:rgba(59,130,246,.07);border:1.5px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:16px;}
-  .pd-not-new-label{font-weight:800;font-size:11.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
-  .pd-not-form{display:flex;flex-direction:column;gap:8px;}
+  .pd-not-form{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
   .pd-not-form input,.pd-not-form textarea{width:100%;border:1px solid var(--line-strong);border-radius:8px;
-    padding:8px 10px;font-size:13px;font-family:inherit;background:var(--bg,#fff);}
+    padding:8px 10px;font-size:13px;font-family:inherit;background:var(--surface);}
   .pd-not-item{border-top:1px solid var(--line);padding:11px 0;}
   .pd-not-item:first-child{border-top:none;}
   .pd-not-tit{font-weight:800;font-size:13.5px;}
@@ -1334,11 +1332,6 @@
   .pd-not-search-row{margin-bottom:12px;}
   .pd-not-search-row input{width:100%;border:1px solid var(--line-strong);border-radius:8px;
     padding:8px 10px;font-size:13px;font-family:inherit;background:var(--surface);}
-  .pd-not-pag{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 0 2px;border-top:1px solid var(--line);margin-top:4px;}
-  .pd-not-pag button{background:var(--surface);border:1px solid var(--line-strong);border-radius:6px;padding:3px 12px;font-size:12px;cursor:pointer;font-family:inherit;}
-  .pd-not-pag button:disabled{opacity:.35;cursor:default;}
-  .pd-not-pag-info{font-size:12px;color:var(--text-soft);}
-  .pd-not-pag button:not(:disabled):hover{background:var(--accent);color:#fff;border-color:var(--accent);}
   /* Informes: tarjetas */
   .pd-inf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;}
   .pd-inf-card{border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:18px;display:flex;flex-direction:column;gap:10px;}
@@ -2057,7 +2050,7 @@
     font-size:14px;padding:4px 6px;border-radius:6px;line-height:1;}
   .rs-modelo-actions button:hover{background:var(--panel);color:var(--text);}
   .rs-modelo-actions button.rs-modelo-del:hover{color:#c0392b;}
-.rs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+  .rs-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
   .rs-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   /* Cápsulas discretas de Copiar/Pegar roster: solo texto, sin iconos, más
      pequeñas que los botones normales, a la izquierda de Imprimir (que queda
@@ -4000,6 +3993,130 @@
   .pz-notas-vacio{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;
     gap:10px;color:var(--text-soft);font-size:13px;}
 
+  /* --- Calendario de tareas (tab 3 de Pizarra) --- */
+  .pz-cal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding-bottom:16px;}
+  @media(max-width:1000px){.pz-cal-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:640px){.pz-cal-grid{grid-template-columns:1fr 1fr;}}
+  .pz-day-card{border-radius:13px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);
+    display:flex;flex-direction:column;border:1.5px solid transparent;}
+  .pz-day-header{padding:13px 15px 9px;display:flex;flex-direction:column;gap:2px;}
+  .pz-day-name{font-size:14px;font-weight:900;letter-spacing:.04em;color:#fff;text-transform:uppercase;}
+  .pz-day-sub{font-size:10px;font-weight:600;color:rgba(255,255,255,.78);letter-spacing:.04em;}
+  .pz-day-body{background:var(--surface);flex:1;padding:10px 13px 8px;
+    border-left:1.5px solid var(--line);border-right:1.5px solid var(--line);}
+  .pz-task-list{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px;}
+  .pz-task-item{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;
+    background:var(--panel);border:1px solid var(--line);font-size:12.5px;color:var(--text);}
+  .pz-task-item:hover{background:var(--hover,#f1f4f8);}
+  .pz-task-item.done{opacity:.5;}
+  .pz-task-item.done .pz-task-text{text-decoration:line-through;color:var(--text-soft);}
+  .pz-task-ck{width:15px;height:15px;border-radius:50%;border:2px solid var(--line-strong);
+    flex-shrink:0;cursor:pointer;transition:all .13s;display:flex;align-items:center;justify-content:center;}
+  .pz-task-ck.checked{background:var(--ok,#1a9e5c);border-color:var(--ok,#1a9e5c);}
+  .pz-task-ck.checked::after{content:'✓';font-size:8.5px;color:#fff;font-weight:900;}
+  .pz-task-text{flex:1;line-height:1.3;word-break:break-word;font-size:12.5px;}
+  .pz-task-del{opacity:0;width:18px;height:18px;flex-shrink:0;border:none;background:none;
+    cursor:pointer;color:var(--text-soft);border-radius:4px;font-size:13px;padding:0;
+    display:flex;align-items:center;justify-content:center;transition:all .1s;}
+  .pz-task-item:hover .pz-task-del{opacity:1;}
+  .pz-task-del:hover{background:rgba(220,53,69,.1);color:#dc3545;}
+  .pz-day-add{background:var(--surface);border-left:1.5px solid var(--line);border-right:1.5px solid var(--line);
+    border-bottom:1.5px solid var(--line);border-radius:0 0 13px 13px;padding:0 13px 13px;}
+  .pz-add-row{display:flex;gap:6px;align-items:center;}
+  .pz-add-input{flex:1;font-size:12px;padding:5px 9px;border-radius:7px;border:1.5px solid var(--line);
+    background:var(--panel);color:var(--text);outline:none;}
+  .pz-add-input:focus{border-color:var(--accent);}
+  .pz-add-btn{flex-shrink:0;width:26px;height:26px;border-radius:7px;border:none;cursor:pointer;
+    font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:#fff;transition:filter .12s;}
+  .pz-add-btn:hover{filter:brightness(1.15);}
+  .pz-empty{font-size:11.5px;color:var(--text-soft);font-style:italic;text-align:center;padding:6px 0;}
+  /* Colores header de cada día */
+  /* Estilo D: fondo HUB oscuro, nombre del día en color */
+  .pz-day-header{background:#1a3a52;}
+  .pz-day-name{font-size:14px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;}
+  .pz-day-sub{font-size:10px;font-weight:600;color:#4a6a82;letter-spacing:.03em;}
+  .pz-day-dom .pz-day-name{color:#fde68a;}
+  .pz-day-lun .pz-day-name{color:#4ade80;}
+  .pz-day-mar .pz-day-name{color:#f472b6;}
+  .pz-day-mie .pz-day-name{color:#22d3ee;}
+  .pz-day-jue .pz-day-name{color:#fb923c;}
+  .pz-day-dom{border-color:#d6b87a;} .pz-day-dom .pz-day-body,.pz-day-dom .pz-day-add{border-color:#d6b87a;}
+  .pz-day-lun{border-color:#86efac;} .pz-day-lun .pz-day-body,.pz-day-lun .pz-day-add{border-color:#86efac;}
+  .pz-day-mar{border-color:#f9a8d4;} .pz-day-mar .pz-day-body,.pz-day-mar .pz-day-add{border-color:#f9a8d4;}
+  .pz-day-mie{border-color:#67e8f9;} .pz-day-mie .pz-day-body,.pz-day-mie .pz-day-add{border-color:#67e8f9;}
+  .pz-day-jue{border-color:#fdba74;} .pz-day-jue .pz-day-body,.pz-day-jue .pz-day-add{border-color:#fdba74;}
+  .pz-day-dom .pz-add-btn{background:#ca8a04;}
+  .pz-day-lun .pz-add-btn{background:#16a34a;}
+  .pz-day-mar .pz-add-btn{background:#db2777;}
+  .pz-day-mie .pz-add-btn{background:#0891b2;}
+  .pz-day-jue .pz-add-btn{background:#ea580c;}
+  .pz-day-dom .pz-task-ck{border-color:#fde68a;}
+  .pz-day-lun .pz-task-ck{border-color:#4ade80;}
+  .pz-day-mar .pz-task-ck{border-color:#f472b6;}
+  .pz-day-mie .pz-task-ck{border-color:#22d3ee;}
+  .pz-day-jue .pz-task-ck{border-color:#fb923c;}
+  .pz-day-dom .pz-task-ck.checked{background:#ca8a04;border-color:#ca8a04;}
+  .pz-day-lun .pz-task-ck.checked{background:#16a34a;border-color:#16a34a;}
+  .pz-day-mar .pz-task-ck.checked{background:#db2777;border-color:#db2777;}
+  .pz-day-mie .pz-task-ck.checked{background:#0891b2;border-color:#0891b2;}
+  .pz-day-jue .pz-task-ck.checked{background:#ea580c;border-color:#ea580c;}
+  .pz-task-locked-icon{flex-shrink:0;opacity:.45;font-size:9px;color:var(--text-soft);user-select:none;}
+  .pz-task-item.locked .pz-task-del{display:none;}
+  .pz-empty{font-size:12px;color:var(--text-soft);padding:8px 4px;font-style:italic;}
+  /* Dashboard Nacho Calendar widget */
+  .nacho-cal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:4px;}
+  @media(max-width:1100px){.nacho-cal-grid{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:700px){.nacho-cal-grid{grid-template-columns:1fr 1fr;}}
+  .ncd-card{border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1px solid var(--line);display:flex;flex-direction:column;}
+  .ncd-header{padding:8px 12px 6px;display:flex;flex-direction:column;gap:1px;}
+  .ncd-name{font-size:11px;font-weight:900;letter-spacing:.06em;color:#fff;text-transform:uppercase;}
+  .ncd-sub{font-size:9px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.04em;}
+  .ncd-body{background:var(--surface);flex:1;padding:8px 10px 4px;min-height:60px;}
+  .ncd-list{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:2px;}
+  .ncd-item{display:flex;align-items:flex-start;gap:5px;padding:3px 5px;border-radius:5px;transition:background .12s;}
+  .ncd-item:hover{background:var(--hover,#f1f4f8);}
+  .ncd-item.done{opacity:.45;}
+  .ncd-item.done .ncd-text{text-decoration:line-through;}
+  .ncd-ck{flex-shrink:0;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .ncd-ck.checked{background:var(--ok,#1a9e5c);border-color:var(--ok,#1a9e5c);}
+  .ncd-ck.checked::after{content:'✓';font-size:7.5px;color:#fff;font-weight:900;}
+  .ncd-text{flex:1;font-size:11.5px;line-height:1.35;word-break:break-word;color:var(--text);}
+  .ncd-del{opacity:0;width:15px;height:15px;flex-shrink:0;border:none;background:none;cursor:pointer;border-radius:4px;color:var(--text-soft);font-size:13px;line-height:1;padding:0;transition:all .12s;}
+  .ncd-item:hover .ncd-del{opacity:1;}
+  .ncd-del:hover{background:rgba(220,53,69,.12);color:#dc3545;}
+  .ncd-lock{flex-shrink:0;opacity:.35;font-size:8px;width:13px;text-align:center;margin-top:2px;}
+  .ncd-foot{background:var(--surface);border-top:1px solid var(--line);padding:5px 8px;}
+  .ncd-add-row{display:flex;gap:4px;align-items:center;}
+  .ncd-add-inp{flex:1;font-size:11px;padding:4px 7px;border-radius:5px;border:1.5px solid var(--line);background:var(--surface);color:var(--text);outline:none;transition:border-color .15s;}
+  .ncd-add-inp:focus{border-color:var(--accent);}
+  .ncd-add-btn{flex-shrink:0;width:22px;height:22px;border-radius:5px;border:none;cursor:pointer;font-size:15px;font-weight:700;color:#fff;line-height:1;display:flex;align-items:center;justify-content:center;}
+  /* Estilo D dashboard: fondo HUB, nombre en color */
+  .ncd-header{background:#1a3a52;}
+  .ncd-name{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
+  .ncd-sub{font-size:8.5px;color:#4a6a82;}
+  .ncd-dom .ncd-name{color:#fde68a;}
+  .ncd-lun .ncd-name{color:#4ade80;}
+  .ncd-mar .ncd-name{color:#f472b6;}
+  .ncd-mie .ncd-name{color:#22d3ee;}
+  .ncd-jue .ncd-name{color:#fb923c;}
+  .ncd-dom .ncd-add-btn{background:#ca8a04;} .ncd-lun .ncd-add-btn{background:#16a34a;}
+  .ncd-mar .ncd-add-btn{background:#db2777;} .ncd-mie .ncd-add-btn{background:#0891b2;}
+  .ncd-jue .ncd-add-btn{background:#ea580c;}
+  .ncd-dom{border-color:#d6b87a;} .ncd-lun{border-color:#86efac;}
+  .ncd-mar{border-color:#f9a8d4;} .ncd-mie{border-color:#67e8f9;} .ncd-jue{border-color:#fdba74;}
+  .ncd-dom .ncd-ck{border-color:#fde68a;} .ncd-lun .ncd-ck{border-color:#4ade80;}
+  .ncd-mar .ncd-ck{border-color:#f472b6;} .ncd-mie .ncd-ck{border-color:#22d3ee;}
+  .ncd-jue .ncd-ck{border-color:#fb923c;}
+  .ncd-dom .ncd-ck.checked{background:#ca8a04;border-color:#ca8a04;}
+  .ncd-lun .ncd-ck.checked{background:#16a34a;border-color:#16a34a;}
+  .ncd-mar .ncd-ck.checked{background:#db2777;border-color:#db2777;}
+  .ncd-mie .ncd-ck.checked{background:#0891b2;border-color:#0891b2;}
+  .ncd-jue .ncd-ck.checked{background:#ea580c;border-color:#ea580c;}
+  .ncd-week-label{font-size:10px;color:var(--text-soft);font-weight:600;letter-spacing:.03em;}
+
+
+
   .pw-wrap{position:relative;display:flex;align-items:center;gap:4px;}
   .pw-toggle{flex-shrink:0;background:var(--panel);border:1px solid var(--line-strong);border-radius:6px;padding:6px 7px;cursor:pointer;color:var(--text-soft);}
   .pw-toggle:hover{color:var(--text);}
@@ -4915,11 +5032,7 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
           <div class="card" style="margin:0;min-width:0;">
             <div class="section-title" style="margin-bottom:10px;">Tareas pendientes · PDA</div>
             <div id="dash-pda-tasks-list" class="dash-pda-readonly"></div>
-            <div id="dash-mis-tareas-card" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
-              <div class="section-title" style="margin-bottom:10px;">Mis tareas <span class="hint">Editable — o ve a Pizarra</span></div>
-              <div id="dash-mis-tareas-list"></div>
-              <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;" onclick="pzNuevaTarea()">+ Añadir tarea</button>
-            </div>
+
           </div>
 
           <div class="card" style="margin:0;">
@@ -4931,6 +5044,15 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
             <div class="section-title" style="margin-bottom:10px;">Próximas visitas <span class="hint">Grupos confirmados por llegar</span></div>
             <div id="dash-proximas-visitas-mini" class="dash-pda-readonly"></div>
           </div>
+        </div>
+
+        <!-- ===== Calendario de Tareas (solo Ignacio) ===== -->
+        <div class="card dash-week-card" id="dash-nacho-cal" style="margin-top:14px;display:none;">
+          <div class="section-title" style="margin-bottom:4px;">
+            <span>Mis tareas semanales</span>
+            <span class="hint ncd-week-label" id="ncd-week-label"></span>
+          </div>
+          <div class="nacho-cal-grid" id="nacho-cal-grid"></div>
         </div>
 
         <div class="grid" id="dash-caps-row" style="margin-top:14px;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch;">
@@ -4986,26 +5108,18 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
       <!-- ============ PIZARRA (solo Ignacio) ============ -->
       <div class="view" id="view-pizarra">
         <div class="pz-tabs">
-          <button class="pz-tab-btn on" data-pztab="tareas" onclick="pizarraTabSwitch('tareas')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-            Tareas
-          </button>
-          <button class="pz-tab-btn" data-pztab="notas" onclick="pizarraTabSwitch('notas')">
+          <button class="pz-tab-btn on" data-pztab="notas" onclick="pizarraTabSwitch('notas')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 12h6M9 16h6"/></svg>
             Notas
           </button>
-        </div>
-
-        <!-- ---- Tareas: tabla libre, se añaden filas a mano ---- -->
-        <div class="pz-panel on" id="pz-panel-tareas">
-          <div class="pz-tareas-card">
-            <div id="pz-tareas-lista"></div>
-            <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="pzNuevaTarea()">+ Añadir tarea</button>
-          </div>
+          <button class="pz-tab-btn" data-pztab="cal" onclick="pizarraTabSwitch('cal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+            Calendario de tareas
+          </button>
         </div>
 
         <!-- ---- Notas: tipo OneNote, a pantalla completa ---- -->
-        <div class="pz-panel" id="pz-panel-notas">
+        <div class="pz-panel on" id="pz-panel-notas">
           <div class="pz-notas-wrap">
             <div class="pz-notas-sidebar">
               <div class="pz-notas-sidebar-head">
@@ -5017,6 +5131,11 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
               <!-- se rellena desde seleccionarPaginaBloc()/pintarNotaVacia() -->
             </div>
           </div>
+        </div>
+
+        <!-- ---- Calendario de tareas: 5 tarjetas, una por día ---- -->
+        <div class="pz-panel" id="pz-panel-cal" style="overflow-y:auto;">
+          <div class="pz-cal-grid" id="pz-cal-grid"></div>
         </div>
       </div>
 
@@ -6197,10 +6316,10 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
             </div>
           </div>
 
-          <!-- Cápsula "Revisión" eliminada a petición de Ignacio (28/9): las
-               validaciones siguen calculándose sin problema (rsValidar sale
-               solo si no encuentra el contenedor), pero ya no se muestra la
-               tarjeta grande debajo del roster. -->
+          <div class="card" id="rs-warns-card">
+            <div class="section-title" style="margin-bottom:10px;">Revisión <span class="hint" id="rs-warn-count"></span></div>
+            <div class="rs-warn" id="rs-warns"></div>
+          </div>
         </div>
 
         <!-- ---------- MODELOS ROSTERS (solo Ignacio y Laia) ---------- -->
@@ -8524,9 +8643,10 @@ function isoToLabelWithDow(isoStr){
 }
 
 async function refreshDashboard(){
-  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA(), renderDashTeamToday(), renderDashReparaciones(), renderDashCompras(), renderDashInfluencers(), renderDashFuGrupos(), renderDashMisTareas()]);
+  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA(), renderDashTeamToday(), renderDashReparaciones(), renderDashCompras(), renderDashInfluencers(), renderDashFuGrupos()]);
   updateDashboardMyTasks(tasks);
   refreshDashboardRecapBadge();
+  if(esNacho()) pzCalRenderDash();
 }
 
 /* Resumen — quién está de vacaciones/recuperación hoy y quién cubre un cambio de turno hoy */
@@ -14187,7 +14307,7 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.09.29a-PDX.BARCELONA';
+const HUB_VERSION = 'v26.09.28b-PDX.BARCELONA';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = HUB_VERSION; b.title = 'Versión del HUB que estás usando ahora mismo'; }
@@ -21689,12 +21809,6 @@ function rsAplicarModoUI(){
   if(pegarBtn) pegarBtn.style.display = enModelo ? 'none' : '';
   rsRenderOkLaia();
   rsRenderCandado();
-  // rsRenderOkLaia y rsRenderCandado hacen return temprano en modo modelo sin
-  // llamar a rsAplicarBloqueoVisual. Si el día anterior estaba bloqueado, la
-  // clase rs-bloqueado sigue en el grid wrapper y el modelo queda ineditable.
-  // Forzar aquí la reevaluación garantiza que la clase se quite al entrar en
-  // un modelo (rsRosterBloqueado() devuelve false en modo modelo).
-  rsAplicarBloqueoVisual();
   rsRenderGridMario();
 }
 function rsCopiarPlantillaActual(){
@@ -21720,45 +21834,23 @@ function rsCopiarRosterDia(){
 }
 /* Al pegar solo se quieren los horarios y la estructura de posiciones
    (turnos, puestos por franja, mitades de 15 min...), nunca los nombres del
-   roster de origen. Los nombres salen de quién trabaja de verdad ese día en
-   el día de destino, pero emparejados POR TIPO DE FILA (no a ciegas por
-   posición, que mezclaba responsables con staff):
-     · Filas de responsable (resp1/resp2) de la plantilla → el responsable
-       que le toca a esa franja ese día. Se coge primero del propio día de
-       destino (si ya estaba puesto) y, si no, del patrón mañana/tarde
-       (rsPatronDelDia): resp1 = quien abre, resp2 = quien cierra.
-     · Filas de staff normal → los nombres de staff del día de destino, en
-       orden (Ana, Neus...). Cada fila de staff de la plantilla se rellena
-       con el siguiente staff de la cola; si sobran filas de plantilla,
-       quedan sin nombre; si sobran nombres, se quedan fuera (la plantilla
-       define cuántas posiciones hay).
-     · Filas estructurales fijas (Laia, Grupos, Cumpleaños, Taller) conservan
-       su propia etiqueta. */
+   roster de origen. Pero tampoco hay que vaciar los nombres: los que ya
+   estaban puestos en el día de destino se mantienen tal cual, emparejando
+   cada fila por su posición en la lista (fila 1 con fila 1, fila 2 con fila
+   2...) y quedándose con el horario/estructura de la copia pero el nombre
+   que ya hubiera en esa fila del día de destino. Si el día de destino tenía
+   menos filas que la plantilla, las filas de más se pegan sin nombre. Las
+   filas estructurales fijas (Laia, Grupos, Cumpleaños) siempre conservan su
+   propia etiqueta, tanto si viene de la copia como si ya estaba puesta. */
 function rsMezclarNombresRoster(filasCopiadas, filasActuales){
-  const ETIQUETAS_FIJAS = ['laia','grupos','cumples','taller'];
-  // 1) Recoger, del día de destino, los responsables por su fila y el staff
-  //    normal en una cola por orden de aparición.
-  const nombreResp = {};   // { resp1:'Ignacio', resp2:'Paula' }
-  const colaStaff = [];    // ['Ana','Neus',...]
-  (filasActuales||[]).forEach(f=>{
-    if(!f) return;
-    if(f.tipo==='resp1' || f.tipo==='resp2'){ if(f.nombre) nombreResp[f.tipo] = f.nombre; }
-    else if(!ETIQUETAS_FIJAS.includes(f.tipo) && f.nombre) colaStaff.push(f.nombre);
-  });
-  // 2) Patrón de responsables del día, como respaldo si el destino aún no los
-  //    tenía puestos (p.ej. día recién abierto o vacío).
-  let patron = null;
-  try{ if(RS_DIA && RS_DIA.fecha) patron = rsPatronDelDia(RS_DIA.fecha); }catch(e){}
-  // 3) Reconstruir desde la plantilla poniendo el nombre correcto por tipo.
-  let iStaff = 0;
-  return (filasCopiadas||[]).map(f=>{
+  const ETIQUETAS_FIJAS = ['laia','grupos','cumples'];
+  return (filasCopiadas||[]).map((f, idx)=>{
     const copia = JSON.parse(JSON.stringify(f));
-    if(ETIQUETAS_FIJAS.includes(copia.tipo)) return copia;           // etiqueta fija
-    if(copia.tipo==='resp1' || copia.tipo==='resp2'){
-      copia.nombre = nombreResp[copia.tipo] || (patron ? (patron[copia.tipo]||'') : '') || '';
-      return copia;
+    if(!ETIQUETAS_FIJAS.includes(copia.tipo)){
+      const actual = (filasActuales||[])[idx];
+      const nombreActual = (actual && !ETIQUETAS_FIJAS.includes(actual.tipo)) ? (actual.nombre||'') : '';
+      copia.nombre = nombreActual;
     }
-    copia.nombre = colaStaff[iStaff++] || '';                        // fila de staff
     return copia;
   });
 }
@@ -22351,40 +22443,18 @@ async function rsLoadDia(){
   RS_CAMBIOS_DIA = [];   // se recargan al final, en rsCargarContexto
   await rsAsegurarPlanCargado(fechaCargada);
   if(miSeq !== RS_LOAD_SEQ) return;   // se pidió otro día mientras esto cargaba
-  RS_DIA = { fecha: fechaCargada, config:{}, filas:[], revisado_por:'', ok_laia:false, bloqueado:false,
-             _ver:null, cargaOk:false, existiaEnBD:false };
-  // Lectura con reintentos. CLAVE contra el borrado accidental: si la lectura
-  // falla (red, timeout…), NO se puede dar el día por "nuevo" y repoblarlo desde
-  // Planificación — eso subiría un esqueleto vacío encima del trabajo real que
-  // hay en la BD. Solo se continúa si la lectura ha ido bien. Con .maybeSingle()
-  // se distingue "el día no existe" (data null, sin error) de "no se ha podido
-  // leer" (error): lo primero es un día nuevo de verdad; lo segundo, cortar.
-  let lecturaOk = false, filaBD = null;
-  for(let intento=0; intento<3 && !lecturaOk; intento++){
-    const { data, error } = await sb.from('roster_dias').select('*').eq('fecha',fechaCargada).maybeSingle();
-    if(miSeq !== RS_LOAD_SEQ) return;   // ya se pidió otro día: esta respuesta sobra
-    if(!error){ lecturaOk = true; filaBD = data || null; break; }
-    await new Promise(r=>setTimeout(r, 350));
-    if(miSeq !== RS_LOAD_SEQ) return;
-  }
-  if(!lecturaOk){
-    // No se pudo leer el día: no se repuebla ni se guarda NADA, para no pisar la
-    // BD con un estado vacío. Se avisa y se deja el día marcado como no cargado
-    // (rsSaveDia se niega a guardar mientras cargaOk sea false).
-    RS_DIA.cargaOk = false;
-    if(typeof showSaveToast==='function') showSaveToast('No se ha podido cargar el roster del '+fechaCargada+'. Revisa la conexión y vuelve a abrir el día. No se ha tocado ni guardado nada.', 'err');
-    return;
-  }
-  if(filaBD){
-    RS_DIA.config = (typeof filaBD.config==='string') ? JSON.parse(filaBD.config) : (filaBD.config||{});
-    RS_DIA.filas  = (typeof filaBD.filas ==='string') ? JSON.parse(filaBD.filas)  : (filaBD.filas ||[]);
-    RS_DIA.revisado_por = filaBD.revisado_por || '';
-    RS_DIA.ok_laia = !!filaBD.ok_laia;
-    RS_DIA.bloqueado = !!filaBD.bloqueado;
-    RS_DIA._ver = filaBD.updated_at || null;   // versión cargada, para el control de concurrencia
-    RS_DIA.existiaEnBD = true;
-  }
-  RS_DIA.cargaOk = true;
+  RS_DIA = { fecha: fechaCargada, config:{}, filas:[], revisado_por:'', ok_laia:false, bloqueado:false };
+  try{
+    const {data} = await sb.from('roster_dias').select('*').eq('fecha',fechaCargada).single();
+    if(miSeq !== RS_LOAD_SEQ) return;   // idem: esta respuesta ya no es del día actual
+    if(data){
+      RS_DIA.config = (typeof data.config==='string') ? JSON.parse(data.config) : (data.config||{});
+      RS_DIA.filas  = (typeof data.filas ==='string') ? JSON.parse(data.filas)  : (data.filas ||[]);
+      RS_DIA.revisado_por = data.revisado_por || '';
+      RS_DIA.ok_laia = !!data.ok_laia;
+      RS_DIA.bloqueado = !!data.bloqueado;
+    }
+  }catch(e){}
   if(miSeq !== RS_LOAD_SEQ) return;
   const d = new Date(fechaCargada+'T12:00:00');
   const finde = (d.getDay()===0 || d.getDay()===6);
@@ -22399,9 +22469,7 @@ async function rsLoadDia(){
   // quien cede su turno no debe volver a salir con una fila vacía en el roster.
   await rsCargarCambiosDia();
   if(miSeq !== RS_LOAD_SEQ) return;
-  // "Nuevo" = no había fila en la BD (no simplemente "filas vacías"): así, si un
-  // día existente llegara con filas vacías por lo que sea, NO se repuebla a ciegas.
-  const eraNuevo = !RS_DIA.existiaEnBD;
+  const eraNuevo = RS_DIA.filas.length === 0;
   if(eraNuevo) rsFilasDesdePlan();
   // Si el día ya existía (no era nuevo) pero alguien se marcó como que
   // trabaja en Planificación DESPUÉS de crear el roster de ese día, su fila
@@ -23721,26 +23789,6 @@ function rsRenderChartTurnos(){
   ctx.fillText(`${max} a las ${rsSlotHora(slots[idxMax])}`, x(idxMax) + (idxMax > n*0.75 ? -6 : 6), Math.max(12, y(max)-8));
 }
 window.addEventListener('resize', () => { if(RS_MODO==='dia') rsRenderChartTurnos(); });
-/* Color real (hex/rgb) de un puesto, leído del propio CSS (clase rs-p-XX) una
-   sola vez y cacheado. Sirve para pintar las celdas divididas con un degradado
-   en el FONDO del botón (como una celda entera) en vez de con capas .rs-mitad
-   superpuestas: así el color abraza el marco negro exactamente igual que una
-   celda normal y desaparecen los recortes/tiras blancas de los cuartos
-   partidos, sobre todo en el primer y último cuarto del turno. */
-let RS_COLOR_PUESTO_CACHE = {};
-function rsColorPuesto(cls){
-  if(!cls) return 'transparent';
-  if(cls in RS_COLOR_PUESTO_CACHE) return RS_COLOR_PUESTO_CACHE[cls];
-  const probe = document.createElement('span');
-  probe.className = 'rs-p-' + cls;
-  probe.style.cssText = 'position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;';
-  document.body.appendChild(probe);
-  let c = getComputedStyle(probe).backgroundColor || 'transparent';
-  probe.remove();
-  if(c === 'rgba(0, 0, 0, 0)') c = 'transparent';
-  RS_COLOR_PUESTO_CACHE[cls] = c;
-  return c;
-}
 function rsRenderGrid(){
   // Esta misma función pinta las DOS rejillas: la del día/plantilla y la del
   // segundo roster de la plantilla ("Roster con Mario"). RS_GRID_CTX dice
@@ -23969,8 +24017,6 @@ function rsRenderGrid(){
         const partida = !!medias || dividida;
         const vPrev = ci>0 ? (f.slots[RS_SLOTS[ci-1]]||'') : '';
         if(medias){
-          const clsIzq = medias.izq ? (rsAdminReunion(f.nombre,medias.izq)?RS_ADMIN_OFF_CLASE:medias.izq) : '';
-          const clsDer = medias.der ? (rsAdminReunion(f.nombre,medias.der)?RS_ADMIN_OFF_CLASE:medias.der) : '';
           ['izq','der'].forEach(lado=>{
             const code = medias[lado] || '';
             const cls  = code ? (rsAdminReunion(f.nombre,code)?RS_ADMIN_OFF_CLASE:code) : '';
@@ -23981,23 +24027,17 @@ function rsRenderGrid(){
             // en el relevo automático (que nunca muestra texto).
             if(tCode.length > 3) tCode = '';
             const sel = (SELH && SELH.i===i && SELH.ci===ci && SELH.lado===lado) ? ' rs-mitad-sel' : '';
-            // La capa .rs-mitad ya NO pinta el color de fondo (background
-            // transparente): solo capta clics/arrastres, la selección y el
-            // codiguito. El color lo pinta el botón con el degradado de abajo,
-            // que abraza el marco igual que una celda entera.
-            mitades += `<span class="rs-mitad rs-mitad-int rs-mitad-${lado==='izq'?'izq':'der'}${code?(' rs-p-'+esc(cls)):' rs-mitad-vacia'}${sel}" style="background:transparent;"`
+            mitades += `<span class="rs-mitad rs-mitad-int rs-mitad-${lado==='izq'?'izq':'der'}${code?(' rs-p-'+esc(cls)):' rs-mitad-vacia'}${sel}"`
               + ` onmousedown="event.stopPropagation()" onclick="rsSelHalf(event,${i},${ci},'${lado}')"`
               + ` oncontextmenu="rsMenuCelda(event,${i},${ci})"`
               + ` ondragover="rsSlotDragOver(event)" ondragleave="rsSlotDragLeave(event)" ondrop="rsDropHalf(event,${i},${ci},'${lado}')"`
               + ` title="${esc(code ? (RS_CODIGO_VISIBLE[code]||code) : 'Media hora vacía')}">${esc(tCode)}</span>`;
           });
-          bgBoton = `background:linear-gradient(90deg,${rsColorPuesto(clsIzq)} 0 50%,${rsColorPuesto(clsDer)} 50% 100%);`;
+          bgBoton = 'background:transparent;';
         } else if(dividida){
-          // Color de cada cuarto pintado en el fondo del botón (degradado), no en
-          // capas superpuestas: así llega al marco negro sin dejar tira blanca.
-          const clsIzq = vPrev ? (rsAdminReunion(f.nombre,vPrev)?RS_ADMIN_OFF_CLASE:vPrev) : '';
-          const clsDer = v ? vCls : '';
-          if(vPrev || v) bgBoton = `background:linear-gradient(90deg,${rsColorPuesto(clsIzq)} 0 50%,${rsColorPuesto(clsDer)} 50% 100%);`;
+          if(vPrev) mitades += `<span class="rs-mitad rs-mitad-izq rs-p-${esc(rsAdminReunion(f.nombre,vPrev)?RS_ADMIN_OFF_CLASE:vPrev)}"></span>`;
+          if(v)     mitades += `<span class="rs-mitad rs-mitad-der rs-p-${esc(vCls)}"></span>`;
+          if(mitades) bgBoton = 'background:transparent;';
           // Si la celda anterior TAMBIÉN está dividida, su cuarto derecho y el
           // cuarto izquierdo de esta celda son, por construcción, el mismo
           // puesto (vPrev = lo que hay guardado en esa celda anterior), así
@@ -24985,16 +25025,9 @@ async function plandayAccionAprobarUno(ev, origen, persona, turno, id, fecha){
 }
 /* ===================== INICIO: Noticias ===================== */
 let PD_NOT_TIMER = null;
-let PD_NOT_PAGE = 0;
 function plandayBuscarNoticias(v){
   clearTimeout(PD_NOT_TIMER);
-  PD_NOT_PAGE = 0;
   PD_NOT_TIMER = setTimeout(()=>{ plandayCargarNoticias(v||''); }, 250);
-}
-function plandayNotPag(dir){
-  const q = (document.getElementById('pd-not-search')?.value||'');
-  PD_NOT_PAGE += dir;
-  plandayCargarNoticias(q);
 }
 async function plandayCargarNoticias(query){
   const el = document.getElementById('pd-noticias-body');
@@ -25003,30 +25036,27 @@ async function plandayCargarNoticias(query){
   const q = (query||'').trim().replace(/[,()%]/g,'').slice(0,80);
   let lista = [];
   try{
-    let req = sb.from('planday_noticias').select('*').order('created_at',{ascending:false}).limit(300);
-    if(q) req = req.or(`titulo.ilike.%${q}%,cuerpo.ilike.%${q}%,autor.ilike.%${q}%`);
+    let req = sb.from('planday_noticias').select('*').order('created_at', {ascending:false});
+    if(q){
+      req = req.or(`titulo.ilike.%${q}%,cuerpo.ilike.%${q}%,autor.ilike.%${q}%`).limit(300);
+    } else {
+      req = req.limit(30);
+    }
     const { data } = await req;
     lista = data || [];
   }catch(e){ console.error('planday noticias', e); }
-  const PER_PAGE = 10;
-  const totalPag = Math.max(1, Math.ceil(lista.length / PER_PAGE));
-  if(PD_NOT_PAGE >= totalPag) PD_NOT_PAGE = totalPag - 1;
-  const pagina = lista.slice(PD_NOT_PAGE * PER_PAGE, (PD_NOT_PAGE + 1) * PER_PAGE);
   let html = '';
   if(puedeEscribir){
-    html += `<div class="pd-not-new-box">
-        <div class="pd-not-new-label">✏️ Nueva noticia</div>
-        <div class="pd-not-form">
-          <input type="text" id="pd-not-titulo" placeholder="Título (opcional)" maxlength="120">
-          <textarea id="pd-not-cuerpo" rows="3" placeholder="Escribe una noticia para el equipo…"></textarea>
-          <div><button class="btn btn-primary btn-sm" onclick="plandayPublicarNoticia()">Publicar noticia</button></div>
-        </div>
+    html += `<div class="pd-not-form">
+        <input type="text" id="pd-not-titulo" placeholder="Título (opcional)" maxlength="120">
+        <textarea id="pd-not-cuerpo" rows="2" placeholder="Escribe una noticia para el equipo…"></textarea>
+        <div><button class="btn btn-primary btn-sm" onclick="plandayPublicarNoticia()">Publicar noticia</button></div>
       </div>`;
   }
   if(!lista.length){
     html += `<div class="pd-cap-empty">${q?'No se han encontrado noticias.':'Todavía no hay noticias.'}</div>`;
   } else {
-    html += pagina.map(n=>{
+    html += lista.map(n=>{
       const fecha = plandayFechaNoticia(n.created_at);
       const del = puedeEscribir ? `<button class="pd-not-del" onclick="plandayBorrarNoticia(${n.id})">Eliminar</button>` : '';
       return `<div class="pd-not-item">
@@ -25035,13 +25065,6 @@ async function plandayCargarNoticias(query){
           <div class="pd-not-meta"><span>${esc(n.autor||'')}</span><span>·</span><span>${esc(fecha)}</span>${del?'<span>·</span>':''}${del}</div>
         </div>`;
     }).join('');
-    if(totalPag > 1){
-      html += `<div class="pd-not-pag">
-          <button onclick="plandayNotPag(-1)" ${PD_NOT_PAGE===0?'disabled':''}>‹ Anterior</button>
-          <span class="pd-not-pag-info">Pág. ${PD_NOT_PAGE+1} / ${totalPag} · ${lista.length} noticias</span>
-          <button onclick="plandayNotPag(1)" ${PD_NOT_PAGE>=totalPag-1?'disabled':''}>Siguiente ›</button>
-        </div>`;
-    }
   }
   el.innerHTML = html;
 }
@@ -27510,105 +27533,56 @@ function rsAltDragEnd(ev){
   rsRenderGrid();
   rsAutoGuardar();
 }
-async function rsSaveDia(snap){
-  // El guardado puede venir de un "snapshot" tomado por rsAutoGuardar en el
-  // momento en que se pidió (para que un autoguardado rezagado suba SIEMPRE el
-  // día que se estaba editando y no el que haya en pantalla ahora), o directo
-  // desde el estado actual si no se pasa snapshot.
-  const dia         = snap ? snap.dia         : ((RS_GRID_CTX === 'mario' && RS_DIA_REAL) ? RS_DIA_REAL : RS_DIA);
-  const filasMario  = snap ? snap.filasMario  : (RS_MARIO_DIA ? RS_MARIO_DIA.filas : []);
-  const modo        = snap ? snap.modo        : RS_MODO;
-  const modeloClave = snap ? snap.modeloClave : RS_MODELO_CLAVE;
-  if(!dia) return;
-  if(modo === 'modelo'){
-    if(!modeloClave) return;
+async function rsSaveDia(){
+  // OJO: si el guardado se dispara mientras se está ejecutando algo en la
+  // rejilla del segundo roster, RS_DIA apunta a ESE roster. Lo que se guarda
+  // como día/plantilla tiene que ser siempre el de verdad, así que se coge de
+  // RS_DIA_REAL cuando estamos dentro de rsMx.
+  const dia = (RS_GRID_CTX === 'mario' && RS_DIA_REAL) ? RS_DIA_REAL : RS_DIA;
+  const filasMario = RS_MARIO_DIA ? RS_MARIO_DIA.filas : [];
+  if(RS_MODO === 'modelo'){
+    if(!RS_MODELO_CLAVE) return;
     await sb.from('roster_modelos').update(
       { config: dia.config, filas: dia.filas,
         filas_mario: filasMario, updated_at:new Date().toISOString() })
-      .eq('clave', modeloClave);
-    const mm = ROSTER_MODELOS.find(m=>m.clave===modeloClave);
+      .eq('clave', RS_MODELO_CLAVE);
+    const mm = ROSTER_MODELOS.find(m=>m.clave===RS_MODELO_CLAVE);
     if(mm){ mm.filas = dia.filas; mm.filas_mario = filasMario; }
     const b=document.getElementById('rs-saved');
     if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none',2200); }
     return;
   }
+  // Guardar SIEMPRE con la fecha del propio día que se está guardando (dia.fecha),
+  // nunca con la variable global rsFecha: si el usuario ya ha cambiado de día
+  // (navegación rápida por el calendario) mientras este guardado esperaba su
+  // turno, rsFecha ya apunta a OTRO día y este guardado escribiría los datos
+  // equivocados encima de esa otra fecha.
   // Si el día tiene el candado (bloqueado) puesto, no se manda nada al
   // servidor — salvo que este guardado sea justo el que ha lanzado el propio
   // clic de poner/quitar el candado (RS_TOGGLE_BLOQUEO_EN_CURSO).
+  // El OK LAIA ya NO bloquea el guardado: solo el candado manual lo hace.
+  // La base de datos rechaza igualmente cualquier guardado que se saltara
+  // este candado por cualquier otro camino (ver migración
+  // roster_dias_candado_manual).
   const eraToggleBloqueo = RS_TOGGLE_BLOQUEO_EN_CURSO;
   RS_TOGGLE_BLOQUEO_EN_CURSO = false;
   if(dia.bloqueado && !eraToggleBloqueo){
     console.warn('Guardado omitido: roster de', dia.fecha, 'bloqueado.');
     return;
   }
-  // ===== SALVAGUARDAS ANTI-BORRADO (concurrencia) =====
-  // (1) Si el día no se cargó bien de la BD, no se guarda NADA encima: una
-  //     lectura fallida nunca puede acabar pisando el trabajo real.
-  if(dia.cargaOk === false){ console.warn('Guardado omitido: día', dia.fecha, 'sin carga válida.'); return; }
-  // (2) Nunca se sube un roster completamente vacío por autoguardado: un día
-  //     real siempre tiene al menos las filas de responsables. filas=[] solo
-  //     ocurre en un estado intermedio de carga o por un fallo, y subirlo
-  //     borraría el día. Es justo lo que pasó el 23 de octubre.
-  if(!Array.isArray(dia.filas) || dia.filas.length === 0){
-    console.warn('Guardado omitido: filas vacías en', dia.fecha, '(salvaguarda anti-borrado).');
+  const { error } = await sb.from('roster_dias').upsert(
+    { fecha: dia.fecha, config: dia.config, filas: dia.filas,
+      revisado_por: dia.revisado_por || null, ok_laia: !!dia.ok_laia,
+      bloqueado: !!dia.bloqueado,
+      updated_at:new Date().toISOString() },
+    { onConflict:'fecha' });
+  if(error){
+    console.error('rsSaveDia', error);
+    if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar el roster: '+(error.message||'error desconocido'), 'err');
     return;
   }
-  const nowIso = new Date().toISOString();
-  const payload = { fecha: dia.fecha, config: dia.config, filas: dia.filas,
-      revisado_por: dia.revisado_por || null, ok_laia: !!dia.ok_laia,
-      bloqueado: !!dia.bloqueado, updated_at: nowIso };
-  // ===== CONTROL DE CONCURRENCIA OPTIMISTA =====
-  // Solo se escribe si en la BD sigue estando la MISMA versión (updated_at) que
-  // teníamos al cargar. Si otro usuario u otra pestaña guardó por medio, el
-  // update no encuentra ninguna fila que cumpla la condición y NO se pisa su
-  // trabajo: se recarga su versión y se avisa (rsResolverConflictoGuardado).
-  try{
-    if(dia.existiaEnBD && dia._ver){
-      const { data:rows, error } = await sb.from('roster_dias').update(payload)
-        .eq('fecha', dia.fecha).eq('updated_at', dia._ver).select('updated_at');
-      if(error){ console.error('rsSaveDia update', error); if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar: '+(error.message||'error'), 'err'); return; }
-      if(!rows || rows.length === 0){ await rsResolverConflictoGuardado(dia); return; }
-      dia._ver = rows[0].updated_at;
-    } else {
-      const { data:rows, error } = await sb.from('roster_dias').insert(payload).select('updated_at');
-      if(error){
-        if(error.code === '23505' || /duplicate|conflict/i.test(error.message||'')){ await rsResolverConflictoGuardado(dia); return; }
-        console.error('rsSaveDia insert', error); if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar: '+(error.message||'error'), 'err'); return;
-      }
-      dia.existiaEnBD = true;
-      if(rows && rows[0]) dia._ver = rows[0].updated_at;
-    }
-  }catch(e){ console.error('rsSaveDia', e); if(typeof showSaveToast==='function') showSaveToast('No se ha podido guardar el roster.', 'err'); return; }
   const b=document.getElementById('rs-saved');
   if(b){ b.style.display='inline'; setTimeout(()=>b.style.display='none',2200); }
-}
-/* Conflicto de guardado: otro usuario (u otra pestaña del mismo usuario) guardó
-   este día entre que lo cargamos y ahora. NO se pisa su trabajo: se lee la
-   versión del servidor y, si el usuario sigue viendo justo ese día, se recarga
-   la rejilla con la última versión y se avisa. Si ya se ha ido a otro día, solo
-   se actualiza la versión conocida del snapshot (sin tocar la pantalla). */
-async function rsResolverConflictoGuardado(dia){
-  try{
-    const { data } = await sb.from('roster_dias').select('*').eq('fecha', dia.fecha).maybeSingle();
-    if(!data) return;
-    if(RS_DIA && RS_DIA === dia){
-      RS_DIA.config = (typeof data.config==='string') ? JSON.parse(data.config) : (data.config||{});
-      RS_DIA.filas  = (typeof data.filas ==='string') ? JSON.parse(data.filas)  : (data.filas ||[]);
-      RS_DIA.revisado_por = data.revisado_por || '';
-      RS_DIA.ok_laia = !!data.ok_laia;
-      RS_DIA.bloqueado = !!data.bloqueado;
-      RS_DIA._ver = data.updated_at || null;
-      RS_DIA.existiaEnBD = true;
-      rsEnsureFilasEspeciales();
-      rsRenderGrid();
-      if(typeof rsRenderCandado==='function') rsRenderCandado();
-      if(typeof rsRenderOkLaia==='function') rsRenderOkLaia();
-      if(typeof showSaveToast==='function') showSaveToast('Otro usuario estaba editando este mismo día a la vez. Se ha recargado con la última versión guardada para no perder el trabajo de nadie — revisa tu último cambio por si hay que repetirlo.', 'err');
-    } else {
-      dia._ver = data.updated_at || null;
-      dia.existiaEnBD = true;
-    }
-  }catch(e){ console.error('rsResolverConflictoGuardado', e); }
 }
 /* Autoguardado: cualquier cambio en la rejilla se guarda solo, sin tener que
    pulsar "Guardar" (con un pequeño retardo para no disparar una llamada por
@@ -27616,19 +27590,8 @@ async function rsResolverConflictoGuardado(dia){
 let RS_AUTOSAVE_TIMER = null;
 function rsAutoGuardar(){
   clearTimeout(RS_AUTOSAVE_TIMER);
-  // Se captura AHORA qué se está editando (día, rejilla, objeto). Si antes de que
-  // salte el temporizador el usuario cambia de día —o la carga del nuevo día deja
-  // RS_DIA en un estado intermedio vacío—, este guardado seguirá subiendo el día
-  // que se estaba editando, con SU objeto, y nunca un estado vacío del día nuevo.
-  // Esto es lo que evitaba que, al ir de un día a otro y volver, se vaciara.
-  const snap = {
-    dia: (RS_GRID_CTX === 'mario' && RS_DIA_REAL) ? RS_DIA_REAL : RS_DIA,
-    filasMario: RS_MARIO_DIA ? RS_MARIO_DIA.filas : [],
-    modo: RS_MODO,
-    modeloClave: RS_MODELO_CLAVE
-  };
   RS_AUTOSAVE_TIMER = setTimeout(async ()=>{
-    try{ await rsSaveDia(snap); }catch(e){ console.error(e); }
+    try{ await rsSaveDia(); }catch(e){ console.error(e); }
   }, 500);
 }
 /* Imprimir: abre el diálogo de impresión del navegador mostrando solo la
@@ -33433,12 +33396,13 @@ async function pizarraInit(){
     PZ_CARGADO = true;
     await cargarPizarraTareas();
   }
-  pizarraTabSwitch(document.querySelector('.pz-tab-btn.on')?.dataset.pztab || 'tareas');
+  pizarraTabSwitch(document.querySelector('.pz-tab-btn.on')?.dataset.pztab || 'notas');
 }
 function pizarraTabSwitch(tab){
   document.querySelectorAll('.pz-tab-btn').forEach(b=>b.classList.toggle('on', b.dataset.pztab===tab));
-  document.getElementById('pz-panel-tareas')?.classList.toggle('on', tab==='tareas');
   document.getElementById('pz-panel-notas')?.classList.toggle('on', tab==='notas');
+  document.getElementById('pz-panel-cal')?.classList.toggle('on', tab==='cal');
+  if(tab==='cal') pzCalRender();
   if(tab==='notas' && !BLOC_CARGADO){
     BLOC_CARGADO = true;
     cargarPaginasBloc().then(()=>{
@@ -33497,13 +33461,7 @@ async function pzBorrarTarea(id){
 /* El Resumen (Dashboard) llama a esto desde refreshDashboard() para que la
    tarjeta "Mis tareas" esté al día sin depender de haber abierto Pizarra. */
 async function renderDashMisTareas(){
-  if(!esNacho()){
-    const card = document.getElementById('dash-mis-tareas-card');
-    if(card) card.style.display = 'none';
-    return;
-  }
-  if(!PZ_CARGADO){ PZ_CARGADO = true; await cargarPizarraTareas(); }
-  else pintarPizarraTareas();
+  // Mis tareas card removed — kept as stub for legacy calls
 }
 
 /* ---------- Notas: tipo OneNote, a pantalla completa dentro de Pizarra ---------- */
@@ -33675,6 +33633,252 @@ async function guardarPaginaBloc(){
     .eq('id', BLOC_ACTUAL);
   if(error) console.error('[NOTAS] guardar', error);
 }
+
+
+/* ============================================================
+   PIZARRA — Calendario de tareas (tab 3)
+   Almacenamiento: localStorage('pz_cal_v1')
+   Estructura: { domingo:[{id,texto,done},...], lunes:[], ... }
+   ============================================================ */
+/* ============================================================
+   CALENDARIO DE TAREAS — localStorage pz_cal_v1
+   Schema: { week: 'YYYY-MM-DD' (domingo), tasks: { dom:[{id,texto,done,locked}] } }
+   - locked: puede hacer check, pero NO borrar. Se resetea done c/semana.
+   - no locked: si no done → carry over semana siguiente; si done → se limpia.
+   ============================================================ */
+const PZ_CAL_KEY = 'pz_cal_v2';
+const PZ_CAL_DIAS = [
+  { key:'domingo',   label:'Domingo',   cls:'pz-day-dom', ncdCls:'ncd-dom' },
+  { key:'lunes',     label:'Lunes',     cls:'pz-day-lun', ncdCls:'ncd-lun' },
+  { key:'martes',    label:'Martes',    cls:'pz-day-mar', ncdCls:'ncd-mar' },
+  { key:'miercoles', label:'Miércoles', cls:'pz-day-mie', ncdCls:'ncd-mie' },
+  { key:'jueves',    label:'Jueves',    cls:'pz-day-jue', ncdCls:'ncd-jue' },
+];
+
+/* Devuelve 'YYYY-MM-DD' del domingo de la semana actual */
+function pzCalSemanaKey(){
+  const hoy = new Date();
+  const d = new Date(hoy);
+  d.setDate(d.getDate() - d.getDay()); // retrocede al domingo
+  return d.toISOString().slice(0,10);
+}
+
+function pzCalCargar(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(PZ_CAL_KEY)) || {};
+    // Migrar formato antiguo (plano) al nuevo
+    if(raw.domingo || raw.lunes || raw.martes){
+      const semana = pzCalSemanaKey();
+      const tasks = {};
+      PZ_CAL_DIAS.forEach(d=>{
+        tasks[d.key] = (raw[d.key]||[]).map(t=>({...t, locked: t.locked||false}));
+      });
+      const nuevo = {week: semana, tasks};
+      pzCalGuardar(nuevo);
+      return nuevo;
+    }
+    return raw;
+  }catch(e){ return {}; }
+}
+
+function pzCalGuardar(d){
+  try{ localStorage.setItem(PZ_CAL_KEY, JSON.stringify(d)); }catch(e){}
+}
+
+function pzCalId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+
+/* Comprueba rollover de semana */
+function pzCalRollover(){
+  const semanaActual = pzCalSemanaKey();
+  const datos = pzCalCargar();
+  if(!datos.week || datos.week === semanaActual) return datos;
+  // Nueva semana: procesar carry-over
+  const nuevoTasks = {};
+  PZ_CAL_DIAS.forEach(dia=>{
+    const tareas = (datos.tasks||{})[dia.key] || [];
+    nuevoTasks[dia.key] = tareas
+      .filter(t => t.locked || !t.done) // quedan: locked siempre + no-locked si no hechas
+      .map(t => t.locked ? {...t, done:false} : t); // locked: resetear done
+  });
+  const nuevo = {week: semanaActual, tasks: nuevoTasks};
+  pzCalGuardar(nuevo);
+  return nuevo;
+}
+
+function pzCalDatos(){
+  const datos = pzCalRollover();
+  if(!datos.tasks){ datos.tasks={}; }
+  if(!datos.week){ datos.week=pzCalSemanaKey(); }
+  return datos;
+}
+
+/* ---- Render PIZARRA (grid completo) ---- */
+function pzCalRender(){
+  const datos = pzCalDatos();
+  const grid = document.getElementById('pz-cal-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+  PZ_CAL_DIAS.forEach(dia=>{
+    const tareas = datos.tasks[dia.key] || [];
+    const card = document.createElement('div');
+    card.className = 'pz-day-card '+dia.cls;
+    const hechas = tareas.filter(t=>t.done).length;
+    const sub = tareas.length ? hechas+'/'+tareas.length+' hechas' : 'Sin tareas';
+    card.innerHTML = `
+      <div class="pz-day-header">
+        <div class="pz-day-name">${dia.label}</div>
+        <div class="pz-day-sub">${sub}</div>
+      </div>
+      <div class="pz-day-body">
+        ${tareas.length
+          ? '<ul class="pz-task-list">'+tareas.map(t=>`
+              <li class="pz-task-item${t.done?' done':''}${t.locked?' locked':''}" data-id="${t.id}">
+                <div class="pz-task-ck${t.done?' checked':''}" onclick="pzCalToggle('${dia.key}','${t.id}')"></div>
+                <span class="pz-task-text">${t.texto.replace(/</g,'&lt;')}</span>
+                ${t.locked
+                  ? '<span class="pz-task-locked-icon" title="Tarea fija">🔒</span>'
+                  : '<button class="pz-task-del" title="Eliminar" onclick="pzCalDel(\'' + dia.key + '\',\'' + t.id + '\')">×</button>'}
+              </li>`).join('')+'</ul>'
+          : '<div class="pz-empty">Sin tareas aún</div>'}
+      </div>
+      <div class="pz-day-add">
+        <div class="pz-add-row">
+          <input class="pz-add-input" id="pz-ai-${dia.key}" type="text" placeholder="Nueva tarea…" maxlength="200"
+            onkeydown="if(event.key==='Enter') pzCalAdd('${dia.key}')">
+          <button class="pz-add-btn" onclick="pzCalAdd('${dia.key}')" title="Añadir tarea">+</button>
+          <button class="pz-add-btn" onclick="pzCalAdd('${dia.key}',true)" title="Añadir tarea fija (no borrable)" style="font-size:11px;">🔒</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  // Sync dashboard too
+  pzCalRenderDash();
+}
+
+/* ---- Render Dashboard widget ---- */
+function pzCalRenderDash(){
+  const dashCard = document.getElementById('dash-nacho-cal');
+  if(!dashCard || !esNacho()) return;
+  dashCard.style.display = '';
+  const grid = document.getElementById('nacho-cal-grid');
+  if(!grid) return;
+  const datos = pzCalDatos();
+  // Week label
+  const wl = document.getElementById('ncd-week-label');
+  if(wl && datos.week){
+    const d = new Date(datos.week+'T12:00:00');
+    const opts = {day:'numeric', month:'short'};
+    const fin = new Date(d); fin.setDate(fin.getDate()+4); // jueves
+    wl.textContent = 'Semana del '+d.toLocaleDateString('es-ES',opts)+' al '+fin.toLocaleDateString('es-ES',opts);
+  }
+  grid.innerHTML = '';
+  PZ_CAL_DIAS.forEach(dia=>{
+    const tareas = datos.tasks[dia.key] || [];
+    const card = document.createElement('div');
+    card.className = 'ncd-card '+dia.ncdCls;
+    const hechas = tareas.filter(t=>t.done).length;
+    const sub = tareas.length ? hechas+'/'+tareas.length : '—';
+    card.innerHTML = `
+      <div class="ncd-header">
+        <div class="ncd-name">${dia.label}</div>
+        <div class="ncd-sub">${sub} hechas</div>
+      </div>
+      <div class="ncd-body">
+        ${tareas.length
+          ? '<ul class="ncd-list">'+tareas.map(t=>`
+              <li class="ncd-item${t.done?' done':''}" data-id="${t.id}">
+                <div class="ncd-ck${t.done?' checked':''}" onclick="ncdToggle('${dia.key}','${t.id}')"></div>
+                <span class="ncd-text">${t.texto.replace(/</g,'&lt;')}</span>
+                ${t.locked
+                  ? '<span class="ncd-lock" title="Tarea fija">🔒</span>'
+                  : '<button class="ncd-del" title="Eliminar" onclick="ncdDel(\'' + dia.key + '\',\'' + t.id + '\')">×</button>'}
+              </li>`).join('')+'</ul>'
+          : '<div style="font-size:11px;color:var(--text-soft);padding:6px 2px;font-style:italic;">Sin tareas</div>'}
+      </div>
+      <div class="ncd-foot">
+        <div class="ncd-add-row">
+          <input class="ncd-add-inp" id="ncd-ai-${dia.key}" type="text" placeholder="Añadir…" maxlength="200"
+            onkeydown="if(event.key==='Enter') ncdAdd('${dia.key}')">
+          <button class="ncd-add-btn" onclick="ncdAdd('${dia.key}')" style="background:var(--accent)" title="Añadir">+</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* Dashboard helpers - sync with pz_cal_v2 */
+function ncdToggle(diaKey,id){
+  const datos = pzCalDatos();
+  if(!datos.tasks[diaKey]) return;
+  const t=datos.tasks[diaKey].find(t=>t.id===id);
+  if(t) t.done=!t.done;
+  pzCalGuardar(datos);
+  pzCalRenderDash();
+  // sync pizarra si visible
+  const panelCal = document.getElementById('pz-panel-cal');
+  if(panelCal && panelCal.classList.contains('on')) pzCalRender();
+}
+function ncdDel(diaKey,id){
+  const datos = pzCalDatos();
+  if(!datos.tasks[diaKey]) return;
+  const t=datos.tasks[diaKey].find(x=>x.id===id);
+  if(t && t.locked) return;
+  datos.tasks[diaKey]=datos.tasks[diaKey].filter(t=>t.id!==id);
+  pzCalGuardar(datos);
+  pzCalRenderDash();
+  const panelCal = document.getElementById('pz-panel-cal');
+  if(panelCal && panelCal.classList.contains('on')) pzCalRender();
+}
+function ncdAdd(diaKey){
+  const inp = document.getElementById('ncd-ai-'+diaKey);
+  if(!inp) return;
+  const texto = inp.value.trim();
+  if(!texto) return;
+  const datos = pzCalDatos();
+  if(!datos.tasks[diaKey]) datos.tasks[diaKey]=[];
+  datos.tasks[diaKey].push({id:pzCalId(),texto,done:false,locked:false});
+  pzCalGuardar(datos);
+  inp.value='';
+  pzCalRenderDash();
+  const panelCal = document.getElementById('pz-panel-cal');
+  if(panelCal && panelCal.classList.contains('on')) pzCalRender();
+  setTimeout(()=>{const e=document.getElementById('ncd-ai-'+diaKey);if(e)e.focus();},30);
+}
+
+/* ---- Pizarra CRUD ---- */
+function pzCalAdd(diaKey, locked=false){
+  const inp = document.getElementById('pz-ai-'+diaKey);
+  if(!inp) return;
+  const texto = inp.value.trim();
+  if(!texto) return;
+  const datos = pzCalDatos();
+  if(!datos.tasks[diaKey]) datos.tasks[diaKey]=[];
+  datos.tasks[diaKey].push({id:pzCalId(),texto,done:false,locked:!!locked});
+  pzCalGuardar(datos);
+  inp.value='';
+  pzCalRender();
+  setTimeout(()=>{const e=document.getElementById('pz-ai-'+diaKey);if(e)e.focus();},30);
+}
+function pzCalDel(diaKey,id){
+  const datos = pzCalDatos();
+  if(!datos.tasks[diaKey]) return;
+  const t=datos.tasks[diaKey].find(x=>x.id===id);
+  if(t && t.locked) return; // no borrar locked
+  datos.tasks[diaKey]=datos.tasks[diaKey].filter(t=>t.id!==id);
+  pzCalGuardar(datos);
+  pzCalRender();
+}
+function pzCalToggle(diaKey,id){
+  const datos = pzCalDatos();
+  if(!datos.tasks[diaKey]) return;
+  const t=datos.tasks[diaKey].find(t=>t.id===id);
+  if(t) t.done=!t.done;
+  pzCalGuardar(datos);
+  pzCalRender();
+}
+
+/* ============================================================ */
+
 
 init();
 
