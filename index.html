@@ -1434,22 +1434,7 @@
     border:1.5px solid rgba(0,0,0,.28);background:rgba(255,255,255,.7);cursor:pointer;
     display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;line-height:1;color:#fff;}
   .pd-shift-chk.on{background:var(--ok);border-color:var(--ok);}
-  .pd-shift-chk.sel{background:var(--accent);border-color:var(--accent);}
   .pd-shift-chk:hover{border-color:var(--accent);}
-  /* Bulk bar para aprobación masiva en Planday WIP */
-  #pd-bulk-bar{display:none;align-items:center;gap:8px;flex-wrap:wrap;
-    background:#EEF3FB;border:1.5px solid var(--accent);border-radius:9px;
-    padding:8px 12px;margin:0 0 8px 0;font-size:12.5px;}
-  #pd-bulk-bar.show{display:flex;}
-  #pd-bulk-count{font-weight:800;color:var(--accent-dark);}
-  .pd-bulk-aprobar{background:#DCF3E7;color:#0E6B45;border:1px solid #8ACFAF;border-radius:6px;
-    padding:4px 12px;font-weight:800;cursor:pointer;font-size:12px;}
-  .pd-bulk-aprobar:hover{background:#B8E4CB;}
-  .pd-bulk-eliminar{background:#FBE9E8;color:#B4231F;border:1px solid #F0B4B2;border-radius:6px;
-    padding:4px 12px;font-weight:800;cursor:pointer;font-size:12px;}
-  .pd-bulk-eliminar:hover{background:#F5CECC;}
-  .pd-bulk-desel{background:none;border:none;color:var(--text-soft);cursor:pointer;font-size:12px;margin-left:4px;}
-  .pd-bulk-desel:hover{color:var(--text);}
   /* Botón "+" para añadir turno directamente sobre la celda */
   .pd-add-btn{position:absolute;border:none;background:var(--accent);color:#fff;cursor:pointer;
     display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .12s;font-weight:800;}
@@ -2921,32 +2906,41 @@
     /* El tirador de arrastre ahora vive junto al nombre, ya no dentro de
        .rs-col-acc: se oculta aparte para que tampoco salga en papel. */
     body.rs-imprimiendo .rs-staff-pick .rs-row-grip{display:none !important;}
-    /* Contorno del turno EN PAPEL: EXACTAMENTE el mismo modelo que en pantalla.
-       No se toca nada aquí a propósito — la rejilla se imprime heredando el
-       border-collapse:collapse de la regla de pantalla.
-
-       Por qué: durante un tiempo esto forzaba border-collapse:separate, y ese
-       era el origen de todo lo que se veía mal en la hoja:
-         · Con "separate" cada celda dibuja su PROPIO borde. Donde acaba un
-           turno y empieza el siguiente se pintaban dos líneas de 2px pegadas
-           una a otra, así que el contorno salía el doble de gordo en unos
-           sitios y de 2px en otros.
-         · La hoja además se imprime con un zoom fraccionario (lo calcula
-           rsAjustarParaImprimir para que quepa el ancho del folio). Con
-           "separate" cada celda redondea su propia caja a píxeles por su
-           cuenta, el error se va acumulando a lo largo de la fila y las
-           columnas acaban desalineadas entre filas: de ahí los escalones y
-           los trozos de contorno que faltaban.
-         · Y el border-right:0 que llevaban las celdas de dentro del bloque
-           borraba las divisiones interiores, que en pantalla sí están.
-
-       Con "collapse" cada línea compartida entre dos celdas se dibuja UNA
-       sola vez, así que no hay líneas dobles ni deriva de redondeo: el
-       contorno del turno sale con el mismo grosor por las cuatro caras y sin
-       huecos, que es justo como se ve en la pantalla del roster. El borde
-       negro de 2px del bloque y el gris de 1px de la rejilla siguen puestos
-       en el propio <td> por el render de la tabla; a 2px contra 1px el negro
-       gana siempre el empate, por eso el marco sale entero. */
+    /* Contorno del turno EN PAPEL: rehecho de cero con border-collapse:separate
+       en vez de collapse. En "collapse" (el de pantalla) dos celdas vecinas
+       comparten y NEGOCIAN su línea — la más ancha o la que "gane" el empate
+       es la que se pinta — y esa negociación es justo lo que hacía que el
+       contorno saliera roto por un lado, doblado por otro o distinto de
+       grosor según la celda: cada intento de arreglarlo por ese camino
+       (reforzar con !important, capas ::after…) seguía dependiendo de quién
+       ganaba esa negociación. Con "separate" cada celda pinta EXACTAMENTE lo
+       que se le dice, sin negociar nada con la de al lado — dos celdas
+       vecinas nunca compiten por la misma línea, cada una tiene la suya.
+       Para no acabar con líneas dobles (cada celda pintando su propio borde
+       en el mismo sitio que la vecina), se sigue un convenio fijo: cada celda
+       SOLO dibuja su lado derecho y su lado inferior; el izquierdo y el
+       superior los pone siempre la celda de al lado/de arriba. Así cada
+       línea de la rejilla la pinta una única celda, nunca dos. */
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m){border-collapse:separate !important;border-spacing:0 !important;}
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td{border:0 !important;
+      border-right:1px solid #C9CDD4 !important;border-bottom:1px solid #C9CDD4 !important;}
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) th{border:0 !important;
+      border-right:1px solid #8C8C8C !important;border-bottom:1px solid #8C8C8C !important;}
+    /* El turno de una fila es SIEMPRE un único tramo seguido (de cuando entra
+       a cuando sale, sin huecos: rsRango rellena todo lo de en medio, incluido
+       un "desc." de por medio), así que TODAS sus celdas llevan rs-blkcell y
+       el contorno tiene que leerse como un solo bloque de principio a fin, sin
+       ninguna raya suelta entre "2", "desc.", "0G"… por dentro. Arriba/abajo
+       siempre en negro, y el lado derecho se ANULA (border-right:0) salvo en
+       la última celda del tramo (rs-blkR), que es la única que cierra el
+       rectángulo por la derecha. rs-blkL abre el rectángulo por la izquierda
+       en la primera celda. Como con "separate" cada celda pinta solo lo suyo,
+       esto es lo único que hace falta — nada de capas aparte ni z-index. */
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkcell{
+      border-top:2px solid #000 !important;border-bottom:2px solid #000 !important;
+      border-right:0 !important;}
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkL{border-left:2px solid #000 !important;}
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-blkR{border-right:2px solid #000 !important;}
     /* Contorno negro alrededor de toda la tabla, para que se vea como una
        hoja cerrada en vez de perderse contra el blanco de la página. */
     body.rs-imprimiendo :is(#rs-grid,#rs-grid-m){border:2px solid #000 !important;}
@@ -2972,8 +2966,11 @@
        rs-blkR que cualquier bloque de turno (son una sola celda fusionada,
        así que les tocan las tres a la vez), así que ya salen con el mismo
        contorno de 2px que el resto — nada que reforzar aparte. */
-    /* El cuarto de hora que queda fuera del turno se imprime con el mismo
-       borde gris de 1px que tiene en pantalla: no necesita regla propia. */
+    /* El cuarto de hora que queda fuera del turno sigue el mismo convenio de
+       "cada celda pinta solo su derecha y su abajo" que el resto de la
+       rejilla, para no acabar con una línea doble junto al turno vecino. */
+    body.rs-imprimiendo :is(#rs-grid,#rs-grid-m) td.rs-cuarto-fuera{border:0 !important;
+      border-right:1px solid #C9CDD4 !important;border-bottom:1px solid #C9CDD4 !important;}
 
     /* --- Menos tinta y más legible ---
        La fila de totales, en pantalla negra, se imprime en blanco con el texto
@@ -3993,130 +3990,6 @@
   .pz-notas-vacio{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;
     gap:10px;color:var(--text-soft);font-size:13px;}
 
-  /* --- Calendario de tareas (tab 3 de Pizarra) --- */
-  .pz-cal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding-bottom:16px;}
-  @media(max-width:1000px){.pz-cal-grid{grid-template-columns:repeat(3,1fr);}}
-  @media(max-width:640px){.pz-cal-grid{grid-template-columns:1fr 1fr;}}
-  .pz-day-card{border-radius:13px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07);
-    display:flex;flex-direction:column;border:1.5px solid transparent;}
-  .pz-day-header{padding:13px 15px 9px;display:flex;flex-direction:column;gap:2px;}
-  .pz-day-name{font-size:14px;font-weight:900;letter-spacing:.04em;color:#fff;text-transform:uppercase;}
-  .pz-day-sub{font-size:10px;font-weight:600;color:rgba(255,255,255,.78);letter-spacing:.04em;}
-  .pz-day-body{background:var(--surface);flex:1;padding:10px 13px 8px;
-    border-left:1.5px solid var(--line);border-right:1.5px solid var(--line);}
-  .pz-task-list{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-direction:column;gap:4px;}
-  .pz-task-item{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:7px;
-    background:var(--panel);border:1px solid var(--line);font-size:12.5px;color:var(--text);}
-  .pz-task-item:hover{background:var(--hover,#f1f4f8);}
-  .pz-task-item.done{opacity:.5;}
-  .pz-task-item.done .pz-task-text{text-decoration:line-through;color:var(--text-soft);}
-  .pz-task-ck{width:15px;height:15px;border-radius:50%;border:2px solid var(--line-strong);
-    flex-shrink:0;cursor:pointer;transition:all .13s;display:flex;align-items:center;justify-content:center;}
-  .pz-task-ck.checked{background:var(--ok,#1a9e5c);border-color:var(--ok,#1a9e5c);}
-  .pz-task-ck.checked::after{content:'✓';font-size:8.5px;color:#fff;font-weight:900;}
-  .pz-task-text{flex:1;line-height:1.3;word-break:break-word;font-size:12.5px;}
-  .pz-task-del{opacity:0;width:18px;height:18px;flex-shrink:0;border:none;background:none;
-    cursor:pointer;color:var(--text-soft);border-radius:4px;font-size:13px;padding:0;
-    display:flex;align-items:center;justify-content:center;transition:all .1s;}
-  .pz-task-item:hover .pz-task-del{opacity:1;}
-  .pz-task-del:hover{background:rgba(220,53,69,.1);color:#dc3545;}
-  .pz-day-add{background:var(--surface);border-left:1.5px solid var(--line);border-right:1.5px solid var(--line);
-    border-bottom:1.5px solid var(--line);border-radius:0 0 13px 13px;padding:0 13px 13px;}
-  .pz-add-row{display:flex;gap:6px;align-items:center;}
-  .pz-add-input{flex:1;font-size:12px;padding:5px 9px;border-radius:7px;border:1.5px solid var(--line);
-    background:var(--panel);color:var(--text);outline:none;}
-  .pz-add-input:focus{border-color:var(--accent);}
-  .pz-add-btn{flex-shrink:0;width:26px;height:26px;border-radius:7px;border:none;cursor:pointer;
-    font-size:17px;line-height:1;display:flex;align-items:center;justify-content:center;
-    font-weight:700;color:#fff;transition:filter .12s;}
-  .pz-add-btn:hover{filter:brightness(1.15);}
-  .pz-empty{font-size:11.5px;color:var(--text-soft);font-style:italic;text-align:center;padding:6px 0;}
-  /* Colores header de cada día */
-  /* Estilo D: fondo HUB oscuro, nombre del día en color */
-  .pz-day-header{background:#1a3a52;}
-  .pz-day-name{font-size:14px;font-weight:900;letter-spacing:.05em;text-transform:uppercase;}
-  .pz-day-sub{font-size:10px;font-weight:600;color:#4a6a82;letter-spacing:.03em;}
-  .pz-day-dom .pz-day-name{color:#fde68a;}
-  .pz-day-lun .pz-day-name{color:#4ade80;}
-  .pz-day-mar .pz-day-name{color:#f472b6;}
-  .pz-day-mie .pz-day-name{color:#22d3ee;}
-  .pz-day-jue .pz-day-name{color:#fb923c;}
-  .pz-day-dom{border-color:#d6b87a;} .pz-day-dom .pz-day-body,.pz-day-dom .pz-day-add{border-color:#d6b87a;}
-  .pz-day-lun{border-color:#86efac;} .pz-day-lun .pz-day-body,.pz-day-lun .pz-day-add{border-color:#86efac;}
-  .pz-day-mar{border-color:#f9a8d4;} .pz-day-mar .pz-day-body,.pz-day-mar .pz-day-add{border-color:#f9a8d4;}
-  .pz-day-mie{border-color:#67e8f9;} .pz-day-mie .pz-day-body,.pz-day-mie .pz-day-add{border-color:#67e8f9;}
-  .pz-day-jue{border-color:#fdba74;} .pz-day-jue .pz-day-body,.pz-day-jue .pz-day-add{border-color:#fdba74;}
-  .pz-day-dom .pz-add-btn{background:#ca8a04;}
-  .pz-day-lun .pz-add-btn{background:#16a34a;}
-  .pz-day-mar .pz-add-btn{background:#db2777;}
-  .pz-day-mie .pz-add-btn{background:#0891b2;}
-  .pz-day-jue .pz-add-btn{background:#ea580c;}
-  .pz-day-dom .pz-task-ck{border-color:#fde68a;}
-  .pz-day-lun .pz-task-ck{border-color:#4ade80;}
-  .pz-day-mar .pz-task-ck{border-color:#f472b6;}
-  .pz-day-mie .pz-task-ck{border-color:#22d3ee;}
-  .pz-day-jue .pz-task-ck{border-color:#fb923c;}
-  .pz-day-dom .pz-task-ck.checked{background:#ca8a04;border-color:#ca8a04;}
-  .pz-day-lun .pz-task-ck.checked{background:#16a34a;border-color:#16a34a;}
-  .pz-day-mar .pz-task-ck.checked{background:#db2777;border-color:#db2777;}
-  .pz-day-mie .pz-task-ck.checked{background:#0891b2;border-color:#0891b2;}
-  .pz-day-jue .pz-task-ck.checked{background:#ea580c;border-color:#ea580c;}
-  .pz-task-locked-icon{flex-shrink:0;opacity:.45;font-size:9px;color:var(--text-soft);user-select:none;}
-  .pz-task-item.locked .pz-task-del{display:none;}
-  .pz-empty{font-size:12px;color:var(--text-soft);padding:8px 4px;font-style:italic;}
-  /* Dashboard Nacho Calendar widget */
-  .nacho-cal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:4px;}
-  @media(max-width:1100px){.nacho-cal-grid{grid-template-columns:repeat(3,1fr);}}
-  @media(max-width:700px){.nacho-cal-grid{grid-template-columns:1fr 1fr;}}
-  .ncd-card{border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.07);border:1px solid var(--line);display:flex;flex-direction:column;}
-  .ncd-header{padding:8px 12px 6px;display:flex;flex-direction:column;gap:1px;}
-  .ncd-name{font-size:11px;font-weight:900;letter-spacing:.06em;color:#fff;text-transform:uppercase;}
-  .ncd-sub{font-size:9px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.04em;}
-  .ncd-body{background:var(--surface);flex:1;padding:8px 10px 4px;min-height:60px;}
-  .ncd-list{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:2px;}
-  .ncd-item{display:flex;align-items:flex-start;gap:5px;padding:3px 5px;border-radius:5px;transition:background .12s;}
-  .ncd-item:hover{background:var(--hover,#f1f4f8);}
-  .ncd-item.done{opacity:.45;}
-  .ncd-item.done .ncd-text{text-decoration:line-through;}
-  .ncd-ck{flex-shrink:0;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;}
-  .ncd-ck.checked{background:var(--ok,#1a9e5c);border-color:var(--ok,#1a9e5c);}
-  .ncd-ck.checked::after{content:'✓';font-size:7.5px;color:#fff;font-weight:900;}
-  .ncd-text{flex:1;font-size:11.5px;line-height:1.35;word-break:break-word;color:var(--text);}
-  .ncd-del{opacity:0;width:15px;height:15px;flex-shrink:0;border:none;background:none;cursor:pointer;border-radius:4px;color:var(--text-soft);font-size:13px;line-height:1;padding:0;transition:all .12s;}
-  .ncd-item:hover .ncd-del{opacity:1;}
-  .ncd-del:hover{background:rgba(220,53,69,.12);color:#dc3545;}
-  .ncd-lock{flex-shrink:0;opacity:.35;font-size:8px;width:13px;text-align:center;margin-top:2px;}
-  .ncd-foot{background:var(--surface);border-top:1px solid var(--line);padding:5px 8px;}
-  .ncd-add-row{display:flex;gap:4px;align-items:center;}
-  .ncd-add-inp{flex:1;font-size:11px;padding:4px 7px;border-radius:5px;border:1.5px solid var(--line);background:var(--surface);color:var(--text);outline:none;transition:border-color .15s;}
-  .ncd-add-inp:focus{border-color:var(--accent);}
-  .ncd-add-btn{flex-shrink:0;width:22px;height:22px;border-radius:5px;border:none;cursor:pointer;font-size:15px;font-weight:700;color:#fff;line-height:1;display:flex;align-items:center;justify-content:center;}
-  /* Estilo D dashboard: fondo HUB, nombre en color */
-  .ncd-header{background:#1a3a52;}
-  .ncd-name{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;}
-  .ncd-sub{font-size:8.5px;color:#4a6a82;}
-  .ncd-dom .ncd-name{color:#fde68a;}
-  .ncd-lun .ncd-name{color:#4ade80;}
-  .ncd-mar .ncd-name{color:#f472b6;}
-  .ncd-mie .ncd-name{color:#22d3ee;}
-  .ncd-jue .ncd-name{color:#fb923c;}
-  .ncd-dom .ncd-add-btn{background:#ca8a04;} .ncd-lun .ncd-add-btn{background:#16a34a;}
-  .ncd-mar .ncd-add-btn{background:#db2777;} .ncd-mie .ncd-add-btn{background:#0891b2;}
-  .ncd-jue .ncd-add-btn{background:#ea580c;}
-  .ncd-dom{border-color:#d6b87a;} .ncd-lun{border-color:#86efac;}
-  .ncd-mar{border-color:#f9a8d4;} .ncd-mie{border-color:#67e8f9;} .ncd-jue{border-color:#fdba74;}
-  .ncd-dom .ncd-ck{border-color:#fde68a;} .ncd-lun .ncd-ck{border-color:#4ade80;}
-  .ncd-mar .ncd-ck{border-color:#f472b6;} .ncd-mie .ncd-ck{border-color:#22d3ee;}
-  .ncd-jue .ncd-ck{border-color:#fb923c;}
-  .ncd-dom .ncd-ck.checked{background:#ca8a04;border-color:#ca8a04;}
-  .ncd-lun .ncd-ck.checked{background:#16a34a;border-color:#16a34a;}
-  .ncd-mar .ncd-ck.checked{background:#db2777;border-color:#db2777;}
-  .ncd-mie .ncd-ck.checked{background:#0891b2;border-color:#0891b2;}
-  .ncd-jue .ncd-ck.checked{background:#ea580c;border-color:#ea580c;}
-  .ncd-week-label{font-size:10px;color:var(--text-soft);font-weight:600;letter-spacing:.03em;}
-
-
-
   .pw-wrap{position:relative;display:flex;align-items:center;gap:4px;}
   .pw-toggle{flex-shrink:0;background:var(--panel);border:1px solid var(--line-strong);border-radius:6px;padding:6px 7px;cursor:pointer;color:var(--text-soft);}
   .pw-toggle:hover{color:var(--text);}
@@ -4776,6 +4649,43 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
 #hub2-bar #hub-backup-btn:hover{background:rgba(255,255,255,.13)!important;color:#fff!important;}
 #hub2-bar .uc-logout,#hub2-bar .uc-refresh{color:#9FB6C2;}
 #hub-badges-group{display:none;}
+
+/* ===== STOCK BOUTIQUE ===== */
+.sb-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.sb-period-sel{flex:1;min-width:180px;max-width:280px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg-card);color:var(--text);font-size:13px;}
+.sb-btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s;}
+.sb-btn-primary{background:var(--accent);color:#fff;}
+.sb-btn-primary:hover{opacity:.88;}
+.sb-btn-secondary{background:var(--bg);color:var(--text);border:1px solid var(--line);}
+.sb-btn-secondary:hover{background:var(--line);}
+.sb-btn-danger{background:#ef4444;color:#fff;}
+.sb-btn-danger:hover{opacity:.85;}
+.sb-cats-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;}
+.sb-cat-pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--line);background:var(--bg);color:var(--text-soft);white-space:nowrap;transition:.12s;}
+.sb-cat-pill:hover,.sb-cat-pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.sb-table{width:100%;border-collapse:collapse;font-size:13px;}
+.sb-table th{padding:7px 10px;text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-soft);border-bottom:1px solid var(--line-strong);background:var(--panel,#f5f6f8);position:sticky;top:0;z-index:2;}
+.sb-table th.editable-header{cursor:pointer;}
+.sb-table th.editable-header:hover{color:var(--accent);}
+.sb-table td{padding:6px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+.sb-table tr:hover td{background:rgba(0,0,0,.02);}
+.sb-cat-row td{background:#0d2137!important;color:#fff!important;padding:6px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em;border-bottom:none;border-top:none;}
+.sb-cat-row.first-cat td{border-top:none;} .sb-cat-count{color:#7aacce;font-size:10px;margin-left:8px;font-weight:400;}
+.sb-prod-name{font-size:13px;color:var(--text);display:block;text-align:left;}
+.sb-prod-name[contenteditable=true]{outline:none;cursor:text;padding:1px 2px;}
+.sb-num-input{width:70px;padding:4px 6px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--text);font-size:13px;text-align:center;cursor:pointer;}
+.sb-num-input:hover{border-color:var(--line);background:var(--bg);}
+.sb-num-input:focus{border-color:var(--accent);background:var(--bg-card);outline:none;}
+.sb-num-input[readonly]{cursor:default;color:var(--text-soft);}
+.sb-delta-pos{color:#16a34a;font-weight:700;font-size:12px;}
+.sb-delta-neg{color:#dc2626;font-weight:700;font-size:12px;}
+.sb-delta-zero{color:var(--text-soft);font-size:12px;}
+.sb-readonly-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;background:#fef3c7;color:#92400e;font-size:11px;font-weight:700;border:1px solid #fde68a;}
+.sb-wrap{max-width:820px;margin:0 auto;border:1.5px solid var(--line-strong,#d0d5dd);border-radius:10px;overflow:hidden;}
+.sb-save-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border-radius:8px;border:1.5px solid var(--accent);margin-bottom:14px;}
+.sb-table-wrap{max-height:calc(100vh - 360px);overflow-y:auto;overflow-x:hidden;}
+.sb-del-btn{background:none;border:none;cursor:pointer;color:var(--text-soft);padding:2px 6px;border-radius:4px;font-size:13px;}
+.sb-del-btn:hover{background:#fee2e2;color:#dc2626;}
 </style>
 </head>
 <body>
@@ -4923,6 +4833,10 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/><path d="M9 13h6M9 17h6M9 9h2"/></svg>
           PROFORMA
         </button>
+          <button class="navitem" id="nav-stock-boutique" data-view="stockboutique" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M8 3v4M16 3v4M2 9h20"/><path d="M7 14h3M7 17h3M12 14h5M12 17h5"/></svg>
+          Stock Boutique
+        </button>
         </div>
         <div class="navgroup ng-inf">
           <div class="navlabel">Informes y Stats</div>
@@ -5032,7 +4946,11 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
           <div class="card" style="margin:0;min-width:0;">
             <div class="section-title" style="margin-bottom:10px;">Tareas pendientes · PDA</div>
             <div id="dash-pda-tasks-list" class="dash-pda-readonly"></div>
-
+            <div id="dash-mis-tareas-card" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
+              <div class="section-title" style="margin-bottom:10px;">Mis tareas <span class="hint">Editable — o ve a Pizarra</span></div>
+              <div id="dash-mis-tareas-list"></div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;" onclick="pzNuevaTarea()">+ Añadir tarea</button>
+            </div>
           </div>
 
           <div class="card" style="margin:0;">
@@ -5044,15 +4962,6 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
             <div class="section-title" style="margin-bottom:10px;">Próximas visitas <span class="hint">Grupos confirmados por llegar</span></div>
             <div id="dash-proximas-visitas-mini" class="dash-pda-readonly"></div>
           </div>
-        </div>
-
-        <!-- ===== Calendario de Tareas (solo Ignacio) ===== -->
-        <div class="card dash-week-card" id="dash-nacho-cal" style="margin-top:14px;display:none;">
-          <div class="section-title" style="margin-bottom:4px;">
-            <span>Mis tareas semanales</span>
-            <span class="hint ncd-week-label" id="ncd-week-label"></span>
-          </div>
-          <div class="nacho-cal-grid" id="nacho-cal-grid"></div>
         </div>
 
         <div class="grid" id="dash-caps-row" style="margin-top:14px;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch;">
@@ -5108,18 +5017,26 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
       <!-- ============ PIZARRA (solo Ignacio) ============ -->
       <div class="view" id="view-pizarra">
         <div class="pz-tabs">
-          <button class="pz-tab-btn on" data-pztab="notas" onclick="pizarraTabSwitch('notas')">
+          <button class="pz-tab-btn on" data-pztab="tareas" onclick="pizarraTabSwitch('tareas')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            Tareas
+          </button>
+          <button class="pz-tab-btn" data-pztab="notas" onclick="pizarraTabSwitch('notas')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 12h6M9 16h6"/></svg>
             Notas
           </button>
-          <button class="pz-tab-btn" data-pztab="cal" onclick="pizarraTabSwitch('cal')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
-            Calendario de tareas
-          </button>
+        </div>
+
+        <!-- ---- Tareas: tabla libre, se añaden filas a mano ---- -->
+        <div class="pz-panel on" id="pz-panel-tareas">
+          <div class="pz-tareas-card">
+            <div id="pz-tareas-lista"></div>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="pzNuevaTarea()">+ Añadir tarea</button>
+          </div>
         </div>
 
         <!-- ---- Notas: tipo OneNote, a pantalla completa ---- -->
-        <div class="pz-panel on" id="pz-panel-notas">
+        <div class="pz-panel" id="pz-panel-notas">
           <div class="pz-notas-wrap">
             <div class="pz-notas-sidebar">
               <div class="pz-notas-sidebar-head">
@@ -5131,11 +5048,6 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
               <!-- se rellena desde seleccionarPaginaBloc()/pintarNotaVacia() -->
             </div>
           </div>
-        </div>
-
-        <!-- ---- Calendario de tareas: 5 tarjetas, una por día ---- -->
-        <div class="pz-panel" id="pz-panel-cal" style="overflow-y:auto;">
-          <div class="pz-cal-grid" id="pz-cal-grid"></div>
         </div>
       </div>
 
@@ -5198,12 +5110,6 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
               <span class="pd-rango" id="pd-rango"></span>
               <button class="pd-navarrow" onclick="plandayNav(1)">›</button>
             </div>
-          </div>
-          <div id="pd-bulk-bar">
-            <span id="pd-bulk-count"></span>
-            <button class="pd-bulk-aprobar" onclick="plandayBulkAprobar()">✓ Aprobar seleccionados</button>
-            <button class="pd-bulk-eliminar" onclick="plandayBulkEliminar()">✕ Eliminar seleccionados</button>
-            <button class="pd-bulk-desel" onclick="plandayDeseleccionar()">Deseleccionar todo</button>
           </div>
           <div id="pd-grid" class="pd-gridwrap"></div>
         </div>
@@ -7047,6 +6953,53 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
         </div>
       </div>
 
+      <!-- ============ STOCK BOUTIQUE ============ -->
+      <div class="view" id="view-stockboutique">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <div>
+              <div class="section-title" style="margin-bottom:2px;">Stock Boutique</div>
+              <div style="font-size:12px;color:var(--text-soft);">Inventario por categoría · historial de stock takes</div>
+            </div>
+            <div id="sb-readonly-badge" style="display:none;"><span class="sb-readonly-badge">👁 Solo lectura</span></div>
+          </div>
+          <!-- Toolbar -->
+          <div class="sb-toolbar">
+            <select class="sb-period-sel" id="sb-period-sel" onchange="sbOnPeriodChange(this.value)">
+              <option value="">Cargando periodos…</option>
+            </select>
+            <button class="sb-btn sb-btn-primary" onclick="sbNuevoPeriodo()" id="sb-btn-nuevo">+ Nuevo Stock Take</button>
+            <button class="sb-btn sb-btn-secondary" onclick="sbAnadirProducto()" id="sb-btn-add-prod">+ Añadir Producto</button>
+            <button class="sb-btn sb-btn-secondary" onclick="sbAnadirCategoria()" id="sb-btn-add-cat">+ Añadir Categoría</button>
+          </div>
+          <!-- Save bar (visible when unsaved changes) -->
+          <div class="sb-save-bar" id="sb-save-bar" style="display:none;">
+            <span style="font-size:13px;font-weight:600;color:var(--accent);">⚠ Cambios sin guardar en este periodo</span>
+            <button class="sb-btn sb-btn-primary" onclick="sbGuardar()">💾 Guardar Stock</button>
+          </div>
+          <!-- Category nav pills -->
+          <div class="sb-cats-nav" id="sb-cats-nav"></div>
+          <!-- Table -->
+          <div class="sb-wrap">
+            <div class="sb-table-wrap">
+              <table class="sb-table" id="sb-table">
+                <thead>
+                  <tr>
+                    <th style="min-width:200px;text-align:left;">Producto</th>
+                    <th style="width:100px;text-align:center;" class="editable-header" onclick="sbEditColName('tienda')" title="Click para editar nombre" id="sb-th-tienda">Stock Tienda</th>
+                    <th style="width:80px;text-align:center;" class="editable-header" onclick="sbEditColName('total')" title="Click para editar nombre" id="sb-th-total">Total</th>
+                    <th style="width:80px;text-align:center;" class="editable-header" onclick="sbEditColName('antes')" title="Click para editar nombre" id="sb-th-antes">Antes</th>
+                    <th style="width:70px;text-align:center;" id="sb-th-delta"></th>
+                    <th style="width:36px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="sb-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="view" id="view-codigos">
         <div class="card" style="max-width:640px;">
           <div class="section-title" style="margin-bottom:4px;">Códigos Museo</div>
@@ -7702,6 +7655,7 @@ const titles = {
   sugerencias:['Sugerencias STAFF','Buzón anónimo del equipo: seguimiento por mes'],
   soldItems:['Sold Items','Ventas semanales de tienda por producto'],
   proforma:['PROFORMA','Facturas proforma para visitas de grupos'],
+  stockboutique:['Stock Boutique','Inventario de la tienda por categoría · historial'],
   recap:['Recap del día','Cierre diario: info general, rutinas y observaciones'],
   pizarra:['Pizarra','Tus tareas y notas personales'],
   loomis:['Loomis','Gestión semanal del lunes'],
@@ -8349,7 +8303,7 @@ const HUB2_BLOQUES = {
   vacaciones:'Operaciones', ev:'Operaciones', entrevistas:'Operaciones', curriculums:'Operaciones',
   diego:'Operaciones', cambiobanco:'Operaciones', sugerencias:'Operaciones', codigos:'Operaciones',
   marketing:'Marketing',
-  gruposnacho:'Groups & Sales', grupos:'Groups & Sales', soldItems:'Groups & Sales', proforma:'Groups & Sales',
+  gruposnacho:'Groups & Sales', grupos:'Groups & Sales', soldItems:'Groups & Sales', proforma:'Groups & Sales', stockboutique:'Groups & Sales',
   spv:'Informes y Stats', loomis:'Informes y Stats', visitas:'Informes y Stats',
   clmant:'Informes y Stats', uniformes:'Informes y Stats', informes:'Informes y Stats',
   resenas:'Informes y Stats', nominas:'Informes y Stats', facturacion:'Informes y Stats',
@@ -8427,6 +8381,10 @@ function goView(v){
   if(v==='proforma'){
     if(!siPuedeVer()){ goView('dashboard'); return; }
     pfInit();
+  }
+  if(v==='stockboutique'){
+    if(!siPuedeVer()){ goView('dashboard'); return; }
+    sbInit();
   }
   if(v==='codigos'){
     if(!esManagerRol()){ goView('dashboard'); return; }
@@ -8539,7 +8497,9 @@ function initApp(){
   const navSold = document.getElementById('nav-solditems');
   if(navSold) navSold.style.display = siPuedeVer() ? '' : 'none';
   const navProforma = document.getElementById('nav-proforma');
+  const navStockBoutique = document.getElementById('nav-stock-boutique');
   if(navProforma) navProforma.style.display = siPuedeVer() ? '' : 'none';
+  if(navStockBoutique) navStockBoutique.style.display = siPuedeVer() ? '' : 'none';
   const navInformes = document.getElementById('nav-informes');
   if(navInformes) navInformes.style.display = esInformesAdmin() ? '' : 'none';
   const navCodigos = document.getElementById('nav-codigos');
@@ -8643,10 +8603,9 @@ function isoToLabelWithDow(isoStr){
 }
 
 async function refreshDashboard(){
-  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA(), renderDashTeamToday(), renderDashReparaciones(), renderDashCompras(), renderDashInfluencers(), renderDashFuGrupos()]);
+  const [tasks] = await Promise.all([fetchPdaTasks(), fetchDashboardVisits(), fetchDashboardTA(), renderDashTeamToday(), renderDashReparaciones(), renderDashCompras(), renderDashInfluencers(), renderDashFuGrupos(), renderDashMisTareas()]);
   updateDashboardMyTasks(tasks);
   refreshDashboardRecapBadge();
-  if(esNacho()) pzCalRenderDash();
 }
 
 /* Resumen — quién está de vacaciones/recuperación hoy y quién cubre un cambio de turno hoy */
@@ -14307,7 +14266,7 @@ function addObsRow(){
 /* Versión del HUB: se muestra en la topbar para poder verificar de un vistazo
    qué versión está corriendo el navegador (evita probar arreglos sobre una
    copia antigua cacheada). Actualizar en cada entrega. */
-const HUB_VERSION = 'v26.09.28b-PDX.BARCELONA';
+const HUB_VERSION = 'v26.07.27-PDX.BARCELONA';
 document.addEventListener('DOMContentLoaded', ()=>{
   const b = document.getElementById('hub-version-badge');
   if(b){ b.textContent = HUB_VERSION; b.title = 'Versión del HUB que estás usando ahora mismo'; }
@@ -14399,14 +14358,8 @@ async function syncRecapReviewToCache(source, count){
    Nunca puede borrar el resto de columnas del día (a diferencia del
    guardado de payload completo, que escribía TODAS las columnas). */
 async function saveRecapField(campos){
-  const me = currentProfile?.nombre || '';
   const payload = { fecha: recapDate, ...campos, updated_at: new Date().toISOString() };
-  if(!recapData || !recapData.autor) payload.autor = me;
-  // Si el recap aún no tiene leido_por (fila recién creada), iniciarlo con [autor]
-  // para que el autoguardado no marque el recap como "nuevo" para todo el mundo.
-  // Solo se pone si no hay leido_por ya guardado: así no pisamos el estado de
-  // los demás usuarios cuando ellos ya han marcado como leído.
-  if(!recapData?.leido_por) payload.leido_por = [me];
+  if(!recapData || !recapData.autor) payload.autor = currentProfile?.nombre || '';
   const { error } = await sb.from('recap').upsert(payload, {onConflict:'fecha'});
   if(error) console.error('[RECAP] Error guardando campo:', campos, error);
   else recapData = { ...recapData, ...payload };
@@ -22162,10 +22115,7 @@ function rsRenderPlan(mantenerScroll){
       // Suma a todos los que se ven en la tabla, incluida Laia cuando tiene
       // turno ese día (así el headcount coincide con la gente que realmente
       // trabaja). Quien está de baja no cuenta porque ni sale en la tabla.
-      // Quien tiene vacaciones o recuperación ese día NO cuenta como turno:
-      // en Planificación del HUB solo se cuentan los turnos de trabajo real
-      // (en Planday WIP sí cuentan, pero eso es otra vista).
-      const n = plantilla.reduce((a,s)=> a + (rsPlanVac(s.nombre, iso) ? 0 : rsPlanValor(s.nombre, iso)), 0);
+      const n = plantilla.reduce((a,s)=>a+rsPlanValor(s.nombre, iso),0);
       tot += `<td class="${sepSi(di,si).trim()}" data-tot="${iso}">${n||''}</td>`;
     });
   });
@@ -22504,26 +22454,8 @@ function rsSincronizarStaffDesdePlan(){
   let cambiado = false;
   const excluir = new Set(RS_RESP_NOMBRES.concat(['Laia']));
   const cedentes = rsCedentesPuros();   // quien cedió su turno ese día no vuelve a salir
-  // Limpieza automática: si alguien tiene vacaciones/recuperación ese día y le
-  // quedó una fila de staff VACÍA (fantasma de una sincronización anterior),
-  // se quita sola — sin tener que borrarla a mano. Solo se eliminan filas sin
-  // turno y sin nada escrito; nunca se toca una fila con datos reales.
-  const antes = RS_DIA.filas.length;
-  RS_DIA.filas = RS_DIA.filas.filter(f=>{
-    if(f.tipo || !f.nombre) return true;
-    if(!rsPlanVac(f.nombre, RS_DIA.fecha)) return true;
-    const vacia = !f.turno
-      && !Object.values(f.slots||{}).some(Boolean)
-      && !Object.values(f.textos||{}).some(Boolean)
-      && !f.aviso;
-    return !vacia;
-  });
-  if(RS_DIA.filas.length !== antes) cambiado = true;
   RS_STAFF.forEach(s=>{
     if(excluir.has(s.nombre) || RS_STAFF_DE_BAJA.has(s.nombre) || cedentes.has(s.nombre)) return;
-    // Vacaciones/recuperación ese día: no se repone su fila. Así, si se borra
-    // la fila fantasma de alguien que está de vac/recup, no vuelve a salir.
-    if(rsPlanVac(s.nombre, RS_DIA.fecha)) return;
     const deseadas = parseInt(plan[s.nombre],10) || 0;
     if(!deseadas) return;
     const actuales = RS_DIA.filas.filter(f=>!f.tipo && f.nombre===s.nombre).length;
@@ -22574,15 +22506,16 @@ function rsRenderCandado(){
   el.innerHTML = `<span class="rs-ok-laia-check">${on?'✓':''}</span>${on?'Bloqueado':'Bloquear'}`;
   rsAplicarBloqueoVisual();
 }
-/* Candado real del roster: SOLO el candado manual (bloqueado) bloquea la
-   edición. El OK LAIA sirve para publicar el roster al staff pero NO impide
-   editar: en cuanto se quita el candado, todos pueden editar aunque el OK LAIA
-   siga activo. rsSnapshot()/rsUndo() cortan cualquier intento de editar
-   mientras haya candado, y rsSaveDia() nunca manda nada al servidor mientras
-   esté bloqueado (salvo el propio clic de poner/quitar el candado). */
+/* Candado real del roster: mientras el candado manual o el OK LAIA estén
+   puestos, la rejilla del día (no las plantillas) deja de aceptar clics/
+   arrastres/escritura, y se avisa arriba del porqué. rsSnapshot()/rsUndo()
+   cortan además cualquier intento de editar por teclado o atajos, y
+   rsSaveDia() nunca manda nada al servidor mientras esté bloqueado (salvo el
+   propio clic de quitar el candado o el OK LAIA). La base de datos lo exige
+   igual aunque algo se saltara todo esto. */
 function rsRosterBloqueado(){
   return RS_MODO !== 'modelo' && RS_GRID_CTX === 'dia'
-    && !!(RS_DIA && RS_DIA.bloqueado);
+    && !!(RS_DIA && (RS_DIA.bloqueado || RS_DIA.ok_laia));
 }
 function rsAplicarBloqueoVisual(){
   const wrap = document.querySelector('.rs-grid-wrap');
@@ -23079,9 +23012,6 @@ function rsFilasDesdePlan(){
   const cedentes = rsCedentesPuros();   // quien cedió su turno ese día no vuelve a salir
   RS_STAFF.forEach(s=>{
     if(excluir.has(s.nombre) || cedentes.has(s.nombre)) return;
-    // Vacaciones/recuperación ese día: no se puede contar con esa persona,
-    // así que NO se le crea fila en el roster (aunque el plan la marque).
-    if(rsPlanVac(s.nombre, rsFecha)) return;
     const n = parseInt(plan[s.nombre],10) || 0;
     for(let i=0;i<n;i++) RS_DIA.filas.push({ turno:'', nombre:s.nombre, slots:{} });
   });
@@ -24434,19 +24364,13 @@ function rsHorasDiaMin(filas){
    en horas+minutos. */
 function rcParseHorasMin(v){
   if(v == null || v === '') return null;
-  const raw = String(v).trim();
-  // Formato con 'h' explícita: "43h 30'" / "43h30'" / "43h"
-  const mH = raw.match(/^(\d+)\s*[hH]\s*(\d{1,2})['´]?\s*$/);
-  if(mH){ const h=parseInt(mH[1],10), min=Math.min(parseInt(mH[2],10),59); return h+min/60; }
-  const mHSolo = raw.match(/^(\d+)\s*[hH]\s*$/);
-  if(mHSolo) return parseInt(mHSolo[1],10);
-  // Separador , : .  → "43,30" / "43:30" / "43.30"
-  const mSep = raw.match(/^(\d+)[,:.\/](\d{1,2})$/);
-  if(mSep){ const h=parseInt(mSep[1],10), min=Math.min(parseInt(mSep[2],10),59); return h+min/60; }
-  // Solo número entero
-  const mN = raw.match(/^(\d+)$/);
-  if(mN) return parseInt(mN[1],10);
-  return null;
+  const s = String(v).trim().replace(/[hH]|'/g, '').trim();
+  const m = s.match(/^(\d+)(?:[,.:](\d{1,2}))?$/);
+  if(!m) return null;
+  const h = parseInt(m[1], 10) || 0;
+  let min = m[2] ? parseInt(m[2], 10) : 0;
+  if(min > 59) min = 59;
+  return h + min/60;
 }
 function rcFormatHorasMin(decimal){
   if(decimal == null || decimal === '') return '';
@@ -24626,7 +24550,6 @@ let PD_VAC = [];
 /* Arrastrar turnos: PD_DRAGITEMS guarda, por render, los datos de cada turno
    pintado (indexado por data-si); PD_DRAG es el turno que se está arrastrando. */
 let PD_DRAGITEMS = [];
-let PD_SELECCIONADOS = new Set(); // índices de PD_DRAGITEMS seleccionados para bulk action
 let PD_DRAG = null;
 /* Orden PDX: el orden en el que Ignacio quiere ver al equipo. Quien no esté en
    la lista cae al final, por alfabético. */
@@ -24641,11 +24564,12 @@ function pdMinContables(persona, min){
   if(PD_MEDIA_DESCANSO.has(persona) && min >= 480) return min - 30;
   return min;
 }
-/* ¿Este bloque cuenta como un turno en el recuento "X turnos"?
-   Solo los turnos de trabajo real (origen !== 'vac').
-   Ni vacaciones ni recuperación suman al contador de la planificación. */
+/* ¿Este bloque cuenta como un turno en el recuento "X turnos"? Un turno de
+   trabajo normal sí. Una ausencia de vacaciones (Paid holiday) no; pero la
+   recuperación (Paid absence) SÍ cuenta como turno, a petición. */
 function pdCuentaComoTurno(s){
-  return s.origen !== 'vac';
+  if(s.origen !== 'vac') return true;
+  return s.tipo === 'Paid absence (recuperación)';
 }
 /* Nombres tal y como los usamos en el HUB para la columna de staff: nombre +
    UN solo apellido, con tildes. Para el equipo activo se fija a mano (así los
@@ -24921,107 +24845,26 @@ async function plandayInicio(){
   plandayInicioAcciones();
   plandayCargarNoticias();
 }
-/* Acciones pendientes: solicitudes de intercambio + turnos de hoy sin aprobar. */
+/* Acciones pendientes: nº de solicitudes de intercambio (turnos 'Pendiente').
+   Al pulsar, lleva a la pestaña "Cambios de turno" del HUB para aprobarlas. */
 async function plandayInicioAcciones(){
   const el = document.getElementById('pd-acciones-body');
   if(!el) return;
-  el.innerHTML = '<div class="pd-accion-none">Cargando…</div>';
-
-  // 1. Intercambios pendientes
-  let nTurnos = 0;
+  let n = 0;
   try{
     const { data } = await sb.from('turnos').select('id').eq('estado','Pendiente');
-    nTurnos = (data||[]).length;
-  }catch(e){ console.error('planday acciones intercambios', e); }
-
-  // 2. Turnos de HOY sin aprobar (del roster + manuales)
-  const hoy = todayIsoStr;
-  let sinAprobar = [];
-  try{
-    const [{ data: rDia }, { data: ovData }, { data: manData }, { data: vacData }] = await Promise.all([
-      sb.from('roster_dias').select('filas').eq('fecha', hoy).maybeSingle(),
-      sb.from('planday_overrides').select('*').eq('fecha', hoy),
-      sb.from('planday_turnos').select('*').eq('fecha', hoy).eq('aprobado', false),
-      sb.from('vac_solicitudes').select('persona,tipo').eq('fecha_inicio', hoy).eq('estado','aprobado'),
-    ]);
-    const ovMap = {};
-    (ovData||[]).forEach(o=>{ ovMap[o.persona+'|'+o.turno] = o; });
-    const conVacHoy = new Set((vacData||[]).filter(v=>v.tipo==='vacaciones'||v.tipo==='recuperacion').map(v=>v.persona));
-    // Turnos del roster
-    (rDia?.filas||[]).forEach(f=>{
-      if(!f?.nombre || !f?.turno) return;
-      if(conVacHoy.has(f.nombre)) return;
-      const ov = ovMap[f.nombre+'|'+f.turno];
-      if(ov?.aprobado) return;  // ya aprobado
-      sinAprobar.push({ origen:'roster', persona:f.nombre, turno:f.turno, id:null });
-    });
-    // Turnos manuales sin aprobar
-    (manData||[]).forEach(m=>{
-      const turno = pdHhmmACode(m.desde)+'-'+pdHhmmACode(m.hasta);
-      sinAprobar.push({ origen:'manual', persona:m.persona, turno, id:m.id });
-    });
-  }catch(e){ console.error('planday acciones turnos hoy', e); }
-
-  let html = '';
-  // Intercambios
-  if(nTurnos){
-    const txt = nTurnos===1 ? '1 solicitud de intercambio' : `${nTurnos} solicitudes de intercambio`;
-    html += `<div class="pd-accion-row" onclick="goView('turnos')">
-      <span class="pd-accion-badge">${nTurnos}</span>
+    n = (data||[]).length;
+  }catch(e){ console.error('planday acciones', e); }
+  if(!n){
+    el.innerHTML = `<div class="pd-accion-none">No hay solicitudes de intercambio pendientes.</div>`;
+    return;
+  }
+  const txt = n===1 ? '1 solicitud de intercambio' : `${n} solicitudes de intercambio`;
+  el.innerHTML = `<div class="pd-accion-row" onclick="goView('turnos')">
+      <span class="pd-accion-badge">${n}</span>
       <span>${txt}</span>
       <span style="margin-left:auto;color:var(--accent);">Revisar ›</span>
     </div>`;
-  }
-  // Turnos hoy sin aprobar
-  if(sinAprobar.length){
-    const n = sinAprobar.length;
-    const txt = n===1 ? '1 turno de hoy sin aprobar' : `${n} turnos de hoy sin aprobar`;
-    html += `<div class="pd-accion-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
-      <div style="display:flex;align-items:center;gap:8px;width:100%;">
-        <span class="pd-accion-badge" style="background:#F2913D;">${n}</span>
-        <span>${txt}</span>
-        <button class="btn btn-ghost btn-sm" style="margin-left:auto;" onclick="plandayTab('planificacion')">Ver en Planday ›</button>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:3px;padding-left:4px;width:100%;">
-        ${sinAprobar.slice(0,8).map(s=>`<div style="display:flex;align-items:center;gap:6px;font-size:12px;">
-          <span style="font-weight:700;color:var(--text);">${esc(s.persona)}</span>
-          <span style="color:var(--text-soft);">${esc(s.turno||'')}</span>
-          <button class="btn btn-sm" style="margin-left:auto;padding:2px 9px;font-size:11px;background:#DCF3E7;color:#0E6B45;border:1px solid #8ACFAF;"
-            onclick="plandayAccionAprobarUno(event,'${s.origen}','${esc(s.persona)}','${esc(s.turno||'')}',${s.id??'null'},'${hoy}')">Aprobar</button>
-        </div>`).join('')}
-        ${sinAprobar.length>8?`<div style="font-size:11px;color:var(--text-soft);padding-top:2px;">+${sinAprobar.length-8} más en Planday WIP</div>`:''}
-      </div>
-    </div>`;
-  }
-  if(!html){
-    html = `<div class="pd-accion-none">Sin intercambios pendientes ni turnos de hoy por aprobar.</div>`;
-  }
-  el.innerHTML = html;
-}
-/* Aprobar un turno de hoy directamente desde Acciones pendientes. */
-async function plandayAccionAprobarUno(ev, origen, persona, turno, id, fecha){
-  ev.stopPropagation();
-  const btn = ev.currentTarget;
-  btn.disabled = true; btn.textContent = '…';
-  try{
-    if(origen==='manual' && id!=null){
-      const { error } = await sb.from('planday_turnos').update({ aprobado:true, updated_at:new Date().toISOString() }).eq('id', id);
-      if(error) throw error;
-    } else {
-      const { data: ov } = await sb.from('planday_overrides').select('*').eq('fecha',fecha).eq('persona',persona).eq('turno',turno).maybeSingle();
-      const fila = { fecha, persona, turno, tipo:ov?.tipo||null, grupo:ov?.grupo||null, aprobado:true, updated_at:new Date().toISOString() };
-      const { error } = await sb.from('planday_overrides').upsert(fila,{onConflict:'fecha,persona,turno'});
-      if(error) throw error;
-    }
-    btn.textContent = '✓';
-    btn.style.background = '#B8E4CB';
-    // Recargar acciones para reflejar el cambio
-    setTimeout(plandayInicioAcciones, 600);
-  }catch(e){
-    console.error('aprobar desde acciones', e);
-    btn.textContent = 'Error';
-    btn.disabled = false;
-  }
 }
 /* ===================== INICIO: Noticias ===================== */
 let PD_NOT_TIMER = null;
@@ -25398,13 +25241,10 @@ function plandayShiftsDeRoster(fecha){
   const festivo = !!RS_FESTIVOS_NOMBRE[fecha];
   const out = [];
   const cedentes = PD_CEDENTES[fecha];
-  // Personas con vacaciones o recuperación ese día: no añadir su fila del roster
-  const conVac = new Set((PD_VAC||[]).filter(v=>v.fecha===fecha).map(v=>v.persona));
   (reg.filas||[]).forEach(f=>{
     if(!f || !f.nombre || !f.turno) return;
     if(PD_EXCLUIR.has(f.nombre)) return;
     if(cedentes && cedentes.has(f.nombre)) return;   // ese día cedió su turno: no sale
-    if(conVac.has(f.nombre)) return;                 // tiene vac/recup ese día: su fila no va al Planday
     if(['grupos','cumples','taller'].includes(f.tipo)) return;
     if(['Grupos','Cumpleaños','Taller','Grupo'].includes(f.nombre)) return;
     const ov = PD_OVERRIDES[pdApKey(fecha, f.nombre, f.turno)];
@@ -25481,8 +25321,6 @@ function plandayRender(dias){
     });
   }
   PD_DRAGITEMS = [];
-  PD_SELECCIONADOS = new Set();
-  pdActualizarBulkBar();
   const hoyIso = rsIso(new Date());
   const cornerToggle = `<div class="pd-ordtoggle">`
     + `<button class="${PD_ORDEN==='pdx'?'active':''}" onclick="plandaySetOrden('pdx')">Orden PDX</button>`
@@ -25539,7 +25377,7 @@ function plandayRender(dias){
         return `<div class="${cls}" draggable="true" data-si="${si}" ondragstart="plandayDragStart(event,${si})" ondragend="plandayDragEnd(event)"${abrir}>`
           + `<span class="pd-shift-hora">${esc(pdTurnoLabel(s.turno))}</span>`
           + `<span class="pd-shift-tag"><span class="pd-tipo-dot-mini" style="background:${dotColor}"></span>${esc(tag)}</span>`
-          + `<span class="pd-shift-chk${aprobadoAhora?' on':''}" title="${aprobadoAhora?'Aprobado':'Seleccionar para aprobar/eliminar en bloque'}" onclick="plandayToggleSeleccion(event,${si})">${aprobadoAhora?'✓':''}</span>`
+          + `<span class="pd-shift-chk${aprobadoAhora?' on':''}" title="${aprobadoAhora?'Aprobado: ha trabajado este turno':'Marcar / gestionar este turno'}" onclick="plandayAbrirCheckMenu(event,${si})">${aprobadoAhora?'✓':''}</span>`
           + `</div>`;
       }).join('');
       // El "+" pequeño de arriba a la derecha (para añadir un turno extra a una
@@ -25687,66 +25525,6 @@ async function plandayToggleAprobadoRoster(ev, fecha, persona, turno){
 }
 /* Menú del check de cada turno: al pulsar el cuadradito de abajo-derecha, sale
    arriba un menú con "Aprobar" (verde) y "Eliminar turno" (rojo). */
-/* ---------- Selección múltiple (bulk) ---------- */
-function plandayToggleSeleccion(ev, si){
-  ev.stopPropagation();
-  const el = ev.currentTarget;
-  const d = PD_DRAGITEMS[si];
-  if(!d) return;
-  if(PD_SELECCIONADOS.has(si)){
-    PD_SELECCIONADOS.delete(si);
-    el.classList.remove('sel');
-  } else {
-    PD_SELECCIONADOS.add(si);
-    el.classList.add('sel');
-  }
-  pdActualizarBulkBar();
-}
-function pdActualizarBulkBar(){
-  const bar = document.getElementById('pd-bulk-bar');
-  const cnt = document.getElementById('pd-bulk-count');
-  if(!bar) return;
-  const n = PD_SELECCIONADOS.size;
-  bar.classList.toggle('show', n > 0);
-  if(cnt) cnt.textContent = `${n} turno${n===1?'':'s'} seleccionado${n===1?'':'s'}`;
-}
-function plandayDeseleccionar(){
-  PD_SELECCIONADOS.clear();
-  document.querySelectorAll('.pd-shift-chk.sel').forEach(el=>el.classList.remove('sel'));
-  pdActualizarBulkBar();
-}
-async function plandayBulkAprobar(){
-  if(!PD_SELECCIONADOS.size) return;
-  const items = [...PD_SELECCIONADOS].map(si=>PD_DRAGITEMS[si]).filter(Boolean);
-  const btn = document.querySelector('#pd-bulk-bar .pd-bulk-aprobar');
-  if(btn){ btn.disabled=true; btn.textContent='Aprobando…'; }
-  for(const d of items){
-    if(d.origen==='manual' && d.id!=null){
-      await sb.from('planday_turnos').update({ aprobado:true, updated_at:new Date().toISOString() }).eq('id', d.id);
-      const t = PD_MANUAL.find(x=>x.id===d.id); if(t) t.aprobado = true;
-    } else {
-      await pdOverrideGuardarParcial(d.fecha, d.persona, d.turno, { aprobado: true });
-    }
-  }
-  plandayRender(plandayDias());
-}
-async function plandayBulkEliminar(){
-  if(!PD_SELECCIONADOS.size) return;
-  const items = [...PD_SELECCIONADOS].map(si=>PD_DRAGITEMS[si]).filter(Boolean);
-  if(!confirm(`¿Eliminar ${items.length} turno${items.length===1?'':'s'}? Esta acción no se puede deshacer.`)) return;
-  const btn = document.querySelector('#pd-bulk-bar .pd-bulk-eliminar');
-  if(btn){ btn.disabled=true; btn.textContent='Eliminando…'; }
-  for(const d of items){
-    if(d.origen==='manual' && d.id!=null){
-      await sb.from('planday_turnos').delete().eq('id', d.id);
-    } else {
-      await plandayBorrarRosterTurno(d.fecha, d.persona, d.turno);
-      return; // plandayBorrarRosterTurno ya llama a plandayCargar()
-    }
-  }
-  plandayCargar();
-}
-
 function plandayCerrarCheckMenu(){ document.getElementById('pd-check-menu')?.remove(); }
 function plandayAbrirCheckMenu(ev, si){
   ev.stopPropagation();
@@ -27557,16 +27335,15 @@ async function rsSaveDia(){
   // (navegación rápida por el calendario) mientras este guardado esperaba su
   // turno, rsFecha ya apunta a OTRO día y este guardado escribiría los datos
   // equivocados encima de esa otra fecha.
-  // Si el día tiene el candado (bloqueado) puesto, no se manda nada al
+  // Si el día tiene el candado o el OK LAIA puestos, no se manda nada al
   // servidor — salvo que este guardado sea justo el que ha lanzado el propio
-  // clic de poner/quitar el candado (RS_TOGGLE_BLOQUEO_EN_CURSO).
-  // El OK LAIA ya NO bloquea el guardado: solo el candado manual lo hace.
+  // clic de poner/quitar el candado o el OK LAIA (RS_TOGGLE_BLOQUEO_EN_CURSO).
   // La base de datos rechaza igualmente cualquier guardado que se saltara
-  // este candado por cualquier otro camino (ver migración
-  // roster_dias_candado_manual).
+  // este candado por cualquier otro camino (ver migraciones
+  // roster_dias_lock_ok_laia / roster_dias_candado_manual).
   const eraToggleBloqueo = RS_TOGGLE_BLOQUEO_EN_CURSO;
   RS_TOGGLE_BLOQUEO_EN_CURSO = false;
-  if(dia.bloqueado && !eraToggleBloqueo){
+  if((dia.ok_laia || dia.bloqueado) && !eraToggleBloqueo){
     console.warn('Guardado omitido: roster de', dia.fecha, 'bloqueado.');
     return;
   }
@@ -33396,13 +33173,12 @@ async function pizarraInit(){
     PZ_CARGADO = true;
     await cargarPizarraTareas();
   }
-  pizarraTabSwitch(document.querySelector('.pz-tab-btn.on')?.dataset.pztab || 'notas');
+  pizarraTabSwitch(document.querySelector('.pz-tab-btn.on')?.dataset.pztab || 'tareas');
 }
 function pizarraTabSwitch(tab){
   document.querySelectorAll('.pz-tab-btn').forEach(b=>b.classList.toggle('on', b.dataset.pztab===tab));
+  document.getElementById('pz-panel-tareas')?.classList.toggle('on', tab==='tareas');
   document.getElementById('pz-panel-notas')?.classList.toggle('on', tab==='notas');
-  document.getElementById('pz-panel-cal')?.classList.toggle('on', tab==='cal');
-  if(tab==='cal') pzCalRender();
   if(tab==='notas' && !BLOC_CARGADO){
     BLOC_CARGADO = true;
     cargarPaginasBloc().then(()=>{
@@ -33461,7 +33237,13 @@ async function pzBorrarTarea(id){
 /* El Resumen (Dashboard) llama a esto desde refreshDashboard() para que la
    tarjeta "Mis tareas" esté al día sin depender de haber abierto Pizarra. */
 async function renderDashMisTareas(){
-  // Mis tareas card removed — kept as stub for legacy calls
+  if(!esNacho()){
+    const card = document.getElementById('dash-mis-tareas-card');
+    if(card) card.style.display = 'none';
+    return;
+  }
+  if(!PZ_CARGADO){ PZ_CARGADO = true; await cargarPizarraTareas(); }
+  else pintarPizarraTareas();
 }
 
 /* ---------- Notas: tipo OneNote, a pantalla completa dentro de Pizarra ---------- */
@@ -33635,249 +33417,492 @@ async function guardarPaginaBloc(){
 }
 
 
-/* ============================================================
-   PIZARRA — Calendario de tareas (tab 3)
-   Almacenamiento: localStorage('pz_cal_v1')
-   Estructura: { domingo:[{id,texto,done},...], lunes:[], ... }
-   ============================================================ */
-/* ============================================================
-   CALENDARIO DE TAREAS — localStorage pz_cal_v1
-   Schema: { week: 'YYYY-MM-DD' (domingo), tasks: { dom:[{id,texto,done,locked}] } }
-   - locked: puede hacer check, pero NO borrar. Se resetea done c/semana.
-   - no locked: si no done → carry over semana siguiente; si done → se limpia.
-   ============================================================ */
-const PZ_CAL_KEY = 'pz_cal_v2';
-const PZ_CAL_DIAS = [
-  { key:'domingo',   label:'Domingo',   cls:'pz-day-dom', ncdCls:'ncd-dom' },
-  { key:'lunes',     label:'Lunes',     cls:'pz-day-lun', ncdCls:'ncd-lun' },
-  { key:'martes',    label:'Martes',    cls:'pz-day-mar', ncdCls:'ncd-mar' },
-  { key:'miercoles', label:'Miércoles', cls:'pz-day-mie', ncdCls:'ncd-mie' },
-  { key:'jueves',    label:'Jueves',    cls:'pz-day-jue', ncdCls:'ncd-jue' },
-];
+/* =====================================================
+   STOCK BOUTIQUE — sb* functions
+   Gestión de inventario de la tienda por categoría
+   ===================================================== */
 
-/* Devuelve 'YYYY-MM-DD' del domingo de la semana actual */
-function pzCalSemanaKey(){
-  const hoy = new Date();
-  const d = new Date(hoy);
-  d.setDate(d.getDate() - d.getDay()); // retrocede al domingo
-  return d.toISOString().slice(0,10);
-}
+// State
+let sbPeriodos = [];     // [{id, label, mes, anio, fecha}]
+let sbCategorias = [];   // [{id, nombre, orden}] — global, no por periodo
+let sbItems = [];        // [{id, periodo_id, categoria_id, producto, stock_tienda, total, antes, orden}]
+let sbColNames = { tienda:'Stock Tienda', total:'Total', antes:'Antes', delta:'Delta' };
+let sbCurrentPeriodoId = null;
+let sbReadOnly = false;
+let sbDirty = false;    // unsaved changes
 
-function pzCalCargar(){
-  try{
-    const raw = JSON.parse(localStorage.getItem(PZ_CAL_KEY)) || {};
-    // Migrar formato antiguo (plano) al nuevo
-    if(raw.domingo || raw.lunes || raw.martes){
-      const semana = pzCalSemanaKey();
-      const tasks = {};
-      PZ_CAL_DIAS.forEach(d=>{
-        tasks[d.key] = (raw[d.key]||[]).map(t=>({...t, locked: t.locked||false}));
-      });
-      const nuevo = {week: semana, tasks};
-      pzCalGuardar(nuevo);
-      return nuevo;
-    }
-    return raw;
-  }catch(e){ return {}; }
-}
-
-function pzCalGuardar(d){
-  try{ localStorage.setItem(PZ_CAL_KEY, JSON.stringify(d)); }catch(e){}
-}
-
-function pzCalId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
-
-/* Comprueba rollover de semana */
-function pzCalRollover(){
-  const semanaActual = pzCalSemanaKey();
-  const datos = pzCalCargar();
-  if(!datos.week || datos.week === semanaActual) return datos;
-  // Nueva semana: procesar carry-over
-  const nuevoTasks = {};
-  PZ_CAL_DIAS.forEach(dia=>{
-    const tareas = (datos.tasks||{})[dia.key] || [];
-    nuevoTasks[dia.key] = tareas
-      .filter(t => t.locked || !t.done) // quedan: locked siempre + no-locked si no hechas
-      .map(t => t.locked ? {...t, done:false} : t); // locked: resetear done
-  });
-  const nuevo = {week: semanaActual, tasks: nuevoTasks};
-  pzCalGuardar(nuevo);
-  return nuevo;
-}
-
-function pzCalDatos(){
-  const datos = pzCalRollover();
-  if(!datos.tasks){ datos.tasks={}; }
-  if(!datos.week){ datos.week=pzCalSemanaKey(); }
-  return datos;
-}
-
-/* ---- Render PIZARRA (grid completo) ---- */
-function pzCalRender(){
-  const datos = pzCalDatos();
-  const grid = document.getElementById('pz-cal-grid');
-  if(!grid) return;
-  grid.innerHTML = '';
-  PZ_CAL_DIAS.forEach(dia=>{
-    const tareas = datos.tasks[dia.key] || [];
-    const card = document.createElement('div');
-    card.className = 'pz-day-card '+dia.cls;
-    const hechas = tareas.filter(t=>t.done).length;
-    const sub = tareas.length ? hechas+'/'+tareas.length+' hechas' : 'Sin tareas';
-    card.innerHTML = `
-      <div class="pz-day-header">
-        <div class="pz-day-name">${dia.label}</div>
-        <div class="pz-day-sub">${sub}</div>
-      </div>
-      <div class="pz-day-body">
-        ${tareas.length
-          ? '<ul class="pz-task-list">'+tareas.map(t=>`
-              <li class="pz-task-item${t.done?' done':''}${t.locked?' locked':''}" data-id="${t.id}">
-                <div class="pz-task-ck${t.done?' checked':''}" onclick="pzCalToggle('${dia.key}','${t.id}')"></div>
-                <span class="pz-task-text">${t.texto.replace(/</g,'&lt;')}</span>
-                ${t.locked
-                  ? '<span class="pz-task-locked-icon" title="Tarea fija">🔒</span>'
-                  : '<button class="pz-task-del" title="Eliminar" onclick="pzCalDel(\'' + dia.key + '\',\'' + t.id + '\')">×</button>'}
-              </li>`).join('')+'</ul>'
-          : '<div class="pz-empty">Sin tareas aún</div>'}
-      </div>
-      <div class="pz-day-add">
-        <div class="pz-add-row">
-          <input class="pz-add-input" id="pz-ai-${dia.key}" type="text" placeholder="Nueva tarea…" maxlength="200"
-            onkeydown="if(event.key==='Enter') pzCalAdd('${dia.key}')">
-          <button class="pz-add-btn" onclick="pzCalAdd('${dia.key}')" title="Añadir tarea">+</button>
-          <button class="pz-add-btn" onclick="pzCalAdd('${dia.key}',true)" title="Añadir tarea fija (no borrable)" style="font-size:11px;">🔒</button>
-        </div>
-      </div>`;
-    grid.appendChild(card);
-  });
-  // Sync dashboard too
-  pzCalRenderDash();
-}
-
-/* ---- Render Dashboard widget ---- */
-function pzCalRenderDash(){
-  const dashCard = document.getElementById('dash-nacho-cal');
-  if(!dashCard || !esNacho()) return;
-  dashCard.style.display = '';
-  const grid = document.getElementById('nacho-cal-grid');
-  if(!grid) return;
-  const datos = pzCalDatos();
-  // Week label
-  const wl = document.getElementById('ncd-week-label');
-  if(wl && datos.week){
-    const d = new Date(datos.week+'T12:00:00');
-    const opts = {day:'numeric', month:'short'};
-    const fin = new Date(d); fin.setDate(fin.getDate()+4); // jueves
-    wl.textContent = 'Semana del '+d.toLocaleDateString('es-ES',opts)+' al '+fin.toLocaleDateString('es-ES',opts);
+async function sbInit(){
+  if(!siPuedeVer()){ goView('dashboard'); return; }
+  // Load column names
+  await sbCargarConfig();
+  // Load periods list
+  await sbCargarPeriodos();
+  // Load categories (global)
+  await sbCargarCategorias();
+  // If no period yet, prompt to create first one
+  if(sbPeriodos.length === 0){
+    sbRenderEmptyState();
+    return;
   }
-  grid.innerHTML = '';
-  PZ_CAL_DIAS.forEach(dia=>{
-    const tareas = datos.tasks[dia.key] || [];
-    const card = document.createElement('div');
-    card.className = 'ncd-card '+dia.ncdCls;
-    const hechas = tareas.filter(t=>t.done).length;
-    const sub = tareas.length ? hechas+'/'+tareas.length : '—';
-    card.innerHTML = `
-      <div class="ncd-header">
-        <div class="ncd-name">${dia.label}</div>
-        <div class="ncd-sub">${sub} hechas</div>
-      </div>
-      <div class="ncd-body">
-        ${tareas.length
-          ? '<ul class="ncd-list">'+tareas.map(t=>`
-              <li class="ncd-item${t.done?' done':''}" data-id="${t.id}">
-                <div class="ncd-ck${t.done?' checked':''}" onclick="ncdToggle('${dia.key}','${t.id}')"></div>
-                <span class="ncd-text">${t.texto.replace(/</g,'&lt;')}</span>
-                ${t.locked
-                  ? '<span class="ncd-lock" title="Tarea fija">🔒</span>'
-                  : '<button class="ncd-del" title="Eliminar" onclick="ncdDel(\'' + dia.key + '\',\'' + t.id + '\')">×</button>'}
-              </li>`).join('')+'</ul>'
-          : '<div style="font-size:11px;color:var(--text-soft);padding:6px 2px;font-style:italic;">Sin tareas</div>'}
-      </div>
-      <div class="ncd-foot">
-        <div class="ncd-add-row">
-          <input class="ncd-add-inp" id="ncd-ai-${dia.key}" type="text" placeholder="Añadir…" maxlength="200"
-            onkeydown="if(event.key==='Enter') ncdAdd('${dia.key}')">
-          <button class="ncd-add-btn" onclick="ncdAdd('${dia.key}')" style="background:var(--accent)" title="Añadir">+</button>
-        </div>
-      </div>`;
-    grid.appendChild(card);
+  // Load latest period
+  sbCurrentPeriodoId = sbPeriodos[0].id;
+  await sbCargarItems(sbCurrentPeriodoId);
+  sbRenderAll();
+}
+
+async function sbCargarConfig(){
+  try {
+    const { data } = await sb.from('sb_config').select('key,value');
+    if(data) {
+      data.forEach(r => {
+        if(r.key === 'col_tienda') sbColNames.tienda = r.value;
+        if(r.key === 'col_total')  sbColNames.total  = r.value;
+        if(r.key === 'col_antes')  sbColNames.antes  = r.value;
+        if(r.key === 'col_delta')  sbColNames.delta  = r.value;
+      });
+    }
+  } catch(e){ console.error('[SB] config', e); }
+}
+
+async function sbCargarPeriodos(){
+  try {
+    const { data, error } = await sb.from('sb_periodos').select('*').order('anio', {ascending:false}).order('mes', {ascending:false});
+    if(error) throw error;
+    sbPeriodos = data || [];
+    sbRenderPeriodSelector();
+  } catch(e){ console.error('[SB] periodos', e); }
+}
+
+async function sbCargarCategorias(){
+  try {
+    const { data, error } = await sb.from('sb_categorias').select('*').order('orden');
+    if(error) throw error;
+    sbCategorias = data || [];
+  } catch(e){ console.error('[SB] categorias', e); }
+}
+
+async function sbCargarItems(periodoId){
+  try {
+    const { data, error } = await sb.from('sb_items')
+      .select('*')
+      .eq('periodo_id', periodoId)
+      .order('orden');
+    if(error) throw error;
+    sbItems = data || [];
+  } catch(e){ console.error('[SB] items', e); }
+}
+
+function sbRenderPeriodSelector(){
+  const sel = document.getElementById('sb-period-sel');
+  if(!sel) return;
+  sel.innerHTML = sbPeriodos.map(p =>
+    `<option value="${p.id}"${p.id === sbCurrentPeriodoId ? ' selected':''}>${p.label}</option>`
+  ).join('');
+}
+
+async function sbOnPeriodChange(periodoId){
+  if(sbDirty && !confirm('Tienes cambios sin guardar. ¿Cambiar de periodo de todos modos?')) {
+    document.getElementById('sb-period-sel').value = sbCurrentPeriodoId;
+    return;
+  }
+  sbCurrentPeriodoId = periodoId;
+  sbDirty = false;
+  await sbCargarItems(periodoId);
+  // Check if this is the most recent period
+  sbReadOnly = sbPeriodos.length > 0 && sbPeriodos[0].id !== periodoId;
+  sbRenderAll();
+}
+
+function sbRenderAll(){
+  sbRenderColHeaders();
+  sbRenderCatPills();
+  sbRenderTable();
+  sbRenderToolbarState();
+}
+
+function sbRenderColHeaders(){
+  ['tienda','total','antes','delta'].forEach(k => {
+    const el = document.getElementById(`sb-th-${k}`);
+    if(el) el.textContent = sbColNames[k];
   });
 }
 
-/* Dashboard helpers - sync with pz_cal_v2 */
-function ncdToggle(diaKey,id){
-  const datos = pzCalDatos();
-  if(!datos.tasks[diaKey]) return;
-  const t=datos.tasks[diaKey].find(t=>t.id===id);
-  if(t) t.done=!t.done;
-  pzCalGuardar(datos);
-  pzCalRenderDash();
-  // sync pizarra si visible
-  const panelCal = document.getElementById('pz-panel-cal');
-  if(panelCal && panelCal.classList.contains('on')) pzCalRender();
-}
-function ncdDel(diaKey,id){
-  const datos = pzCalDatos();
-  if(!datos.tasks[diaKey]) return;
-  const t=datos.tasks[diaKey].find(x=>x.id===id);
-  if(t && t.locked) return;
-  datos.tasks[diaKey]=datos.tasks[diaKey].filter(t=>t.id!==id);
-  pzCalGuardar(datos);
-  pzCalRenderDash();
-  const panelCal = document.getElementById('pz-panel-cal');
-  if(panelCal && panelCal.classList.contains('on')) pzCalRender();
-}
-function ncdAdd(diaKey){
-  const inp = document.getElementById('ncd-ai-'+diaKey);
-  if(!inp) return;
-  const texto = inp.value.trim();
-  if(!texto) return;
-  const datos = pzCalDatos();
-  if(!datos.tasks[diaKey]) datos.tasks[diaKey]=[];
-  datos.tasks[diaKey].push({id:pzCalId(),texto,done:false,locked:false});
-  pzCalGuardar(datos);
-  inp.value='';
-  pzCalRenderDash();
-  const panelCal = document.getElementById('pz-panel-cal');
-  if(panelCal && panelCal.classList.contains('on')) pzCalRender();
-  setTimeout(()=>{const e=document.getElementById('ncd-ai-'+diaKey);if(e)e.focus();},30);
+function sbRenderCatPills(){
+  const nav = document.getElementById('sb-cats-nav');
+  if(!nav) return;
+  // Build ordered list of categories that have items in this period
+  const catIds = [...new Set(sbItems.map(i => i.categoria_id))];
+  const catsInPeriod = sbCategorias.filter(c => catIds.includes(c.id));
+  nav.innerHTML = catsInPeriod.map(c =>
+    `<span class="sb-cat-pill" onclick="sbScrollToCat('${c.id}')" data-catid="${c.id}">${c.nombre}</span>`
+  ).join('');
 }
 
-/* ---- Pizarra CRUD ---- */
-function pzCalAdd(diaKey, locked=false){
-  const inp = document.getElementById('pz-ai-'+diaKey);
-  if(!inp) return;
-  const texto = inp.value.trim();
-  if(!texto) return;
-  const datos = pzCalDatos();
-  if(!datos.tasks[diaKey]) datos.tasks[diaKey]=[];
-  datos.tasks[diaKey].push({id:pzCalId(),texto,done:false,locked:!!locked});
-  pzCalGuardar(datos);
-  inp.value='';
-  pzCalRender();
-  setTimeout(()=>{const e=document.getElementById('pz-ai-'+diaKey);if(e)e.focus();},30);
-}
-function pzCalDel(diaKey,id){
-  const datos = pzCalDatos();
-  if(!datos.tasks[diaKey]) return;
-  const t=datos.tasks[diaKey].find(x=>x.id===id);
-  if(t && t.locked) return; // no borrar locked
-  datos.tasks[diaKey]=datos.tasks[diaKey].filter(t=>t.id!==id);
-  pzCalGuardar(datos);
-  pzCalRender();
-}
-function pzCalToggle(diaKey,id){
-  const datos = pzCalDatos();
-  if(!datos.tasks[diaKey]) return;
-  const t=datos.tasks[diaKey].find(t=>t.id===id);
-  if(t) t.done=!t.done;
-  pzCalGuardar(datos);
-  pzCalRender();
+function sbScrollToCat(catId){
+  const row = document.querySelector(`[data-catanchor="${catId}"]`);
+  if(row) row.scrollIntoView({behavior:'smooth', block:'start'});
+  // Highlight pill
+  document.querySelectorAll('.sb-cat-pill').forEach(p => p.classList.remove('active'));
+  const pill = document.querySelector(`.sb-cat-pill[data-catid="${catId}"]`);
+  if(pill) pill.classList.add('active');
 }
 
-/* ============================================================ */
+function sbRenderTable(){
+  const tbody = document.getElementById('sb-tbody');
+  if(!tbody) return;
+
+  const ronly = sbReadOnly;
+  const rows = [];
+  let firstCat = true;
+
+  // Group items by category (in category order)
+  const catIds = [...new Set(sbItems.map(i => i.categoria_id))];
+  const catsOrdered = sbCategorias.filter(c => catIds.includes(c.id));
+
+  catsOrdered.forEach(cat => {
+    const catItems = sbItems.filter(i => i.categoria_id === cat.id).sort((a,b) => a.orden - b.orden);
+    if(catItems.length === 0) return;
+
+    // Category header row
+    rows.push(`<tr class="sb-cat-row${firstCat ? ' first-cat' : ''}" data-catanchor="${cat.id}">
+      <td colspan="6" id="sb-cat-${cat.id}" style="padding:0;">
+        <div style="background:#0d2137;padding:6px 12px;display:flex;align-items:center;gap:8px;">
+          <span style="color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;"${!ronly ? ` contenteditable="true" style="outline:none;cursor:text;color:#fff;" onblur="sbRenameCat('${cat.id}',this.textContent)"` : ''}>
+            ${sbEsc(cat.nombre)}
+          </span>
+          <span style="color:#7aacce;font-size:10px;">(${catItems.length})</span>
+        </div>
+      </td>
+    </tr>`);
+    firstCat = false;
+
+    catItems.forEach(item => {
+      const delta = (item.total || 0) - (item.antes || 0);
+      const deltaHtml = delta > 0 ? `<span class="sb-delta-pos">▲${delta}</span>`
+        : delta < 0 ? `<span class="sb-delta-neg">▼${Math.abs(delta)}</span>`
+        : `<span class="sb-delta-zero">—</span>`;
+
+      rows.push(`<tr data-itemid="${item.id}">
+        <td style="text-align:left;padding-left:14px;">
+          <span class="sb-prod-name"${!ronly ? ` contenteditable="true" onblur="sbRenameItem('${item.id}',this.textContent)"` : ''}>
+            ${sbEsc(item.producto)}
+          </span>
+        </td>
+        <td style="text-align:center;">
+          <input class="sb-num-input" type="number" min="0" value="${item.stock_tienda||0}"
+            ${ronly ? 'readonly' : `onchange="sbUpdateVal('${item.id}','stock_tienda',this.value)"`}>
+        </td>
+        <td style="text-align:center;">
+          <input class="sb-num-input" type="number" min="0" value="${item.total||0}"
+            ${ronly ? 'readonly' : `onchange="sbUpdateVal('${item.id}','total',this.value)"`}>
+        </td>
+        <td style="text-align:center;">
+          <input class="sb-num-input" type="number" min="0" value="${item.antes||0}"
+            ${ronly ? 'readonly' : `onchange="sbUpdateVal('${item.id}','antes',this.value)"`}>
+        </td>
+        <td style="text-align:center;">${deltaHtml}</td>
+        <td style="text-align:center;">
+          ${!ronly ? `<button class="sb-del-btn" onclick="sbDeleteItem('${item.id}')" title="Eliminar">×</button>` : ''}
+        </td>
+      </tr>`);
+    });
+  });
+
+  if(rows.length === 0){
+    rows.push('<tr><td colspan="6" style="text-align:center;color:var(--text-soft);padding:24px;">No hay productos en este periodo.</td></tr>');
+  }
+
+  tbody.innerHTML = rows.join('');
+}
+
+function sbRenderToolbarState(){
+  const badge = document.getElementById('sb-readonly-badge');
+  const saveBar = document.getElementById('sb-save-bar');
+  const btnAdd = document.getElementById('sb-btn-add-prod');
+  const btnAddCat = document.getElementById('sb-btn-add-cat');
+
+  if(badge) badge.style.display = sbReadOnly ? '' : 'none';
+  if(saveBar) saveBar.style.display = (!sbReadOnly && sbDirty) ? '' : 'none';
+  if(btnAdd) btnAdd.style.display = sbReadOnly ? 'none' : '';
+  if(btnAddCat) btnAddCat.style.display = sbReadOnly ? 'none' : '';
+}
+
+function sbRenderEmptyState(){
+  const tbody = document.getElementById('sb-tbody');
+  const sel = document.getElementById('sb-period-sel');
+  if(sel) sel.innerHTML = '<option value="">Sin periodos</option>';
+  if(tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-soft);padding:40px;">No hay stock takes registrados. Crea uno con <b>+ Nuevo Stock Take</b>.</td></tr>';
+}
+
+function sbUpdateVal(itemId, field, rawVal){
+  const val = parseInt(rawVal) || 0;
+  const item = sbItems.find(i => i.id === itemId);
+  if(!item) return;
+  item[field] = val;
+  sbDirty = true;
+  // Re-render just the delta for this row
+  const row = document.querySelector(`tr[data-itemid="${itemId}"]`);
+  if(row){
+    const delta = (item.total||0) - (item.antes||0);
+    const deltaCell = row.cells[4];
+    if(deltaCell) deltaCell.innerHTML = delta > 0
+      ? `<span class="sb-delta-pos">▲${delta}</span>`
+      : delta < 0 ? `<span class="sb-delta-neg">▼${Math.abs(delta)}</span>`
+      : `<span class="sb-delta-zero">—</span>`;
+  }
+  sbRenderToolbarState();
+}
+
+function sbRenameItem(itemId, newName){
+  const trimmed = newName.trim();
+  if(!trimmed) return;
+  const item = sbItems.find(i => i.id === itemId);
+  if(!item || item.producto === trimmed) return;
+  item.producto = trimmed;
+  sbDirty = true;
+  sbRenderToolbarState();
+}
+
+function sbRenameCat(catId, newName){
+  const trimmed = newName.trim();
+  if(!trimmed) return;
+  const cat = sbCategorias.find(c => c.id === catId);
+  if(!cat || cat.nombre === trimmed) return;
+  cat.nombre = trimmed;
+  // Save immediately to DB
+  sb.from('sb_categorias').update({ nombre: trimmed }).eq('id', catId)
+    .then(({ error }) => {
+      if(error) console.error('[SB] rename cat', error);
+      else sbRenderCatPills(); // refresh pills
+    });
+}
+
+async function sbEditColName(key){
+  if(sbReadOnly) return;
+  const current = sbColNames[key];
+  const nuevo = prompt(`Nombre de columna "${current}":`, current);
+  if(!nuevo || nuevo.trim() === current) return;
+  const trimmed = nuevo.trim();
+  sbColNames[key] = trimmed;
+  // Save to DB
+  const { error } = await sb.from('sb_config').update({ value: trimmed, updated_at: new Date().toISOString() }).eq('key', `col_${key}`);
+  if(error) console.error('[SB] col name', error);
+  sbRenderColHeaders();
+}
+
+async function sbDeleteItem(itemId){
+  if(!confirm('¿Eliminar este producto del periodo?')) return;
+  // Delete from DB
+  const { error } = await sb.from('sb_items').delete().eq('id', itemId);
+  if(error){ alert('Error al eliminar'); return; }
+  sbItems = sbItems.filter(i => i.id !== itemId);
+  sbRenderAll();
+}
+
+async function sbGuardar(){
+  if(!sbCurrentPeriodoId) return;
+  const btn = document.querySelector('#sb-save-bar .sb-btn-primary');
+  if(btn){ btn.textContent = 'Guardando…'; btn.disabled = true; }
+
+  // Batch upsert all items
+  const updates = sbItems.map(item => ({
+    id: item.id,
+    periodo_id: item.periodo_id,
+    categoria_id: item.categoria_id,
+    producto: item.producto,
+    stock_tienda: item.stock_tienda || 0,
+    total: item.total || 0,
+    antes: item.antes || 0,
+    orden: item.orden
+  }));
+
+  const { error } = await sb.from('sb_items').upsert(updates);
+  if(error){
+    alert('Error al guardar: ' + error.message);
+    if(btn){ btn.textContent = '💾 Guardar Stock'; btn.disabled = false; }
+    return;
+  }
+
+  sbDirty = false;
+  if(btn){ btn.textContent = '💾 Guardar Stock'; btn.disabled = false; }
+  sbRenderToolbarState();
+  // Flash success
+  const bar = document.getElementById('sb-save-bar');
+  if(bar){ bar.style.display = ''; bar.innerHTML = '<span style="color:#16a34a;font-weight:700;">✓ Guardado correctamente</span>'; setTimeout(()=>{ bar.style.display='none'; }, 2200); }
+}
+
+async function sbNuevoPeriodo(){
+  // Ask for period label
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const hoy = new Date();
+  const defaultLabel = meses[hoy.getMonth()] + ' ' + hoy.getFullYear();
+  const label = prompt('Nombre del periodo (ej: Marzo 2027):', defaultLabel);
+  if(!label || !label.trim()) return;
+
+  const trimmed = label.trim();
+  // Parse mes/año from label
+  let mes = hoy.getMonth() + 1;
+  let anio = hoy.getFullYear();
+  for(let i = 0; i < meses.length; i++){
+    if(trimmed.toLowerCase().startsWith(meses[i].toLowerCase())){
+      mes = i + 1;
+      const parts = trimmed.split(' ');
+      if(parts[1]) anio = parseInt(parts[1]) || anio;
+      break;
+    }
+  }
+
+  // Create period in DB
+  const { data: periodoData, error: pErr } = await sb.from('sb_periodos')
+    .insert({ label: trimmed, mes, anio, fecha: new Date().toISOString().slice(0,10) })
+    .select().single();
+  if(pErr){ alert('Error creando periodo: ' + pErr.message); return; }
+
+  const newPeriodoId = periodoData.id;
+
+  // Get previous period (most recent before this one)
+  const prevPeriodo = sbPeriodos[0] || null;
+
+  // Get previous period items to use as "antes"
+  let prevItems = [];
+  if(prevPeriodo){
+    const { data: pi } = await sb.from('sb_items').select('*').eq('periodo_id', prevPeriodo.id);
+    prevItems = pi || [];
+  }
+
+  // Create items for all categories and all their products from prev period
+  // (or if no prev period, just create one empty product per category)
+  let newItems = [];
+  if(prevItems.length > 0){
+    newItems = prevItems.map(item => ({
+      periodo_id: newPeriodoId,
+      categoria_id: item.categoria_id,
+      producto: item.producto,
+      stock_tienda: 0,
+      total: 0,
+      antes: item.total || 0,  // previous total becomes 'antes'
+      orden: item.orden
+    }));
+  } else {
+    // No previous — create one placeholder per category
+    sbCategorias.forEach((cat, idx) => {
+      newItems.push({
+        periodo_id: newPeriodoId,
+        categoria_id: cat.id,
+        producto: 'Nuevo producto',
+        stock_tienda: 0, total: 0, antes: 0, orden: 0
+      });
+    });
+  }
+
+  if(newItems.length > 0){
+    // Insert in batches of 100
+    for(let i = 0; i < newItems.length; i += 100){
+      const batch = newItems.slice(i, i+100);
+      const { error: iErr } = await sb.from('sb_items').insert(batch);
+      if(iErr){ console.error('[SB] insert items', iErr); }
+    }
+  }
+
+  // Reload
+  await sbCargarPeriodos();
+  sbCurrentPeriodoId = newPeriodoId;
+  await sbCargarItems(newPeriodoId);
+  sbReadOnly = false;
+  sbDirty = false;
+  document.getElementById('sb-period-sel').value = newPeriodoId;
+  sbRenderAll();
+}
+
+async function sbAnadirProducto(){
+  if(sbReadOnly) return;
+
+  // Build category options
+  const catOpts = sbCategorias.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+  const modalHtml = `
+    <div id="sb-modal-add" onclick="if(event.target===this)this.remove()" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;">
+      <div style="background:#fff;border-radius:14px;padding:28px;min-width:340px;max-width:480px;width:90%;position:relative;box-sizing:border-box;">
+        <button onclick="document.getElementById('sb-modal-add').remove()" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;line-height:1;padding:0;">×</button>
+        <div style="font-weight:700;font-size:15px;color:#111;margin-bottom:20px;">Añadir producto</div>
+        <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;display:block;margin-bottom:6px;">Categoría</label>
+        <select id="sb-add-cat-sel" style="width:100%;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;background:#f9fafb;color:#111;font-size:13px;margin-bottom:16px;box-sizing:border-box;">${catOpts}</select>
+        <label style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#6b7280;display:block;margin-bottom:6px;">Nombre del producto</label>
+        <input id="sb-add-prod-name" type="text" placeholder="Ej: Crema Hidratante SPF30" style="width:100%;box-sizing:border-box;padding:9px 10px;border:1px solid #d1d5db;border-radius:8px;background:#f9fafb;color:#111;font-size:13px;margin-bottom:22px;">
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button onclick="document.getElementById('sb-modal-add').remove()" style="padding:8px 18px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#374151;cursor:pointer;font-size:13px;">Cancelar</button>
+          <button onclick="sbConfirmAddProducto()" style="padding:8px 18px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;font-weight:700;">Añadir</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  document.getElementById('sb-add-prod-name').focus();
+  // Enter key
+  document.getElementById('sb-add-prod-name').addEventListener('keydown', e => {
+    if(e.key === 'Enter') sbConfirmAddProducto();
+  });
+}
+
+async function sbConfirmAddProducto(){
+  const catSel = document.getElementById('sb-add-cat-sel');
+  const nameEl = document.getElementById('sb-add-prod-name');
+  if(!catSel || !nameEl) return;
+  const catId = catSel.value;
+  const nombre = nameEl.value.trim();
+  if(!nombre){ nameEl.style.borderColor='#ef4444'; return; }
+
+  // Find max order for this category
+  const catItems = sbItems.filter(i => i.categoria_id === catId);
+  const maxOrden = catItems.length > 0 ? Math.max(...catItems.map(i=>i.orden)) + 1 : 0;
+
+  const { data, error } = await sb.from('sb_items').insert({
+    periodo_id: sbCurrentPeriodoId,
+    categoria_id: catId,
+    producto: nombre,
+    stock_tienda: 0,
+    total: 0,
+    antes: 0,
+    orden: maxOrden
+  }).select().single();
+
+  if(error){ alert('Error: ' + error.message); return; }
+
+  sbItems.push(data);
+  document.getElementById('sb-modal-add').remove();
+  sbRenderAll();
+  // Scroll to the added product
+  setTimeout(() => sbScrollToCat(catId), 100);
+}
+
+async function sbAnadirCategoria(){
+  if(sbReadOnly) return;
+  const nombre = prompt('Nombre de la nueva categoría:');
+  if(!nombre || !nombre.trim()) return;
+  const trimmed = nombre.trim();
+
+  const maxOrden = sbCategorias.length > 0 ? Math.max(...sbCategorias.map(c => c.orden)) + 1 : 0;
+
+  const { data, error } = await sb.from('sb_categorias').insert({ nombre: trimmed, orden: maxOrden }).select().single();
+  if(error){ alert('Error: ' + error.message); return; }
+
+  sbCategorias.push(data);
+
+  // Add one placeholder item to current period
+  const { data: itemData, error: iErr } = await sb.from('sb_items').insert({
+    periodo_id: sbCurrentPeriodoId,
+    categoria_id: data.id,
+    producto: 'Nuevo producto',
+    stock_tienda: 0, total: 0, antes: 0, orden: 0
+  }).select().single();
+
+  if(!iErr && itemData) sbItems.push(itemData);
+  sbRenderAll();
+  setTimeout(() => sbScrollToCat(data.id), 100);
+}
+
+function sbEsc(str){
+  if(!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
 
 init();
