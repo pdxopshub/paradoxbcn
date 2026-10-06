@@ -1619,7 +1619,25 @@
   /* ---- PDA: semana + columnas por persona ---- */
   .pda-topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;
     flex-wrap:wrap;margin-bottom:14px;}
-  .pda-week{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .pda-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-top:14px;}
+@media(max-width:900px){.pda-cal-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.pda-cal-grid{grid-template-columns:1fr 1fr;}}
+.pda-cal-col{background:#0d2233;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px;}
+.pda-cal-head{margin-bottom:4px;}
+.pda-cal-dia{font-size:12px;font-weight:800;color:var(--dia-color);letter-spacing:.06em;display:block;}
+.pda-cal-prog{font-size:10px;color:rgba(255,255,255,.45);display:block;margin-top:1px;}
+.pda-cal-tasks{display:flex;flex-direction:column;gap:5px;flex:1;}
+.pda-cal-task{display:flex;align-items:center;gap:6px;cursor:pointer;padding:2px 0;}
+.pda-cal-task input[type=checkbox]{accent-color:var(--dia-color);width:14px;height:14px;flex-shrink:0;cursor:pointer;}
+.pda-cal-task.done .pda-cal-txt{text-decoration:line-through;opacity:.45;}
+.pda-cal-txt{font-size:12.5px;color:#e8ecf0;flex:1;line-height:1.35;}
+.pda-cal-task.locked{cursor:default;}
+.pda-cal-add{display:flex;gap:6px;margin-top:6px;}
+.pda-cal-input{flex:1;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 8px;color:#e8ecf0;font-size:12px;outline:none;}
+.pda-cal-input::placeholder{color:rgba(255,255,255,.3);}
+.pda-cal-plus{background:var(--dia-color);color:#0d2233;border:none;border-radius:8px;width:28px;height:28px;font-size:18px;line-height:1;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+.pda-week{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .pda-week-label{font-family:var(--font);font-weight:800;font-size:15px;color:var(--accent);
     min-width:190px;text-align:center;display:flex;align-items:center;justify-content:center;}
   .pda-readonly{font-size:11.5px;font-weight:700;color:var(--wait);
@@ -3925,7 +3943,49 @@
      visible SIEMPRE, colándose debajo de cualquier otra vista (justo el bug
      que se veía: Tareas/Notas apareciendo al final del Resumen). */
   #view-pizarra.active{display:flex;flex-direction:column;height:calc(100vh - 122px);}
-  .pz-tabs{display:flex;gap:6px;margin-bottom:16px;flex-shrink:0;}
+  .pz-lock-btn{background:none;border:none;cursor:pointer;font-size:13px;padding:0 2px;opacity:.35;line-height:1;flex-shrink:0;}
+.pz-lock-btn.on{opacity:1;}
+.pz-lock-btn:hover{opacity:.8;}
+.pz-cal-task.pz-locked{background:rgba(255,255,255,.04);border-radius:5px;padding:2px 4px;}
+.pz-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:10px;}
+.pz-cal-compact{grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:900px){.pz-cal-grid{grid-template-columns:repeat(4,1fr);}}
+@media(max-width:600px){.pz-cal-grid{grid-template-columns:1fr 1fr;}}
+.pz-cal-col{background:#0d2233;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px;}
+.pz-cal-head{margin-bottom:2px;}
+.pz-cal-dia{font-size:11px;font-weight:800;color:var(--pz-color);letter-spacing:.06em;display:block;}
+.pz-cal-prog{font-size:10px;color:rgba(255,255,255,.4);display:block;}
+.pz-cal-tasks{display:flex;flex-direction:column;gap:4px;flex:1;}
+.pz-cal-task{display:flex;align-items:center;gap:5px;}
+.pz-cal-task input[type=checkbox]{accent-color:var(--pz-color);width:14px;height:14px;flex-shrink:0;cursor:pointer;}
+.pz-cal-task.done .pz-cal-txt-inp{text-decoration:line-through;opacity:.4;}
+.pz-cal-txt-inp{flex:1;background:none;border:none;outline:none;color:#e8ecf0;font-size:12px;font-family:inherit;padding:0;}
+.pz-cal-txt-inp::placeholder{color:rgba(255,255,255,.25);}
+.pz-cal-add{display:flex;gap:5px;margin-top:4px;}
+.pz-cal-input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 7px;color:#e8ecf0;font-size:11.5px;outline:none;}
+.pz-cal-input::placeholder{color:rgba(255,255,255,.28);}
+.pz-cal-plus{background:var(--pz-color);color:#0d2233;border:none;border-radius:7px;width:26px;height:26px;font-size:17px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+.pz-cal-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:10px;}
+.pz-cal-compact{gap:8px;}
+@media(max-width:900px){.pz-cal-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.pz-cal-grid{grid-template-columns:1fr 1fr;}}
+.pz-cal-col{background:#0d2233;border-radius:11px;padding:12px 10px;display:flex;flex-direction:column;gap:5px;}
+.pz-cal-head{margin-bottom:2px;}
+.pz-cal-dia{font-size:11px;font-weight:800;color:var(--pz-color);letter-spacing:.07em;display:block;}
+.pz-cal-prog{font-size:10px;color:rgba(255,255,255,.38);display:block;margin-bottom:2px;}
+.pz-cal-tasks{display:flex;flex-direction:column;gap:3px;flex:1;}
+.pz-cal-task{display:flex;align-items:center;gap:5px;padding:2px 0;}
+.pz-cal-task input[type=checkbox]{accent-color:var(--pz-color);width:14px;height:14px;flex-shrink:0;cursor:pointer;}
+.pz-cal-task.done .pz-cal-txt-inp{text-decoration:line-through;opacity:.4;}
+.pz-cal-txt-inp{flex:1;background:none;border:none;outline:none;color:#e0eaf5;font-size:12px;font-family:inherit;padding:0;}
+.pz-cal-txt-inp::placeholder{color:rgba(255,255,255,.22);}
+.pz-cal-add{display:flex;gap:5px;margin-top:5px;}
+.pz-cal-input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 7px;color:#e0eaf5;font-size:11.5px;outline:none;font-family:inherit;}
+.pz-cal-input::placeholder{color:rgba(255,255,255,.25);}
+.pz-cal-plus{background:var(--pz-color);color:#0d2233;border:none;border-radius:7px;width:26px;height:26px;font-size:17px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+
+.pz-tabs{display:flex;gap:6px;margin-bottom:16px;flex-shrink:0;}
   .pz-tab-btn{border:none;background:none;font-family:inherit;font-size:13px;font-weight:800;
     color:var(--text-soft);padding:9px 16px;border-radius:9px;cursor:pointer;transition:.14s;
     display:flex;align-items:center;gap:7px;}
@@ -4689,6 +4749,21 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
 .sb-table-wrap{max-height:calc(100vh - 360px);overflow-y:auto;overflow-x:hidden;}
 .sb-del-btn{background:none;border:none;cursor:pointer;color:var(--text-soft);padding:2px 6px;border-radius:4px;font-size:13px;}
 .sb-del-btn:hover{background:#fee2e2;color:#dc2626;}
+
+/* PDA — columnas por persona */
+.pda-personas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px;}
+.pda-persona-col{background:#fff;border-radius:12px;border:1.5px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:8px;}
+.pda-persona-col.pda-yo{border-color:#E97D3B;box-shadow:0 0 0 2px rgba(233,125,59,.12);}
+.pda-persona-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
+.pda-persona-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0;}
+.pda-persona-nombre{font-size:14px;font-weight:700;flex:1;}
+.pda-persona-prog{font-size:12px;color:#999;background:#f1f1f1;border-radius:20px;padding:2px 8px;}
+.pda-task-row{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer;min-width:0;}
+.pda-task-row:last-child{border-bottom:none;}
+.pda-task-row.done .pda-task-txt{text-decoration:line-through;opacity:.4;}
+.pda-task-row.locked{cursor:default;}
+.pda-task-txt{flex:1;min-width:0;font-size:13px;color:var(--text);word-break:break-word;overflow-wrap:anywhere;}
+.pda-persona-tasks{display:flex;flex-direction:column;}
 </style>
 </head>
 <body>
@@ -4947,13 +5022,9 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
 
         <div class="grid" style="margin-top:14px;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch;">
           <div class="card" style="margin:0;min-width:0;">
-            <div class="section-title" style="margin-bottom:10px;">Tareas pendientes · PDA</div>
+            <div class="section-title" style="margin-bottom:10px;cursor:pointer;" onclick="goView('pda')">Tareas pendientes · PDA <span style="font-size:10px;opacity:.45;">↗</span></div>
             <div id="dash-pda-tasks-list" class="dash-pda-readonly"></div>
-            <div id="dash-mis-tareas-card" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
-              <div class="section-title" style="margin-bottom:10px;">Mis tareas <span class="hint">Editable — o ve a Pizarra</span></div>
-              <div id="dash-mis-tareas-list"></div>
-              <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;" onclick="pzNuevaTarea()">+ Añadir tarea</button>
-            </div>
+
           </div>
 
           <div class="card" style="margin:0;">
@@ -4966,6 +5037,8 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
             <div id="dash-proximas-visitas-mini" class="dash-pda-readonly"></div>
           </div>
         </div>
+
+        <div id="dash-nacho-cal" style="display:none;margin-top:14px;"></div>
 
         <div class="grid" id="dash-caps-row" style="margin-top:14px;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:stretch;">
           <div class="card" style="margin:0;">
@@ -5020,9 +5093,9 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
       <!-- ============ PIZARRA (solo Ignacio) ============ -->
       <div class="view" id="view-pizarra">
         <div class="pz-tabs">
-          <button class="pz-tab-btn on" data-pztab="tareas" onclick="pizarraTabSwitch('tareas')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-            Tareas
+          <button class="pz-tab-btn on" data-pztab="calendario" onclick="pizarraTabSwitch('calendario')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Calendario de tareas
           </button>
           <button class="pz-tab-btn" data-pztab="notas" onclick="pizarraTabSwitch('notas')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z"/><path d="M14 2v6h6"/><path d="M9 12h6M9 16h6"/></svg>
@@ -5030,12 +5103,9 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
           </button>
         </div>
 
-        <!-- ---- Tareas: tabla libre, se añaden filas a mano ---- -->
-        <div class="pz-panel on" id="pz-panel-tareas">
-          <div class="pz-tareas-card">
-            <div id="pz-tareas-lista"></div>
-            <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="pzNuevaTarea()">+ Añadir tarea</button>
-          </div>
+        <!-- ---- Calendario de tareas (solo Ignacio) ---- -->
+        <div class="pz-panel on" id="pz-panel-calendario">
+          <div id="pz-cal-lista"></div>
         </div>
 
         <!-- ---- Notas: tipo OneNote, a pantalla completa ---- -->
@@ -13635,85 +13705,91 @@ async function renderPDA(){
   const yo = currentProfile?.nombre || currentRole();
   const verTodos = pdaCanSeeAll();
   const puedeAsignar = pdaCanAssign();
-  const personas = verTodos ? ASSIGNABLE : [yo];
 
   let html = `<div class="pda-topbar">
-      <div class="pda-week">
-        <button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(-1)">‹ Anterior</button>
-        <div class="pda-week-label">${pdaWeekLabel(pdaWeekOffset)}${pdaWeekOffset===0?' <span class="pill green" style="margin-left:6px;">actual</span>':''}</div>
-        <button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(1)">Siguiente ›</button>
-        ${pdaWeekOffset!==0?'<button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(0)">Ir a la actual</button>':''}
+    <div class="pda-week">
+      <button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(-1)">‹ Anterior</button>
+      <div class="pda-week-label">${pdaWeekLabel(pdaWeekOffset)}${pdaWeekOffset===0?' <span class="pill green" style="margin-left:6px;">actual</span>':''}</div>
+      <button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(1)">Siguiente ›</button>
+      ${pdaWeekOffset!==0?'<button class="btn btn-ghost btn-sm" onclick="pdaChangeWeek(0)">Ir a la actual</button>':''}
+    </div>
+    ${!puedeAsignar ? '<span class="pda-readonly">Solo lectura · marcas únicamente tus tareas</span>' : ''}
+  </div>`;
+
+  // Columnas por persona
+  const personas = verTodos ? ASSIGNABLE : [yo];
+  html += '<div class="pda-personas-grid">';
+  personas.forEach(persona => {
+    const personaTasks = tasks.filter(t => t.assignee === persona);
+    const doneCt = personaTasks.filter(t=>t.done).length;
+    const esYo = persona === yo;
+    html += `<div class="pda-persona-col${esYo?' pda-yo':''}">
+      <div class="pda-persona-head">
+        <span class="pda-persona-avatar" style="background:${esYo?'#E97D3B':'#7B9CCD'}">${persona[0]}</span>
+        <span class="pda-persona-nombre">${esc(persona)}${esYo?' <span class="hint">(tú)</span>':''}</span>
+        <span class="pda-persona-prog">${doneCt}/${personaTasks.length}</span>
       </div>
-      ${!puedeAsignar ? '<span class="pda-readonly">Solo lectura · marcas únicamente tus tareas</span>' : ''}
-    </div>`;
-
-  if(puedeAsignar){
-    html += `<div class="card" style="margin-bottom:14px;">
-      <div class="section-title">Asignar tarea · ${pdaWeekLabel(pdaWeekOffset)}</div>
-      <div style="display:grid;grid-template-columns:180px 1fr auto;gap:10px;align-items:end;">
-        <div><label class="field-label">Para</label>
-          <select id="new-assignee">${ASSIGNABLE.map(a=>`<option value="${a}">${a}</option>`).join('')}</select>
-        </div>
-        <div><label class="field-label">Tarea</label>
-          <input id="new-task-title" placeholder="Ej: Revisar propuesta grupos septiembre"
-                 onkeydown="if(event.key==='Enter') addPdaTask()">
-        </div>
-        <button class="btn btn-primary" onclick="addPdaTask()">Asignar</button>
-      </div>
-    </div>`;
-  }
-
-  html += `<div class="pda-cols${personas.length===1?' one':''}">`;
-  personas.forEach(person=>{
-    const mine = tasks.filter(t=>t.assignee===person);
-    const doneCt = mine.filter(t=>t.done).length;
-    const pct = mine.length ? Math.round(doneCt/mine.length*100) : 0;
-    const esMia = person === yo;
-    const color = roleColors[person] || 'var(--accent)';
-
-    html += `<div class="card pda-col${esMia?' mine':''}">
-      <div class="flex-between" style="margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:9px;min-width:0;">
-          <div class="avatar" style="width:26px;height:26px;font-size:12px;background:${color};display:flex;align-items:center;justify-content:center;border-radius:50%;color:#0B0E14;font-weight:800;flex-shrink:0;">${person[0]}</div>
-          <b style="font-family:var(--font);font-size:14px;">${person}</b>
-          ${esMia?'<span class="pill green" style="font-size:9.5px;">tú</span>':''}
-        </div>
-        <span class="pill ${pct===100&&mine.length?'green':'grey'}" style="flex-shrink:0;">${doneCt}/${mine.length}</span>
-      </div>
-      <div class="progress-bar" style="margin-bottom:12px;"><div class="fill" style="width:${pct}%;background:${color};"></div></div>
-      <div class="pda-list">`;
-
-    if(mine.length){
-      mine.forEach(t=>{
-        const puedeMarcar = puedeAsignar || esMia;
+      <div class="pda-persona-tasks">`;
+    if(personaTasks.length){
+      personaTasks.forEach(t=>{
+        const puedeMarcar = puedeAsignar || t.assignee === yo;
         const tieneObs = !!(t.obs && t.obs.trim());
         const obsSinLeer = tieneObs && !t.obs_visto && verTodos;
-        const obsClase = obsSinLeer ? 'pda-obs-btn nueva' : (tieneObs ? 'pda-obs-btn con-obs' : 'pda-obs-btn');
-        const obsTitulo = tieneObs ? (obsSinLeer ? 'Observación nueva sin leer' : 'Ver observación') : 'Añadir observación';
-        html += `<label class="pda-task ${t.done?'done':''} ${puedeMarcar?'':'locked'}">
+        html += `<label class="pda-task${t.done?' done':''}${puedeMarcar?'':' locked'}">
           <input type="checkbox" ${t.done?'checked':''} ${puedeMarcar?'':'disabled'}
                  onchange="togglePdaTask(${t.id}, this.checked)">
           <span class="pda-task-txt">${esc(t.title)}</span>
-          ${puedeMarcar?`<button type="button" class="${obsClase}" title="${obsTitulo}" onclick="event.preventDefault();pdaAbrirObs(${t.id})">💬</button>`:''}
+          ${puedeMarcar?`<button type="button" class="pda-obs-btn${obsSinLeer?' nueva':tieneObs?' con-obs':''}" title="${tieneObs?(obsSinLeer?'Observación sin leer':'Ver observación'):'Añadir observación'}" onclick="event.preventDefault();pdaAbrirObs(${t.id})">💬</button>`:''}
           ${puedeAsignar?`<button class="row-del" title="Eliminar" onclick="event.preventDefault();deletePdaTask(${t.id})">✕</button>`:''}
         </label>`;
       });
     } else {
-      html += `<div style="font-size:12.5px;color:var(--text-dim);padding:8px 0;">Sin tareas esta semana.</div>`;
+      html += '<div class="empty-state" style="padding:16px 0;font-size:12px;">Sin tareas esta semana</div>';
     }
-    html += `</div></div>`;
+    html += '</div>';
+    if(puedeAsignar){
+      html += `<div class="pda-cal-add" style="padding:8px 0 0;">
+        <input class="pda-cal-input" placeholder="Añadir tarea..." id="pda-inp-${persona.toLowerCase()}"
+               onkeydown="if(event.key==='Enter') addPdaPersonaTask('${persona}')">
+        <button class="pda-cal-plus" onclick="addPdaPersonaTask('${persona}')">+</button>
+      </div>`;
+    }
+    html += '</div>';
   });
-  html += `</div>`;
+  html += '</div>';
 
   container.innerHTML = html;
   updateDashboardMyTasks(all.filter(t=>(t.week||'')===pdaWeekKey(0)));
+}
+async function addPdaCalTask(dayKey){
+  const inp = document.getElementById('pda-inp-'+dayKey);
+  if(!inp) return;
+  const title = inp.value.trim();
+  if(!title) return;
+  const yo = currentProfile?.nombre || currentRole();
+  await sb.from('pda_tasks').insert({assignee: yo, title, week: pdaWeekKey(pdaWeekOffset), done:false, created_by: yo});
+  inp.value = '';
+  renderPDA();
+}
+
+async function addPdaPersonaTask(persona){
+  const inp = document.getElementById('pda-inp-'+persona.toLowerCase());
+  if(!inp) return;
+  const title = inp.value.trim();
+  if(!title) return;
+  const yo = currentProfile?.nombre || currentRole();
+  await sb.from('pda_tasks').insert({assignee: persona, title, week: pdaWeekKey(pdaWeekOffset), done:false, created_by: yo});
+  inp.value = '';
+  renderPDA();
 }
 
 async function addPdaTask(){
   const assignee = document.getElementById('new-assignee').value;
   const title = document.getElementById('new-task-title').value.trim();
   if(!title) return;
-  await sb.from('pda_tasks').insert({assignee, title, week: pdaWeekKey(pdaWeekOffset), done:false, created_by: currentProfile?.nombre || currentRole()});
+  const dayEl = document.getElementById('new-day');
+  const day = dayEl ? dayEl.value : 'lun';
+  await sb.from('pda_tasks').insert({assignee, title, week: pdaWeekKey(pdaWeekOffset), day, done:false, created_by: currentProfile?.nombre || currentRole()});
   document.getElementById('new-task-title').value='';
   renderPDA();
 }
@@ -33175,12 +33251,14 @@ async function pizarraInit(){
     PZ_CARGADO = true;
     await cargarPizarraTareas();
   }
-  pizarraTabSwitch(document.querySelector('.pz-tab-btn.on')?.dataset.pztab || 'tareas');
+  pizarraTabSwitch(document.querySelector('.pz-tab-btn.on')?.dataset.pztab || 'calendario');
+  pzRenderDashCal();
 }
 function pizarraTabSwitch(tab){
   document.querySelectorAll('.pz-tab-btn').forEach(b=>b.classList.toggle('on', b.dataset.pztab===tab));
-  document.getElementById('pz-panel-tareas')?.classList.toggle('on', tab==='tareas');
+  document.getElementById('pz-panel-calendario')?.classList.toggle('on', tab==='calendario');
   document.getElementById('pz-panel-notas')?.classList.toggle('on', tab==='notas');
+  if(tab==='calendario') pzRenderCalendario();
   if(tab==='notas' && !BLOC_CARGADO){
     BLOC_CARGADO = true;
     cargarPaginasBloc().then(()=>{
@@ -33208,7 +33286,108 @@ function pintarPizarraTareas(){
   const b = document.getElementById('dash-mis-tareas-list'); if(b) b.innerHTML = html;
   const card = document.getElementById('dash-mis-tareas-card');
   if(card) card.style.display = esNacho() ? '' : 'none';
+  pzRenderDashCal();
 }
+
+
+const PZ_CAL_DIAS = [
+  { key:'dom', label:'DOMINGO',   color:'#F5D469' },
+  { key:'lun', label:'LUNES',     color:'#6EC6F0' },
+  { key:'mar', label:'MARTES',    color:'#F06292' },
+  { key:'mie', label:'MIÉRCOLES', color:'#4DD0E1' },
+  { key:'jue', label:'JUEVES',    color:'#FF9A45' },
+];
+
+function pzRenderCalendario(){
+  const el = document.getElementById('pz-cal-lista');
+  if(!el) return;
+  let html = '<div class="pz-cal-grid">';
+  PZ_CAL_DIAS.forEach(dia=>{
+    const dayTasks = PZ_TAREAS.filter(t=>(t.dia||'')=== dia.key);
+    const doneCt = dayTasks.filter(t=>t.hecho).length;
+    html += `<div class="pz-cal-col" style="--pz-color:${dia.color};">
+      <div class="pz-cal-head">
+        <span class="pz-cal-dia">${dia.label}</span>
+        <span class="pz-cal-prog">${doneCt}/${dayTasks.length} hechas</span>
+      </div>
+      <div class="pz-cal-tasks">`;
+    dayTasks.forEach(t=>{
+      const lock = t.recurrente;
+      html += `<div class="pz-cal-task${t.hecho?' done':''}${lock?' pz-locked':''}">
+        <input type="checkbox" ${t.hecho?'checked':''} onchange="pzToggleHecho(${t.id},this.checked)">
+        <input type="text" class="pz-cal-txt-inp" value="${esc(t.texto||'')}" placeholder="Tarea…" onchange="pzGuardarTexto(${t.id},this.value)">
+        <button class="pz-lock-btn${lock?' on':''}" title="${lock?'Quitar recurrencia':'Fijar como tarea semanal'}" onclick="pzToggleLock(${t.id})">${lock?'🔒':'🔓'}</button>
+        ${lock?'':'<span class="pz-tarea-del" onclick="pzBorrarTarea('+t.id+')" title="Borrar">✕</span>'}
+      </div>`;
+    });
+    html += `</div>
+      <div class="pz-cal-add">
+        <input class="pz-cal-input" placeholder="Añadir..." id="pzcal-inp-${dia.key}"
+               onkeydown="if(event.key==='Enter') pzNuevaTareaCal('${dia.key}')">
+        <button class="pz-cal-plus" onclick="pzNuevaTareaCal('${dia.key}')">+</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+  pzRenderDashCal();
+}
+
+async function pzNuevaTareaCal(diaKey, src){
+  const prefix = src === 'dash' ? 'dash-cal-inp-' : 'pzcal-inp-';
+  const inp = document.getElementById(prefix+diaKey);
+  const texto = inp ? inp.value.trim() : '';
+  if(!texto) return;
+  const { data, error } = await sb.from('mis_tareas').insert({ texto, hecho:false, dia: diaKey, orden: PZ_TAREAS.length }).select().single();
+  if(error){ console.error('[PIZARRA] nueva tarea cal', error); return; }
+  PZ_TAREAS.push(data);
+  if(inp) inp.value = '';
+  pzRenderCalendario();
+  pzRenderDashCal();
+}
+
+async function pzToggleLock(id){
+  const t = PZ_TAREAS.find(x=>x.id===id);
+  if(!t) return;
+  t.recurrente = !t.recurrente;
+  await sb.from('mis_tareas').update({ recurrente: t.recurrente }).eq('id', id);
+  pzRenderCalendario();
+}
+
+
+function pzRenderDashCal(){
+  const el = document.getElementById('dash-nacho-cal');
+  if(!el) return;
+  if(!esNacho()){ el.style.display='none'; return; }
+  el.style.display='';
+  let html = '<div class="pz-cal-grid">';
+  PZ_CAL_DIAS.forEach(dia=>{
+    const dayTasks = PZ_TAREAS.filter(t=>(t.dia||'')=== dia.key);
+    const doneCt = dayTasks.filter(t=>t.hecho).length;
+    html += `<div class="pz-cal-col" style="--pz-color:${dia.color};">
+      <div class="pz-cal-head">
+        <span class="pz-cal-dia">${dia.label}</span>
+        <span class="pz-cal-prog">${doneCt}/${dayTasks.length} hechas</span>
+      </div>
+      <div class="pz-cal-tasks">`;
+    dayTasks.forEach(t=>{
+      html += `<label class="pz-cal-task${t.hecho?' done':''}">
+        <input type="checkbox" ${t.hecho?'checked':''} onchange="pzToggleHecho(${t.id},this.checked)">
+        <span style="font-size:12px;color:#e0eaf5;flex:1;${t.hecho?'text-decoration:line-through;opacity:.4;':''}">${esc(t.texto||'')}</span>
+      </label>`;
+    });
+    html += `</div>
+      <div class="pz-cal-add">
+        <input class="pz-cal-input" placeholder="Añadir..." id="dash-cal-inp-${dia.key}"
+               onkeydown="if(event.key==='Enter') pzNuevaTareaCal('${dia.key}','dash')">
+        <button class="pz-cal-plus" onclick="pzNuevaTareaCal('${dia.key}','dash')">+</button>
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+
 async function pzNuevaTarea(){
   const { data, error } = await sb.from('mis_tareas').insert({ texto:'', hecho:false, orden: PZ_TAREAS.length }).select().single();
   if(error){ console.error('[PIZARRA] nueva tarea', error); return; }
@@ -33239,13 +33418,13 @@ async function pzBorrarTarea(id){
 /* El Resumen (Dashboard) llama a esto desde refreshDashboard() para que la
    tarjeta "Mis tareas" esté al día sin depender de haber abierto Pizarra. */
 async function renderDashMisTareas(){
-  if(!esNacho()){
-    const card = document.getElementById('dash-mis-tareas-card');
-    if(card) card.style.display = 'none';
-    return;
+  // Mis tareas section is hidden for everyone — Ignacio sees the calendar widget instead
+  const card = document.getElementById('dash-mis-tareas-card');
+  if(card) card.style.display = 'none';
+  if(esNacho()){
+    if(!PZ_CARGADO){ PZ_CARGADO = true; await cargarPizarraTareas(); }
+    else { pintarPizarraTareas(); pzRenderDashCal(); }
   }
-  if(!PZ_CARGADO){ PZ_CARGADO = true; await cargarPizarraTareas(); }
-  else pintarPizarraTareas();
 }
 
 /* ---------- Notas: tipo OneNote, a pantalla completa dentro de Pizarra ---------- */
