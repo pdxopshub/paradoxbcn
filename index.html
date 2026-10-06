@@ -4672,6 +4672,9 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
 .sb-cat-row td{background:#0d2137!important;color:#fff!important;padding:6px 12px;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.08em;border-bottom:none;border-top:none;}
 .sb-cat-row.first-cat td{border-top:none;} .sb-cat-count{color:#7aacce;font-size:10px;margin-left:8px;font-weight:400;}
 .sb-prod-name{font-size:13px;color:var(--text);display:block;text-align:left;}
+.sb-thumb{width:32px;height:32px;object-fit:cover;border-radius:5px;flex-shrink:0;}
+.sb-prod-cell{display:flex;align-items:center;gap:10px;}
+.sb-thumb-ph{width:32px;height:32px;border-radius:5px;background:var(--bg);border:1px solid var(--line);flex-shrink:0;}
 .sb-prod-name[contenteditable=true]{outline:none;cursor:text;padding:1px 2px;}
 .sb-num-input{width:70px;padding:4px 6px;border:1px solid transparent;border-radius:4px;background:transparent;color:var(--text);font-size:13px;text-align:center;cursor:pointer;}
 .sb-num-input:hover{border-color:var(--line);background:var(--bg);}
@@ -6128,7 +6131,7 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
               <h2 class="rs-print-title" id="rs-print-title"></h2>
               <div class="rs-toolbar rs-no-print">
                 <button class="btn btn-ghost btn-sm" id="rs-btn-laia" onclick="rsToggleLaia()">+ Laia</button>
-                <button class="btn btn-ghost btn-sm" id="rs-btn-grupos" onclick="rsToggleEspecial('grupos')">+ Grupos</button>
+                <button class="btn btn-ghost btn-sm" id="rs-btn-grupos" onclick="rsToggleEspecial('grupos')">+ Fila grupos</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-cumples" onclick="rsToggleEspecial('cumples')">+ Cumples</button>
                 <button class="btn btn-ghost btn-sm" id="rs-btn-taller" onclick="rsToggleEspecial('taller')">+ Taller</button>
                 <span class="rs-toolbar-sep"></span>
@@ -22515,7 +22518,7 @@ function rsRenderCandado(){
    igual aunque algo se saltara todo esto. */
 function rsRosterBloqueado(){
   return RS_MODO !== 'modelo' && RS_GRID_CTX === 'dia'
-    && !!(RS_DIA && (RS_DIA.bloqueado || RS_DIA.ok_laia));
+    && !!(RS_DIA && RS_DIA.bloqueado);
 }
 function rsAplicarBloqueoVisual(){
   const wrap = document.querySelector('.rs-grid-wrap');
@@ -23039,7 +23042,7 @@ function rsEnsureFilasEspeciales(){
     if(!b) return;
     // En plantillas, Grupos siempre suma una fila más (nunca "Quitar"): se
     // borran una a una con la ✕ de cada fila.
-    if(RS_MODO === 'modelo' && tipo === 'grupos'){ b.textContent = '+ Grupos'; return; }
+    if(tipo === 'grupos'){ b.textContent = '+ Grupos'; return; }
     b.textContent = RS_DIA.filas.some(f=>f.tipo===tipo) ? ('Quitar '+RS_ESPECIAL_LABEL[tipo]) : ('+ '+RS_ESPECIAL_LABEL[tipo]);
   });
 }
@@ -23077,12 +23080,11 @@ function rsToggleLaia(){
    rejilla, con su color, el rato en que hay un grupo/cumple/taller. */
 function rsToggleEspecial(tipo){
   const label = RS_ESPECIAL_LABEL[tipo];
-  // En Modelos Rosters, Grupos no es un interruptor de una sola fila: se
-  // pueden añadir tantas filas de Grupos como haga falta (a mano se quitan
-  // una a una con la ✕), para montar la plantilla a libre albedrío.
-  if(RS_MODO === 'modelo' && tipo === 'grupos'){
+  // Grupos: siempre añade una fila nueva (pueden coexistir varias a la vez).
+  // Se eliminan individualmente con la ✕ de cada fila.
+  if(tipo === 'grupos'){
     rsSnapshot();
-    RS_DIA.filas.push({ tipo, turno:'', nombre:label, slots:{}, textos:{} });
+    RS_DIA.filas.unshift({ tipo, turno:'', nombre:label, slots:{}, textos:{} });
     rsRenderGrid();
     rsAutoGuardar();
     return;
@@ -33431,6 +33433,164 @@ let sbCurrentPeriodoId = null;
 let sbReadOnly = false;
 let sbDirty = false;    // unsaved changes
 
+const SB_FOTOS={
+  'animal arrengements':'https://images.sumup.com/img_018NWG3DZ68Z6V8H4WVA4X7FME',
+  'animal cube':'https://images.sumup.com/img_0X8Y2ANB5K8ZFS9NY07WM08BMK',
+  'animals yo yo':'https://images.sumup.com/img_0YFD9KPFKZ9XH8X01566SGWEF9',
+  'animal tattoos':'https://images.sumup.com/img_1XNWZ7CHVS96MBH60ZVBZXQFWG',
+  'are you series puzzle':'https://images.sumup.com/img_7R1K1D59469X2B7ZJAP8WFBB6C',
+  'art play marion deuchars':'https://images.sumup.com/img_07TMXCF6DH8MC9HXD2RH7F8RMY',
+  'astronaut pocket puzzle':'https://images.sumup.com/img_399Y6B5GYF9NKAKMZMKHP36Q6T',
+  'barcelona gaudi puzzle':'https://images.sumup.com/img_3SRZ2R18VQ9MSABNT84N882528',
+  'barcelona night and day puzzle':'https://images.sumup.com/img_7CBK10NQZC94Q993XWASMA8FQS',
+  'barcelona paradox museum keychain':'https://images.sumup.com/img_300EK9XJGD9GM89JSFMN14HFJS',
+  'barcelona skyline puzzle':'https://images.sumup.com/img_5ZM2XYRVZ38JNRHBXGXVMAZNWC',
+  'barcelona sorra puzzle':'https://images.sumup.com/img_393SAHQGF08CKT0T23EHQJZ3GF',
+  'bendy pencil':'https://images.sumup.com/img_5TEWJQ7WVY8WWB4G1HY31B9DMY',
+  'bi plane':'https://images.sumup.com/img_3Z7M166BSC9RHT396MKRYHWDAC',
+  'bleecker scrunchy stripes':'https://images.sumup.com/img_1ZKBR5DH5Z9DV8Q3CTB3ANJ95B',
+  'brain matches':'https://images.sumup.com/img_6Q54801N7J9VSVD5NGWDN8E0XC',
+  'brain puzzle set of 6':'https://images.sumup.com/img_6VPEX15E8Z8RWSD5ENH99GWPEQ',
+  'brandmark hoodie':'https://images.sumup.com/img_55KPG7Q9RB90CAVHP925Y5V8AY',
+  'busca i troba per als mes petits':'https://images.sumup.com/img_4ZC7AYGHG78J7VRS7CCHMK3TSA',
+  'cain s jawbone a novel problem':'https://images.sumup.com/img_26FFYBR54Y9V7SD7D30K2W6MR3',
+  'can you solve my problems alex bellos':'https://images.sumup.com/img_4DGGMR5B2S84MVM6APPSMM4G29',
+  'cmy color mixing cube':'https://images.sumup.com/img_7WR4MDVABY8FHBGWRF14S0S5NC',
+  'color changing straws':'https://images.sumup.com/img_631039G4KV9YV81DQMXWQHM8H0',
+  'creativity battle':'https://images.sumup.com/img_3Z350XBE76936ASVF30NCB7EMK',
+  'cube fanxin bloques negro':'https://images.sumup.com/img_4GJEV6ZCFC9W2941RSG3Z2SWKA',
+  'cubo qiyi 3x3':'https://images.sumup.com/img_7TQH71G8WN8FW8ZSVP1BK05P6Y',
+  'discover the planets micropuzzle':'https://images.sumup.com/img_5YFEBRXG4B8PET1PXVVW79YHV3',
+  'drumstick pen':'https://images.sumup.com/img_4915F81ZB589TTHGEKDFMF0GCN',
+  'egg 2d puzzle':'https://images.sumup.com/img_40FDK1NEBK820TGHA9XWC37SFK',
+  'egg puzzle 3d':'https://images.sumup.com/img_7MCFNK3EJD87V9245SQHYRWGN3',
+  'enigmas divertidos en un minuto':'https://images.sumup.com/img_0NEK3KKTTN98GSHAHHSAE8425Y',
+  'escape':'https://images.sumup.com/img_0GA3TFVB939TGVE25RAM23KSJ7',
+  'esfera qiyi rainbow ball':'https://images.sumup.com/img_7W2Q8C4A3Y925SN5BGSW7G9DHQ',
+  'experimentem il lusions optiques':'https://images.sumup.com/img_2D9VEAEVC39FQA7Q5SC3E5CQJ1',
+  'eye of horus':'https://images.sumup.com/img_763NVCG5TT9QGV3WQN1EGSVVEB',
+  'ferris wheel':'https://images.sumup.com/img_00AED2TN0G9089DB0ZENT9XW14',
+  'gallop rufus butler':'https://images.sumup.com/img_4XRJACVNBE9J3V1JHGAFT7Q48X',
+  'game r s g':'https://images.sumup.com/img_6BHK0TJCYW8R3890D5M0QQX58P',
+  'glow in the dark t shirt black':'https://images.sumup.com/img_2GE242V3029KQBDG65WGQHJA03',
+  'grand piano':'https://images.sumup.com/img_231YZ62G0193SV77HVZHS2FC6E',
+  'hexiamond puzzle':'https://images.sumup.com/img_2HZFR8VAED87P9EPPX583S4BJH',
+  'il lusions optiques':'https://images.sumup.com/img_0ZMJR7G0178D7RA37G9VW56FAS',
+  'infinity cube lamp':'https://images.sumup.com/img_6SQM3H3HXG8YNVWGACGXYQRCDV',
+  'invisible pen light':'https://images.sumup.com/img_1PGG8FSMYX9B3AS8FRQXT8WP19',
+  'iq mini multicolor':'https://images.sumup.com/img_7BCMARZTQB8ZKV2Z3ETDHJVN9F',
+  'jc s lock':'https://images.sumup.com/img_6BJ72F3SS28DWB3Q73TD38BSRA',
+  'johanna s christmas a festive coloring book for adults':'https://images.sumup.com/img_4CD71Z0VT884FVDMV5QN7HHJ42',
+  'juegos de ingenio para estimular el pensamiento lateral y la creatividad':'https://images.sumup.com/img_0J1GJQ5MM490STVT2GACJH0A83',
+  'juegos de logica pasatiempos':'https://images.sumup.com/img_6ZZGM5SZ1Y93H84XXSR3E6PJCT',
+  'kaleidoscope animal mix':'https://images.sumup.com/img_1MPB1C3NPA96BR7N0WS4BKK52R',
+  'kids water bottle':'https://images.sumup.com/img_22HKJ83C9G8JD9Y95PJ7B0ATR1',
+  'laberinto moyu 3d azul':'https://images.sumup.com/img_75RKRFQJW99RBTWCMYGPHBH1T9',
+  'la fuga':'https://images.sumup.com/img_3G8XJJHMPD8Q5A20F3H309AR0P',
+  'les millors il lusions optiques':'https://images.sumup.com/img_48WQ3QBXT299CBBSHDTCX9CG4J',
+  'levitating globe eu':'https://images.sumup.com/img_36R1G5QKFC9YJTBPH6AX164F8J',
+  'llavero qiyi 3x3 mini pillow':'https://images.sumup.com/img_44000ZDA659DWA85RH5D1WXMJG',
+  'llavero yuxin panda 2x2':'https://images.sumup.com/img_597196ETY498K9AEE96AYBMM9N',
+  'llavero yuxin tiger 2x2':'https://images.sumup.com/img_5QC7DTBVHJ8Z7T7K6XPNB62MM6',
+  'luminous globe':'https://images.sumup.com/img_4NCDEQF6X898ARGF0254QJVW2D',
+  'magic cube flowers':'https://images.sumup.com/img_3AB6SYA5MY99VBXH7JCQ3HW71S',
+  'magic cube illusion':'https://images.sumup.com/img_6W8AF19CDF8QDBAMQR5SJ85JYF',
+  'magic eye 25th anniversary book':'https://images.sumup.com/img_555JA3RGDM8HMTMX4E537E9T6Q',
+  'magic spinner':'https://images.sumup.com/img_5TED91ZX7R94PAAE5431C4MD58',
+  'magnet':'https://images.sumup.com/img_2CFD15BV138AVVBPNX0RGZ1S0C',
+  'magnet round':'https://images.sumup.com/img_05832941929QDVY3V4JCZZCP6R',
+  'mega rainbow twirler':'https://images.sumup.com/img_7QTRXWP56X8M091763JCB5NS1V',
+  'merry go round':'https://images.sumup.com/img_4C4FKXGN959WHRMQ7KKK7TXW8X',
+  'mini 3d maze':'https://images.sumup.com/img_28R7TAJG4Z88CVBR0XR7CK4C5M',
+  'mini kaleidoscope space':'https://images.sumup.com/img_2GA8TPHQ198S981MTE6265EFSY',
+  'mis ejercicios gym ilusiones opticas':'https://images.sumup.com/img_2DK4JQCMYJ92S8VTJN23VDFJPJ',
+  'mission imposible':'https://images.sumup.com/img_6WB570ZDEH8G8TY2P8GPAXPVN8',
+  'moyu macaron 3x3':'https://images.sumup.com/img_1RJJZ1BY7J93KAQQR76GGQMC09',
+  'multicolor pencil':'https://images.sumup.com/img_3K9QABNXRJ8G3VXVPWHZMCXC32',
+  'murder most puzzling':'https://images.sumup.com/img_317VP4R6FY96CAZK87HPS0CWRT',
+  'murdle 100 mystery logic puzzles':'https://images.sumup.com/img_72P43TWSTR8WVAJYCD7EE3RX4W',
+  'notebook schrodinger s cat':'https://images.sumup.com/img_09XH7Z4MP68YG80X39T9P6N2NG',
+  'on balla en joan petit busca i troba':'https://images.sumup.com/img_2CF6EXSWQK9JEBF6WQF5G3RAAJ',
+  'optical illusions game':'https://images.sumup.com/img_1B5S056VBQ8FDBHGTF9W7PWPNG',
+  'optical illusions incredible pop up visual magic':'https://images.sumup.com/img_0KH04ZM3YZ868BVB9W5QCD0R2V',
+  'owl big eye':'https://images.sumup.com/img_5XSNEVTV4N949TS2G618HSJ0JV',
+  'owl clock':'https://images.sumup.com/img_3VMFMYEX9Q8NY8SPATYE6244A6',
+  'paper bag':'https://images.sumup.com/img_64SJRAS7W89VKRAASN5CN5ERCN',
+  'paradojas gareth southwell':'https://images.sumup.com/img_25X063Y0ZF94N93VKB4HE7EEKD',
+  'paradox cap':'https://images.sumup.com/img_76HP76VHW48J09RXBDX9T0JR1M',
+  'paradoxes r m sainsbury':'https://images.sumup.com/img_45E622H0VT9KJTWBGRXBF4H5N9',
+  'paradox hoodie black':'https://images.sumup.com/img_09391TJCBV9ATTBGMD5287DVVB',
+  'paradox hoodie white':'https://images.sumup.com/img_4JR0TA5DXY8VH88FQ3VB69F0XC',
+  'paradox hourglass':'https://images.sumup.com/img_3RXMT5K2E09EDB5MXQVTGJ8NB9',
+  'paradox rings':'https://images.sumup.com/img_22YYVQ9K798BX89TKTQ6743Q29',
+  'paradox spinner':'https://images.sumup.com/img_7XAW7FX45G9Y4ASRVCFDNZN30X',
+  'paradox the nine greatest enigmas in physics':'https://images.sumup.com/img_5GTQVE3XYZ96T9Y4ETZ2JXSVRG',
+  'paradox t shirt black':'https://images.sumup.com/img_5YPYRQSQQ58SS89MSJK9J1VAGN',
+  'paradox t shirt white':'https://images.sumup.com/img_485VH3MHXR91HAHJYHN00VBFFN',
+  'patterns of universe':'https://images.sumup.com/img_23DB2MA16S9KXA4MQMJ9QVBEA0',
+  'pento chess puzzle':'https://images.sumup.com/img_17399E7CBD8DQSDAC8YGVT0QPQ',
+  'pierre the maze detective the curious case of the castle in the sky':'https://images.sumup.com/img_66HD2AAGSH89PV428KM2HC7X13',
+  'pierre the maze detective the mystery of the empire maze tower':'https://images.sumup.com/img_76SQQ1X8PW90JB1SQCBND585ZP',
+  'pierre the maze detective the search for the stolen maze stone':'https://images.sumup.com/img_5NRTH5C3PP8PCAFH0H1ZDCZ9PK',
+  'plasma ball':'https://images.sumup.com/img_1A96HAF3M99KC809MGCE5NKH79',
+  'postcard':'https://images.sumup.com/img_3QKG4JYJWY8BEAJSBQ13M6J11J',
+  'pride t shirt':'https://images.sumup.com/img_2EB9MGDP7K93PAQ7FW2EH69JR7',
+  'puzzle cococrash multicolor':'https://images.sumup.com/img_1EAFC4DMWG8SXR9BFWZ1CB0N2H',
+  'puzzle detective m c':'https://images.sumup.com/img_7BN5YHGBNC82VAJHDQXWHJFY6B',
+  'puzzle mama':'https://images.sumup.com/img_58S12H3STX8YN9FZBD7EE904Z9',
+  'qiyi gear cube':'https://images.sumup.com/img_2ZE2EPZRDM8ZSSG6B0ZMGYBSN5',
+  'qiyi mini rubik 3x3':'https://images.sumup.com/img_6N64V0R7H78XNRY0DS242HHH5R',
+  'qiyi mini snake rubik':'https://images.sumup.com/img_7W6BXN1PWZ934VKRKP9AQYY58P',
+  'qiyi mirror 3x3 oro':'https://images.sumup.com/img_6ASGEFYQX281A9CQJ1NFRHB3PE',
+  'qiyi o2 spinner 1x1x1':'https://images.sumup.com/img_3AXCNWXP628X7VKAMJCH0PYNR8',
+  'qiyi qimeng plus 3x3':'https://images.sumup.com/img_0JZMTBP42R8JQBC4BEGAB7ZCGT',
+  'qiyi warrior carbono':'https://images.sumup.com/img_143VVBGEJG9AFVDX0EF19YFMF0',
+  'qr hoodie':'https://images.sumup.com/img_19XDV9331N9K7TZHH13YNTSYWZ',
+  'qr t shirt':'https://images.sumup.com/img_3298RCRP4V9CDR2PBSK2ADBWA1',
+  'rainbow dachshund markers':'https://images.sumup.com/img_7ESD2J5MCS8HX9VWXHR1VCKJ3J',
+  'rainbow twirler':'https://images.sumup.com/img_5B3WGYFXW78K78F7TS9AESRD0D',
+  'reverse umbrella':'https://images.sumup.com/img_0MH21DYZ6T969SP69QA9F35DAD',
+  'riddles in mathematics a book of paradoxes':'https://images.sumup.com/img_0HKYCSJ6XX9Z8A927KJ75BVFNW',
+  'round puzzle':'https://images.sumup.com/img_083P2KT6CG8DTB586FRKWPYE5Z',
+  'ruler':'https://images.sumup.com/img_07ECB3P3Y3923SXNAPAKN6R2Y1',
+  'sagrada familia micropuzzle':'https://images.sumup.com/img_3BYDR1CCXP99CR78RJ51Y6JREC',
+  'spinning fish tops':'https://images.sumup.com/img_25866MHZ6D9239QZ0H1JH540WB',
+  'squeezy bubbles':'https://images.sumup.com/img_17S9SC0J8B9MYA4AHG22ENTQ8V',
+  'stack a bug wooden game':'https://images.sumup.com/img_5WG6CKN0QF8HW8Z6T33SNZJJ1A',
+  'the language lover s puzzle book':'https://images.sumup.com/img_70KCBJ75VC9HGR5E8D2S42YVV2',
+  'the mysterious mansion daria song':'https://images.sumup.com/img_76FNMM9WMT8K1BRF8KAEGGPBS4',
+  'the time chamber daria song':'https://images.sumup.com/img_3B90Y3QN8C90T9F2RA8QZ3B9RD',
+  'the waiter s tray':'https://images.sumup.com/img_24N0XJY1MC9FYRMVW0AG7Z162N',
+  'think again adam grant':'https://images.sumup.com/img_77RYW8YVE98Z4RTSYGTEAWYF3K',
+  'tote bag schrodinger s cat':'https://images.sumup.com/img_1EZ63F066F9BWSSVFHCQXR4G3K',
+  't shirt schrodinger s cat black':'https://images.sumup.com/img_77ZWVX4CQ691G9FV22248JEZXD',
+  't shirt schrodinger s cat grey':'https://images.sumup.com/img_24RBH9YZY19DEAFCXWN5CNFYPT',
+  't shirt schrodinger s cat white':'https://images.sumup.com/img_65NRZ8H7PC99SVA6T4KMNK0AW3',
+  'turning card 1609':'https://images.sumup.com/img_35J5TRDF639RY8EY38GMK81R57',
+  'turning card 16228b':'https://images.sumup.com/img_6RBVET1Y3Y8JXV4YVESEWCFSDZ',
+  'turning card 16233':'https://images.sumup.com/img_3EG4GSF73F9BBV1H81R82CQ4CP',
+  'turning card 16235':'https://images.sumup.com/img_7N68G32V6K9TT9ECKXDKEDPCSV',
+  'turning card 1634':'https://images.sumup.com/img_7MXN935NXM8AT8J7N0QTETEVXZ',
+  'turning card 16372':'https://images.sumup.com/img_6J1STM6K3181E8MP4XTT5D9JH8',
+  'turning card 16373':'https://images.sumup.com/img_3KNWQFRGE48PVVHREQNQ9WAXFR',
+  'water bottle':'https://images.sumup.com/img_0SJCYYEF249JRAMQBCBMSVXRTC',
+  'wooden pinball':'https://images.sumup.com/img_4Q4VZ90BYB9RYS8GYP8ZW8CMX3',
+  'wooden toy meow':'https://images.sumup.com/img_50D6W873B09C1B7ZZ28QS0D3C2',
+  'wooden toy up to the stars':'https://images.sumup.com/img_7A66EQEM5W9MVRADBKB7TP3SGT'
+};
+function sbGetFoto(nombre){
+  if(!nombre)return null;
+  let k=nombre.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+  if(SB_FOTOS[k])return SB_FOTOS[k];
+  // partial match: longest key that is a substring
+  let best=null,bestLen=0;
+  for(const fk of Object.keys(SB_FOTOS)){
+    if(k.includes(fk)||fk.includes(k)){
+      if(fk.length>bestLen){best=SB_FOTOS[fk];bestLen=fk.length;}
+    }
+  }
+  return best;
+}
 async function sbInit(){
   if(!siPuedeVer()){ goView('dashboard'); return; }
   // Load column names
@@ -33583,10 +33743,13 @@ function sbRenderTable(){
         : `<span class="sb-delta-zero">—</span>`;
 
       rows.push(`<tr data-itemid="${item.id}">
-        <td style="text-align:left;padding-left:14px;">
-          <span class="sb-prod-name"${!ronly ? ` contenteditable="true" onblur="sbRenameItem('${item.id}',this.textContent)"` : ''}>
-            ${sbEsc(item.producto)}
-          </span>
+        <td style="padding:4px 12px;">
+          <div class="sb-prod-cell">
+            ${(()=>{const u=sbGetFoto(item.producto);return u?`<img class="sb-thumb" src="${u}" alt="" loading="lazy">`:`<div class="sb-thumb-ph"></div>`;})()}
+            <span class="sb-prod-name"${!ronly ? ` contenteditable="true" onblur="sbRenameItem('${item.id}',this.textContent)"` : ''}>
+              ${sbEsc(item.producto)}
+            </span>
+          </div>
         </td>
         <td style="text-align:center;">
           <input class="sb-num-input" type="number" min="0" value="${item.stock_tienda||0}"
