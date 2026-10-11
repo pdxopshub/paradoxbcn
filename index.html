@@ -5097,6 +5097,141 @@ body #view-spv #spv-grid-table thead tr:nth-child(2) th:not(.spv-addcol){color:#
   body.es-nacho:has(#view-dashboard.active) .content{padding-bottom:12px!important;}
   body.es-nacho #view-dashboard.active > .dash-week-card{margin-bottom:0!important;}
 </style>
+<style id="sk-css">
+/* ===== Grupos · Stakeholders: tabla tipo Excel con cabecera PDX ===== */
+#sk-root .sk-kpis{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+#sk-root .sk-kpi{background:#fff;border:1px solid #E1E4EA;border-radius:10px;padding:7px 14px;cursor:pointer;text-align:left;font-family:inherit;}
+#sk-root .sk-kpi span{font-size:9.5px;color:#6B7380;font-weight:800;text-transform:uppercase;letter-spacing:.5px;display:block;}
+#sk-root .sk-kpi b{font-size:16px;color:#062430;}
+#sk-root .sk-kpi.on{border-color:#007BA7;box-shadow:0 0 0 2px #007BA7 inset;}
+#sk-root .sk-bar{display:flex;gap:8px;align-items:center;background:#fff;border:1px solid #D5DAE1;border-bottom:none;border-radius:10px 10px 0 0;padding:9px 10px;flex-wrap:wrap;}
+#sk-root .sk-bar input,#sk-root .sk-bar select{width:auto;border:1px solid #D5DAE1;border-radius:7px;padding:7px 9px;font-family:inherit;font-size:12.5px;background:#fff;}
+#sk-root .sk-bar #sk-q{width:280px;}
+#sk-root .sk-sp{flex:1;}
+#sk-root .sk-btn{border:1px solid #062430;background:#fff;color:#062430;border-radius:7px;padding:7px 11px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+#sk-root .sk-btn.p{background:#062430;color:#fff;}
+#sk-root .sk-wrap{overflow:auto;max-height:calc(100vh - 330px);min-height:300px;border:1px solid #D5DAE1;background:#fff;border-radius:0 0 10px 10px;}
+#sk-root table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;font-size:12.5px;}
+#sk-root tbody tr td{background:#fff!important;}
+#sk-root tbody tr:hover td{background:#F2FAFE!important;}
+#sk-root tbody td.n{background:#F3F5F8!important;}
+#sk-root th,#sk-root td{border:none!important;border-right:1px solid #E1E4EA!important;border-bottom:1px solid #E1E4EA!important;padding:5px 9px!important;height:auto!important;line-height:1.35;font-size:12.5px;text-align:left;white-space:nowrap;vertical-align:middle;}
+#sk-root thead th{position:sticky;z-index:3;background:#062430!important;color:#fff!important;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:800;border-color:#0B3A4C;cursor:pointer;user-select:none;}
+#sk-root thead tr.g th{top:0;height:26px;font-size:10px;color:#6EC6F0!important;text-align:center;background:#04202B!important;cursor:default;}
+#sk-root thead tr.c th{top:26px;border-bottom:3px solid #6EC6F0;}
+#sk-root th.n,#sk-root td.n{position:sticky;left:0;z-index:2;background:#F3F5F8;color:#8A93A0;font-size:10.5px;text-align:right;width:44px;min-width:44px;}
+#sk-root thead th.n{z-index:5;background:#04202B!important;}
+#sk-root td.nm{position:sticky;left:44px;background:#fff;z-index:1;font-weight:700;max-width:280px;min-width:200px;overflow:hidden;text-overflow:ellipsis;box-shadow:2px 0 0 #E1E4EA;cursor:text;}
+#sk-root thead th.nm{left:44px;z-index:5;}
+#sk-root tbody tr:hover td{background:#F2FAFE;}
+#sk-root tbody tr:hover td.n{background:#E6EEF3;}
+#sk-root .sk-tg{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:20px;}
+.sk-t1{background:#E2F2F9;color:#0B6A8F}.sk-t2{background:#E6F4EC;color:#1F7A50}.sk-t3{background:#FFE6F2;color:#C21F6C}.sk-t4{background:#FCF0DC;color:#A86B12}.sk-t5{background:#EEE8FB;color:#6A45C2}.sk-t6{background:#EEF0F3;color:#5B6270}
+#sk-root .sk-sub{color:#8A93A0;font-size:11px;margin-left:5px;}
+#sk-root td.ed{cursor:text;min-width:120px;max-width:260px;overflow:hidden;text-overflow:ellipsis;}
+#sk-root td.ed:focus{outline:2px solid #007BA7;outline-offset:-2px;background:#fff;white-space:normal;}
+#sk-root td.cp{cursor:pointer;min-width:170px;}
+#sk-root td.cp .vacio{color:#C5CCD5;}
+#sk-root td.cp small{display:block;color:#8A93A0;font-size:10.5px;}
+#sk-root .sk-st{width:auto;border:1px solid #D5DAE1;border-radius:7px;padding:4px 6px;font-family:inherit;font-size:12px;font-weight:700;background:#fff;}
+#sk-root .sk-st.sr{background:#F3F5F8;color:#5B6270}#sk-root .sk-st.ni{background:#FDE8E8;color:#B42318}#sk-root .sk-st.re{background:#E3F4EC;color:#1F7A50}#sk-root .sk-st.ma{background:#FCF0DC;color:#A86B12}
+#sk-root .sk-foot{display:flex;justify-content:space-between;align-items:center;padding:8px 2px;color:#6B7380;font-size:11.5px;gap:10px;}
+.sk-pop{position:absolute;background:#fff;border:1px solid #D5DAE1;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:12px;z-index:500;display:none;width:270px;}
+.sk-pop b{display:block;margin-bottom:8px;color:#062430;font-size:12.5px;}
+.sk-pop label{display:block;font-size:10.5px;font-weight:800;color:#6B7380;margin:6px 0 3px;text-transform:uppercase;}
+.sk-pop input{width:100%;}
+.sk-pop .ms{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
+.sk-pop .ms span{border:1px solid #E1E4EA;border-radius:6px;text-align:center;padding:5px 0;cursor:pointer;font-weight:700;font-size:11.5px;}
+.sk-pop .ms span:hover,.sk-pop .ms span.on{background:#062430;color:#fff;}
+.sk-pop .row .sk-btn{border:1px solid #062430;background:#fff;color:#062430;border-radius:7px;padding:6px 11px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;}.sk-pop .row .sk-btn.p{background:#062430;color:#fff;}
+.sk-pop .row{display:flex;gap:6px;margin-top:10px;justify-content:flex-end;}
+.sk-pop .yr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-weight:800;}
+.sk-pop .yr button{border:1px solid #D5DAE1;background:#fff;border-radius:6px;cursor:pointer;width:26px;}
+
+/* Stakeholders v2: una cabecera, columnas visibles, sin scroll de página */
+#sk-root thead th{top:0!important;background:#062430!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-bottom:3px solid #6EC6F0!important;opacity:1!important;visibility:visible!important;font-size:11px!important;}
+#sk-root .sk-wrap{max-height:none!important;min-height:0!important;}
+#sk-root .sk-cnt{font-size:12px;font-weight:700;color:#6B7380;}
+#sk-root td.n{position:sticky;}
+#sk-root td.n .sk-del{display:none;border:none;background:#FDE8E8;color:#B42318;border-radius:5px;font-weight:900;cursor:pointer;font-size:11px;padding:1px 6px;}
+#sk-root tbody tr:hover td.n .sk-num{display:none;}
+#sk-root tbody tr:hover td.n .sk-del{display:inline-block;}
+#sk-root td.ob{text-align:center;}
+#sk-root .sk-ob{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:12px;color:#6B7380;cursor:pointer;padding:3px 9px;border-radius:20px;background:#F3F5F8;}
+#sk-root .sk-ob.on{background:#E3F4EC;color:#1F7A50;}
+#sk-root .sk-ob input{width:auto;margin:0;}
+body:has(#view-gruposnacho.active){overflow:hidden;}
+.sk-modal{position:fixed;inset:0;background:rgba(6,36,48,.45);z-index:600;display:none;align-items:center;justify-content:center;}
+.sk-modal-box{background:#fff;border-radius:14px;width:min(640px,94vw);box-shadow:0 24px 60px rgba(0,0,0,.3);overflow:hidden;}
+.sk-modal-h{background:#062430;color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #6EC6F0;}
+.sk-modal-h b{font-size:15px;}
+.sk-x{border:none;background:none;color:#fff;font-size:16px;cursor:pointer;}
+.sk-modal-b{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.sk-modal-b label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:800;color:#5B6270;text-transform:uppercase;letter-spacing:.4px;}
+.sk-modal-b label.full{grid-column:1 / -1;}
+.sk-modal-b label.chk{flex-direction:row;align-items:center;gap:8px;text-transform:none;font-size:13px;color:#171B22;}
+.sk-modal-b label.chk input{width:auto;}
+.sk-modal-b input,.sk-modal-b textarea{font-family:inherit;font-size:13px;text-transform:none;letter-spacing:0;font-weight:500;}
+.sk-modal-f{display:flex;gap:8px;justify-content:flex-end;align-items:center;padding:12px 18px;background:#F7F8FA;border-top:1px solid #E1E4EA;}
+.sk-modal-f .sk-btn{border:1px solid #062430;background:#fff;color:#062430;border-radius:7px;padding:8px 14px;font-weight:800;font-size:12.5px;cursor:pointer;font-family:inherit;}
+.sk-modal-f .sk-btn.p{background:#062430;color:#fff;}
+.sk-err{margin-right:auto;color:#B42318;font-weight:700;font-size:12px;}
+
+#sk-root .ld-table td{padding:3px 5px!important;}
+#sk-root .ld-in{border:1px solid transparent;background:transparent;border-radius:6px;padding:4px 6px;font-family:inherit;font-size:12.5px;width:auto;min-width:90px;color:#171B22;}
+#sk-root .ld-in:hover{border-color:#D5DAE1;background:#fff;}
+#sk-root .ld-in:focus{border-color:#007BA7;background:#fff;outline:none;}
+#sk-root input.ld-in[type=date]{min-width:128px;}
+#sk-root .ld-st{font-weight:800;}
+#sk-root .ld-st.confirmed{background:#E3F4EC;color:#1F7A50;}
+#sk-root .ld-st.rejected{background:#FDE8E8;color:#B42318;}
+#sk-root td.ro{color:#5B6270;font-weight:700;background:#F7F8FA!important;}
+#sk-root td.ld-total input{font-size:14px;font-weight:800;min-width:110px;}
+#sk-root td.ld-mot{max-width:240px;overflow:hidden;text-overflow:ellipsis;color:#B42318;}
+#sk-root .ld-table td.nm .ld-in{font-weight:700;min-width:200px;}
+
+#sk-root .pr-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;align-items:start;overflow:auto;max-height:none!important;}
+#sk-root .pr-col{display:flex;flex-direction:column;gap:14px;}
+#sk-root .pr-box{overflow-x:auto!important;background:#fff;border:1px solid #D5DAE1;border-radius:10px;overflow:hidden;}
+#sk-root .pr-h{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-bottom:1px solid #E1E4EA;}
+#sk-root .pr-h b{font-size:13.5px;color:#062430;}#sk-root .pr-h small{display:block;color:#8A93A0;font-size:11px;}
+#sk-root .pr-t thead th{position:static!important;}
+#sk-root tr.pr-sec td{background:#E2F2F9!important;color:#0B6A8F;font-weight:800;font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;}
+#sk-root td.pr-ex{padding-left:18px!important;color:#5B6270;}
+#sk-root .pr-num{width:84px!important;min-width:84px!important;text-align:right;font-weight:700;}
+#sk-root .pr-mut{color:#9AA1AD;}
+#sk-root th.r,#sk-root td.r{text-align:right;}
+#sk-root .ld-tot{border:1px solid #D5DAE1;background:#fff;border-radius:8px;padding:4px 10px;text-align:left;cursor:pointer;min-width:150px;max-width:260px;font-family:inherit;}
+#sk-root .ld-tot b{display:block;font-size:14px;color:#062430;}
+#sk-root .ld-tot small{display:block;font-size:10.5px;color:#6B7380;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#sk-root .ld-tot.vac b{color:#007BA7;font-size:12px;}
+.sk-pop.ld-pop{width:420px;}
+.ld-ed{display:flex;flex-direction:column;gap:6px;margin-bottom:8px;}
+.ld-ed-f{display:grid;grid-template-columns:1fr 90px 28px;gap:6px;}
+.ld-ed-f select,.ld-ed-f input,.sk-pop select{font-family:inherit;font-size:12px;padding:5px;border:1px solid #D5DAE1;border-radius:6px;width:100%;}
+.ld-ed-f button{border:none;background:#FDE8E8;color:#B42318;border-radius:6px;cursor:pointer;font-weight:900;}
+.ld-ed-tot{margin:10px 0 4px;font-size:14px;color:#062430;}.ld-ed-tot b{font-size:17px;}
+.sk-pop .sk-btn{border:1px solid #062430;background:#fff;color:#062430;border-radius:7px;padding:6px 11px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;}
+.sk-pop .sk-btn.p{background:#062430;color:#fff;}
+
+#sk-root .ld-pf{border:1px solid #062430;background:#fff;color:#062430;border-radius:7px;padding:4px 10px;font-weight:800;font-size:11.5px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+#sk-root .ld-pf.on{background:#062430;color:#fff;}
+.lpf-box{background:#fff;border-radius:14px;width:min(1180px,96vw);max-height:94vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);}
+.lpf-body{display:grid;grid-template-columns:400px 1fr;gap:16px;padding:14px 16px;overflow:auto;}
+.lpf-form{display:flex;flex-direction:column;gap:8px;}
+.lpf-form label{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:800;color:#5B6270;text-transform:uppercase;}
+.lpf-form input,.lpf-form textarea{font-family:inherit;font-size:12.5px;text-transform:none;font-weight:500;}
+.lpf-lt{font-size:11px;font-weight:800;color:#5B6270;text-transform:uppercase;margin-top:4px;}
+.lpf-lin{width:100%;border-collapse:collapse;font-size:12px;}
+.lpf-lin th{text-align:left;font-size:10px;color:#6B7380;padding:3px;}
+.lpf-lin td{padding:2px;}
+.lpf-lin td input{width:100%;font-size:12px;padding:4px;}
+.lpf-lin button{border:none;background:#FDE8E8;color:#B42318;border-radius:5px;cursor:pointer;font-weight:900;}
+.lpf-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.lpf-prev{background:#EEF0F3;border-radius:10px;padding:14px;overflow:auto;}
+#lpf-modal .sk-btn{border:1px solid #062430;background:#fff;color:#062430;border-radius:7px;padding:7px 12px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;}
+#lpf-modal .sk-btn.p{background:#062430;color:#fff;}
+</style>
 </head>
 <body>
 
@@ -6551,6 +6686,8 @@ body #view-spv #spv-grid-table thead tr:nth-child(2) th:not(.spv-addcol){color:#
               <!-- Cambios de turno aprobados que aún no están reflejados en las
                    filas de abajo. Se rellena desde rsRenderAvisoCambios(). -->
               <div class="rs-warn rs-no-print" id="rs-aviso-cambios" style="display:none;margin-bottom:10px;"></div>
+              <!-- Aviso: alguien puesto en el roster está de vacaciones/recuperación/baja ese día. -->
+              <div class="rs-no-print" id="rs-aviso-vac" style="display:none;margin-bottom:10px;background:#FDECEC;border:1px solid #E5A3A3;color:#9B1C1C;border-radius:9px;padding:9px 12px;font-weight:700;font-size:13px;"></div>
               <!-- Sugerencia automática: día ya montado con la misma plantilla
                    (mismo tipo de día y mismo nº de turnos de staff) del que se
                    pueden copiar los horarios. Lo rellena rsRenderSugerencia(). -->
@@ -6668,6 +6805,11 @@ body #view-spv #spv-grid-table thead tr:nth-child(2) th:not(.spv-addcol){color:#
 
       <!-- ============ GRUPOS NACHO (CRM en pruebas · solo Ignacio) ============ -->
       <div class="view" id="view-gruposnacho">
+        <!-- ============ GRUPOS · STAKEHOLDERS (tabla única) ============ -->
+        <div class="gn-tabs" id="gn-sk-tabs" style="margin-bottom:10px;"><button class="gn-tab active" data-sk="stake" onclick="skTab('stake')">Stakeholders</button><button class="gn-tab" data-sk="in" onclick="skTab('in')">Inbound</button><button class="gn-tab" data-sk="out" onclick="skTab('out')">Outbound</button><button class="gn-tab" data-sk="cumple" onclick="skTab('cumple')">Cumpleaños</button><button class="gn-tab" data-sk="precios" onclick="skTab('precios')">Precios Tickets</button></div>
+        <div id="sk-root"><div class="hint">Cargando…</div></div>
+        <div class="sk-pop" id="sk-pop"></div>
+        <div id="gn-legacy" style="display:none;">
         <div class="gn-topbar">
           <!-- Cuatro islas: el día a día comercial, el material de trabajo,
                cumpleaños (mundo aparte) y los datos de referencia. -->
@@ -6700,6 +6842,8 @@ body #view-spv #spv-grid-table thead tr:nth-child(2) th:not(.spv-addcol){color:#
         <div class="gn-pane" id="gn-pane-cumples" style="display:none;"></div>
         <div class="gn-pane" id="gn-pane-precios" style="display:none;"></div>
         <div class="gn-pane" id="gn-pane-stats" style="display:none;"></div>
+      </div>
+        </div>
       </div>
 
       <!-- ============ GRUPOS (PDXspot) ============ -->
@@ -8831,7 +8975,7 @@ function goView(v){
   }
   if(v==='gruposnacho'){
     if(!esNacho()){ goView('dashboard'); return; }
-    gnInit();
+    skInit();
   }
   if(v==='pizarra'){
     if(!esNacho()){ goView('dashboard'); return; }
@@ -13530,7 +13674,66 @@ function rsFmtTurnoBonito(turno){
   if(!m) return turno||'';
   return rsFmtHoraBonita(m[1]) + ' - ' + rsFmtHoraBonita(m[2]);
 }
+/* ── Cambios de turno: se elige el TURNO REAL del roster de esa persona ──
+   TURNO_RD = filas de roster_dias desde hoy (90 días). Si no se puede leer
+   el roster, se cae al formulario antiguo (hora + fecha a mano). */
+let TURNO_RD = null;
+async function turnoCargarRoster(){
+  try{
+    const hoy = todayIso();
+    const d = new Date(hoy+'T12:00:00'); d.setDate(d.getDate()+90);
+    const { data, error } = await sb.from('roster_dias').select('fecha,filas')
+      .gte('fecha', hoy).lte('fecha', rsIso(d)).order('fecha');
+    if(error) throw error;
+    TURNO_RD = (data||[]).map(r=>({ fecha:r.fecha,
+      filas: (typeof r.filas==='string') ? JSON.parse(r.filas) : (r.filas||[]) }));
+  }catch(e){ console.error('turnos: roster', e); TURNO_RD = null; }
+  return TURNO_RD;
+}
+function turnoTurnosDe(nombre){
+  const k = String(nombre||'').trim().toLowerCase(), out = [];
+  (TURNO_RD||[]).forEach(r=> (r.filas||[]).forEach(f=>{
+    if(!f || ['grupos','cumples','taller'].includes(f.tipo)) return;
+    if(String(f.nombre||'').trim().toLowerCase()===k && /^\d{3,4}-\d{3,4}$/.test(String(f.turno||'')))
+      out.push({ fecha:r.fecha, turno:f.turno });
+  }));
+  return out;
+}
+function turnoFechaCorta(iso){ const [y,m,d] = String(iso).split('-'); return `${d}/${m}/${String(y).slice(2)}`; }
+function turnoPintarOpciones(prefix){
+  const sel = document.getElementById(prefix+'-sel'); if(!sel) return;
+  const nombre = document.getElementById(prefix+'-staff').value;
+  const lista = turnoTurnosDe(nombre);
+  sel.innerHTML = lista.length
+    ? '<option value="">— Elige el turno —</option>' + lista.map(t=>
+        `<option value="${t.fecha}|${t.turno}">${esc(nombre)} – ${turnoFechaCorta(t.fecha)} hace de ${esc(rsFmtTurnoBonito(t.turno))}</option>`).join('')
+    : '<option value="">No tiene turnos en el roster</option>';
+  turnoElegir(prefix);
+}
+function turnoElegir(prefix){
+  const v = (document.getElementById(prefix+'-sel')?.value||'').split('|');
+  document.getElementById(prefix+'-fecha').value = v[0]||'';
+  document.getElementById(prefix+'-turno').value = v[1]||'';
+  document.getElementById(prefix+'-hora').value = v[1] ? v[1].split('-')[0] : '';
+}
 function buildTurnoBlock(prefix, label, staffNames, lockedName){
+  if(TURNO_RD){
+    const staffField = lockedName
+      ? `<div style="padding:8px 0 4px;font-weight:800;">${esc(lockedName)}</div><input type="hidden" id="${prefix}-staff" value="${esc(lockedName)}">`
+      : `<select id="${prefix}-staff" onchange="turnoPintarOpciones('${prefix}')">${staffNames.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('') || '<option value="">Añade staff primero</option>'}</select>`;
+    return `
+    <div class="turno-form-block" style="border:1px solid var(--line);border-radius:9px;padding:12px;background:var(--panel);">
+      <div style="font-size:11.5px;font-weight:800;color:var(--text-soft);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">${label}</div>
+      <div style="display:grid;grid-template-columns:1fr 2.4fr;gap:10px;align-items:end;">
+        <div><label class="field-label">Staff</label>${staffField}</div>
+        <div><label class="field-label">Turno en el roster</label><select id="${prefix}-sel" onchange="turnoElegir('${prefix}')"></select></div>
+      </div>
+      <input type="hidden" id="${prefix}-hora"><input type="hidden" id="${prefix}-fecha"><input type="hidden" id="${prefix}-turno">
+    </div>`;
+  }
+  return buildTurnoBlockManual(prefix, label, staffNames, lockedName);
+}
+function buildTurnoBlockManual(prefix, label, staffNames, lockedName){
   // Mismos bloques de horario que en el roster (rsGenInicios/rsTurnoDesdeInicio):
   // se elige el turno entero, no la hora y los minutos por separado.
   const opts = rsGenInicios().map(c=>
@@ -13553,16 +13756,20 @@ function buildTurnoBlock(prefix, label, staffNames, lockedName){
 async function renderTurnoBlocks(){
   const list = (await fetchStaff()).filter(s=>s.activo !== false);
   const names = list.map(s=>s.nombre);
+  await turnoCargarRoster();
   document.getElementById('turno-block-1').innerHTML = buildTurnoBlock('tb1','Staff que pide cambiar su turno', names);
   document.getElementById('turno-block-2').innerHTML = buildTurnoBlock('tb2','Staff que le cambia el turno', names);
+  if(TURNO_RD){ turnoPintarOpciones('tb1'); turnoPintarOpciones('tb2'); }
 }
 /* ---------- Autoservicio de staff: ellos son siempre quien pide (p1) ---------- */
 async function renderTurnoBlocksStaff(){
   const list = (await fetchStaff()).filter(s=>s.activo !== false);
   const yo = currentProfile?.nombre || '';
   const names = list.map(s=>s.nombre).filter(n=> n !== yo);
+  await turnoCargarRoster();
   document.getElementById('turno-block-1-staff').innerHTML = buildTurnoBlock('stb1','Tu turno que quieres ceder', [], yo);
   document.getElementById('turno-block-2-staff').innerHTML = buildTurnoBlock('stb2','A quién se lo pides', names);
+  if(TURNO_RD){ turnoPintarOpciones('stb1'); turnoPintarOpciones('stb2'); }
 }
 async function addTurnoRequestStaff(){
   const p1 = readTurnoBlock('stb1');
@@ -13571,6 +13778,7 @@ async function addTurnoRequestStaff(){
     alert('Elige a otra persona del equipo para el cambio.');
     return;
   }
+  if(TURNO_RD && (!p1.fechaIso || !p2.fechaIso)){ alert('Elige los dos turnos del roster.'); return; }
   const motivo = document.getElementById('turno-motivo-staff').value.trim();
   const { error } = await sb.from('turnos').insert({
     p1_staff:p1.staff, p1_hora:p1.hora, p1_fecha:p1.fechaIso,
@@ -13653,7 +13861,8 @@ function readTurnoBlock(prefix){
     // Se sigue guardando como "H:MM" (hora de entrada del nuevo turno): es el
     // mismo formato de siempre, así que el resto de la lógica (aplicar el
     // cambio al roster, el aviso del día, etc.) no necesita tocarse.
-    staff, hora: rsFmtHoraBonita(codigo),
+    staff, hora: codigo ? rsFmtHoraBonita(codigo) : '',
+    turno: document.getElementById(prefix+'-turno')?.value || '',
     fechaIso,
     fechaLabel: dt ? `${dt.getDate()} ${TURNO_MONTHS[dt.getMonth()]} ${dt.getFullYear()}` : '—',
   };
@@ -13869,15 +14078,68 @@ async function addTurnoRequest(){
   const p1 = readTurnoBlock('tb1');
   const p2 = readTurnoBlock('tb2');
   if(!p1.staff || !p2.staff) return;
+  if(p1.staff === p2.staff){ alert('Elige dos personas distintas.'); return; }
+  if(TURNO_RD && (!p1.turno || !p2.turno)){ alert('Elige el turno del roster de las dos personas.'); return; }
   const motivo = document.getElementById('turno-motivo').value.trim();
   const fechaSolicitud = document.getElementById('turno-fecha-solicitud')?.value || todayIso();
-  await sb.from('turnos').insert({
+  // Con turnos del roster elegidos: se cambian SOLO los nombres en el roster
+  // al crear el cambio, y queda registrado ya como aprobado.
+  const conRoster = !!(TURNO_RD && p1.turno && p2.turno);
+  let res = null;
+  if(conRoster){
+    res = await turnoCambiarNombres([
+      { fecha:p1.fechaIso, de:p1.staff, turno:p1.turno, a:p2.staff },
+      { fecha:p2.fechaIso, de:p2.staff, turno:p2.turno, a:p1.staff },
+    ]);
+  }
+  const { error } = await sb.from('turnos').insert({
     p1_staff:p1.staff, p1_hora:p1.hora, p1_fecha:p1.fechaIso,
     p2_staff:p2.staff, p2_hora:p2.hora, p2_fecha:p2.fechaIso,
-    motivo, estado:'Pendiente', fecha_solicitud: fechaSolicitud
+    motivo, estado: (conRoster && res.ok) ? 'Aprobado' : 'Pendiente', fecha_solicitud: fechaSolicitud
   });
+  if(error){ alert('No se pudo guardar el cambio: '+error.message); }
   document.getElementById('turno-motivo').value='';
+  if(res){
+    alert(res.ok ? 'Cambio de turno creado y aplicado en el roster (solo los nombres):\n· '+res.hechos.join('\n· ')
+                 : 'Cambio guardado como pendiente. Revisa el roster a mano:\n· '+res.fallos.join('\n· '));
+  }
   renderTurnos();
+}
+/* Cambia solo el campo "nombre" de las filas indicadas (RPC
+   roster_cambiar_nombres; funciona aunque el día esté bloqueado o con OK LAIA). */
+async function turnoCambiarNombres(cambios){
+  const porFecha = {};
+  cambios.forEach(c=>{ if(c.fecha && c.turno) (porFecha[c.fecha] = porFecha[c.fecha] || []).push({ de:c.de, turno:c.turno, a:c.a }); });
+  const hechos = [], fallos = [];
+  for(const [fecha, lista] of Object.entries(porFecha)){
+    const { data, error } = await sb.rpc('roster_cambiar_nombres', { p_fecha:fecha, p_cambios:lista });
+    const h = (!error && data && data.hechos) || [];
+    lista.forEach(c=>{
+      const ok = h.some(x=>x.de===c.de && x.turno===c.turno);
+      (ok?hechos:fallos).push(`${turnoFechaCorta(fecha)} ${rsFmtTurnoBonito(c.turno)}: ${ok?c.de+' → '+c.a:'no encuentro a '+c.de+' en ese turno'}`);
+    });
+    if(typeof RS_DIA!=='undefined' && RS_DIA && RS_DIA.fecha===fecha && typeof rsLoadDia==='function') rsLoadDia();
+  }
+  return { ok: !fallos.length && hechos.length>0, hechos, fallos };
+}
+/* Para solicitudes antiguas/de staff al aprobarlas: deduce el turno a partir
+   de la hora de inicio y cambia solo los nombres. */
+async function turnoSwapAlAprobar(t){
+  const rd = await sb.from('roster_dias').select('fecha,filas').in('fecha',[t.p1_fecha,t.p2_fecha].filter(Boolean));
+  const filasDe = f => { const r=(rd.data||[]).find(x=>x.fecha===f); return r ? ((typeof r.filas==='string')?JSON.parse(r.filas):(r.filas||[])) : []; };
+  const buscar = (fecha, nombre, hora) => {
+    const cod = rsCodigoDesdeHora(hora);
+    const f = filasDe(fecha).find(x=> x && !['grupos','cumples','taller'].includes(x.tipo)
+      && String(x.nombre||'').trim().toLowerCase()===String(nombre||'').trim().toLowerCase()
+      && (!cod || String(x.turno||'').split('-')[0]===cod));
+    return f ? f.turno : '';
+  };
+  const t1 = buscar(t.p1_fecha, t.p1_staff, t.p1_hora), t2 = buscar(t.p2_fecha, t.p2_staff, t.p2_hora);
+  if(!t1 || !t2) return null;
+  return turnoCambiarNombres([
+    { fecha:t.p1_fecha, de:t.p1_staff, turno:t1, a:t.p2_staff },
+    { fecha:t.p2_fecha, de:t.p2_staff, turno:t2, a:t.p1_staff },
+  ]);
 }
 async function deleteTurno(id){
   if(!confirm('¿Eliminar esta solicitud de cambio de turno?')) return;
@@ -13890,6 +14152,7 @@ async function resolveTurno(id, estado){
   if(estado === 'Aprobado'){
     const { data: t, error } = await sb.from('turnos').select('*').eq('id', id).single();
     if(!error && t){
+      try{ await turnoSwapAlAprobar(t); }catch(e){ console.error('turnos: swap', e); }
       const { aplicados, pendientes } = await turnoAplicarAlRosterAuto(t);
       if(aplicados.length || pendientes.length){
         let msg = 'Cambio aprobado.';
@@ -22461,6 +22724,25 @@ async function rsCargarVacacionesPlan(){
       (RS_PLAN_VAC[r.fecha] = RS_PLAN_VAC[r.fecha] || {})[r.persona] = { tipo:r.tipo, estado:r.estado };
     });
   }catch(e){ console.error('planificacion_vac', e); }
+  // Las vacaciones/recuperaciones pedidas en la pestaña Vacaciones también
+  // salen aquí (antes solo salía lo de planificacion_vac y se escapaban, p.ej.
+  // las de Laia en noviembre). Solo se añade si ese día no tiene ya marca.
+  try{
+    const y = rsPlanAnioActual;
+    const { data } = await sb.from('vac_solicitudes').select('persona,tipo,estado,fecha_inicio,fecha_fin')
+      .lte('fecha_inicio', `${y}-12-31`).gte('fecha_fin', `${y}-01-01`).in('estado',['aprobado','pendiente']);
+    (data||[]).forEach(v=>{
+      if(v.tipo!=='vacaciones' && v.tipo!=='recuperacion') return;
+      const tipo = v.tipo==='vacaciones' ? 'V' : 'R';
+      const estado = v.estado==='aprobado' ? 'confirmada' : 'pendiente';
+      const d = new Date(v.fecha_inicio+'T12:00:00'), fin = new Date(v.fecha_fin+'T12:00:00');
+      for(; d<=fin; d.setDate(d.getDate()+1)){
+        const iso = rsIso(d);
+        const m = (RS_PLAN_VAC[iso] = RS_PLAN_VAC[iso] || {});
+        if(!m[v.persona]) m[v.persona] = { tipo, estado };
+      }
+    });
+  }catch(e){ console.error('vac_solicitudes plan', e); }
 }
 function rsPlanVac(nombre, iso){
   return (RS_PLAN_VAC[iso] && RS_PLAN_VAC[iso][nombre]) || null;
@@ -23352,10 +23634,15 @@ async function rsCargarContexto(){
   const rsActivo = p => !p || !RS_STAFF_DE_BAJA.has(p);
 
   let fuera = [];
+  const offDia = {}; // nombre → etiqueta (vacaciones/recuperación/baja/pendiente)
   try{
     const { data } = await sb.from('vac_solicitudes').select('*')
-      .lte('fecha_inicio', fecha).gte('fecha_fin', fecha).eq('estado','aprobado');
-    fuera = (data||[]).filter(s=> (s.tipo==='vacaciones' || s.tipo==='recuperacion') && rsActivo(s.persona)).map(s=>{
+      .lte('fecha_inicio', fecha).gte('fecha_fin', fecha).in('estado',['aprobado','pendiente']);
+    (data||[]).filter(s=> s.tipo==='vacaciones' || s.tipo==='recuperacion').forEach(s=>{
+      const lbl = (typeof VAC_TIPOS!=='undefined' && VAC_TIPOS[s.tipo]?.label) || s.tipo;
+      offDia[s.persona] = s.estado==='aprobado' ? lbl : lbl+' (pendiente de aprobar)';
+    });
+    fuera = (data||[]).filter(s=> s.estado==='aprobado' && (s.tipo==='vacaciones' || s.tipo==='recuperacion') && rsActivo(s.persona)).map(s=>{
       const lbl = (typeof VAC_TIPOS!=='undefined' && VAC_TIPOS[s.tipo]?.label) || s.tipo;
       return `<b>${esc(s.persona||'?')}</b> (${esc(lbl)})`;
     });
@@ -23367,6 +23654,7 @@ async function rsCargarContexto(){
     const { data } = await sb.from('vac_bajas').select('*').lte('fecha_inicio', fecha).gte('fecha_fin', fecha);
     const bajasAct = (data||[]).filter(b=> rsActivo(b.persona));
     bajas = bajasAct.map(b=> `<b>${esc(b.persona||'?')}</b> (baja)`);
+    bajasAct.forEach(b=>{ if(b.persona) offDia[b.persona]='baja'; });
     RS_BAJAS_DIA = bajasAct.map(b=> rsNombreCanonico(b.persona)).filter(Boolean);
   }catch(e){}
   // Las bajas llegan de Supabase después de pintar la rejilla: hay que
@@ -23377,8 +23665,27 @@ async function rsCargarContexto(){
   if(elC) elC.innerHTML = RS_CAMBIOS_DIA_TXT.length ? RS_CAMBIOS_DIA_TXT.join('<br>') : 'Ninguno';
   const off = fuera.concat(bajas);
   if(elV) elV.innerHTML = off.length ? off.join('<br>') : 'Nadie';
+  rsPintarAvisoVac(fecha, offDia);
 }
 
+/* Aviso rojo encima del roster si alguien que está puesto ese día (incluida
+   Laia) tiene vacaciones, recuperación o baja. Solo avisa: no toca el roster. */
+function rsPintarAvisoVac(fecha, offDia){
+  const el = document.getElementById('rs-aviso-vac');
+  if(!el) return;
+  if(!RS_DIA || RS_DIA.fecha!==fecha || RS_MODO==='modelo'){ el.style.display='none'; return; }
+  const canon = n => String(n||'').trim().toLowerCase();
+  const off = {}; Object.keys(offDia||{}).forEach(n=> off[canon(n)] = [n, offDia[n]]);
+  const vistos = new Set(); const msgs = [];
+  (RS_DIA.filas||[]).forEach(f=>{
+    const k = canon(f && f.nombre);
+    if(!k || vistos.has(k) || !off[k]) return;
+    vistos.add(k);
+    msgs.push(`⚠ <b>${esc(f.nombre)}</b> está puesta/o en el roster pero ese día tiene <b>${esc(off[k][1])}</b>.`);
+  });
+  el.innerHTML = msgs.join('<br>');
+  el.style.display = msgs.length ? '' : 'none';
+}
 /* ── Cambios de turno aprobados → aplicarlos al roster ────────────────────
    Un cambio aprobado deja de ser solo informativo: si la persona que cede
    sigue puesta en la fila, se ofrece sustituirla por quien lo recibe. Nunca
@@ -35536,6 +35843,870 @@ function dashAjustarAltura(){
   document.documentElement.style.setProperty('--dash-top', Math.round(top + Math.min(pie, 16)) + 'px');
 }
 window.addEventListener('resize', dashAjustarAltura);
+
+/* ============================================================================
+   GRUPOS · STAKEHOLDERS — una sola tabla (public.stakeholders) con todos los
+   grupos. Sin páginas: todo en una tabla con scroll propio (la pantalla no
+   hace scroll). Buscar, filtrar, editar en la celda, añadir (ventana) y
+   eliminar. Seguimiento: Primer contacto, FU 1, FU 2 opcional, Status,
+   Observaciones y Outbound (Sí/No → pasa a la pestaña Outbound).
+   ============================================================================ */
+let SK = [], SK_CARGADO = false, SK_FU2 = false, SK_ORDEN = { col:null, asc:true }, SK_TAB = 'stake';
+const SK_STATUS = ['Sin respuesta','No interesados','Returning','Contactar más adelante'];
+const SK_ST_CLS = {'Sin respuesta':'sr','No interesados':'ni','Returning':'re','Contactar más adelante':'ma'};
+const SK_TG = {'Schools BCN':'sk-t1','Schools CAT':'sk-t2','Holidays Schools':'sk-t3','Travel Agencies':'sk-t4','Asociaciones':'sk-t5'};
+const SK_MESES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const SK_F = { q:'', tip:'', sub:'', st:'', con:'', out:'' };
+
+async function skInit(){
+  const root = document.getElementById('sk-root');
+  if(!root) return;
+  if(!SK_CARGADO){
+    root.innerHTML = '<div class="hint">Cargando stakeholders…</div>';
+    const { data, error } = await sbFetchAll(()=>sb.from('stakeholders').select('*').order('id'));
+    if(error){
+      root.innerHTML = '<div class="card"><b>No se pudo cargar la tabla de Stakeholders.</b><div class="hint" style="margin-top:6px;">'+esc(error.message||'')+'</div></div>';
+      return;
+    }
+    SK = data || [];
+    SK_FU2 = SK.some(r=>r.fu2 && (r.fu2.asunto||r.fu2.fecha));
+    try{ const { data:c } = await sb.from('hub_config').select('valor').eq('clave','sk_fu2').maybeSingle(); if(c && c.valor && c.valor.on) SK_FU2 = true; }catch(e){}
+    SK_CARGADO = true;
+  }
+  if(!SK.length){ skPantallaVacia(); return; }
+  skPintarTodo();
+}
+function skTab(t){ SK_TAB = t; skPintarTodo(); }
+function skPintarTodo(){
+  const root = document.getElementById('sk-root');
+  if(!root) return;
+  document.querySelectorAll('#gn-sk-tabs .gn-tab').forEach(b=>b.classList.toggle('active', b.dataset.sk===SK_TAB));
+  if(SK_TAB === 'out'){ ldPintar('outbound'); return; }
+  if(SK_TAB === 'in'){ ldPintar('inbound'); return; }
+  if(SK_TAB === 'cumple'){ ldPintar('cumple'); return; }
+  if(SK_TAB === 'precios'){ ptPintar(); return; }
+  const tips = [...new Set(SK.map(r=>r.tipologia).filter(Boolean))].sort();
+  const subs = [...new Set(SK.filter(r=>!SK_F.tip || r.tipologia===SK_F.tip).map(r=>r.subtipo).filter(Boolean))].sort();
+  const opt = (arr,sel)=>arr.map(o=>`<option${o===sel?' selected':''}>${esc(o)}</option>`).join('');
+  root.innerHTML =
+    `<div class="sk-bar">
+      <input id="sk-q" placeholder="🔍 Buscar nombre, localidad, email, teléfono, campaña…" value="${esc(SK_F.q)}" oninput="SK_F.q=this.value;skPintarTablaDiferido()">
+      <select onchange="SK_F.tip=this.value;SK_F.sub='';skPintarTodo()"><option value="">Todas las tipologías</option>${opt(tips,SK_F.tip)}</select>
+      <select onchange="SK_F.sub=this.value;skPintarTabla()"><option value="">Cualquier subtipo</option>${opt(subs,SK_F.sub)}</select>
+      <select onchange="SK_F.st=this.value;skPintarTabla()"><option value="">Todos los status</option><option value="__sin"${SK_F.st==='__sin'?' selected':''}>Sin status</option>${opt(SK_STATUS,SK_F.st)}</select>
+      <select onchange="SK_F.con=this.value;skPintarTabla()"><option value="">Primer contacto: todos</option><option value="no"${SK_F.con==='no'?' selected':''}>Sin contactar</option><option value="si"${SK_F.con==='si'?' selected':''}>Contactados</option></select>
+      <select onchange="SK_F.out=this.value;skPintarTabla()"><option value="">Outbound: todos</option><option value="si"${SK_F.out==='si'?' selected':''}>Outbound: Sí</option><option value="no"${SK_F.out==='no'?' selected':''}>Outbound: No</option></select>
+      <span class="sk-sp"></span>
+      <span class="sk-cnt" id="sk-cnt"></span>
+      ${SK_FU2?'':'<button class="sk-btn" onclick="skActivarFU2()">＋ Columna FU 2</button>'}
+      <button class="sk-btn p" onclick="skNuevo()">＋ Grupo</button>
+    </div>
+    <div class="sk-wrap" id="sk-wrap"><table class="no-filter" id="sk-table"><thead id="sk-th"></thead><tbody id="sk-tb"></tbody></table></div>`;
+  skPintarTabla();
+}
+let SK_T_Q = null;
+function skPintarTablaDiferido(){ clearTimeout(SK_T_Q); SK_T_Q = setTimeout(skPintarTabla, 180); }
+function skTxtCamp(c){ return c ? ((c.asunto||'')+' '+(c.fecha||'')) : ''; }
+function skFiltrados(){
+  const q = SK_F.q.trim().toLowerCase();
+  let out = SK.filter(r=>{
+    if(SK_F.tip && r.tipologia!==SK_F.tip) return false;
+    if(SK_F.sub && r.subtipo!==SK_F.sub) return false;
+    if(SK_F.st==='__sin'){ if(r.status) return false; } else if(SK_F.st && r.status!==SK_F.st) return false;
+    const con = !!(r.primer_contacto && (r.primer_contacto.asunto||r.primer_contacto.fecha));
+    if(SK_F.con==='si' && !con) return false;
+    if(SK_F.con==='no' && con) return false;
+    if(SK_F.out==='si' && !r.outbound) return false;
+    if(SK_F.out==='no' && r.outbound) return false;
+    if(q){
+      const t = [r.nombre,r.tipologia,r.subtipo,r.localidad,r.email,r.telefono,r.observaciones,skTxtCamp(r.primer_contacto),skTxtCamp(r.fu1),skTxtCamp(r.fu2),r.status].join(' ').toLowerCase();
+      if(!t.includes(q)) return false;
+    }
+    return true;
+  });
+  if(SK_ORDEN.col){
+    const c = SK_ORDEN.col, s = SK_ORDEN.asc?1:-1;
+    const val = r => ['primer_contacto','fu1','fu2'].includes(c) ? ((r[c]&&r[c].fecha)||'') : (c==='outbound' ? (r.outbound?'1':'0') : (r[c]||''));
+    out = out.slice().sort((a,b)=> String(val(a)).localeCompare(String(val(b)),'es',{numeric:true})*s);
+  }
+  return out;
+}
+function skOrdenar(c){ if(SK_ORDEN.col===c) SK_ORDEN.asc=!SK_ORDEN.asc; else { SK_ORDEN.col=c; SK_ORDEN.asc=true; } skPintarTabla(); }
+function skFmtFecha(f){ if(!f) return ''; const [y,m,d]=String(f).split('-'); return d+'/'+m+'/'+y; }
+function skCeldaCamp(r,campo){
+  const c = r[campo];
+  if(!c || !(c.asunto||c.fecha)) return `<td class="cp" onclick="skAbrirCamp(event,${r.id},'${campo}')"><span class="vacio">＋</span></td>`;
+  return `<td class="cp" onclick="skAbrirCamp(event,${r.id},'${campo}')" title="${esc(c.asunto||'')}">${esc(c.asunto||'—')}<small>${skFmtFecha(c.fecha)}</small></td>`;
+}
+function skFila(r, n){
+  const st = r.status || '';
+  const lblMa = r.contactar_mes ? 'Contactar en '+SK_MESES[parseInt(r.contactar_mes.slice(5),10)-1]+' '+r.contactar_mes.slice(0,4) : 'Contactar más adelante';
+  const ed = (campo) => `contenteditable="plaintext-only" spellcheck="false" onfocus="this.dataset.v=this.textContent" onblur="skGuardarCelda(${r.id},'${campo}',this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}if(event.key==='Escape'){this.textContent=this.dataset.v;this.blur()}"`;
+  return `<tr data-id="${r.id}"><td class="n"><span class="sk-num">${n}</span><button class="sk-del" title="Eliminar grupo" onclick="skEliminar(${r.id})">✕</button></td>
+    <td class="nm" ${ed('nombre')} title="${esc(r.nombre||'')}">${esc(r.nombre||'')}</td>
+    <td><span class="sk-tg ${SK_TG[r.tipologia]||'sk-t6'}">${esc(r.tipologia||'—')}</span>${r.subtipo?'<span class="sk-sub">'+esc(r.subtipo)+'</span>':''}</td>
+    <td class="ed" ${ed('localidad')}>${esc(r.localidad||'')}</td>
+    <td class="ed" ${ed('email')}>${esc(r.email||'')}</td>
+    <td class="ed" ${ed('telefono')}>${esc(r.telefono||'')}</td>
+    ${skCeldaCamp(r,'primer_contacto')}${skCeldaCamp(r,'fu1')}${SK_FU2?skCeldaCamp(r,'fu2'):''}
+    <td><select class="sk-st ${SK_ST_CLS[st]||''}" onchange="skSetStatus(event,${r.id},this.value)"><option value="">—</option>${SK_STATUS.map(o=>`<option value="${o}"${o===st?' selected':''}>${o==='Contactar más adelante'?lblMa:o}</option>`).join('')}</select></td>
+    <td class="ed" style="min-width:240px;" ${ed('observaciones')}>${esc(r.observaciones||'')}</td>
+    <td class="ob"><label class="sk-ob${r.outbound?' on':''}"><input type="checkbox"${r.outbound?' checked':''} onchange="skSetOutbound(${r.id},this.checked)"> ${r.outbound?'Sí':'No'}</label></td></tr>`;
+}
+function skPintarTabla(){
+  const th = document.getElementById('sk-th'), tb = document.getElementById('sk-tb');
+  if(!th || !tb) return;
+  const ar = c => SK_ORDEN.col===c ? (SK_ORDEN.asc?' ▲':' ▼') : '';
+  const h = (c,l,cls='') => `<th class="${cls}" onclick="skOrdenar('${c}')">${l}${ar(c)}</th>`;
+  th.innerHTML = `<tr><th class="n">#</th>${h('nombre','Nombre','nm')}${h('tipologia','Tipo')}${h('localidad','Localidad')}${h('email','Email')}${h('telefono','Teléfono')}${h('primer_contacto','Primer contacto')}${h('fu1','FU 1')}${SK_FU2?h('fu2','FU 2'):''}${h('status','Status')}${h('observaciones','Observaciones')}${h('outbound','Outbound')}</tr>`;
+  const lista = skFiltrados();
+  SK_LISTA = lista; SK_PINTADAS = 0;
+  tb.innerHTML = lista.length ? '' : `<tr><td class="n"></td><td colspan="${SK_FU2?11:10}" style="color:#8A93A0;">No hay grupos con estos filtros.</td></tr>`;
+  skMasFilas();
+  const w = document.getElementById('sk-wrap');
+  if(w){ w.scrollTop = 0; w.onscroll = () => { if(w.scrollTop + w.clientHeight > w.scrollHeight - 600) skMasFilas(); }; }
+  const cnt = document.getElementById('sk-cnt');
+  if(cnt) cnt.textContent = lista.length.toLocaleString('de-DE')+' grupos';
+  skAjustarAltura();
+}
+/* Fluidez: se pintan 150 filas y el resto a medida que se baja (sigue siendo
+   una sola tabla, sin páginas). */
+let SK_LISTA = [], SK_PINTADAS = 0;
+function skMasFilas(){
+  const tb = document.getElementById('sk-tb'); if(!tb || SK_PINTADAS >= SK_LISTA.length) return;
+  const hasta = Math.min(SK_LISTA.length, SK_PINTADAS + 150);
+  let h = ''; for(let i=SK_PINTADAS;i<hasta;i++) h += skFila(SK_LISTA[i], i+1);
+  tb.insertAdjacentHTML('beforeend', h); SK_PINTADAS = hasta;
+}
+/* La pantalla no hace scroll: la tabla ocupa hasta el final de la ventana y
+   el scroll va dentro de la tabla. */
+function skAjustarAltura(){
+  const w = document.getElementById('sk-wrap');
+  if(!w || !w.offsetParent) return;
+  const top = w.getBoundingClientRect().top;
+  w.style.height = Math.max(260, window.innerHeight - top - 14) + 'px';
+}
+window.addEventListener('resize', ()=>{ if(document.getElementById('view-gruposnacho')?.classList.contains('active')) skAjustarAltura(); });
+async function skUpdate(id, cambios){
+  const r = SK.find(x=>x.id===id); if(!r) return false;
+  const antes = {}; Object.keys(cambios).forEach(k=>antes[k]=r[k]);
+  Object.assign(r, cambios);
+  const { error } = await sb.from('stakeholders').update({ ...cambios, updated_at:new Date().toISOString() }).eq('id', id);
+  if(error){ Object.assign(r, antes); skPintarTabla(); return false; }
+  return true;
+}
+function skGuardarCelda(id, campo, el){
+  const v = el.textContent.trim();
+  const r = SK.find(x=>x.id===id); if(!r) return;
+  if((r[campo]||'') === v) return;
+  if(campo==='nombre' && !v){ el.textContent = r.nombre; return; }
+  skUpdate(id, { [campo]: v || null });
+}
+async function skSetOutbound(id, on){
+  const s = SK.find(x=>x.id===id); if(!s) return;
+  await ldCargar();
+  if(!on){ const ok = await ldQuitarOutbound(s); if(!ok){ skPintarTodo(); return; } }
+  const ok = await skUpdate(id, { outbound: !!on });
+  if(ok && on && !LD.some(l=>l.canal==='outbound' && l.stakeholder_id===id)) await ldCrearOutbound(s);
+  skPintarTodo();
+}
+async function skEliminar(id){
+  const r = SK.find(x=>x.id===id); if(!r) return;
+  if(!confirm('¿Eliminar "'+r.nombre+'" de Stakeholders? No se puede deshacer.')) return;
+  const { error } = await sb.from('stakeholders').delete().eq('id', id);
+  if(error) return;
+  SK = SK.filter(x=>x.id!==id);
+  skPintarTabla();
+}
+function skCerrarPop(){ const p=document.getElementById('sk-pop'); if(p) p.style.display='none'; }
+function skPosPop(el){
+  const p = document.getElementById('sk-pop'); const b = el.getBoundingClientRect();
+  p.classList.remove('ld-pop'); p.style.display='block';
+  let left = b.left + window.scrollX; if(left + 440 > window.innerWidth) left = window.innerWidth - 450;
+  let top = b.bottom + window.scrollY + 6; if(b.bottom + 260 > window.innerHeight) top = b.top + window.scrollY - 250;
+  p.style.left = left+'px'; p.style.top = top+'px';
+  return p;
+}
+function skAbrirCamp(ev, id, campo){
+  ev.stopPropagation();
+  const r = SK.find(x=>x.id===id); if(!r) return;
+  const c = r[campo] || {};
+  const tit = {primer_contacto:'Primer contacto', fu1:'Follow up 1', fu2:'Follow up 2'}[campo];
+  const p = skPosPop(ev.currentTarget);
+  p.innerHTML = `<b>${tit} · ${esc(r.nombre)}</b>
+    <label>Asunto de la campaña</label><input id="sk-c-as" value="${esc(c.asunto||'')}" placeholder="Ej. Campaña escuelas enero">
+    <label>Fecha</label><input id="sk-c-fe" type="date" value="${c.fecha||todayIso()}">
+    <div class="row">${(c.asunto||c.fecha)?`<button class="sk-btn" onclick="skGuardarCamp(${id},'${campo}',true)">Borrar</button>`:''}<button class="sk-btn" onclick="skCerrarPop()">Cancelar</button><button class="sk-btn p" onclick="skGuardarCamp(${id},'${campo}')">Guardar</button></div>`;
+  setTimeout(()=>document.getElementById('sk-c-as')?.focus(), 30);
+}
+async function skGuardarCamp(id, campo, borrar){
+  const r = SK.find(x=>x.id===id); if(!r) return;
+  const as = (document.getElementById('sk-c-as')?.value||'').trim();
+  const fe = document.getElementById('sk-c-fe')?.value || '';
+  const val = (borrar || (!as && !fe)) ? null : { asunto: as, fecha: fe };
+  const cambios = { [campo]: val };
+  if(campo==='primer_contacto' && val && !r.status) cambios.status = 'Sin respuesta';
+  skCerrarPop();
+  await skUpdate(id, cambios);
+  skPintarTabla();
+}
+function skSetStatus(ev, id, v){
+  if(v === 'Contactar más adelante'){ skAbrirMes(ev.target, id); return; }
+  skCerrarPop();
+  skUpdate(id, { status: v || null, contactar_mes: null }).then(()=>skPintarTabla());
+}
+let SK_MES_ANIO = 2027;
+function skAbrirMes(el, id){
+  const r = SK.find(x=>x.id===id); if(!r) return;
+  SK_MES_ANIO = r.contactar_mes ? parseInt(r.contactar_mes.slice(0,4),10) : Math.max(2027, new Date().getFullYear());
+  const p = skPosPop(el);
+  p.dataset.id = id;
+  skPintarMeses();
+}
+function skPintarMeses(){
+  const p = document.getElementById('sk-pop'); const id = parseInt(p.dataset.id,10);
+  const r = SK.find(x=>x.id===id); if(!r) return;
+  p.innerHTML = `<b>¿Cuándo volver a contactar?</b>
+    <div class="yr"><button onclick="event.stopPropagation();SK_MES_ANIO--;skPintarMeses()">‹</button><span>${SK_MES_ANIO}</span><button onclick="event.stopPropagation();SK_MES_ANIO++;skPintarMeses()">›</button></div>
+    <div class="ms">${SK_MESES.map((m,i)=>{ const k=SK_MES_ANIO+'-'+String(i+1).padStart(2,'0'); return `<span class="${r.contactar_mes===k?'on':''}" onclick="skGuardarMes(${id},'${k}')">${m}</span>`; }).join('')}</div>
+    <div class="row"><button class="sk-btn" onclick="skCerrarPop();skPintarTabla()">Cancelar</button></div>`;
+}
+async function skGuardarMes(id, k){
+  skCerrarPop();
+  await skUpdate(id, { status:'Contactar más adelante', contactar_mes:k });
+  skPintarTabla();
+}
+document.addEventListener('mousedown', e=>{
+  const p=document.getElementById('sk-pop');
+  if(p && p.style.display==='block' && !p.contains(e.target) && !e.target.closest('#sk-root td.cp,#sk-root .sk-st')){
+    const eraMes = p.querySelector('.ms'); p.style.display='none'; if(eraMes) skPintarTabla();
+  }
+});
+async function skActivarFU2(){
+  SK_FU2 = true;
+  try{ await sb.from('hub_config').upsert({ clave:'sk_fu2', valor:{on:true}, updated_at:new Date().toISOString(), updated_by: currentProfile?.nombre||'' }, { onConflict:'clave' }); }catch(e){}
+  skPintarTodo();
+}
+/* Ventana para añadir un grupo con todos sus datos */
+function skNuevo(){
+  const tips = [...new Set(SK.map(r=>r.tipologia).filter(Boolean))].sort();
+  const subs = [...new Set(SK.map(r=>r.subtipo).filter(Boolean))].sort();
+  let m = document.getElementById('sk-modal');
+  if(!m){ m = document.createElement('div'); m.id = 'sk-modal'; m.className = 'sk-modal'; document.body.appendChild(m); }
+  m.innerHTML = `<div class="sk-modal-box" role="dialog" aria-label="Nuevo grupo">
+    <div class="sk-modal-h"><b>Nuevo grupo</b><button class="sk-x" onclick="skCerrarModal()">✕</button></div>
+    <div class="sk-modal-b">
+      <label class="full">Nombre del grupo *<input id="skn-nombre" placeholder="Ej. Escola Sant Martí"></label>
+      <label>Tipo de grupo<input id="skn-tip" list="skn-tips" placeholder="Schools BCN, Travel Agencies…"><datalist id="skn-tips">${tips.map(t=>`<option value="${esc(t)}">`).join('')}</datalist></label>
+      <label>Subtipo<input id="skn-sub" list="skn-subs" placeholder="Públic, Privat/Concertat…"><datalist id="skn-subs">${subs.map(t=>`<option value="${esc(t)}">`).join('')}</datalist></label>
+      <label class="full">Localidad<input id="skn-loc" placeholder="Ej. Barcelona, Sant Martí · o el municipio"></label>
+      <label>Email<input id="skn-email" type="email" placeholder="correo@escuela.cat"></label>
+      <label>Teléfono<input id="skn-tel" placeholder="933 000 000"></label>
+      <label class="full">Observaciones<textarea id="skn-obs" rows="3"></textarea></label>
+      <label class="chk"><input type="checkbox" id="skn-out"> Outbound</label>
+    </div>
+    <div class="sk-modal-f"><span id="skn-err" class="sk-err"></span><button class="sk-btn" onclick="skCerrarModal()">Cancelar</button><button class="sk-btn p" onclick="skGuardarNuevo()">Guardar grupo</button></div>
+  </div>`;
+  m.style.display = 'flex';
+  m.onclick = e => { if(e.target===m) skCerrarModal(); };
+  setTimeout(()=>document.getElementById('skn-nombre')?.focus(), 30);
+}
+function skCerrarModal(){ const m=document.getElementById('sk-modal'); if(m) m.style.display='none'; }
+async function skGuardarNuevo(){
+  const v = id => (document.getElementById(id)?.value||'').trim() || null;
+  const nombre = v('skn-nombre');
+  if(!nombre){ document.getElementById('skn-err').textContent = 'Pon el nombre del grupo.'; return; }
+  const fila = { nombre, tipologia:v('skn-tip'), subtipo:v('skn-sub'), localidad:v('skn-loc'), email:v('skn-email'), telefono:v('skn-tel'), observaciones:v('skn-obs'), outbound:!!document.getElementById('skn-out')?.checked };
+  const { data, error } = await sb.from('stakeholders').insert(fila).select().single();
+  if(error || !data){ document.getElementById('skn-err').textContent = 'No se pudo guardar.'; return; }
+  SK.push(data);
+  skCerrarModal();
+  SK_F.q = nombre; SK_F.tip = ''; SK_F.sub = ''; SK_F.st = ''; SK_F.con = ''; SK_F.out = '';
+  skPintarTodo();
+}
+/* Pestaña Outbound: de momento, la lista de los grupos marcados (el diseño
+   de esta tabla se definirá más adelante). */
+function skPintarOutbound(){
+  const root = document.getElementById('sk-root');
+  const lista = SK.filter(r=>r.outbound);
+  root.innerHTML = `<div class="sk-bar"><b style="color:#062430;">Outbound</b><span class="sk-sp"></span><span class="sk-cnt">${lista.length.toLocaleString('de-DE')} grupos</span></div>
+    <div class="sk-wrap" id="sk-wrap"><table class="no-filter" id="sk-table"><thead><tr><th class="n">#</th><th class="nm">Nombre</th><th>Tipo</th><th>Localidad</th><th>Email</th><th>Teléfono</th><th>Status</th><th>Outbound</th></tr></thead>
+    <tbody>${lista.map((r,i)=>`<tr><td class="n">${i+1}</td><td class="nm">${esc(r.nombre||'')}</td><td><span class="sk-tg ${SK_TG[r.tipologia]||'sk-t6'}">${esc(r.tipologia||'—')}</span></td><td>${esc(r.localidad||'')}</td><td>${esc(r.email||'')}</td><td>${esc(r.telefono||'')}</td><td>${esc(r.status||'—')}</td><td class="ob"><label class="sk-ob on"><input type="checkbox" checked onchange="skSetOutbound(${r.id},this.checked)"> Sí</label></td></tr>`).join('') || '<tr><td class="n"></td><td colspan="7" style="color:#8A93A0;">Todavía no hay grupos en Outbound. Marca "Sí" en la columna Outbound de Stakeholders.</td></tr>'}</tbody></table></div>
+    <div class="hint" style="margin-top:6px;">El formato definitivo de esta tabla lo definimos más adelante.</div>`;
+  skAjustarAltura();
+}
+/* Carga inicial desde el Excel (solo si la tabla está vacía) */
+function skPantallaVacia(){
+  const root = document.getElementById('sk-root');
+  root.innerHTML = `<div class="card" style="max-width:620px;"><div class="section-title">Tabla de Stakeholders vacía</div>
+    <p class="hint" style="margin:6px 0 14px;line-height:1.6;">Sube el Excel de Stakeholders (cabeceras: Nombre Grupo, Tipología General, Tipo, Localidad, Email, Teléfono).</p>
+    <input type="file" id="sk-file" accept=".xlsx,.xls" style="display:none" onchange="skImportar(this.files[0])">
+    <button class="btn btn-primary" onclick="document.getElementById('sk-file').click()">⬆ Cargar Excel de Stakeholders</button>
+    <div id="sk-imp-msg" class="hint" style="margin-top:12px;font-weight:700;"></div></div>`;
+}
+async function skImportar(file){
+  const msg = document.getElementById('sk-imp-msg');
+  if(!file) return;
+  if(typeof XLSX==='undefined' || !XLSX.read){ msg.textContent='No se pudo cargar el lector de Excel. Recarga la página.'; return; }
+  try{
+    msg.textContent = 'Leyendo el Excel…';
+    const wb = XLSX.read(await file.arrayBuffer(), { type:'array' });
+    const filas = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header:1, defval:null, raw:true });
+    const h = filas.findIndex(r=> r && String(r[0]||'').trim().toLowerCase()==='nombre grupo');
+    if(h<0){ msg.textContent='No encuentro la cabecera "Nombre Grupo" en la primera hoja.'; return; }
+    const c = x => { if(x===null||x===undefined) return null; const s=String(x).trim(); return s||null; };
+    const datos = filas.slice(h+1).filter(r=>r && c(r[0])).map(r=>{
+      let loc = c(r[3]);
+      if(c(r[1])==='Schools BCN' && loc && loc.toLowerCase()!=='barcelona') loc = 'Barcelona, '+loc;
+      let t = c(r[5]); if(t && /^\d+\.0$/.test(t)) t = t.slice(0,-2);
+      if(t && /^\d{9}$/.test(t)) t = t.slice(0,3)+' '+t.slice(3,6)+' '+t.slice(6);
+      return { nombre:c(r[0]), tipologia:c(r[1]), subtipo:c(r[2]), localidad:loc, email:c(r[4]), telefono:t };
+    });
+    const { count } = await sb.from('stakeholders').select('id', { count:'exact', head:true });
+    if(count){ msg.textContent='La tabla ya tiene datos: no se vuelve a cargar.'; SK_CARGADO=false; skInit(); return; }
+    if(!confirm('Se van a cargar '+datos.length.toLocaleString('de-DE')+' grupos. ¿Seguimos?')) return;
+    for(let i=0;i<datos.length;i+=500){
+      msg.textContent = 'Cargando… '+Math.min(i+500,datos.length).toLocaleString('de-DE')+' de '+datos.length.toLocaleString('de-DE');
+      const { error } = await sb.from('stakeholders').insert(datos.slice(i,i+500));
+      if(error){ msg.textContent='Error al cargar: '+error.message; return; }
+    }
+    SK_CARGADO = false; setTimeout(skInit, 400);
+  }catch(e){ console.error('skImportar', e); msg.textContent = 'No se pudo leer el Excel: '+(e.message||e); }
+}
+
+
+/* ============================================================================
+   GRUPOS · OUTBOUND / INBOUND — tabla public.gr_leads (canal outbound|inbound).
+   Outbound: se crea solo al marcar "Sí" en Stakeholders. Inbound: + Lead.
+   Cada celda se guarda en Supabase al salir de ella.
+   ============================================================================ */
+let LD = [], LD_CARGADO = false, LD_Q = '';
+const LD_RESP = ['Mireia','Ceci','Paula','Laia','Ignacio'];
+const LD_MET = ['Transferencia bancaria','Box office','Credit card'];
+const LD_MES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+async function ldCargar(){
+  if(LD_CARGADO) return;
+  const { data, error } = await sbFetchAll(()=>sb.from('gr_leads').select('*').order('id'));
+  if(error) return;
+  LD = data || []; LD_CARGADO = true;
+  // Stakeholders marcados como Outbound que aún no tienen su lead
+  const faltan = SK.filter(s=>s.outbound && !LD.some(l=>l.canal==='outbound' && l.stakeholder_id===s.id));
+  for(const s of faltan) await ldCrearOutbound(s);
+}
+async function ldCrearOutbound(s){
+  const fila = { canal:'outbound', stakeholder_id:s.id, grupo:s.nombre, email:s.email, tipologia:s.tipologia, request_date: todayIso() };
+  const { data, error } = await sb.from('gr_leads').insert(fila).select().single();
+  if(!error && data) LD.push(data);
+}
+async function ldQuitarOutbound(s){
+  const l = LD.find(x=>x.canal==='outbound' && x.stakeholder_id===s.id);
+  if(!l) return true;
+  const conDatos = ['status','responsable','contacto','travel_date','pax','total','pago1','pago2','seguimiento','datos_fiscales'].some(k=>l[k]!==null && l[k]!=='' && l[k]!==undefined);
+  if(conDatos && !confirm('Este lead de Outbound ya tiene datos. Si quitas el "Sí", se borra de Outbound. ¿Seguimos?')) return false;
+  const { error } = await sb.from('gr_leads').delete().eq('id', l.id);
+  if(error) return false;
+  LD = LD.filter(x=>x.id!==l.id);
+  return true;
+}
+function ldAnio(f){ return f ? f.slice(0,4) : ''; }
+function ldMes(f){ return f ? LD_MES[parseInt(f.slice(5,7),10)-1] : ''; }
+function ldEur(v){ return (v===null||v===undefined||v==='') ? '' : Number(v).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+async function ldPintar(canal){
+  const root = document.getElementById('sk-root');
+  root.innerHTML = '<div class="hint">Cargando…</div>';
+  await ldCargar(); await prCargar();
+  const q = LD_Q.trim().toLowerCase();
+  const lista = LD.filter(l=>l.canal===canal).filter(l=>!q || [l.grupo,l.contacto,l.email,l.tipologia,l.responsable,l.status,l.seguimiento].join(' ').toLowerCase().includes(q));
+  const inp = (l,c,type='text',extra='') => `<input class="ld-in" type="${type}" value="${esc(String(l[c]??''))}" ${extra} onchange="ldSet(${l.id},'${c}',this.value,'${type}')">`;
+  const sel = (l,c,ops,cls='') => `<select class="ld-in ${cls}" onchange="ldSet(${l.id},'${c}',this.value)"><option value="">—</option>${ops.map(o=>`<option${l[c]===o?' selected':''}>${o}</option>`).join('')}</select>`;
+  const st = l => `<select class="ld-in ld-st ${l.status||''}" onchange="ldStatus(event,${l.id},this.value)"><option value="">—</option><option value="confirmed"${l.status==='confirmed'?' selected':''}>Confirmed</option><option value="rejected"${l.status==='rejected'?' selected':''}>Rejected</option></select>`;
+  const filas = lista.map((l,i)=>`<tr>
+    <td class="n"><span class="sk-num">${i+1}</span><button class="sk-del" title="Eliminar lead" onclick="ldEliminar(${l.id})">✕</button></td>
+    <td class="nm">${canal!=='outbound'?inp(l,'grupo'):esc(l.grupo||'')}</td>
+    <td>${inp(l,'request_date','date')}</td><td class="ro">${ldAnio(l.request_date)}</td><td class="ro">${ldMes(l.request_date)}</td>
+    <td>${sel(l,'responsable',LD_RESP)}</td><td>${st(l)}</td>
+    <td>${inp(l,'contacto')}</td><td>${inp(l,'email','email')}</td><td>${inp(l,'tipologia')}</td>
+    <td>${inp(l,'travel_date','date')}</td><td class="ro">${ldAnio(l.travel_date)}</td><td class="ro">${ldMes(l.travel_date)}</td>
+    <td>${inp(l,'hora','time')}</td><td>${inp(l,'pax','number','min="0" style="width:64px"')}</td>
+    ${canal==='cumple'?`<td><select class="ld-in" style="min-width:200px" onchange="ldTipoCumple(${l.id},this.value)"><option value="">— Tipo —</option>${PR_CUM.filter(c=>!c.extra).map(c=>`<option value="${esc(c.clave)}"${c.clave===l.tipo_cumple?' selected':''}>${esc(c.sec&&c.concepto!==c.sec?c.sec+' · '+c.concepto:c.concepto)} · ${prEur(c.precio)} €</option>`).join('')}</select></td>`:''}
+    <td class="ld-total">${ldCeldaTotal(l)}</td>
+    <td>${inp(l,'pago1','number','step="0.01" style="width:90px"')}</td><td>${inp(l,'pago1_fecha','date')}</td><td>${sel(l,'pago1_metodo',LD_MET)}</td>
+    <td>${inp(l,'pago2','number','step="0.01" style="width:90px"')}</td><td>${inp(l,'pago2_fecha','date')}</td><td>${sel(l,'pago2_metodo',LD_MET)}</td>
+    <td>${inp(l,'datos_fiscales','text','style="min-width:180px"')}</td><td>${inp(l,'seguimiento','text','style="min-width:200px"')}</td>
+    <td>${inp(l,'next_contact','date')}</td><td class="ld-mot" title="${esc(l.motivo_rejected||'')}">${esc(l.motivo_rejected||'')}</td>
+    ${canal!=='cumple'?`<td class="ob"><label class="sk-ob${l.roster_ok?' on':''}"><input type="checkbox"${l.roster_ok?' checked':''} onchange="ldAterrizar(${l.id},this.checked,this)"> ${l.roster_ok?'Sí':'No'}</label></td>`:''}
+    <td class="ob"><button class="ld-pf${l.proforma?' on':''}" onclick="lpfAbrir(${l.id})">📄 ${l.proforma?'Ver':'Crear'}</button></td></tr>`).join('');
+  root.innerHTML = `<div class="sk-bar">
+      <input id="ld-q" placeholder="🔍 Buscar grupo, contacto, email, responsable…" value="${esc(LD_Q)}" oninput="LD_Q=this.value;clearTimeout(window._ldT);window._ldT=setTimeout(()=>ldPintar('${canal}'),200)">
+      <span class="sk-sp"></span><span class="sk-cnt">${lista.length.toLocaleString('de-DE')} leads</span>
+      ${canal!=='outbound'?`<button class="sk-btn p" onclick="ldNuevo('${canal}')">＋ Lead</button>`:''}
+    </div>
+    <div class="sk-wrap" id="sk-wrap"><table class="no-filter ld-table" id="sk-table"><thead><tr><th class="n">#</th><th class="nm">Grupo</th>
+      <th>Request Date</th><th>Year Request</th><th>Month Request</th><th>Responsable</th><th>Status</th><th>Nombre contacto</th><th>Email</th><th>Tipología</th>
+      <th>Travel Date</th><th>Year Travel</th><th>Month Travel</th><th>Hora</th><th>PAX</th>${canal==='cumple'?'<th>Tipo de cumpleaños</th>':''}<th>Total €</th>
+      <th>Primer pago</th><th>Fecha 1er pago</th><th>Método 1er pago</th><th>Segundo pago</th><th>Fecha 2º pago</th><th>Método 2º pago</th>
+      <th>Datos fiscales</th><th>Seguimiento</th><th>Next contact</th><th>Motivo rejected</th>${canal!=='cumple'?'<th>Aterrizar roster</th>':''}<th>Proforma</th></tr></thead>
+      <tbody>${filas || `<tr><td class="n"></td><td colspan="${canal==='cumple'?27:27}" style="color:#8A93A0;">${canal==='outbound'?'Todavía no hay leads. Marca "Sí" en la columna Outbound de Stakeholders.':'Todavía no hay leads. Pulsa "＋ Lead".'}</td></tr>`}</tbody></table></div>`;
+  if(LD_Q){ const i=document.getElementById('ld-q'); i.focus(); i.setSelectionRange(i.value.length,i.value.length); }
+  skAjustarAltura();
+}
+async function ldSet(id, campo, valor, type){
+  const l = LD.find(x=>x.id===id); if(!l) return;
+  let v = valor === '' ? null : valor;
+  if(v!==null && (type==='number')) v = Number(v);
+  if(campo==='pax' && v!==null) v = Math.round(v);
+  const antes = l[campo]; l[campo] = v;
+  const { error } = await sb.from('gr_leads').update({ [campo]: v, updated_at:new Date().toISOString() }).eq('id', id);
+  if(error){ l[campo] = antes; }
+  if(campo==='pax' && !error){ await ldRecalcPorPax(id); return; }
+  if(['request_date','travel_date'].includes(campo) || error) ldPintar(l.canal);
+}
+function ldStatus(ev, id, v){
+  const l = LD.find(x=>x.id===id); if(!l) return;
+  if(v !== 'rejected'){ ldSetMulti(id, { status: v||null, motivo_rejected: null }); return; }
+  const p = skPosPop(ev.target);
+  p.innerHTML = `<b>¿Por qué lo han rechazado?</b><textarea id="ld-mot" rows="3" style="width:100%;font-family:inherit;">${esc(l.motivo_rejected||'')}</textarea>
+    <div class="row"><button class="sk-btn" onclick="skCerrarPop();ldPintar('${l.canal}')">Cancelar</button><button class="sk-btn p" onclick="ldGuardarMotivo(${id})">Guardar</button></div>`;
+  setTimeout(()=>document.getElementById('ld-mot')?.focus(),30);
+}
+function ldGuardarMotivo(id){
+  const m = (document.getElementById('ld-mot')?.value||'').trim();
+  skCerrarPop();
+  ldSetMulti(id, { status:'rejected', motivo_rejected: m || null });
+}
+async function ldSetMulti(id, cambios){
+  const l = LD.find(x=>x.id===id); if(!l) return;
+  const { error } = await sb.from('gr_leads').update({ ...cambios, updated_at:new Date().toISOString() }).eq('id', id);
+  if(!error) Object.assign(l, cambios);
+  ldPintar(l.canal);
+}
+async function ldEliminar(id){
+  const l = LD.find(x=>x.id===id); if(!l) return;
+  if(!confirm('¿Eliminar el lead "'+(l.grupo||'sin nombre')+'"? No se puede deshacer.')) return;
+  const { error } = await sb.from('gr_leads').delete().eq('id', id);
+  if(error) return;
+  LD = LD.filter(x=>x.id!==id);
+  // Outbound: el stakeholder pasa a Outbound "No" (si no, se volvería a crear solo).
+  if(l.canal==='outbound' && l.stakeholder_id){
+    const sk = SK.find(x=>x.id===l.stakeholder_id);
+    const r = await sb.from('stakeholders').update({ outbound:false }).eq('id', l.stakeholder_id);
+    if(!r.error && sk) sk.outbound = false;
+  }
+  ldPintar(l.canal);
+}
+let LD_NUEVO_CANAL = 'inbound';
+function ldNuevo(canal){
+  LD_NUEVO_CANAL = canal || 'inbound';
+  let m = document.getElementById('sk-modal');
+  if(!m){ m = document.createElement('div'); m.id = 'sk-modal'; m.className = 'sk-modal'; document.body.appendChild(m); }
+  const tips = [...new Set(SK.map(r=>r.tipologia).filter(Boolean))].sort();
+  m.innerHTML = `<div class="sk-modal-box" role="dialog" aria-label="Nuevo lead inbound">
+    <div class="sk-modal-h"><b>Nuevo lead · ${LD_NUEVO_CANAL==='cumple'?'Cumpleaños':'Inbound'}</b><button class="sk-x" onclick="skCerrarModal()">✕</button></div>
+    <div class="sk-modal-b">
+      <label class="full">Grupo *<input id="ldn-grupo" placeholder="Nombre del grupo / escuela / empresa"></label>
+      <label>Request Date<input id="ldn-req" type="date" value="${todayIso()}"></label>
+      <label>Responsable<select id="ldn-resp"><option value="">—</option>${LD_RESP.map(r=>`<option>${r}</option>`).join('')}</select></label>
+      <label>Nombre contacto<input id="ldn-cont"></label>
+      <label>Email<input id="ldn-email" type="email"></label>
+      <label>Tipología<input id="ldn-tip" list="ldn-tips"><datalist id="ldn-tips">${tips.map(t=>`<option value="${esc(t)}">`).join('')}</datalist></label>
+      <label>Travel Date<input id="ldn-travel" type="date"></label>
+      <label>Hora<input id="ldn-hora" type="time"></label>
+      <label>PAX<input id="ldn-pax" type="number" min="0"></label>
+      <label class="full">Seguimiento<textarea id="ldn-seg" rows="2"></textarea></label>
+    </div>
+    <div class="sk-modal-f"><span id="ldn-err" class="sk-err"></span><button class="sk-btn" onclick="skCerrarModal()">Cancelar</button><button class="sk-btn p" onclick="ldGuardarNuevo()">Guardar lead</button></div>
+  </div>`;
+  m.style.display = 'flex';
+  m.onclick = e => { if(e.target===m) skCerrarModal(); };
+  setTimeout(()=>document.getElementById('ldn-grupo')?.focus(), 30);
+}
+async function ldGuardarNuevo(){
+  const v = id => (document.getElementById(id)?.value||'').trim() || null;
+  if(!v('ldn-grupo')){ document.getElementById('ldn-err').textContent = 'Pon el nombre del grupo.'; return; }
+  const fila = { canal:LD_NUEVO_CANAL, grupo:v('ldn-grupo'), request_date:v('ldn-req'), responsable:v('ldn-resp'), contacto:v('ldn-cont'), email:v('ldn-email'),
+    tipologia:v('ldn-tip'), travel_date:v('ldn-travel'), hora:v('ldn-hora'), pax: v('ldn-pax')!==null ? parseInt(v('ldn-pax'),10) : null, seguimiento:v('ldn-seg') };
+  const { data, error } = await sb.from('gr_leads').insert(fila).select().single();
+  if(error || !data){ document.getElementById('ldn-err').textContent = 'No se pudo guardar.'; return; }
+  LD.push(data); skCerrarModal(); ldPintar(LD_NUEVO_CANAL);
+}
+
+/* ============================================================================
+   GRUPOS · PRECIOS TICKETS — los precios de siempre:
+   · Entradas y promos: tabla grupos_precios (promos = clave promo_*).
+   · Cumpleaños: pdxspot_kv 'precios-cumples' (mismo formato que antes).
+   Son los que usa el Total € de Inbound / Outbound / Cumpleaños.
+   ============================================================================ */
+let PR_ENT = [], PR_PROMO = [], PR_CUM = [], PR_CARGADO = false;
+const PR_CUM_DEF = [
+  {clave:'cumple_enigma_ninos',sec:'Paquete Enigma',concepto:'Niños (4–12 años)',precio:11,unidad:'persona'},
+  {clave:'cumple_enigma_jovenes',sec:'Paquete Enigma',concepto:'Jóvenes (13-19 años)',precio:14,unidad:'persona'},
+  {clave:'cumple_enigma_adultos',sec:'Paquete Enigma',concepto:'Adultos',precio:15,unidad:'persona'},
+  {clave:'cumple_enigma_senior',sec:'Paquete Enigma',concepto:'Senior',precio:11,unidad:'persona'},
+  {clave:'cumple_ilusion_base',sec:'Paquete Ilusión',concepto:'Paquete Ilusión',precio:17.5,unidad:'persona'},
+  {clave:'cumple_ilusion_regalo',sec:'Paquete Ilusión',concepto:'Regalo Paradox (opcional)',precio:2.5,unidad:'asistente',extra:true},
+  {clave:'cumple_ilusion_acond',sec:'Paquete Ilusión',concepto:'Acondicionamiento y limpieza del espacio',precio:7.5,unidad:'grupo',extra:true},
+  {clave:'cumple_paradox_base',sec:'Paquete Paradox',concepto:'Paquete Paradox',precio:25,unidad:'persona'},
+  {clave:'cumple_paradox_acond',sec:'Paquete Paradox',concepto:'Acondicionamiento y limpieza del espacio',precio:7.5,unidad:'grupo',extra:true},
+];
+function prSeccion(c){
+  if(c==='ong') return 'ONG';
+  if(c==='corporativo' || c.startsWith('corp_')) return 'Corporativo';
+  if(c.startsWith('school') || c==='taller' || c==='monitor') return 'Escuelas';
+  if(['uni','adult','senior'].includes(c)) return 'Grupos';
+  return 'Otros';
+}
+const PR_SECS = ['ONG','Corporativo','Escuelas','Grupos','Otros'];
+async function prCargar(force){
+  if(PR_CARGADO && !force) return;
+  const { data } = await sb.from('grupos_precios').select('*').order('orden');
+  const all = data || [];
+  PR_PROMO = all.filter(p=>String(p.clave).startsWith('promo_'));
+  PR_ENT = all.filter(p=>!String(p.clave).startsWith('promo_'));
+  PR_ENT.forEach(p=>p._sec = prSeccion(String(p.clave)));
+  PR_ENT.sort((a,b)=> PR_SECS.indexOf(a._sec)-PR_SECS.indexOf(b._sec) || (a.orden||0)-(b.orden||0));
+  try{
+    const kv = await kvGet('precios-cumples');
+    const saved = kv?.value ? JSON.parse(kv.value) : null;
+    PR_CUM = (saved && Array.isArray(saved) && saved.length)
+      ? saved.map((s,i)=> ({...(PR_CUM_DEF.find(d=>d.clave===s.clave) || PR_CUM_DEF[i] || {}), ...s}))
+      : JSON.parse(JSON.stringify(PR_CUM_DEF));
+  }catch(e){ PR_CUM = JSON.parse(JSON.stringify(PR_CUM_DEF)); }
+  PR_CUM.forEach((c,i)=>{ if(!c.clave) c.clave = 'cumple_x_'+i; });
+  PR_CARGADO = true;
+}
+/* Catálogo para el Total €: clave -> {label, precio, extra, unidad} */
+function prItem(k){
+  const e = PR_ENT.find(p=>p.clave===k);
+  if(e) return { label:e.etiqueta, precio:Number(e.precio_grupo)||0, extra:!!e.extra, unidad: e.extra && /catering|team|tb/i.test(e.clave) ? 'persona' : (e.extra?'unidad':'persona') };
+  const c = PR_CUM.find(p=>p.clave===k);
+  if(c) return { label:(c.sec&&!c.extra&&c.concepto!==c.sec?c.sec+' · ':'')+c.concepto, precio:Number(c.precio)||0, extra:!!c.extra, unidad:c.unidad||'persona' };
+  return null;
+}
+function prPromo(k){ return PR_PROMO.find(p=>p.clave===k) || null; }
+function prEur(v){ return (Number(v)||0).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+async function ptPintar(){
+  const root = document.getElementById('sk-root');
+  root.innerHTML = '<div class="hint">Cargando…</div>';
+  await prCargar(true);
+  const inEnt = (p,c,type='number') => `<input class="ld-in pr-num" type="${type}" ${type==='number'?'step="0.01" min="0"':''} value="${esc(String(p[c]??''))}" onchange="prSetEnt(${p.id},'${c}',this.value,'${type}')">`;
+  let ent = '', sec = '', n = 0;
+  PR_ENT.forEach(p=>{
+    if(p._sec!==sec){ sec = p._sec; ent += `<tr class="pr-sec"><td class="n"></td><td colspan="3">${sec}</td></tr>`; }
+    n++;
+    ent += `<tr><td class="n"><span class="sk-num">${n}</span><button class="sk-del" title="Eliminar" onclick="prDel(${p.id})">✕</button></td>
+      <td class="${p.extra?'pr-ex':''}">${p.extra?'＋ ':''}<input class="ld-in" style="min-width:200px;font-weight:700" value="${esc(p.etiqueta||'')}" onchange="prSetEnt(${p.id},'etiqueta',this.value,'text')"></td>
+      <td class="r">${p.extra?'<span class="pr-mut">—</span>':inEnt(p,'precio_original')}</td><td class="r">${inEnt(p,'precio_grupo')}</td></tr>`;
+  });
+  const promos = PR_PROMO.map((p,i)=>`<tr><td class="n"><span class="sk-num">${i+1}</span><button class="sk-del" title="Eliminar" onclick="prDel(${p.id})">✕</button></td>
+    <td><input class="ld-in" style="min-width:170px;font-weight:700" value="${esc(p.etiqueta||'')}" onchange="prSetEnt(${p.id},'etiqueta',this.value,'text')"></td>
+    <td><select class="ld-in" onchange="prSetEnt(${p.id},'tipo',this.value,'text')"><option value="fijo"${p.tipo!=='porcentaje'?' selected':''}>Precio fijo €/pax</option><option value="porcentaje"${p.tipo==='porcentaje'?' selected':''}>Descuento %</option></select></td>
+    <td class="r">${p.tipo==='porcentaje'
+      ? `<input class="ld-in pr-num" type="number" step="0.01" min="0" max="100" value="${esc(String(p.porcentaje??''))}" onchange="prSetEnt(${p.id},'porcentaje',this.value,'number')"> %`
+      : `<input class="ld-in pr-num" type="number" step="0.01" min="0" value="${esc(String(p.precio_grupo??''))}" onchange="prSetEnt(${p.id},'precio_grupo',this.value,'number')"> €/pax`}</td>
+    <td><input class="ld-in" type="date" value="${esc(p.desde||'')}" onchange="prSetEnt(${p.id},'desde',this.value,'date')"></td>
+    <td><input class="ld-in" type="date" value="${esc(p.hasta||'')}" onchange="prSetEnt(${p.id},'hasta',this.value,'date')"></td>
+    <td><input class="ld-in" style="min-width:200px" value="${esc(p.condiciones||'')}" onchange="prSetEnt(${p.id},'condiciones',this.value,'text')"></td></tr>`).join('');
+  let cum = ''; sec = '';
+  PR_CUM.forEach((c,i)=>{
+    if(c.sec!==sec){ sec = c.sec; cum += `<tr class="pr-sec"><td class="n"></td><td colspan="3">${esc(sec||'Otros')}</td></tr>`; }
+    cum += `<tr><td class="n"><span class="sk-num">${i+1}</span><button class="sk-del" title="Eliminar" onclick="prCumDel(${i})">✕</button></td>
+      <td class="${c.extra?'pr-ex':''}">${c.extra?'＋ ':''}<input class="ld-in" style="min-width:200px;font-weight:700" value="${esc(c.concepto||'')}" onchange="prCumSet(${i},'concepto',this.value)"></td>
+      <td class="r"><input class="ld-in pr-num" type="number" step="0.01" min="0" value="${esc(String(c.precio??''))}" onchange="prCumSet(${i},'precio',this.value)"></td>
+      <td><select class="ld-in" onchange="prCumSet(${i},'unidad',this.value)">${['persona','asistente','grupo'].map(u=>`<option${c.unidad===u?' selected':''}>${u}</option>`).join('')}</select></td></tr>`;
+  });
+  root.innerHTML = `<div class="pr-grid" id="sk-wrap">
+    <div class="pr-col">
+      <div class="pr-box"><div class="pr-h"><div><b>Entradas grupos</b><small>Precio original y precio de grupo</small></div><button class="sk-btn" onclick="prNuevoEnt()">＋ Tipo</button></div>
+        <table class="no-filter ld-table pr-t"><thead><tr><th class="n">#</th><th>Tipo</th><th class="r">Original €</th><th class="r">Grupo €</th></tr></thead><tbody>${ent}</tbody></table></div>
+      <div class="pr-box"><div class="pr-h"><div><b>Promociones</b><small>Precio fijo (€/pax) o descuento (% sobre el total)</small></div><button class="sk-btn" onclick="prNuevaPromo()">＋ Promo</button></div>
+        <table class="no-filter ld-table pr-t"><thead><tr><th class="n">#</th><th>Promo</th><th>Tipo</th><th class="r">Valor</th><th>Desde</th><th>Hasta</th><th>Condiciones</th></tr></thead><tbody>${promos||'<tr><td class="n"></td><td colspan="6" class="pr-mut">Sin promociones.</td></tr>'}</tbody></table></div>
+    </div>
+    <div class="pr-col"><div class="pr-box"><div class="pr-h"><div><b>Cumpleaños</b><small>Paquetes Enigma, Ilusión y Paradox</small></div><button class="sk-btn" onclick="prCumNuevo()">＋ Concepto</button></div>
+      <table class="no-filter ld-table pr-t"><thead><tr><th class="n">#</th><th>Concepto</th><th class="r">Precio €</th><th>Por</th></tr></thead><tbody>${cum}</tbody></table></div></div>
+  </div>`;
+  skAjustarAltura();
+}
+async function prSetEnt(id, campo, valor, type){
+  const p = PR_ENT.find(x=>x.id===id) || PR_PROMO.find(x=>x.id===id); if(!p) return;
+  const v = valor==='' ? null : (type==='number' ? Number(valor) : valor);
+  const { error } = await sb.from('grupos_precios').update({ [campo]: v }).eq('id', id);
+  if(!error){ p[campo] = v; if(campo==='tipo') ptPintar(); }
+}
+async function prNuevoEnt(){
+  const orden = PR_ENT.reduce((m,p)=>Math.max(m,p.orden||0),0)+1;
+  const et = prompt('Nombre del tipo de entrada (ej. Groups Familia):'); if(!et) return;
+  const extra = confirm('¿Es un extra (se suma aparte, sin precio original)? Aceptar = Sí · Cancelar = No');
+  const { error } = await sb.from('grupos_precios').insert({ clave:'tipo_'+Date.now(), etiqueta:et, orden, extra });
+  if(!error) ptPintar();
+}
+async function prNuevaPromo(){
+  const orden = PR_PROMO.reduce((m,p)=>Math.max(m,p.orden||0),100)+1;
+  const { error } = await sb.from('grupos_precios').insert({ clave:'promo_'+Date.now(), etiqueta:'Nueva promo', tipo:'fijo', orden });
+  if(!error) ptPintar();
+}
+async function prDel(id){
+  if(!confirm('¿Eliminar esta fila de precios?')) return;
+  const { error } = await sb.from('grupos_precios').delete().eq('id', id);
+  if(!error) ptPintar();
+}
+async function prCumGuardar(){ await kvSet('precios-cumples', JSON.stringify(PR_CUM)); if(typeof showSaveToast==='function') showSaveToast('Guardado','ok'); }
+async function prCumSet(i, campo, valor){
+  if(!PR_CUM[i]) return;
+  PR_CUM[i][campo] = campo==='precio' ? (valor===''?null:Number(valor)) : valor;
+  if(campo==='unidad') PR_CUM[i].extra = valor!=='persona';
+  await prCumGuardar();
+  if(campo==='unidad') ptPintar();
+}
+async function prCumNuevo(){
+  const sec = prompt('Paquete (ej. Paquete Enigma, Paquete Ilusión, Paquete Paradox):', 'Paquete Paradox'); if(!sec) return;
+  const concepto = prompt('Concepto:'); if(!concepto) return;
+  // se coloca al final de su paquete para que las secciones no se mezclen
+  let pos = PR_CUM.length; for(let i=PR_CUM.length-1;i>=0;i--){ if(PR_CUM[i].sec===sec){ pos=i+1; break; } }
+  PR_CUM.splice(pos, 0, { clave:'cumple_'+Date.now(), sec, concepto, precio:0, unidad:'persona' });
+  await prCumGuardar(); ptPintar();
+}
+async function prCumDel(i){
+  if(!confirm('¿Eliminar "'+(PR_CUM[i]?.concepto||'')+'"?')) return;
+  PR_CUM.splice(i,1); await prCumGuardar(); ptPintar();
+}
+
+/* ============================================================================
+   TOTAL € AUTOMÁTICO EN LOS LEADS
+   desglose = [{k: clave del precio, c: cantidad | null (= PAX)}]
+   promo = clave promo_* · Precio fijo: sustituye el precio de las entradas
+   (no de los extras) · Descuento %: sobre el total.
+   ============================================================================ */
+function ldCant(l, it){ return (it.c===null || it.c===undefined || it.c==='') ? (Number(l.pax)||0) : Number(it.c)||0; }
+function ldCalcTotal(l){
+  const des = Array.isArray(l.desglose) ? l.desglose : [];
+  if(!des.length) return null;
+  const promo = l.promo ? prPromo(l.promo) : null;
+  let tot = 0;
+  des.forEach(it=>{
+    const p = prItem(it.k); if(!p) return;
+    let precio = p.precio;
+    if(promo && promo.tipo!=='porcentaje' && !p.extra && promo.precio_grupo!=null) precio = Number(promo.precio_grupo);
+    tot += precio * ldCant(l, it);
+  });
+  if(promo && promo.tipo==='porcentaje' && promo.porcentaje) tot = tot * (1 - Number(promo.porcentaje)/100);
+  return Math.round(tot*100)/100;
+}
+function ldResumen(l){
+  const des = Array.isArray(l.desglose) ? l.desglose : [];
+  const t = des.map(it=>{ const p = prItem(it.k); return p ? p.label+' ×'+ldCant(l,it) : ''; }).filter(Boolean).join(' + ');
+  const pr = l.promo ? prPromo(l.promo) : null;
+  return t + (pr ? ' · '+pr.etiqueta : '');
+}
+function ldCeldaTotal(l){
+  const des = Array.isArray(l.desglose) && l.desglose.length;
+  const val = l.total!=null ? prEur(l.total)+' €' : '＋ Calcular';
+  return `<button class="ld-tot${des?'':' vac'}" onclick="ldAbrirTotal(event,${l.id})" title="${esc(ldResumen(l))}"><b>${val}</b>${des?`<small>${esc(ldResumen(l))}</small>`:''}</button>`;
+}
+function ldOpciones(canal, sel){
+  const grp = {};
+  if(canal==='cumple') PR_CUM.forEach(c=>{ (grp[c.sec||'Cumpleaños']=grp[c.sec||'Cumpleaños']||[]).push({k:c.clave,l:c.concepto,p:c.precio,u:c.unidad}); });
+  PR_ENT.forEach(p=>{ (grp[p._sec]=grp[p._sec]||[]).push({k:p.clave,l:(p.extra?'＋ ':'')+p.etiqueta,p:p.precio_grupo,u:p.extra?'':'pax'}); });
+  return Object.entries(grp).map(([g,arr])=>`<optgroup label="${esc(g)}">${arr.map(o=>`<option value="${esc(o.k)}"${o.k===sel?' selected':''}>${esc(o.l)} · ${prEur(o.p)} €</option>`).join('')}</optgroup>`).join('');
+}
+let LD_EDIT = null;
+async function ldAbrirTotal(ev, id){
+  ev.stopPropagation();
+  await prCargar();
+  const l = LD.find(x=>x.id===id); if(!l) return;
+  LD_EDIT = { id, des: JSON.parse(JSON.stringify(Array.isArray(l.desglose)?l.desglose:[])), promo: l.promo||'' };
+  if(!LD_EDIT.des.length) LD_EDIT.des.push({ k:'', c:null });
+  const p = skPosPop(ev.currentTarget);
+  p.classList.add('ld-pop');
+  ldPintarEditor();
+}
+function ldPintarEditor(){
+  const p = document.getElementById('sk-pop'); const l = LD.find(x=>x.id===LD_EDIT.id); if(!l) return;
+  const tmp = { ...l, desglose: LD_EDIT.des.filter(it=>it.k), promo: LD_EDIT.promo||null };
+  const tot = ldCalcTotal(tmp);
+  p.innerHTML = `<b>Total € · ${esc(l.grupo||'')}</b>
+    <div class="ld-ed">${LD_EDIT.des.map((it,i)=>`<div class="ld-ed-f">
+      <select onchange="LD_EDIT.des[${i}].k=this.value;ldAutoCant(${i});ldPintarEditor()"><option value="">— Elige —</option>${ldOpciones(l.canal, it.k)}</select>
+      <input type="number" min="0" placeholder="PAX (${Number(l.pax)||0})" value="${it.c??''}" oninput="LD_EDIT.des[${i}].c=this.value===''?null:Number(this.value);ldPintarTotEd()">
+      <button onclick="LD_EDIT.des.splice(${i},1);ldPintarEditor()" title="Quitar">✕</button></div>`).join('')}
+      <button class="sk-btn" style="margin-top:4px" onclick="LD_EDIT.des.push({k:'',c:null});ldPintarEditor()">＋ Añadir línea</button></div>
+    <label>Promo</label><select id="ld-ed-promo" onchange="LD_EDIT.promo=this.value;ldPintarTotEd()"><option value="">Sin promo</option>${PR_PROMO.map(pr=>`<option value="${esc(pr.clave)}"${pr.clave===LD_EDIT.promo?' selected':''}>${esc(pr.etiqueta)} · ${pr.tipo==='porcentaje'?(pr.porcentaje||0)+' %':prEur(pr.precio_grupo)+' €/pax'}</option>`).join('')}</select>
+    <div class="ld-ed-tot">Total: <b id="ld-ed-tot">${tot!=null?prEur(tot)+' €':'—'}</b></div>
+    <div class="hint" style="font-size:10.5px">Cantidad vacía = usa los PAX del lead.</div>
+    <div class="row"><button class="sk-btn" onclick="skCerrarPop()">Cancelar</button><button class="sk-btn p" onclick="ldGuardarTotal()">Guardar</button></div>`;
+}
+function ldAutoCant(i){ const it = LD_EDIT.des[i]; const p = prItem(it.k); if(p && (p.unidad==='grupo' || p.unidad==='unidad') && (it.c===null||it.c===undefined)) it.c = 1; }
+function ldPintarTotEd(){
+  const l = LD.find(x=>x.id===LD_EDIT.id); if(!l) return;
+  const t = ldCalcTotal({ ...l, desglose: LD_EDIT.des.filter(it=>it.k), promo: LD_EDIT.promo||null });
+  const el = document.getElementById('ld-ed-tot'); if(el) el.textContent = t!=null ? prEur(t)+' €' : '—';
+}
+async function ldGuardarTotal(){
+  const l = LD.find(x=>x.id===LD_EDIT.id); if(!l) return;
+  const des = LD_EDIT.des.filter(it=>it.k);
+  const cambios = { desglose: des.length?des:null, promo: LD_EDIT.promo||null };
+  cambios.total = ldCalcTotal({ ...l, ...cambios });
+  skCerrarPop();
+  await ldSetMulti(l.id, cambios);
+}
+/* Tipo de cumpleaños: fija la línea principal (precio por persona × PAX) */
+async function ldTipoCumple(id, k){
+  await prCargar();
+  const l = LD.find(x=>x.id===id); if(!l) return;
+  let des = Array.isArray(l.desglose) ? l.desglose.slice() : [];
+  des = des.filter(it=>{ const p = prItem(it.k); return p && p.extra; });
+  if(k) des.unshift({ k, c:null });
+  const cambios = { tipo_cumple: k||null, desglose: des.length?des:null };
+  cambios.total = ldCalcTotal({ ...l, ...cambios });
+  await ldSetMulti(id, cambios);
+}
+/* Si cambian los PAX, el total se recalcula solo */
+async function ldRecalcPorPax(id){
+  const l = LD.find(x=>x.id===id); if(!l || !Array.isArray(l.desglose) || !l.desglose.length) return;
+  const t = ldCalcTotal(l);
+  if(t !== l.total) await ldSetMulti(id, { total: t });
+}
+
+
+/* ============================================================================
+   ATERRIZAR ROSTER — añade (o quita) SOLO la fila "Grupos" de este lead en el
+   roster del Travel Date, aunque el día esté bloqueado o con OK LAIA. Lo hace
+   la función de Supabase roster_aterrizar_grupo, que no toca nada más.
+   ============================================================================ */
+function arSlot(h){
+  const d = String(h||'').replace(/[^0-9]/g,'');
+  if(d.length < 3) return -1;
+  const hh = parseInt(d.slice(0,d.length-2),10), mm = parseInt(d.slice(-2),10);
+  return RS_SLOTS.indexOf(String(hh) + (mm>=30?'30':'00'));
+}
+async function ldAterrizar(id, on, el){
+  const l = LD.find(x=>x.id===id); if(!l) return;
+  if(on){
+    const ini = arSlot(l.hora);
+    if(!l.travel_date || ini < 0){ alert('Para aterrizarlo en el roster pon antes el Travel Date y la Hora.'); el.checked = false; return; }
+    const fin = Math.min(ini+2, RS_SLOTS.length-1);              // 1h30 por defecto
+    const finTurno = RS_SLOTS[fin+1] || (String(parseInt(RS_SLOTS[fin],10)+30).replace(/60$/,'00'));
+    const fila = { tipo:'grupos', turno: RS_SLOTS[ini]+'-'+finTurno, nombre:'', slots:{}, textos:{} };
+    for(let i=ini;i<=fin;i++) fila.slots[RS_SLOTS[i]] = 'GR';
+    fila.textos[RS_SLOTS[ini]] = (l.pax ? l.pax+' Pax' : 'Grupo');
+    const { data, error } = await sb.rpc('roster_aterrizar_grupo', { p_lead:id, p_fecha:l.travel_date, p_fila:fila });
+    if(error){ alert('No se pudo aterrizar en el roster: '+error.message); el.checked = false; return; }
+    l.roster_ok = true;
+    if(typeof showSaveToast==='function') showSaveToast(data==='ya' ? 'Ya estaba en el roster' : 'Añadido al roster del '+l.travel_date.split('-').reverse().join('/'), 'ok');
+  } else {
+    if(!confirm('¿Quitar la fila de este grupo del roster del '+(l.travel_date||'').split('-').reverse().join('/')+'? No se toca nada más.')){ el.checked = true; return; }
+    const { error } = await sb.rpc('roster_quitar_grupo', { p_lead:id, p_fecha:l.travel_date });
+    if(error){ alert('No se pudo quitar: '+error.message); el.checked = true; return; }
+    l.roster_ok = false;
+    if(typeof showSaveToast==='function') showSaveToast('Quitado del roster','ok');
+  }
+  ldPintar(l.canal);
+}
+
+/* ============================================================================
+   PROFORMA POR LEAD — la misma plantilla de la pestaña PROFORMA, en una
+   ventana. Se rellena con los datos del lead y es editable; se guarda en el
+   propio lead (gr_leads.proforma) y se descarga en PDF.
+   ============================================================================ */
+let LPF = null, LPF_ID = null, LPF_T = null;
+function lpfInicial(l){
+  const d = l.travel_date ? l.travel_date.split('-').reverse().join('.') : '';
+  const lineas = (Array.isArray(l.desglose)?l.desglose:[]).map(it=>{
+    const p = prItem(it.k); if(!p) return null;
+    const pr = l.promo ? prPromo(l.promo) : null;
+    let precio = p.precio;
+    if(pr && pr.tipo!=='porcentaje' && !p.extra && pr.precio_grupo!=null) precio = Number(pr.precio_grupo);
+    return { desc: p.label + (pr && !p.extra ? ' ('+pr.etiqueta+')' : ''), cant: ldCant(l,it), precio, ivaIncl:false };
+  }).filter(Boolean);
+  return { fecha: todayIso(), factura: 'Proforma - '+(l.grupo||'grupo').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9]+/g,'_').slice(0,30)+'_'+id36(),
+    motivo: 'Visita '+(l.grupo||''), motivoExtra: d ? 'Día: '+d+(l.hora?' a las '+l.hora+'h':'') : '',
+    ivaPct:10, otro:0, lineas: lineas.length ? lineas : [{desc:'', cant:Number(l.pax)||1, precio:0, ivaIncl:false}] };
+}
+function id36(){ return Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,5); }
+function lpfTotLinea(x){ const b=(x.cant||0)*(x.precio||0); return x.ivaIncl ? b/(1+(LPF.ivaPct||0)/100) : b; }
+function lpfAbrir(id){
+  const l = LD.find(x=>x.id===id); if(!l) return;
+  LPF_ID = id;
+  LPF = (l.proforma && l.proforma.lineas) ? JSON.parse(JSON.stringify(l.proforma)) : lpfInicial(l);
+  let m = document.getElementById('lpf-modal');
+  if(!m){ m = document.createElement('div'); m.id='lpf-modal'; m.className='sk-modal'; document.body.appendChild(m); }
+  m.innerHTML = `<div class="lpf-box">
+    <div class="sk-modal-h"><b>Proforma · ${esc(l.grupo||'')}</b><button class="sk-x" onclick="document.getElementById('lpf-modal').style.display='none'">✕</button></div>
+    <div class="lpf-body"><div class="lpf-form" id="lpf-form"></div><div class="lpf-prev"><div id="lpf-doc" class="pf-doc"></div></div></div>
+    <div class="sk-modal-f"><span id="lpf-est" class="sk-err" style="color:#6B7380"></span>
+      <button class="sk-btn" onclick="lpfRegenerar()">↺ Rellenar con datos del lead</button>
+      <button class="sk-btn p" onclick="lpfPDF()">⬇ Descargar PDF</button></div></div>`;
+  m.style.display = 'flex';
+  m.onclick = e => { if(e.target===m) m.style.display='none'; };
+  lpfForm(); lpfPrev();
+}
+function lpfRegenerar(){
+  if(!confirm('¿Volver a rellenar la proforma con los datos actuales del lead? Se pierden los cambios a mano.')) return;
+  LPF = lpfInicial(LD.find(x=>x.id===LPF_ID)); lpfForm(); lpfPrev(); lpfGuardar();
+}
+function lpfForm(){
+  document.getElementById('lpf-form').innerHTML = `
+    <label>Fecha<input type="date" value="${esc(LPF.fecha||'')}" oninput="LPF.fecha=this.value;lpfCambio()"></label>
+    <label>Motivo<input value="${esc(LPF.motivo||'')}" oninput="LPF.motivo=this.value;lpfCambio()"></label>
+    <label>Texto adicional<textarea rows="2" oninput="LPF.motivoExtra=this.value;lpfCambio()">${esc(LPF.motivoExtra||'')}</textarea></label>
+    <label>Nº de factura (nombre del PDF)<input value="${esc(LPF.factura||'')}" oninput="LPF.factura=this.value;lpfCambio()"></label>
+    <div class="lpf-lt">Líneas</div>
+    <table class="lpf-lin"><thead><tr><th>Descripción</th><th>Cant.</th><th>Precio/ud</th><th>IVA incl.</th><th></th></tr></thead><tbody>
+    ${LPF.lineas.map((x,i)=>`<tr><td><input value="${esc(x.desc||'')}" oninput="LPF.lineas[${i}].desc=this.value;lpfCambio()"></td>
+      <td><input type="number" value="${x.cant}" oninput="LPF.lineas[${i}].cant=parseFloat(this.value)||0;lpfCambio()" style="width:60px"></td>
+      <td><input type="number" step="0.01" value="${x.precio}" oninput="LPF.lineas[${i}].precio=parseFloat(this.value)||0;lpfCambio()" style="width:80px"></td>
+      <td style="text-align:center"><input type="checkbox" ${x.ivaIncl?'checked':''} onchange="LPF.lineas[${i}].ivaIncl=this.checked;lpfCambio()"></td>
+      <td><button onclick="LPF.lineas.splice(${i},1);if(!LPF.lineas.length)LPF.lineas.push({desc:'',cant:1,precio:0,ivaIncl:false});lpfForm();lpfCambio()">✕</button></td></tr>`).join('')}
+    </tbody></table>
+    <button class="sk-btn" onclick="LPF.lineas.push({desc:'',cant:1,precio:0,ivaIncl:false});lpfForm();lpfCambio()">＋ Añadir línea</button>
+    <div class="lpf-2"><label>IVA (%)<input type="number" step="0.5" value="${LPF.ivaPct}" oninput="LPF.ivaPct=parseFloat(this.value)||0;lpfCambio()"></label>
+    <label>Otro (señal)<input type="number" step="0.01" value="${LPF.otro}" oninput="LPF.otro=parseFloat(this.value)||0;lpfCambio()"></label></div>`;
+}
+function lpfCambio(){ lpfPrev(); const e=document.getElementById('lpf-est'); if(e) e.textContent='Guardando…'; clearTimeout(LPF_T); LPF_T = setTimeout(lpfGuardar, 700); }
+async function lpfGuardar(){
+  const l = LD.find(x=>x.id===LPF_ID); if(!l) return;
+  const { error } = await sb.from('gr_leads').update({ proforma: LPF, updated_at:new Date().toISOString() }).eq('id', LPF_ID);
+  if(!error) l.proforma = JSON.parse(JSON.stringify(LPF));
+  const e=document.getElementById('lpf-est'); if(e) e.textContent = error ? 'No se pudo guardar' : 'Guardado';
+}
+function lpfPrev(){
+  const el = document.getElementById('lpf-doc'); if(!el) return;
+  const base = LPF.lineas.reduce((a,x)=>a+lpfTotLinea(x),0), cuota = base*((LPF.ivaPct||0)/100), total = base+cuota+(LPF.otro||0);
+  const f = LPF.fecha ? LPF.fecha.split('-').reverse().join('.') : '';
+  el.innerHTML = `
+    <div class="pf-doc-top"><div class="pf-doc-titulo">FACTURA PROFORMA</div><img class="pf-doc-logo" src="${PF_LOGO}" alt="Paradox Museum"></div>
+    <div class="pf-doc-info">
+      <div class="pf-doc-empresa"><b>${esc(PF_EMPRESA.nombre)}</b><br>${esc(PF_EMPRESA.razon)}<br>CIF: ${esc(PF_EMPRESA.cif)}<br>Dirección: ${esc(PF_EMPRESA.direccion)}</div>
+      <div class="pf-doc-visita"><div class="pf-doc-campo"><b>Fecha:</b>${esc(f)}</div><div class="pf-doc-campo"><b>Motivo:</b>${esc(LPF.motivo||'')}${LPF.motivoExtra?'<br>'+esc(LPF.motivoExtra):''}</div></div>
+    </div>
+    <hr class="pf-doc-sep">
+    <table class="pf-doc-items"><thead><tr><th>Descripción</th><th>Cantidad</th><th>Precio/ud</th><th>Total</th></tr></thead><tbody>
+      ${LPF.lineas.map(x=>`<tr><td>${esc(x.desc)||'&nbsp;'}</td><td>${x.desc?(x.cant||0):'-&nbsp;€'}</td><td>${x.desc?pfMoneda(x.precio):'-&nbsp;€'}</td><td>${x.desc?pfMoneda(lpfTotLinea(x)):'-&nbsp;€'}</td></tr>`).join('')}
+    </tbody></table>
+    <div class="pf-doc-foot">
+      <div class="pf-doc-foot-empresa"><b>${esc(PF_EMPRESA.nombre)}</b><br>${esc(PF_EMPRESA.razon)}<br><u>IBAN: ${esc(PF_EMPRESA.iban)}</u></div>
+      <div class="pf-doc-totales">
+        <div><span>Base imponible</span><span>${pfMoneda(base)}</span></div>
+        <div><span>IVA (${LPF.ivaPct}%)</span><span>${(LPF.ivaPct||0).toFixed(2).replace('.',',')}%</span></div>
+        <div><span>Cuota de IVA</span><span>${pfMoneda(cuota)}</span></div>
+        <div class="pf-tot-otro"><span>Otro (señal)</span><span>${LPF.otro?pfMoneda(LPF.otro):'-&nbsp;€'}</span></div>
+        <div class="pf-tot-final"><span>Total</span><span>${pfMoneda(total)}</span></div>
+      </div>
+    </div>`;
+}
+async function lpfPDF(){
+  const el = document.getElementById('lpf-doc'); if(!el) return;
+  if(typeof html2canvas==='undefined' || typeof window.jspdf==='undefined'){ alert('No se pudo generar el PDF (librería no cargada).'); return; }
+  try{
+    const canvas = await html2canvas(el, {backgroundColor:'#ffffff', scale:2});
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit:'pt', format:'a4' });
+    const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight();
+    const w = pw-48, h = w*(canvas.height/canvas.width);
+    pdf.addImage(canvas.toDataURL('image/png'),'PNG',24, h<ph-48?(ph-h)/2:24, w, h);
+    pdf.save((LPF.factura||'proforma').replace(/[^a-zA-Z0-9-]+/g,'_')+'.pdf');
+  }catch(err){ alert('No se pudo generar el PDF: '+(err.message||err)); }
+}
 </script>
 <div id="hub2-cmd" onclick="if(event.target.id==='hub2-cmd') hub2CmdCerrar()">
   <div class="hub2-cmd-box">
