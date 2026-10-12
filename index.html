@@ -4755,6 +4755,10 @@ nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:4px;
 .pda-personas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px;}
 .pda-persona-col{background:#fff;border-radius:12px;border:1.5px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:8px;}
 .pda-persona-col.pda-yo{border-color:#E97D3B;box-shadow:0 0 0 2px rgba(233,125,59,.12);}
+.pda-persona-col .pda-cal-input{background:#fff;border:1px solid var(--line);color:#171B22;font-size:13px;padding:7px 9px;}
+.pda-persona-col .pda-cal-input::placeholder{color:#9AA1AD;}
+.pda-persona-col .pda-cal-input:focus{border-color:#062430;}
+.pda-persona-col .pda-cal-plus{background:#062430;color:#fff;}
 .pda-persona-head{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
 .pda-persona-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;flex-shrink:0;}
 .pda-persona-nombre{font-size:14px;font-weight:700;flex:1;}
@@ -14392,7 +14396,8 @@ async function addPdaPersonaTask(persona){
   const title = inp.value.trim();
   if(!title) return;
   const yo = currentProfile?.nombre || currentRole();
-  await sb.from('pda_tasks').insert({assignee: persona, title, week: pdaWeekKey(pdaWeekOffset), done:false, created_by: yo});
+  const { error } = await sb.from('pda_tasks').insert({assignee: persona, title, week: pdaWeekKey(pdaWeekOffset), done:false, created_by: yo});
+  if(error){ alert('No se pudo guardar la tarea: '+error.message); return; }
   inp.value = '';
   renderPDA();
 }
